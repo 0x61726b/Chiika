@@ -6,7 +6,7 @@ class ApplicationWindow
 
   constructor: (path, options) ->
     @window = new BrowserWindow(options)
-    @window.loadURL(path)
+    @window.loadUrl(path)
 
   on: (args...) ->
     @window.on(args...)

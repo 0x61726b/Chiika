@@ -7,7 +7,6 @@ BrowserWindow = require 'browser-window'
 crashReporter = require 'crash-reporter'
 
 ApplicationWindow = require './ApplicationWindow'
-client = require('electron-connect').client
 # ---------------------------
 #
 # ---------------------------
@@ -23,6 +22,8 @@ class Application
     # Report crashes to our server.
     require('crash-reporter').start()
 
+    
+
     # Quit when all windows are closed.
     app.on 'window-all-closed', -> app.quit()
     app.on 'ready', => @openWindow()
@@ -30,10 +31,12 @@ class Application
   openWindow: ->
     htmlURL = "file://#{__dirname}/../renderer/index.html"
     @window = new ApplicationWindow htmlURL,
-      width: 1200,
-      height: 800
-
-    client.create(@window)
+      width: 1400,
+      height: 900,
+      minWidth:800,
+      minHeight:600,
+      title: 'Chiika - Development Mode',
+      icon: __dirname + '/../../resources/icon.png'
 
 
 application = new Application

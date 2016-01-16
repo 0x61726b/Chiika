@@ -3,7 +3,7 @@ shell = require 'shell'
 
 class Main extends React.Component
   state: {
-    message: 'Chiika'
+    message: 'Huhehuehuehu'
   },
   elect: {
     electron: process.versions.electron,
