@@ -1,5 +1,6 @@
 React = require 'react'
+ReactDOM = require 'react-dom'
 Main = require('./components/main').Main
 
-React.render(React.createElement(Main), document.getElementById('app'))
+ReactDOM.render(React.createElement(Main), document.getElementById('app'))
 # React.render(<div>start</div>, document.getElementById('app'))

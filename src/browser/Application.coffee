@@ -22,7 +22,7 @@ class Application
     # Report crashes to our server.
     require('crash-reporter').start()
 
-    
+
 
     # Quit when all windows are closed.
     app.on 'window-all-closed', -> app.quit()
@@ -31,12 +31,13 @@ class Application
   openWindow: ->
     htmlURL = "file://#{__dirname}/../renderer/index.html"
     @window = new ApplicationWindow htmlURL,
-      width: 1400,
-      height: 900,
+      width: 1000,
+      height: 800,
       minWidth:800,
       minHeight:600,
       title: 'Chiika - Development Mode',
       icon: __dirname + '/../../resources/icon.png'
+    @window.openDevTools()
 
 
 application = new Application

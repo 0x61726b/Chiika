@@ -6,7 +6,9 @@ class ApplicationWindow
 
   constructor: (path, options) ->
     @window = new BrowserWindow(options)
-    @window.loadUrl(path)
+    @window.loadURL(path)
 
   on: (args...) ->
     @window.on(args...)
+  openDevTools: () ->
+    @window.openDevTools();
