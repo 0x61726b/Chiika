@@ -14,18 +14,19 @@
     "cjsx",
     "coffeescript"
   ],
-  "author": "runtBlue",
+  "author": "arkenthera",
   "license": "MIT",
   "dependencies": {
     "babel": "^5.8.34",
     "coffee-script": "^1.9.3",
-    "electron-builder": "^2.6.0",
-    "electron-prebuilt": "0.36.4",
     "lodash": "^3.9.3",
     "react": "^0.14.6",
-    "react-dom": "^0.14.6"
+    "react-bootstrap": "^0.28.2",
+    "react-dom": "^0.14.6",
+    "react-router": "^1.0.3"
   },
   "devDependencies": {
+    "arkenthera-electron-connect": "^0.3.5",
     "del": "^1.1.1",
     "electron-installer-squirrel-windows": "^1.2.2",
     "electron-packager": "^4.1.3",
@@ -34,18 +35,22 @@
     "gulp": "^3.8.11",
     "gulp-babel": "^5.1.0",
     "gulp-coffee-react": "^1.0.0",
+    "gulp-concat": "^2.6.0",
     "gulp-flatten": "0.0.4",
+    "gulp-if": "^2.0.0",
     "gulp-inject": "^1.2.0",
     "gulp-load-plugins": "^0.10.0",
+    "gulp-main-bower-files": "^1.3.1",
+    "gulp-minify-css": "^1.2.3",
     "gulp-plumber": "^1.0.1",
     "gulp-sass": "^2.0.1",
     "gulp-sourcemaps": "^1.5.2",
     "gulp-task-listing": "^1.0.1",
     "gulp-useref": "^1.2.0",
     "gulp-watch": "^4.2.4",
+    "history": "^1.17.0",
     "main-bower-files": "^2.8.0",
     "react-fontawesome": "^0.3.3",
-    "react-sidenav": "0.0.15",
     "titlebar": "^1.4.0"
   }
 }

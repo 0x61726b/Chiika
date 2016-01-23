@@ -13,17 +13,23 @@
 #authors: arkenthera
 #Description:
 #----------------------------------------------------------------------------
-BrowserWindow = require 'browser-window'
+React = require 'React'
+ReactDOM = require 'react-dom'
+ReactRouter = require 'react-router'
+_ReactRouter = ReactRouter;
+Router = _ReactRouter.Router;
+Route = _ReactRouter.Route;
+IndexRoute = _ReactRouter.IndexRoute;
+Redirect = _ReactRouter.Redirect;
+Link = _ReactRouter.Link;
+IndexLink = _ReactRouter.IndexLink;
+
+class CommonComponents
+  _React = React
+  _ReactDOM = ReactDOM
 
 module.exports =
-class ApplicationWindow
-  window: null
-
-  constructor: (path, options) ->
-    @window = new BrowserWindow options
-    @window.loadURL(path)
-
-  on: (args...) ->
-    @window.on(args...)
-  openDevTools: () ->
-    @window.openDevTools();
+  React: React
+  Router: Router
+  Route: Route
+  Link: Link

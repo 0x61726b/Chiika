@@ -13,17 +13,22 @@
 #authors: arkenthera
 #Description:
 #----------------------------------------------------------------------------
-BrowserWindow = require 'browser-window'
+
+
+RunEventHandlers = () ->
+    $(".chiikaLogo").hover ->
+      RotateLogo()
+
+    $("div.navigation ul li").click ->
+      $("div.navigation ul li").removeClass "active"
+      $(this).toggleClass "active"
+
+    $("a.userArea").click ->
+      $("div.navigation ul li").removeClass "active"
+
+RotateLogo = () ->
+   $(".chiikaLogo").toggleClass "rotateLogo"
 
 module.exports =
-class ApplicationWindow
-  window: null
-
-  constructor: (path, options) ->
-    @window = new BrowserWindow options
-    @window.loadURL(path)
-
-  on: (args...) ->
-    @window.on(args...)
-  openDevTools: () ->
-    @window.openDevTools();
+  EventHandlers: RunEventHandlers
+  RotateLogo: RotateLogo

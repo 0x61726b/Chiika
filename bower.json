@@ -1,5 +1,5 @@
 {
-  "name": "electron-cjsx-coffee-boilerplate",
+  "name": "chiika",
   "version": "0.0.1",
   "authors": [
     "runtBlue"
@@ -13,6 +13,7 @@
     "tests"
   ],
   "dependencies": {
-    "bootstrap": "~3.3.4"
+    "bootstrap": "3.3.4",
+    "roboto-fontface": "~0.4.3"
   }
 }

@@ -13,16 +13,12 @@ gulp = require('gulp')
 fs = require('fs')
 del = require('del')
 mainBowerFiles = require('main-bower-files')
-electron = require('electron-connect').server.create()
+electron = require('arkenthera-electron-connect').server.create()
 packager = require('electron-packager')
 
 # gulps
 sourcemaps = require "gulp-sourcemaps"
 plumber = require "gulp-plumber"
-
-# ---------------------------
-# "___" starting functions are old other practices.
-# ---------------------------
 
 Compile_scss_files_with_sourcemaps = () ->
   gulp.task 'compile:styles', () ->
@@ -39,7 +35,7 @@ Inject_css___compiled_and_depedent___files_into_html = () ->
   gulp.task 'inject:css', ['compile:styles'], () ->
 
     inject = require "gulp-inject"
-
+    concat = require "gulp-concat"
     files = mainBowerFiles().concat([serveDir + '/styles/**/*.css'])
     options =
       relative: true
@@ -47,28 +43,14 @@ Inject_css___compiled_and_depedent___files_into_html = () ->
       addPrefix: '..'
 
     gulp.src(srcDir + '/**/*.html')
-      .pipe(inject(gulp.src(files), options))
-      .pipe(gulp.dest(serveDir))
+        .pipe(inject(gulp.src(files),options))
+        .pipe(gulp.dest(serveDir))
 
 Copy_assets = () ->
   gulp.task 'misc', () ->
     gulp.src(srcDir + '/assets/**/*')
       .pipe(gulp.dest(serveDir + '/assets'))
       .pipe(gulp.dest(distDir + '/assets'))
-
-___Incremental_compile_ES6_JSX_files_with_sourcemaps = () ->
-  gulp.task 'compile:scripts:watch', (done) ->
-
-    watch = require "gulp-watch"
-
-    gulp.src('src/**/*.{js,jsx}')
-      .pipe(watch('src/**/*.{js,jsx}', {verbose: true}))
-      .pipe(plumber())
-      .pipe(sourcemaps.init())
-      # .pipe(babel({stage: 0}))
-      .pipe(sourcemaps.write('.'))
-      .pipe(gulp.dest(serveDir))
-    done()
 
 Incremental_compile_cjsx_coffee_files_with_sourcemaps = () ->
   gulp.task 'compile:scripts:watch', (done) ->
@@ -85,15 +67,6 @@ Incremental_compile_cjsx_coffee_files_with_sourcemaps = () ->
       .pipe(gulp.dest(serveDir))
     done()
 
-___Compile_scripts_for_distribution = () ->
-  gulp.task 'compile:scripts', () ->
-
-    babel = require "gulp-babel"
-
-    gulp.src('src/**/*.{js,jsx}')
-      .pipe(babel({stage: 0}))
-      .pipe(gulp.dest(distDir))
-
 Compile_scripts_for_distribution = () ->
   gulp.task 'compile:scripts', () ->
 
@@ -108,13 +81,17 @@ Inject_renderer_bundle_file_and_concatnate_css_files = () ->
   gulp.task 'html', ['inject:css'], () ->
 
     useref = require "gulp-useref"
-    assets = useref.assets({searchPath: ['bower_components', serveDir + '/styles']})
+    gulpif = require "gulp-if"
+    minify = require "gulp-minify-css"
+
+    assets = useref.assets({searchPath: ['bower_components', serveDir + '/styles']});
 
     gulp.src(serveDir + '/renderer/**/*.html')
-      .pipe(assets)
-      .pipe(assets.restore())
-      .pipe(useref())
-      .pipe(gulp.dest(distDir + '/renderer'))
+    .pipe(assets)
+    .pipe(gulpif('*.css', minify()))
+    .pipe(assets.restore())
+    .pipe(useref())
+    .pipe(gulp.dest(distDir + '/renderer'))
 
 Copy_fonts_file = () ->
 
@@ -189,6 +166,7 @@ do Your_Application_will_ = () ->
   gulp.task 'serve', ['inject:css', 'compile:scripts:watch', 'compile:styles', 'misc'], () ->
     electron.start()
     gulp.watch(['bower.json', srcDir + '/renderer/index.html'], ['inject:css'])
+    gulp.watch([srcDir + '/styles/*.scss'],['inject:css'])
     gulp.watch([serveDir + '/browser/Application.js', serveDir + '/browser/**/*.js'], electron.restart)
     gulp.watch([serveDir + '/styles/**/*.css', serveDir + '/renderer/**/*.html', serveDir + '/renderer/**/*.js'], electron.reload)
   gulp.task 'clean', (done) ->

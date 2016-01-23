@@ -13,17 +13,23 @@
 #authors: arkenthera
 #Description:
 #----------------------------------------------------------------------------
-BrowserWindow = require 'browser-window'
 
-module.exports =
-class ApplicationWindow
-  window: null
+React = require('./Common').React
+Router = require('./Common').Router
+Route = require('./Common').Route
+Link = require('./Common').Link
 
-  constructor: (path, options) ->
-    @window = new BrowserWindow options
-    @window.loadURL(path)
 
-  on: (args...) ->
-    @window.on(args...)
-  openDevTools: () ->
-    @window.openDevTools();
+class Content extends React.Component
+  constructor: (props) ->
+    super props
+  render: () ->
+    (<div className="main">
+      <div id="titleBar">
+      </div>
+      <div className="content">
+        {this.props.props.children}
+      </div>
+    </div>)
+
+module.exports = Content

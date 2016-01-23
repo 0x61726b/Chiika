@@ -1,0 +1,31 @@
+body {
+  cursor: default;
+  -webkit-user-select: none;
+  font-family:Roboto;
+  font-weight: 300;
+  text-decoration: none;
+}
+
+.titlebar {
+  -webkit-user-select: none;
+  -webkit-app-region: drag;
+  height: 45px;
+  left: 160px; }
+
+html, body, .container-fluid {
+  height: 100%; }
+
+
+//Global Variables
+$sidebar-width: 160px;
+$sidebar-top-height: 170px;
+$titlebar-height: 45px;
+$navigation-font-size:15px;
+$userInfo-font-size:16px;
+
+@-webkit-keyframes spin { 100% { -webkit-transform: rotate(360deg); } }
+
+.rotateLogo
+{
+  -webkit-animation:spin 4s linear infinite;
+}

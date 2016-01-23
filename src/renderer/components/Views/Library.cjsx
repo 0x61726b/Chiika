@@ -13,17 +13,11 @@
 #authors: arkenthera
 #Description:
 #----------------------------------------------------------------------------
-BrowserWindow = require 'browser-window'
+React = require 'react'
+h = require './../Helpers'
 
-module.exports =
-class ApplicationWindow
-  window: null
+class Library extends React.Component
+  render: () ->
+    (<div>Library here</div>);
 
-  constructor: (path, options) ->
-    @window = new BrowserWindow options
-    @window.loadURL(path)
-
-  on: (args...) ->
-    @window.on(args...)
-  openDevTools: () ->
-    @window.openDevTools();
+module.exports = Library

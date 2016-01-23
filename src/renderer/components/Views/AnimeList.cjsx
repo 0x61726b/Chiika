@@ -13,17 +13,11 @@
 #authors: arkenthera
 #Description:
 #----------------------------------------------------------------------------
-BrowserWindow = require 'browser-window'
+React = require 'react'
 
-module.exports =
-class ApplicationWindow
-  window: null
 
-  constructor: (path, options) ->
-    @window = new BrowserWindow options
-    @window.loadURL(path)
+AnimeList = React.createClass
+  render: () ->
+    (<div>Welcome to Anime List</div>);
 
-  on: (args...) ->
-    @window.on(args...)
-  openDevTools: () ->
-    @window.openDevTools();
+module.exports = AnimeList

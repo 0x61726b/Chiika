@@ -13,17 +13,18 @@
 #authors: arkenthera
 #Description:
 #----------------------------------------------------------------------------
-BrowserWindow = require 'browser-window'
+Titlebar = require 'titlebar'
+titlebar = Titlebar()
 
-module.exports =
-class ApplicationWindow
-  window: null
+remote = require 'remote'
+BrowserWindow = remote.BrowserWindow;
+app = remote.app;
 
-  constructor: (path, options) ->
-    @window = new BrowserWindow options
-    @window.loadURL(path)
+titlebar.appendTo(document.getElementById('titleBar'))
 
-  on: (args...) ->
-    @window.on(args...)
-  openDevTools: () ->
-    @window.openDevTools();
+titlebar.on 'close', () ->
+  app.quit()
+titlebar.on 'minimize', () ->
+  remote.getCurrentWindow().minimize()
+titlebar.on 'maximize', () ->
+  remote.getCurrentWindow().maximize()
