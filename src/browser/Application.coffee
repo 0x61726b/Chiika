@@ -18,6 +18,8 @@ BrowserWindow = require 'browser-window'
 crashReporter = require 'crash-reporter'
 
 ApplicationWindow = require './ApplicationWindow'
+appMenu = require './menu/appMenu'
+Menu = require 'menu'
 # ---------------------------
 #
 # ---------------------------
@@ -49,8 +51,8 @@ class Application
       minHeight:600
       title: 'Chiika - Development Mode'
       icon: "./resources/icon.png"
-      frame:false
     @window.openDevTools()
+    Menu.setApplicationMenu(appMenu)
 
 
 application = new Application
