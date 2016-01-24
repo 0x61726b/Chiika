@@ -9,8 +9,20 @@ body {
 .titlebar {
   -webkit-user-select: none;
   -webkit-app-region: drag;
-  height: 45px;
-  left: 160px; }
+  height: 46px;
+  left: 160px;
+ }
+
+.box-shadow:after {
+   content:"";
+    width: inherit;
+    height: 1px;
+    display: block;
+    margin-top:-1px;
+    z-index: -100;
+    -webkit-box-shadow: 0px 0px 16px 0px black;
+    box-shadow: 0px 0px 16px 0px black ;
+}
 
 html, body, .container-fluid {
   height: 100%; }
@@ -19,13 +31,27 @@ html, body, .container-fluid {
 //Global Variables
 $sidebar-width: 160px;
 $sidebar-top-height: 170px;
-$titlebar-height: 45px;
+$titlebar-height: 46px;
 $navigation-font-size:15px;
 $userInfo-font-size:16px;
+$mainArea-height:calc(100% - #{$titlebar-height});
+$chiika-rot-speed:2s;
 
+.strecthToMainArea
+{
+  height:$mainArea-height;
+}
+.ReactTabs__TabPanel
+{
+  height:$mainArea-height;
+}
+.content > div
+{
+  height:100%;
+}
 @-webkit-keyframes spin { 100% { -webkit-transform: rotate(360deg); } }
 
 .rotateLogo
 {
-  -webkit-animation:spin 4s linear infinite;
+  -webkit-animation:spin $chiika-rot-speed linear infinite;
 }

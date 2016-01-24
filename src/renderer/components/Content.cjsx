@@ -25,7 +25,7 @@ class Content extends React.Component
     super props
   render: () ->
     (<div className="main">
-      <div id="titleBar">
+      <div id="titleBar" className="box-shadow">
       </div>
       <div className="content">
         {this.props.props.children}

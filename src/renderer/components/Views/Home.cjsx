@@ -14,11 +14,15 @@
 #Description:
 #----------------------------------------------------------------------------
 React = require 'react'
-h = require './../Helpers'
+Helpers = require('./../Helpers')
 
-Home = React.createClass
-  onLoading: ->
-    h.RotateLogo()
+class Home extends React.Component
+  utility:null
+  constructor: (props) ->
+    super props
+    @utility = new Helpers.Utility()
+  onLoading: =>
+    @utility.RotateLogo()
   render: () ->
     (<div><a href="#" onClick={this.onLoading}>Click me</a></div>);
 

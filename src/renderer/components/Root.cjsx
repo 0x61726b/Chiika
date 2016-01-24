@@ -35,19 +35,27 @@ User = require './Views/User'
 
 
 
-class Root extends React.Component
-  constructor: (props) ->
-    super props
+Root = React.createClass
+  componentDidMount:
+    console.log "Root:Mount"
+  componentWillUnmoun:
+    console.log "Root:Unmount"
   render: () ->
     (<div><SideMenu /><Content props={this.props}/></div>)
 
-class ChiikaRouter extends React.Component
+ChiikaRouter = React.createClass
+  getInitialState: ->
+    animeListLastTab:0
+  onAnimeListTabSelect: (index,last) ->
+    @state.animeListLastTab = index
+  CreateAnimeList: (props) ->
+    (<AnimeList onSelect={@onAnimeListTabSelect} startWithTabIndex={@state.animeListLastTab} />)
   render: () ->
     (<Router>
       <Route component={Root}>
         <Route path="/" component={Home}/>
         <Route name="Home" path="Home" component={Home}/>
-        <Route name="AnimeList" path="AnimeList" component={AnimeList}/>
+        <Route name="AnimeList" path="AnimeList" component={@CreateAnimeList}/>
         <Route name="MangaList" path="MangaList" component={MangaList}/>
         <Route name="Library" path="Library" component={Library}/>
         <Route name="Calendar" path="Calendar" component={Calendar}/>

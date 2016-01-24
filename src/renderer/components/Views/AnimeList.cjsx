@@ -14,10 +14,54 @@
 #Description:
 #----------------------------------------------------------------------------
 React = require 'react'
+ReactTabs = require 'react-tabs'
+Tab = ReactTabs.Tab;
+Tabs = ReactTabs.Tabs;
+TabList = ReactTabs.TabList;
+TabPanel = ReactTabs.TabPanel;
+
+Helpers = require('./../Helpers')
 
 
+WatchingList = require './AnimeList/Watching'
+PlantoWatchList = require './AnimeList/PlantoWatch'
+DroppedList = require './AnimeList/Dropped'
+OnHoldList = require './AnimeList/OnHold'
+CompletedList = require './AnimeList/Completed'
+
+Tabs.setUseDefaultStyles(false)
 AnimeList = React.createClass
+  getInitialState: () ->
+    selectedIndex: -1,
+    tabs:[
+        { label:"Watching",element:"gridWatchingList" },
+        { label:"Plan to Watch",element:"gridPlantoWatchList" },
+        { label:"Completed",element:"gridCompletedList" },
+        { label:"On Hold",element:"gridOnHoldList" },
+        { label:"Dropped",element:"gridDroppedList" }
+    ]
   render: () ->
-    (<div>Welcome to Anime List</div>);
+    (<Tabs selectedIndex={this.props.startWithTabIndex} onSelect={this.props.onSelect} forceRenderTabPanel={false}>
+        <TabList>
+          {this.state.tabs.map((tab, i) =>
+                <Tab key={i}>{tab.label}</Tab>
+                )}
+        </TabList>
+        <TabPanel key={0}>
+          <WatchingList />
+        </TabPanel>
+        <TabPanel key={1}>
+          <PlantoWatchList />
+        </TabPanel>
+        <TabPanel key={2}>
+          <CompletedList />
+        </TabPanel>
+        <TabPanel key={3}>
+          <OnHoldList />
+        </TabPanel>
+        <TabPanel key={4}>
+          <DroppedList />
+        </TabPanel>
+      </Tabs>);
 
 module.exports = AnimeList

@@ -27,4 +27,4 @@ ReactDOM.render(React.createElement(Root), document.getElementById('app'))
 Helpers = require("./components/Helpers")
 Titlebar = require("./components/Titlebar")
 
-Helpers = new Helpers.EventHandlers()
+Util = new Helpers.Utility()

@@ -1,10 +1,14 @@
 @import "Common";
 @import "sideBar";
+@import "Lists";
 
+.hidden
+{
+  display:none
+}
 
 .main
 {
-  background-color: #4682b4;
   height: 100vh;
   float:right;
   width:calc(100% - #{$sidebar-width});
@@ -12,8 +16,12 @@
 
 .content
 {
-  background-color: #adff2f;
   height: calc(100% - #{$titlebar-height});
 }
 
+td
+{
+  background-color:white;
+  background-image:'';
+}
 /*# sourceMappingURL=main.css.map */

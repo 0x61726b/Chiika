@@ -15,20 +15,31 @@
 #----------------------------------------------------------------------------
 
 
-RunEventHandlers = () ->
-    $(".chiikaLogo").hover ->
-      RotateLogo()
+class Utility
+  constructor: () ->
+    @RunEverything()
+  RunEverything: () ->
+    @FadeInOnPageLoad()
+    @SideMenuClickHandler()
+    @RotateLogoOnHover()
+  FadeInElement: (element) ->
+    element.fadeIn(1000).removeClass "hidden"
+  FadeInOnPageLoad: () ->
+    $ ->
+      $("#app").fadeIn(250).removeClass "hidden"
 
+  SideMenuClickHandler: () ->
     $("div.navigation ul li").click ->
       $("div.navigation ul li").removeClass "active"
       $(this).toggleClass "active"
 
     $("a.userArea").click ->
       $("div.navigation ul li").removeClass "active"
-
-RotateLogo = () ->
-   $(".chiikaLogo").toggleClass "rotateLogo"
+  RotateLogo: () ->
+    $(".chiikaLogo").toggleClass "rotateLogo"
+   RotateLogoOnHover: () ->
+     $(".chiikaLogo").hover =>
+        @RotateLogo()
 
 module.exports =
-  EventHandlers: RunEventHandlers
-  RotateLogo: RotateLogo
+  Utility: Utility
