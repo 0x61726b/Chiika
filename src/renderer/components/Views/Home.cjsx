@@ -14,14 +14,22 @@
 #Description:
 #----------------------------------------------------------------------------
 React = require 'react'
+electron = require 'electron'
+remote = electron.remote
+bw = remote.BrowserWindow
 
 class Home extends React.Component
   utility:null
   constructor: (props) ->
     super props
 
-  onLoading: =>
-
+  onLoading: ->
+    options = { frame:true,width:600,height:600 }
+    sec = new bw(options);
+    sec.loadURL("file://#{__dirname}/../../../renderer/MyAnimeListLogin.html")
+    sec.on 'closed', () ->
+      sec = null
+      console.log "Yeah"
   render: () ->
     (<div><a href="#" onClick={this.onLoading}>Click me</a></div>);
 

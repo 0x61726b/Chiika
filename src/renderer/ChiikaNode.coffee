@@ -68,6 +68,44 @@ class ChiikaNode
   getUserInfo:() ->
     @db.User
 
+  #Helpers functions for Lists
+  #The return value is formatted to match the grid
+  getAnimeListByUserStatus:(status) ->
+    data = []
+    wholeList = @db.Animelist
+    for value in wholeList['AnimeArray']
+     animeStatus = value['my_status']
+     if parseInt(animeStatus) == status #Watching
+       entry = {}
+       animeTitle = value.anime['series_title']
+       watchedEps = value['my_watched_episodes']
+       totalEps   = value.anime['series_episodes']
+       serieStatus = value.anime['series_status']
+       progress   = "?"
+       if parseInt(totalEps) > 0
+         progress   = (parseInt(watchedEps) / parseInt(totalEps)) * 100
+       season     = "Spring 2016"
+       score      = value['my_score']
+
+       if score == '0'
+         score = '-'
+
+       icon = 'black'
+       if serieStatus == "1"
+         icon = '#2db039'
+       if serieStatus == "0"
+         icon = 'gray'
+       if serieStatus == "2"
+         icon = '#26448f'
+
+       entry['recid'] = data.length
+       entry['icon'] = icon
+       entry['title'] = animeTitle
+       entry['progress'] = progress
+       entry['score'] = score
+       entry['season'] = season
+       data.push entry
+    data
 
 
 

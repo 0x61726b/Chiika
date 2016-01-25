@@ -14,40 +14,35 @@
 #Description:
 #----------------------------------------------------------------------------
 React = require 'react'
+cn = require './../../../ChiikaNode'
 
-test = {
+CompletedGrid = {
     name   : 'gridCompletedList',
+    reorderColumns:true,
     columns: [
-        { field: 'title', caption: 'Title', size: '30%' },
-        { field: 'progress', caption: 'Progress', size: '30%' },
-        { field: 'Score', caption: 'Score', size: '40%',
-        render: (record) ->
-          '<div class="progress">
-  <div class="progress-bar" role="progressbar" aria-valuenow="70"
-  aria-valuemin="0" aria-valuemax="100" style="width:70%">
-    '+record.Score*10+'%
-  </div>
-</div>' },
-        { field: 'Season', caption: 'Season', size: '120px' },
+      { field: 'icon', caption: '', size: '40px',render:(icon) ->
+        '<i class="fa fa-desktop" style="color:'+icon.icon+'"></i>'  },
+        { field: 'title', caption: 'Title', size: '40%',resizable: true, sortable: true  },
+        { field: 'score', caption: 'Score', size: '10%',resizable: true, sortable: true  },
+        { field: 'progress', caption: 'Progress', size: '40%',resizable: true, sortable: true },
+        { field: 'season', caption: 'Season', size: '120px',resizable: true, sortable: true  },
     ],
     records: [
-        { recid: 1, title: 'Senjougahara', progress: 'Hitagi', Score: '10', Season: '4/3/2012' },
-    ],
-    onDestroy: ->
-      console.log "destroy"
-    onRefresh: ->
-      console.log "refresh"
+    ]
 }
-test.records.push({ recid: 1, title: 'Senjougahara', progress: 'Hitagi', Score: '10', Season: '4/3/2012' }) for i in [0..150] by 1
 
-class CompletedList extends React.Component
+CompletedList = React.createClass
   componentDidMount: ->
+    @buildData()
     $ ->
-      $("#gridCompletedList").w2grid(test)
-    console.log "Completed:Mount"
+      $("#gridCompletedList").w2grid(CompletedGrid)
   componentWillUnmount: ->
     $('#gridCompletedList').w2destroy();
-    console.log "Completed:Dismount"
+    CompletedGrid.records = []
+  buildData: ->
+    list = cn.getAnimeListByUserStatus(2)
+    for val in list
+      CompletedGrid.records.push val
   render: () ->
     (<div id="gridCompletedList" className="listCommon"></div>);
 

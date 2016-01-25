@@ -1,94 +1,94 @@
-
 .sidebar {
-  width: $sidebar-width;
-  background-color: #fafad2;
-  float: left;
-  height: 100vh; }
+    width: $sidebar-width;
+    background-color: #fafad2;
+    float: left;
+    height: 100vh;
+}
+
 //Chiika Logo
 .topLeft {
-  background-color: #ad1457;
-  width: inherit;
-  height: $sidebar-top-height;
-  margin-left: auto;
-  margin-right: auto;
-  background-image: url("./../assets/images/topLeftBack.png");
-  -webkit-app-region: no-drag;
- }
- .noDecoration, a:link, a:visited {
-     text-decoration: none;
- }
-//User Avatar and user name
-.avatar
-{
-  width:75px;
-  height:75px;
-  -webkit-clip-path: circle(50%);
-  margin-left:auto;
-  margin-right:auto;
-  display:block;
-}
-.userArea
-{
-  height:calc(#{$sidebar-top-height} - #{$titlebar-height} });
-  cursor:default;
-  text-decoration: none;
-}
-.imageContainer
-{
-  margin-top:10px;
-}
-.userInfo
-{
-  color:white;
-  text-align:center;
-  font-size:$userInfo-font-size;
-  margin-top:5px;
-}
-.logoContainer
-{
-  height:$titlebar-height;
-}
-img.chiikaLogo
-{
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
+    background-color: $mainColor;
+    width: inherit;
+    height: $sidebar-top-height;
+    margin-left: auto;
+    margin-right: auto;
+    background-image: url("./../assets/images/topLeftBack.png");
+    -webkit-app-region: no-drag;
 }
 
-.navigation
-{
-  background-color: #19181d;
-  width: inherit;
-  position: relative;
-  height: calc(100% - #{$sidebar-top-height});
-  font-size:$navigation-font-size;
+.noDecoration,
+a:link,
+a:visited {
+    text-decoration: none;
+}
+
+//User Avatar and user name
+.avatar {
+    width: 75px;
+    height: 75px;
+    -webkit-clip-path: circle(50%);
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+
+.userArea {
+    height:calc(#{$sidebar-top-height} - #{$titlebar-height}
+}
+
+);
+cursor:default;
+text-decoration: none;
+
+}
+.imageContainer {
+    margin-top: 10px;
+}
+.userInfo {
+    color: white;
+    text-align: center;
+    font-size: $userInfo-font-size;
+    margin-top: 5px;
+}
+.logoContainer {
+    height: $titlebar-height;
+}
+img.chiikaLogo {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+.navigation {
+    background-color: #19181d;
+    width: inherit;
+    position: relative;
+    height: calc(100% - #{$sidebar-top-height});
+    font-size: $navigation-font-size;
 }
 .navigation ul {
-  list-style-type: none;
-  margin: 0;
-  padding: 0; }
-
-.navigation li a {
-  display: block;
-  color: white;
-  padding: 8px 0 8px 16px;
-  text-decoration: none;
-  cursor: default; }
-
-.navigation li.active
- {
-  border-left: 4px solid #ad1457;
-  background-color:#101014;
-  font-weight:400;
- }
-
-.navigation li a:hover:not(.active) {
-  background-color: #141419;
-  color: white;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
 }
-.navigation li:not(.active)
-{
-    opacity:0.87;
+.navigation li a {
+    display: block;
+    color: white;
+    padding: 8px 0 8px 16px;
+    text-decoration: none;
+    cursor: default;
+}
+.navigation li.active {
+    border-left: 4px solid $mainColor;
+    background-color: #101014;
+    font-weight: 400;
+}
+.navigation li a:hover:not(.active) {
+    background-color: #141419;
+    color: white;
+}
+.navigation li:not(.active) {
+    opacity: 0.87;
 }
 .navigation li a:focus {
-  color: white; }
+    color: white;
+}

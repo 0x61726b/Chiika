@@ -15,6 +15,7 @@
   "dependencies": {
     "bootstrap": "3.3.4",
     "roboto-fontface": "~0.4.3",
-    "w2ui": "~1.4.3"
+    "w2ui": "~1.4.3",
+    "components-font-awesome": "~4.5.0"
   }
 }

@@ -1,32 +1,38 @@
 body {
-  cursor: default;
-  -webkit-user-select: none;
-  font-family:Roboto;
-  font-weight: 300;
-  text-decoration: none;
+    cursor: default;
+    -webkit-user-select: none;
+    font-family: Roboto;
+    font-weight: 300;
+    text-decoration: none;
 }
 
 .titlebar {
-  -webkit-user-select: none;
-  -webkit-app-region: drag;
-  height: 46px;
-  left: 160px;
- }
-
-.box-shadow:after {
-   content:"";
-    width: inherit;
-    height: 1px;
-    display: block;
-    margin-top:-1px;
-    z-index: -100;
-    -webkit-box-shadow: 0px 0px 16px 0px black;
-    box-shadow: 0px 0px 16px 0px black ;
+    -webkit-user-select: none;
+    -webkit-app-region: drag;
+    height: 46px;
+    left: 160px;
+    background-color: #e0e0e0;
+    border-bottom: 1px solid #cecece;
 }
 
-html, body, .container-fluid {
-  height: 100%; }
 
+/*
+.box-shadow:after {
+    content: "";
+    width: inherit;
+    height: -1px;
+    display: block;
+    margin-top: -1px;
+    z-index: -100;
+    -webkit-box-shadow: 0px 0px 16px 0px black;
+    box-shadow: 0px 0px 16px 0px black;
+}*/
+
+html,
+body,
+.container-fluid {
+    height: 100%;
+}
 
 //Global Variables
 $sidebar-width: 160px;
@@ -36,22 +42,27 @@ $navigation-font-size:15px;
 $userInfo-font-size:16px;
 $mainArea-height:calc(100% - #{$titlebar-height});
 $chiika-rot-speed:2s;
+$mainColor:#4527A0; //color: 800
+$secondaryColor:#5E35B1; // color: 600
+$thirdColor:#6200EA; //color: A700
+.strecthToMainArea {
+    height: $mainArea-height;
+}
 
-.strecthToMainArea
-{
-  height:$mainArea-height;
+.ReactTabs__TabPanel {
+    height: $mainArea-height;
 }
-.ReactTabs__TabPanel
-{
-  height:$mainArea-height;
-}
-.content > div
-{
-  height:100%;
-}
-@-webkit-keyframes spin { 100% { -webkit-transform: rotate(360deg); } }
 
-.rotateLogo
-{
-  -webkit-animation:spin $chiika-rot-speed linear infinite;
+.content > div {
+    height: 100%;
+}
+
+@-webkit-keyframes spin {
+    100% {
+        -webkit-transform: rotate(360deg);
+    }
+}
+
+.rotateLogo {
+    -webkit-animation: spin $chiika-rot-speed linear infinite;
 }
