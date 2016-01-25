@@ -12,8 +12,10 @@ packageJson = require('./package.json')
 gulp = require('gulp')
 fs = require('fs')
 del = require('del')
+argv = require('yargs').argv
 mainBowerFiles = require('main-bower-files')
-electron = require('arkenthera-electron-connect').server.create()
+ep = require('electron-prebuilt')
+
 packager = require('electron-packager')
 
 # gulps
@@ -164,6 +166,17 @@ do Your_Application_will_ = () ->
 
   gulp.task('build', ['html', 'compile:scripts', 'packageJson', 'copy:fonts', 'misc'])
   gulp.task 'serve', ['inject:css', 'compile:scripts:watch', 'compile:styles', 'misc'], () ->
+    development = null
+    if argv.pls
+      development = Object.create( process.env );
+      development.Show_CA_Debug_Tools = 'yeah';
+
+    electron = require('arkenthera-electron-connect').server.create({
+        electron:ep,
+        spawnOpt: {
+          env:development || 'nope'
+        }
+      })
     electron.start()
     gulp.watch(['bower.json', srcDir + '/renderer/index.html'], ['inject:css'])
     gulp.watch([srcDir + '/styles/*.scss'],['inject:css'])

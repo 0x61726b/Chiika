@@ -14,7 +14,6 @@
 #Description:
 #----------------------------------------------------------------------------
 
-
 class Utility
   constructor: () ->
     @RunEverything()
@@ -41,5 +40,6 @@ class Utility
      $(".chiikaLogo").hover =>
         @RotateLogo()
 
-module.exports =
-  Utility: Utility
+
+Util = new Utility()
+module.exports = Util

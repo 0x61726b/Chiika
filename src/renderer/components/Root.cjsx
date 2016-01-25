@@ -13,7 +13,6 @@
 #authors: arkenthera
 #Description:
 #----------------------------------------------------------------------------
-
 React = require('./Common').React
 Router = require('./Common').Router
 Route = require('./Common').Route
@@ -34,11 +33,10 @@ User = require './Views/User'
 
 
 
-
 Root = React.createClass
-  componentDidMount:
-    console.log "Root:Mount"
-  componentWillUnmoun:
+  componentDidMount: ->
+
+  componentWillUnmount:
     console.log "Root:Unmount"
   render: () ->
     (<div><SideMenu /><Content props={this.props}/></div>)

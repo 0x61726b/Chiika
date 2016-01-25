@@ -1,58 +1,61 @@
 app = require 'app'
 Menu = require 'menu'
 MenuItem = require 'menu-item'
-Chiika = require("./../../../../chiika-node")
-path = require('path');
-fs = require('fs');
-lib  = path.join(path.dirname(fs.realpathSync(Chiika.path)), '../');
+BrowserWindow = require 'browser-window'
 
-root = new Chiika.Root({
-      userName:"arkenthera",
-      pass:"123456789",
-      debugMode:true,
-      appMode:true,
-      modulePath:lib
-    });
-
-
-request = new Chiika.Request();
-database = new Chiika.Database();
-
-# request.verifyUser(-> console.log "success"
-# -> console.log "error"
-# )
-
-
+electron = require 'electron'
+ipcMain = electron.ipcMain
 
 
 template = [{
+      label: 'Chiika'
+      submenu:[{
+          label: 'Reload'
+          accelerator: 'CmdOrCtrl+R'
+          click: () ->
+             BrowserWindow.getFocusedWindow().reload()
+             #console.log Root
+      },
+      {
+          label: 'Quit'
+          accelerator: 'CmdOrCtrl+Q'
+          click: () -> app.quit()
+      }]
+  },{
   label: 'Requests'
   submenu: [{
-    label: 'Verify'
-    click: () ->
-      request.VerifyUser(-> console.log "success"
-      -> console.log "error"
-      )
-  },
-  {
-    label: 'Get MyAnimeList'
-    click: () ->
-      request.GetMyAnimelist(-> console.log "success"
-      -> console.log "error"
-      )
-  },
-  {
-    label: 'Get MyMangaList'
-    click: () ->
-      request.GetMyMangalist(-> console.log "success"
-      -> console.log "error"
-      )
-  },
-  {
-    label: 'Quit'
-    accelerator: 'Command+Q'
-    click: () -> app.quit()
-  }]
+          label: 'Verify'
+          click: () ->
+            BrowserWindow.getFocusedWindow().webContents.send 'browserPing','requestVerify'
+          },
+          {
+          label: 'Get MyAnimeList'
+          click: () ->
+            BrowserWindow.getFocusedWindow().webContents.send 'browserPing','requestMyAnimelist'
+          },
+          {
+            label: 'Get MyMangaList'
+            click: () ->
+              BrowserWindow.getFocusedWindow().webContents.send 'browserPing','requestMyMangalist'
+          }]
+        },
+        {
+            label: 'Database'
+            submenu:[{
+              label: 'Animelist'
+              click: () ->
+                BrowserWindow.getFocusedWindow().webContents.send 'browserPing','databaseAnimelist'
+              },
+              {
+                label: 'Mangalist'
+                click: () ->
+                  BrowserWindow.getFocusedWindow().webContents.send 'browserPing','databaseMangalist'
+              },
+              {
+                label: 'UserInfo'
+                click: () ->
+                  BrowserWindow.getFocusedWindow().webContents.send 'browserPing','databaseUserInfo'
+              }]
 }]
 
 appMenu = Menu.buildFromTemplate(template)

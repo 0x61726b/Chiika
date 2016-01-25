@@ -13,6 +13,11 @@
 #authors: arkenthera
 #Description:
 #----------------------------------------------------------------------------
+#
+#
+#--------------------
+#
+#--------------------
 app = require "app"
 BrowserWindow = require 'browser-window'
 crashReporter = require 'crash-reporter'
@@ -20,10 +25,12 @@ crashReporter = require 'crash-reporter'
 ApplicationWindow = require './ApplicationWindow'
 appMenu = require './menu/appMenu'
 Menu = require 'menu'
+
+
 # ---------------------------
 #
 # ---------------------------
-
+process.on('uncaughtException',(err) -> console.log err)
 
 module.exports =
 class Application
@@ -31,10 +38,9 @@ class Application
 
   constructor: (options) ->
     global.application = this
-
+    global.Chiika = { Request:null}
     # Report crashes to our server.
     require('crash-reporter').start()
-
 
 
 
@@ -43,16 +49,26 @@ class Application
     app.on 'ready', => @openWindow()
 
   openWindow: ->
+    isBorderless = true
+
+    if process.env.Show_CA_Debug_Tools == 'yeah'
+      isBorderless = false;
     htmlURL = "file://#{__dirname}/../renderer/index.html"
     @window = new ApplicationWindow htmlURL,
-      width: 1400
-      height: 900
+      width: 1200
+      height: 800
       minWidth:800
       minHeight:600
       title: 'Chiika - Development Mode'
       icon: "./resources/icon.png"
+      frame:!isBorderless
     @window.openDevTools()
-    Menu.setApplicationMenu(appMenu)
+
+    if process.env.Show_CA_Debug_Tools == 'yeah'
+      Menu.setApplicationMenu(appMenu)
+
+
+
 
 
 application = new Application

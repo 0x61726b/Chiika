@@ -15,11 +15,8 @@
 #----------------------------------------------------------------------------
 React = require("React");
 ReactDOM = require("react-dom");
-
-window.$ = window.jQuery = require('./../../bower_components/jquery/dist/jquery.min.js')
-
-
 Root = require('./components/Root')
+
 ReactDOM.render(React.createElement(Root), document.getElementById('app'))
 # React.render(<div>start</div>, document.getElementById('app'))
 
@@ -27,4 +24,10 @@ ReactDOM.render(React.createElement(Root), document.getElementById('app'))
 Helpers = require("./components/Helpers")
 Titlebar = require("./components/Titlebar")
 
-Util = new Helpers.Utility()
+Helpers.RunEverything()
+
+Chiika = require './ChiikaNode'
+
+#Chiika.verifyUser()
+#Chiika.RequestMyAnimelist()
+#console.log Chiika.GetMyAnimelist()

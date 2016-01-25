@@ -19,7 +19,6 @@ Router = require('./Common').Router
 Route = require('./Common').Route
 Link = require('./Common').Link
 
-
 class Content extends React.Component
   constructor: (props) ->
     super props

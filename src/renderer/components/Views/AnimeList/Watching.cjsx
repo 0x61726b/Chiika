@@ -14,6 +14,7 @@
 #Description:
 #----------------------------------------------------------------------------
 React = require 'react'
+cn = require './../../../ChiikaNode'
 
 test = {
     name   : 'gridWatchingList',
@@ -47,8 +48,17 @@ WatchingList = React.createClass
   componentDidMount: ->
     $ ->
        $("#gridWatchingList").w2grid(test)
+
+    @buildData()
   componentWillUnmount: ->
     $('#gridWatchingList').w2destroy();
+
+  buildData: ->
+    wholeList = cn.getMyAnimelist()
+    # for value in wholeList['AnimeArray']
+    #   console.log value
+
+
   render: () ->
     (<div id="gridWatchingList" className="listCommon"></div>);
 
