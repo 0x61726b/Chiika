@@ -15,37 +15,20 @@
 #----------------------------------------------------------------------------
 React = require 'react'
 cn = require './../../../ChiikaNode'
-
-WatchingGrid = {
-    name   : 'gridWatchingList',
-    reorderColumns:true,
-    columns: [
-      { field: 'icon', caption: '', size: '40px',render:(icon) ->
-        '<i class="fa fa-desktop" style="color:'+icon.icon+'"></i>'  },
-        { field: 'title', caption: 'Title', size: '40%',resizable: true, sortable: true  },
-        { field: 'score', caption: 'Score', size: '10%',resizable: true, sortable: true  },
-        { field: 'progress', caption: 'Progress', size: '40%',resizable: true, sortable: true },
-        { field: 'season', caption: 'Season', size: '120px',resizable: true, sortable: true  },
-    ],
-    records: [
-    ]
-}
+Mixin = require './Common'
 
 Helpers = require('./../../Helpers')
 #Watching List
 WatchingList = React.createClass
+  mixins:[Mixin]
   componentDidMount: ->
-    @buildData()
-    $ ->
-       $("#gridWatchingList").w2grid(WatchingGrid)
+    list = cn.getAnimeListByUserStatus(1)
+    @setGridName("gridWatchingList")
+    @setList(list)
+
+    $("#gridWatchingList").w2grid(@getGrid())
   componentWillUnmount: ->
     $('#gridWatchingList').w2destroy();
-    WatchingGrid.records = []
-  buildData: ->
-    list = cn.getAnimeListByUserStatus(1)
-    console.log list
-    for val in list
-      WatchingGrid.records.push val
 
 
   render: () ->

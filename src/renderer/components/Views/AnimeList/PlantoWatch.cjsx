@@ -15,35 +15,21 @@
 #----------------------------------------------------------------------------
 React = require 'react'
 cn = require './../../../ChiikaNode'
-
-PtwGrid = {
-    name   : 'gridPlantoWatchList',
-    reorderColumns:true,
-    columns: [
-      { field: 'icon', caption: '', size: '40px',render:(icon) ->
-        '<i class="fa fa-desktop" style="color:'+icon.icon+'"></i>'  },
-        { field: 'title', caption: 'Title', size: '40%',resizable: true, sortable: true  },
-        { field: 'score', caption: 'Score', size: '10%',resizable: true, sortable: true  },
-        { field: 'progress', caption: 'Progress', size: '40%',resizable: true, sortable: true },
-        { field: 'season', caption: 'Season', size: '120px',resizable: true, sortable: true  },
-    ],
-    records: [
-    ]
-}
+Mixin = require './Common'
 
 #Plan to Watch List
 PlantoWatchList = React.createClass
+  mixins:[Mixin]
+
+
   componentDidMount: ->
-    @buildData()
-    $ ->
-      $("#gridPlantoWatchList").w2grid(PtwGrid)
+    list = cn.getAnimeListByUserStatus(6)
+    @setGridName("gridWatchingList")
+    @setList(list)
+
+    $("#gridPlantoWatchList").w2grid(@getGrid())
   componentWillUnmount: ->
     $('#gridPlantoWatchList').w2destroy()
-    PtwGrid.records = []
-  buildData: ->
-    list = cn.getAnimeListByUserStatus(6)
-    for val in list
-      PtwGrid.records.push val
   render: () ->
     (<div id="gridPlantoWatchList" className="listCommon"></div>);
 

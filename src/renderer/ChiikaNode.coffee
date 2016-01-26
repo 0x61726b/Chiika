@@ -18,61 +18,102 @@ fs = require('fs')
 remote = require('remote')
 electron = require 'electron'
 ipcRenderer = electron.ipcRenderer
+h = require './components/Helpers'
+BrowserWindow = electron.remote.BrowserWindow
 
 class ChiikaNode
-  rootOptions:{
-    userName:"arkenthera",
-    pass:"123456789",
-    debugMode:true,
-    appMode:true
-  }
-  @chiika: null
-  @root:null
-  @db:null
-  @request:null
-  @modulePath:''
+  DbIpcKeys:[
+    'databaseRequest'
+  ],
+  IpcKeys:[
+    'requestVerify',
+    'requestMyAnimelist',
+    'requestMyMangalist'
+  ]
+  ipcStatus:[],
+  apiBusy:false
+  readyCallback:null
+  databaseMyUserInfo:null
+  databaseMyAnimelist:null
+  databaseMyMangalist:null
+  firstLaunch:true
+  initialized:false
+  requestData: () ->
+    @apiBusy = true
+    ipcRenderer.send 'rendererPing','databaseRequest'
+
+  #Send browser async requests to retrieve data
   constructor: ->
-    @chiika = require("./../../../chiika-node")
-    @modulePath = path.join(path.dirname(fs.realpathSync(@chiika.path)), '../')
-    @rootOptions.modulePath = @modulePath
-    @root = @chiika.Root(@rootOptions)
-    @db = @chiika.Database()
-    @request = @chiika.Request()
+    @requestData()
+
+  #Check if browser answered everything
+  isInitialized: () ->
+    @initialized
+
+  setApiBusy:(busy) ->
+    @apiBusy = busy
+    h.SetApiBusy(@apiBusy)
 
 
-  #Native Request JS Wrappers
-  #These are Native function calls on chiika-node
-  #See https://github.com/arkenthera/chiika-node/blob/master/src/RequestWrapper.cc
-  #for implementations of the methods below
-  #
-  #Note: These functions will exit immediately.Since cURL requests run its own
-  #thread, success or error callbacks will be called when the request thread finally exists.
-  #Native functions and its wrappers start with capitals
-  requestSuccess:(ret) ->
-    console.log ret
-  requestError:(ret) ->
-    console.log ret
-  RequestVerifyUser: ->
-    @request.VerifyUser(@requestSuccess,@requestError)
-  RequestMyAnimelist: () ->
-    @request.GetMyAnimelist(@requestSuccess,@requestError)
-  RequestMyMangalist: ->
-    @request.GetMyMangalist(@requestSuccess,@requestError)
-  #Native Database JS Wrappers
-  #These synchronous functions will only load related data into v8 structures and send it back.
-  #See https://github.com/arkenthera/chiika-node/blob/master/src/DatabaseWrapper.cc for more info.
+  checkApiBusy: () ->
+    if @isInitialized() == false
+      @apiBusy = true
+
+    h.SetApiBusy(@apiBusy)
+
+    if @isInitialized()
+      if @readyCallback
+        @readyCallback()
+        @readyCallback = null
+      @setSidebarInfo()
+
+  openMyAnimeListLoginWindow: () ->
+    options = {
+       frame:false,
+       width:600,
+       height:600
+    }
+    LoginWindow = new BrowserWindow(options);
+    LoginWindow.loadURL("file://#{__dirname}/../renderer/MyAnimeListLogin.html")
+    #LoginWindow.openDevTools()
+    LoginWindow.on 'closed', () ->
+      LoginWindow = null
+
+  setSidebarInfo: () ->
+    if @getUserInfo().UserInfo.user_name == 'undefined'
+      $("div.userInfo").html("No User")
+    else
+      $("div.userInfo").html(@getUserInfo().UserInfo.user_name)
+
+  requestVerifyUser: ->
+    ipcRenderer.send 'rendererPing',@IpcKeys[0]
+
+
+  requestMyAnimelist: () ->
+    ipcRenderer.send 'rendererPing',@IpcKeys[1]
+
+
+  requestMyMangalist: ->
+    ipcRenderer.send 'rendererPing',@IpcKeys[2]
+
+
   getMyAnimelist:() ->
-    @db.Animelist
+    @databaseMyAnimelist
   getMyMangalist:() ->
-    @db.Mangalist
+    @databaseMyMangalist
   getUserInfo:() ->
-    @db.User
+    @databaseMyUserInfo
+
+  getReady: (callback) ->
+    @readyCallback = callback
+
 
   #Helpers functions for Lists
   #The return value is formatted to match the grid
   getAnimeListByUserStatus:(status) ->
     data = []
-    wholeList = @db.Animelist
+
+    wholeList = @databaseMyAnimelist
     for value in wholeList['AnimeArray']
      animeStatus = value['my_status']
      if parseInt(animeStatus) == status #Watching
@@ -108,29 +149,33 @@ class ChiikaNode
     data
 
 
-
 chiikaNode = new ChiikaNode
 
-#IPC
-#Handle async messages from browser process
+ipcRenderer.on 'loginSuccess', (event,arg) ->
+    chiikaNode.requestMyAnimelist()
+
+    chiikaNode.setApiBusy(true)
+
+ipcRenderer.on 'browserPing',(event,arg) ->
+  if arg == 'refreshData'
+    console.log "[Renderer]IPC Message from browser process -refreshData- "
+    chiikaNode.requestData()
+
+ipcRenderer.on 'databaseRequest', (event,arg) ->
+    console.log 'Receiving IPC message from browser process!Event:databaseRequest'
+
+    chiikaNode.databaseMyAnimelist = arg.animeList
+    chiikaNode.databaseMyMangalist = arg.mangaList
+    chiikaNode.databaseMyUserInfo = arg.userInfo
+
+    chiikaNode.initialized = true
+    chiikaNode.checkApiBusy()
+
 #
-ipcRenderer.on 'browserPing',(event,arg)->
-  console.log "Receiving IPC message from browser process! Args: " + arg
 
-  if arg == 'requestVerify'
-    chiikaNode.RequestVerifyUser()
-  if arg == 'requestMyAnimelist'
-    chiikaNode.RequestMyAnimelist()
-  if arg == 'requestMyMangalist'
-    chiikaNode.RequestMyMangalist()
-  if arg == 'databaseAnimelist'
-    console.log chiikaNode.getMyAnimelist()
-  if arg == 'databaseMangalist'
-    console.log chiikaNode.getMyMangalist()
-  if arg == 'databaseUserInfo'
-    console.log chiikaNode.getUserInfo()
-
-
+ipcRenderer.on 'setApiBusy', (event,arg) ->
+    console.log 'Receiving IPC message from browser process!Event:setApiBusy'
+    chiikaNode.setApiBusy(arg)
 #
 #
 #Export

@@ -22,6 +22,8 @@ class ApplicationWindow
   constructor: (path, options) ->
     @window = new BrowserWindow options
     @window.loadURL(path)
+  getWindow: () ->
+    @window
 
   on: (args...) ->
     @window.on(args...)

@@ -6,6 +6,8 @@ BrowserWindow = require 'browser-window'
 electron = require 'electron'
 ipcMain = electron.ipcMain
 
+Chiika = require './../Chiika'
+
 
 template = [{
       label: 'Chiika'
@@ -14,7 +16,6 @@ template = [{
           accelerator: 'CmdOrCtrl+R'
           click: () ->
              BrowserWindow.getFocusedWindow().reload()
-             #console.log Root
       },
       {
           label: 'Quit'
@@ -26,17 +27,17 @@ template = [{
   submenu: [{
           label: 'Verify'
           click: () ->
-            BrowserWindow.getFocusedWindow().webContents.send 'browserPing','requestVerify'
+            Chiika.RequestVerifyUser()
           },
           {
           label: 'Get MyAnimeList'
           click: () ->
-            BrowserWindow.getFocusedWindow().webContents.send 'browserPing','requestMyAnimelist'
+            Chiika.RequestMyAnimelist()
           },
           {
             label: 'Get MyMangaList'
             click: () ->
-              BrowserWindow.getFocusedWindow().webContents.send 'browserPing','requestMyMangalist'
+              Chiika.RequestMyMangalist()
           }]
         },
         {
@@ -44,17 +45,17 @@ template = [{
             submenu:[{
               label: 'Animelist'
               click: () ->
-                BrowserWindow.getFocusedWindow().webContents.send 'browserPing','databaseAnimelist'
+                console.log "Anime Array Len:" + Chiika.getMyAnimelist()['AnimeArray'].length
               },
               {
                 label: 'Mangalist'
                 click: () ->
-                  BrowserWindow.getFocusedWindow().webContents.send 'browserPing','databaseMangalist'
+                  console.log "Manga Array Len:" + Chiika.getMyMangalist()['AnimeArray'].length #Fix me
               },
               {
                 label: 'UserInfo'
                 click: () ->
-                  BrowserWindow.getFocusedWindow().webContents.send 'browserPing','databaseUserInfo'
+                  console.log Chiika.getUserInfo()
               }]
 }]
 

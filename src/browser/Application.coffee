@@ -25,6 +25,7 @@ crashReporter = require 'crash-reporter'
 ApplicationWindow = require './ApplicationWindow'
 appMenu = require './menu/appMenu'
 Menu = require 'menu'
+Chiika = require './Chiika'
 
 
 # ---------------------------
@@ -35,18 +36,17 @@ process.on('uncaughtException',(err) -> console.log err)
 module.exports =
 class Application
   window: null
-
   constructor: (options) ->
     global.application = this
-    global.Chiika = { Request:null}
     # Report crashes to our server.
     require('crash-reporter').start()
 
-
-
     # Quit when all windows are closed.
-    app.on 'window-all-closed', -> app.quit()
-    app.on 'ready', => @openWindow()
+    app.on 'window-all-closed', ->
+       app.quit()
+    app.on 'ready', =>
+       @openWindow()
+
 
   openWindow: ->
     isBorderless = true
@@ -55,8 +55,8 @@ class Application
       isBorderless = false;
     htmlURL = "file://#{__dirname}/../renderer/index.html"
     @window = new ApplicationWindow htmlURL,
-      width: 1600
-      height: 900
+      width: 1200
+      height: 800
       minWidth:800
       minHeight:600
       title: 'Chiika - Development Mode'
@@ -67,6 +67,7 @@ class Application
     if process.env.Show_CA_Debug_Tools == 'yeah'
       Menu.setApplicationMenu(appMenu)
 
+    Chiika.setMainWindow(@window.getWindow())
 
 
 

@@ -17,16 +17,31 @@ React = require("React");
 ReactDOM = require("react-dom");
 Root = require('./components/Root')
 
-ReactDOM.render(React.createElement(Root), document.getElementById('app'))
-# React.render(<div>start</div>, document.getElementById('app'))
+ChiikaIsReady = ->
+  console.log "Chiika-Node kickin' in!"
+
+  ReactDOM.render(React.createElement(Root), document.getElementById('app'))
+  # React.render(<div>start</div>, document.getElementById('app'))
 
 
-Helpers = require("./components/Helpers")
-Titlebar = require("./components/Titlebar")
+  Helpers = require("./components/Helpers")
+  Titlebar = require("./components/Titlebar")
 
-Helpers.RunEverything()
+  t = new Titlebar
+  t.appendTitlebar()
+
+  Helpers.FadeInOnPageLoad()
+  Helpers.RunEverything()
+
 
 Chiika = require './ChiikaNode'
+
+Chiika.getReady ChiikaIsReady
+
+
+
+
+
 
 #Chiika.verifyUser()
 #Chiika.RequestMyAnimelist()

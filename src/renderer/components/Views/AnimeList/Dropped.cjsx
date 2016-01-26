@@ -15,35 +15,20 @@
 #----------------------------------------------------------------------------
 React = require 'react'
 cn = require './../../../ChiikaNode'
-
-DroppedGrid = {
-    name   : 'gridDroppedList',
-    reorderColumns:true,
-    columns: [
-      { field: 'icon', caption: '', size: '40px',render:(icon) ->
-        '<i class="fa fa-desktop" style="color:'+icon.icon+'"></i>'  },
-        { field: 'title', caption: 'Title', size: '40%',resizable: true, sortable: true  },
-        { field: 'score', caption: 'Score', size: '10%',resizable: true, sortable: true  },
-        { field: 'progress', caption: 'Progress', size: '40%',resizable: true, sortable: true },
-        { field: 'season', caption: 'Season', size: '120px',resizable: true, sortable: true  },
-    ],
-    records: [
-    ]
-}
+Mixin = require './Common'
 
 #Dropped List
 DroppedList = React.createClass
+  mixins:[Mixin]
+
+
   componentDidMount: ->
-    @buildData()
-    $ ->
-      $("#gridDroppedList").w2grid(DroppedGrid)
+    list = cn.getAnimeListByUserStatus(4)
+    @setGridName("gridDroppedList")
+    @setList(list)
+    $("#gridDroppedList").w2grid(@getGrid())
   componentWillUnmount: ->
     $('#gridDroppedList').w2destroy()
-    DroppedGrid.records = []
-  buildData: ->
-    list = cn.getAnimeListByUserStatus(4)
-    for val in list
-      DroppedGrid.records.push val
   render: () ->
     (<div id="gridDroppedList" className="listCommon"></div>);
 

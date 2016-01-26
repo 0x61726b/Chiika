@@ -15,34 +15,19 @@
 #----------------------------------------------------------------------------
 React = require 'react'
 cn = require './../../../ChiikaNode'
-
-CompletedGrid = {
-    name   : 'gridCompletedList',
-    reorderColumns:true,
-    columns: [
-      { field: 'icon', caption: '', size: '40px',render:(icon) ->
-        '<i class="fa fa-desktop" style="color:'+icon.icon+'"></i>'  },
-        { field: 'title', caption: 'Title', size: '40%',resizable: true, sortable: true  },
-        { field: 'score', caption: 'Score', size: '10%',resizable: true, sortable: true  },
-        { field: 'progress', caption: 'Progress', size: '40%',resizable: true, sortable: true },
-        { field: 'season', caption: 'Season', size: '120px',resizable: true, sortable: true  },
-    ],
-    records: [
-    ]
-}
+Mixin = require './Common'
 
 CompletedList = React.createClass
+  mixins:[Mixin]
+
+
   componentDidMount: ->
-    @buildData()
-    $ ->
-      $("#gridCompletedList").w2grid(CompletedGrid)
+    list = cn.getAnimeListByUserStatus(2)
+    @setGridName("gridDroppedList")
+    @setList(list)
+    $("#gridCompletedList").w2grid(@getGrid())
   componentWillUnmount: ->
     $('#gridCompletedList').w2destroy();
-    CompletedGrid.records = []
-  buildData: ->
-    list = cn.getAnimeListByUserStatus(2)
-    for val in list
-      CompletedGrid.records.push val
   render: () ->
     (<div id="gridCompletedList" className="listCommon"></div>);
 

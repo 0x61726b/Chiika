@@ -15,10 +15,10 @@
 #----------------------------------------------------------------------------
 
 class Utility
+  apiBusy:false
   constructor: () ->
     @RunEverything()
   RunEverything: () ->
-    @FadeInOnPageLoad()
     @SideMenuClickHandler()
     @RotateLogoOnHover()
   FadeInElement: (element) ->
@@ -34,11 +34,24 @@ class Utility
 
     $("a.userArea").click ->
       $("div.navigation ul li").removeClass "active"
-  RotateLogo: () ->
-    $(".chiikaLogo").toggleClass "rotateLogo"
-   RotateLogoOnHover: () ->
-     $(".chiikaLogo").hover =>
-        @RotateLogo()
+  RotateLogo: (cond) ->
+    if cond == true
+      $(".chiikaLogo").addClass "rotateLogo"
+    else
+      $(".chiikaLogo").removeClass "rotateLogo"
+  SetApiBusy: (busy) ->
+    @apiBusy = busy
+    @RotateLogo(busy)
+  RotateLogoOnHover: () ->
+    $(".chiikaLogo").
+    hover(=>
+      if !@apiBusy
+        @RotateLogo(true)
+    =>
+      if !@apiBusy
+        @RotateLogo(false)
+    )
+
 
 
 Util = new Utility()

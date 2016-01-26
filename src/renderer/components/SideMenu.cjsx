@@ -33,7 +33,7 @@ class SideMenu extends React.Component
             <img className="avatar" src="./../assets/images/avatar.jpg"/>
           </div>
           <div className="userInfo">
-            arkenthera
+            No User
           </div>
         </Link>
       </div>

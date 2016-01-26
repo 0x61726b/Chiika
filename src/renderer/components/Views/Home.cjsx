@@ -15,22 +15,17 @@
 #----------------------------------------------------------------------------
 React = require 'react'
 electron = require 'electron'
-remote = electron.remote
-bw = remote.BrowserWindow
+Chiika = require './../../ChiikaNode'
+
 
 class Home extends React.Component
   utility:null
   constructor: (props) ->
     super props
 
-  onLoading: ->
-    options = { frame:true,width:600,height:600 }
-    sec = new bw(options);
-    sec.loadURL("file://#{__dirname}/../../../renderer/MyAnimeListLogin.html")
-    sec.on 'closed', () ->
-      sec = null
-      console.log "Yeah"
+  onOpen: ->
+    Chiika.openMyAnimeListLoginWindow()
   render: () ->
-    (<div><a href="#" onClick={this.onLoading}>Click me</a></div>);
+    (<div><a href="#" onClick={this.onOpen}>Click me</a></div>);
 
 module.exports = Home
