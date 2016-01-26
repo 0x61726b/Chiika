@@ -168,8 +168,10 @@ ipcRenderer.on 'databaseRequest', (event,arg) ->
     chiikaNode.databaseMyMangalist = arg.mangaList
     chiikaNode.databaseMyUserInfo = arg.userInfo
 
+    #Important!!! Dont remove
     chiikaNode.initialized = true
     chiikaNode.checkApiBusy()
+    chiikaNode.setApiBusy(false)
 
 #
 

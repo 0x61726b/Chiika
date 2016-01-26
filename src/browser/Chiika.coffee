@@ -54,6 +54,12 @@ class Chiika
 
   sendAsyncMessageToRenderer:(msg,arg) ->
     @mainWindow.webContents.send msg,arg
+  sendRendererData:() ->
+    al = @getMyAnimelist()
+    ml = @getMyMangalist()
+    ui = @getUserInfo()
+    db = { animeList: al,mangaList:ml,userInfo:ui}
+    @sendAsyncMessageToRenderer 'databaseRequest',db
 
   #Native Request JS Wrappers
   #These are Native function calls on chiika-node
@@ -63,36 +69,40 @@ class Chiika
   #Note: These functions will exit immediately.Since cURL requests run its own
   #thread, success or error callbacks will be called when the request thread finally exists.
   #Native functions and its wrappers start with capitals
-  requestSuccess:(ret) =>
-    @mainWindow.webContents.send 'browserPing','refreshData'
-    @sendAsyncMessageToRenderer('setApiBusy',false)
-  requestError:(ret) =>
-    @sendAsyncMessageToRenderer('setApiBusy',false)
+  requestMyAnimeListSuccess:(ret) =>
+    @RequestMyMangalist()
+
+  requestMyAnimeListError:(ret) =>
+    console.log ret
+
+
+  requestMyMangaListSuccess:(ret) =>
+    @sendRendererData()
+
+
+  requestMyMangaListError:(ret) =>
+    console.log ret
 
 
   verifyRequestSuccess: (ret) =>
     @malLoginWindow.send 'browserPing','close'
-    @requestSuccess(ret)
+    @RequestMyAnimelist()
 
-    @sendAsyncMessageToRenderer('loginSuccess',true)
-    #@RequestMyAnimelist()
-    #@RequestMyMangalist()
 
   verifyRequestError: (ret) =>
     @malLoginWindow.send 'browserPing','error'
     @requestError(ret)
 
   RequestVerifyUser: () ->
+    @sendAsyncMessageToRenderer('setApiBusy',true)
     @request.VerifyUser(@verifyRequestSuccess,@verifyRequestError)
 
-
   RequestMyAnimelist: () =>
-    @sendAsyncMessageToRenderer('setApiBusy',true)
-    @request.GetMyAnimelist(@requestSuccess,@requestError)
+    @request.GetMyAnimelist(@requestMyAnimeListSuccess,@requestMyAnimeListError)
 
   RequestMyMangalist: ->
-    @sendAsyncMessageToRenderer('setApiBusy',true)
-    @request.GetMyMangalist(@requestSuccess,@requestError)
+    @request.GetMyMangalist(@requestMyMangaListSuccess,@requestMyMangaListError)
+
   SetUser: (user,pass) ->
     @db.SetUser( { userName: user,password: pass} )
   #Native Database JS Wrappers
