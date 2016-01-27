@@ -40,6 +40,8 @@ def Push_Chiika():
     git_query = Popen(git_command_push, cwd=chiika, stdout=PIPE, stderr=PIPE)
     (git_status, error) = git_query.communicate()
 
+    print error
+
 def Push_ChiikaApi():
     print "ChiikaApi - Adding..."
     git_query = Popen(git_command_add_all, cwd=chiikaApi, stdout=PIPE, stderr=PIPE)
@@ -54,6 +56,8 @@ def Push_ChiikaApi():
     git_query = Popen(git_command_push, cwd=chiikaApi, stdout=PIPE, stderr=PIPE)
     (git_status, error) = git_query.communicate()
 
+    print error
+
 
 def Push_ChiikaNode():
     print "Chiika-Node - Adding..."
@@ -67,6 +71,8 @@ def Push_ChiikaNode():
     print "Chiika-Node - Pushing..."
     git_query = Popen(git_command_push, cwd=chiikaNode, stdout=PIPE, stderr=PIPE)
     (git_status, error) = git_query.communicate()
+
+    print error
 
 if argchiika == True:
     Push_Chiika()
