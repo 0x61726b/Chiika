@@ -37,7 +37,7 @@ It is necessary that you follow the recommended directory structure so you wont 
 
 If you run the Magic.py you'll get the above structure.
 
-CD to ChiikaApi and run CMake,set -DCopyFinalDepsDir=<chiika-node>/<deps> for automatic copying of the DLLs generated.After generating the .SLN file run then build.
+CD to ChiikaApi and run CMake,set ```-DCopyFinalDepsDir=<chiika-node>/<deps>``` for automatic copying of the DLLs generated.After generating the .SLN file run then build.
 
 When the building of ChiikaApi is done,
 
@@ -61,7 +61,7 @@ If everything is successful the application should launch.
 
 (The MIT License)
 
-Copyright (c) 2012 Nathan Rajlich <nathan@tootallnate.net>
+Copyright (c) 2016 arkenthera
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the 'Software'), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
