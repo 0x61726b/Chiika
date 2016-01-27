@@ -31,35 +31,81 @@ Seasons = require './Views/Seasons'
 Torrents = require './Views/Torrents'
 User = require './Views/User'
 
+h = require './Helpers'
+Search = require './Search'
 
 
 Root = React.createClass
+  routes: [
+    'Home',
+    'AnimeList',
+    'MangaList',
+    'Library',
+    'Calendar',
+    'Seasons',
+    'Torrents',
+    'User'
+  ]
   componentDidMount: ->
+    path = @props.routes[@props.routes.length-1]
+    routeIndex = 0
+    for val,index in @routes
+      if path.path == val
+        routeIndex = index
 
+    Search.updateState(routeIndex)
+    h.SetActiveMenuItem(routeIndex)
   componentWillUnmount:
     console.log "Root:Unmount"
   render: () ->
     (<div><SideMenu /><Content props={this.props}/></div>)
 
 ChiikaRouter = React.createClass
+  onEnter:(nextState) ->
+    path = nextState.location.pathname
+
+    if path == '/Home' || path == 'Home'
+      Search.updateState(0)
+    if path == 'AnimeList'
+      Search.updateState(1)
+    if path == 'MangaList'
+      Search.updateState(2)
+    if path == 'Library'
+      Search.updateState(3)
+    if path == 'Calendar'
+      Search.updateState(4)
+    if path == 'Seasons'
+      Search.updateState(5)
+    if path == 'Torrents'
+      Search.updateState(6)
+    if path == 'User'
+      Search.updateState(7)
+
   getInitialState: ->
+
     animeListLastTab:0
+
+  componentDidMount: ->
+
+
   onAnimeListTabSelect: (index,last) ->
     @state.animeListLastTab = index
+
+
   CreateAnimeList: (props) ->
     (<AnimeList onSelect={@onAnimeListTabSelect} startWithTabIndex={@state.animeListLastTab} />)
   render: () ->
     (<Router>
       <Route component={Root}>
-        <Route path="/" component={Home}/>
-        <Route name="Home" path="Home" component={Home}/>
-        <Route name="AnimeList" path="AnimeList" component={@CreateAnimeList}/>
-        <Route name="MangaList" path="MangaList" component={MangaList}/>
-        <Route name="Library" path="Library" component={Library}/>
-        <Route name="Calendar" path="Calendar" component={Calendar}/>
-        <Route name="Seasons" path="Seasons" component={Seasons}/>
-        <Route name="Torrents" path="Torrents" component={Torrents}/>
-        <Route name="User" path="User" component={User}/>
+        #<Route path="/" component={Home} onEnter={@onEnter}/>
+        <Route name="Home" path="Home" component={Home} onEnter={@onEnter}/>
+        <Route name="AnimeList" path="AnimeList" component={@CreateAnimeList} onEnter={@onEnter}/>
+        <Route name="MangaList" path="MangaList" component={MangaList} onEnter={@onEnter}/>
+        <Route name="Library" path="Library" component={Library} onEnter={@onEnter}/>
+        <Route name="Calendar" path="Calendar" component={Calendar} onEnter={@onEnter}/>
+        <Route name="Seasons" path="Seasons" component={Seasons} onEnter={@onEnter}/>
+        <Route name="Torrents" path="Torrents" component={Torrents} onEnter={@onEnter}/>
+        <Route name="User" path="User" component={User} onEnter={@onEnter}/>
       </Route>
     </Router>)
 

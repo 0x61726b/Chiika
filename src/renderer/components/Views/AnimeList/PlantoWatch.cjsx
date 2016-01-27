@@ -24,7 +24,7 @@ PlantoWatchList = React.createClass
 
   componentDidMount: ->
     list = cn.getAnimeListByUserStatus(6)
-    @setGridName("gridWatchingList")
+    @setGridName("gridPlantoWatchList")
     @setList(list)
 
     $("#gridPlantoWatchList").w2grid(@getGrid())

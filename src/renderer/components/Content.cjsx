@@ -29,6 +29,9 @@ class Content extends React.Component
       <div className="content">
         {this.props.props.children}
       </div>
+      <div className="statusBar">
+        status bar here
+      </div>
     </div>)
 
 module.exports = Content

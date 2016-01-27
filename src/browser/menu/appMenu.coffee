@@ -50,7 +50,7 @@ template = [{
               {
                 label: 'Mangalist'
                 click: () ->
-                  console.log "Manga Array Len:" + Chiika.getMyMangalist()['AnimeArray'].length #Fix me
+                  console.log "Manga Array Len:" + Chiika.getMyMangalist()['MangaArray'].length #Fix me
               },
               {
                 label: 'UserInfo'

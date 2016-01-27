@@ -9,7 +9,7 @@
 #but WITHOUT ANY WARRANTY; without even the implied warranty of
 #MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #GNU General Public License for more details.
-#Date: 26.1.2016
+#Date: 27.1.2016
 #authors: arkenthera
 #Description:
 #----------------------------------------------------------------------------
@@ -20,17 +20,15 @@ Grid = {
     name   : '',
     reorderColumns:true,
     columns: [
-      { field: 'icon', caption: '',attr: "align=center", size: '40px',render:(icon) ->
-        '<i class="fa fa-desktop" style="color:'+icon.icon+'"></i>'  },
-        { field: 'title', caption: 'Title', size: '40%',resizable: true, sortable: true  },
-        { field: 'score', caption: 'Score', size: '10%',resizable: true, sortable: true,
+        { field: 'title', caption: 'Title', size: '50%',resizable: true, sortable: true  },
+        { field: 'score', caption: 'Score', size: '15%',resizable: true, sortable: true,
         render:(score) ->
           if score.score == 0
             '<div>-</div>'
           else
             '<div>'+score.score+'</div>'  },
-        { field: 'progress', caption: 'Progress', size: '40%',resizable: true, sortable: true },
-        { field: 'season', caption: 'Season', size: '120px',resizable: true, sortable: true  },
+        { field: 'chapters', caption: 'Chapters', size: '15%',resizable: true, sortable: true },
+        { field: 'volumes', caption: 'Volumes', size: '20%',resizable: true, sortable: true  },
     ],
     records: [
     ],
@@ -44,14 +42,15 @@ Grid = {
     ],
     onMenuClick: (event) ->
       console.log event
+
 }
 
-AnimeListMixin =
+MangaListMixin =
   componentWillMount: ->
     @list = []
   setGridName: (grid) ->
     Grid.name = grid
-    Search.updateAnimelistState grid
+    Search.updateMangalistState grid
   setList: (l) ->
     @list = l
     Grid.records = @list
@@ -60,4 +59,4 @@ AnimeListMixin =
   componentWillUnmount: ->
 
 
-module.exports = AnimeListMixin
+module.exports = MangaListMixin

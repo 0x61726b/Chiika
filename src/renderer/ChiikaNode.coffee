@@ -71,7 +71,8 @@ class ChiikaNode
     options = {
        frame:false,
        width:600,
-       height:600
+       height:600,
+       icon:'./resources/icon.png'
     }
     LoginWindow = new BrowserWindow(options);
     LoginWindow.loadURL("file://#{__dirname}/../renderer/MyAnimeListLogin.html")
@@ -122,14 +123,17 @@ class ChiikaNode
        watchedEps = value['my_watched_episodes']
        totalEps   = value.anime['series_episodes']
        serieStatus = value.anime['series_status']
-       progress   = "?"
+       progress   = 0
        if parseInt(totalEps) > 0
-         progress   = (parseInt(watchedEps) / parseInt(totalEps)) * 100
+         progress   = Math.ceil((parseInt(watchedEps) / parseInt(totalEps)) * 100)
+
        season     = "Spring 2016"
        score      = value['my_score']
 
        if score == '0'
-         score = '-'
+         score = 0
+       else
+         score = parseInt(score)
 
        icon = 'black'
        if serieStatus == "1"
@@ -147,6 +151,45 @@ class ChiikaNode
        entry['season'] = season
        data.push entry
     data
+
+  getMangaListByUserStatus:(status) ->
+      data = []
+
+      wholeList = @databaseMyMangalist
+      for value in wholeList['MangaArray']
+       mangaStatus = value['my_status']
+       if parseInt(mangaStatus) == status
+         entry = {}
+         title = value.manga['series_title']
+         readChapters = value['my_read_chapters']
+         readVolumes = value['my_read_volumes']
+         totalVols   = value.manga['series_chapters']
+         totalChaps = value.manga['series_volumes']
+         serieStatus = value.manga['series_status']
+         progress   = 0
+
+
+
+         score      = value['my_score']
+
+         if score == '0'
+           score = 0
+         else
+           score = parseInt(score)
+
+         if parseInt(totalChaps) == 0
+           totalChaps = '-'
+         if parseInt(totalVols) == 0
+           totalVols = '-'
+         chapters = readChapters + "/" + totalChaps;
+         volumes = readVolumes + "/" + totalVols;
+         entry['recid'] = data.length
+         entry['chapters'] = chapters
+         entry['title'] = title
+         entry['volumes'] = volumes
+         entry['score'] = score
+         data.push entry
+      data
 
 
 chiikaNode = new ChiikaNode

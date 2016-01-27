@@ -14,10 +14,54 @@
 #Description:
 #----------------------------------------------------------------------------
 React = require 'react'
-h = require './../Helpers'
+ReactTabs = require 'react-tabs'
+Tab = ReactTabs.Tab;
+Tabs = ReactTabs.Tabs;
+TabList = ReactTabs.TabList;
+TabPanel = ReactTabs.TabPanel;
 
-class MangaList extends React.Component
+Helpers = require('./../Helpers')
+
+
+ReadingList = require './MangaList/Reading'
+PlantoReadList = require './MangaList/PlantoRead'
+DroppedList = require './MangaList/Dropped'
+OnHoldList = require './MangaList/OnHold'
+CompletedList = require './MangaList/Completed'
+
+Tabs.setUseDefaultStyles(false)
+MangaList = React.createClass
+  getInitialState: () ->
+    selectedIndex: -1
+    tabs:[
+        { label:"Reading",element:"gridMangaReadingList" },
+        { label:"Plan to Read",element:"gridPlantoReadList" },
+        { label:"Completed",element:"gridMangaCompletedList" },
+        { label:"On Hold",element:"gridMangaOnHoldList" },
+        { label:"Dropped",element:"gridMangaDroppedList" }
+    ]
   render: () ->
-    (<div>MangaList here</div>);
+    (<Tabs selectedIndex={this.props.startWithTabIndex} onSelect={this.props.onSelect} forceRenderTabPanel={false}>
+        <TabList>
+          {this.state.tabs.map((tab, i) =>
+                <Tab key={i}>{tab.label}</Tab>
+                )}
+        </TabList>
+        <TabPanel key={0}>
+          <ReadingList />
+        </TabPanel>
+        <TabPanel key={1}>
+          <PlantoReadList />
+        </TabPanel>
+        <TabPanel key={2}>
+          <CompletedList />
+        </TabPanel>
+        <TabPanel key={3}>
+          <OnHoldList />
+        </TabPanel>
+        <TabPanel key={4}>
+          <DroppedList />
+        </TabPanel>
+      </Tabs>);
 
 module.exports = MangaList

@@ -16,6 +16,8 @@
 
 class Utility
   apiBusy:false
+  currentlySelectedAnimelistTab:0
+  animelistTabs:[]
   constructor: () ->
     @RunEverything()
   RunEverything: () ->
@@ -42,6 +44,10 @@ class Utility
   SetApiBusy: (busy) ->
     @apiBusy = busy
     @RotateLogo(busy)
+  SetActiveMenuItem: (index) ->
+    $("div.navigation ul li").removeClass "active"
+    console.log index
+    $("div.navigation ul li:nth-child(" +(index+1)+ ")").toggleClass "active"
   RotateLogoOnHover: () ->
     $(".chiikaLogo").
     hover(=>

@@ -32,7 +32,7 @@ CompletedList = require './AnimeList/Completed'
 Tabs.setUseDefaultStyles(false)
 AnimeList = React.createClass
   getInitialState: () ->
-    selectedIndex: -1,
+    selectedIndex: -1
     tabs:[
         { label:"Watching",element:"gridWatchingList" },
         { label:"Plan to Watch",element:"gridPlantoWatchList" },

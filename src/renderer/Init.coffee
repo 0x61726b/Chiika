@@ -33,10 +33,19 @@ ChiikaIsReady = ->
   Helpers.FadeInOnPageLoad()
   Helpers.RunEverything()
 
+  SearchManager = require './components/Search'
+  SearchManager.startSearching()
+
+
+
+
+
 
 Chiika = require './ChiikaNode'
 
+#Entry point
 Chiika.getReady ChiikaIsReady
+
 
 
 

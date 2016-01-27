@@ -56,6 +56,6 @@
     "history": "^1.17.0",
     "main-bower-files": "^2.8.0",
     "react-fontawesome": "^0.3.3",
-    "titlebar": "^1.4.0"
+    "arkenthera-titlebar": "^1.4.0"
   }
 }

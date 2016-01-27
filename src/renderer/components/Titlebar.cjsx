@@ -13,7 +13,7 @@
 #authors: arkenthera
 #Description:
 #----------------------------------------------------------------------------
-Titlebar = require 'titlebar'
+Titlebar = require 'arkenthera-titlebar'
 
 
 remote = require 'remote'

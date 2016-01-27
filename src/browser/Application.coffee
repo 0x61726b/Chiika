@@ -53,7 +53,7 @@ class Application
 
     if process.env.Show_CA_Debug_Tools == 'yeah'
       isBorderless = false;
-    htmlURL = "file://#{__dirname}/../renderer/index.html"
+    htmlURL = "file://#{__dirname}/../renderer/index.html#Home"
     @window = new ApplicationWindow htmlURL,
       width: 1200
       height: 800

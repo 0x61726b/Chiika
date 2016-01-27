@@ -45,12 +45,15 @@ $chiika-rot-speed:2s;
 $mainColor:#005d5d; //color: 800
 $secondaryColor:#4527A0; // color: 600
 $thirdColor:#6200EA; //color: A700
+$tabListHeight:33px; //Fix me ?
+
+$statusBarHeight:30px;
 .strecthToMainArea {
     height: $mainArea-height;
 }
 
 .ReactTabs__TabPanel {
-    height: $mainArea-height;
+    height: calc(100% - #{$tabListHeight});
 }
 
 .content > div {
