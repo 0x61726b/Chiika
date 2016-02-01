@@ -48,9 +48,7 @@ Grid = {
     onClick: (event) ->
       false
     onDblClick: (event) ->
-      cn.requestAnimeScrape(Grid.records[event.recid].animeId)
       window.location = "#Anime/" + Grid.records[event.recid].animeId
-
 }
 
 AnimeListMixin =

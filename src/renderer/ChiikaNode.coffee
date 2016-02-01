@@ -237,7 +237,7 @@ ipcRenderer.on 'databaseRequest', (event,arg) ->
     chiikaRenderer.checkApiBusy()
     chiikaRenderer.setApiBusy(false)
 
-    if chiikaRenderer.listener != undefined
+    if chiikaRenderer.listener != null
       chiikaRenderer.listener.trigger()
 
 #

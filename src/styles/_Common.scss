@@ -69,3 +69,11 @@ $statusBarHeight:30px;
 .rotateLogo {
     -webkit-animation: spin $chiika-rot-speed linear infinite;
 }
+
+.loadingSomething {
+  width:40px!important;
+  height:40px!important;
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);;
+}

@@ -24,18 +24,36 @@ AnimeDetails = React.createClass
   mixins: [ History ]
   anime:null
   coverPath:""
+  coverExists:false
   componentWillMount:->
     Chiika.listener = this
     @anime = Chiika.getAnimeById(@props.params.animeId)
     console.log @anime
 
+    animeCover = Chiika.chiikaNode.rootOptions.imagePath + "Anime/" + @anime.series_animedb_id + ".jpg"
+    animeCover = animeCover.replace("/\\/g","/")
+
+    try
+      file = fs.statSync(animeCover)
+      @coverExists = true
+    catch error
+      @coverExists = false
 
   componentDidMount:->
     if @anime.Misc.broadcast_time == "broadcast_time"
         $(".airingStatsuDiv").hide()
     $("#seasonId").addClass @getSeasonClass()
+    Chiika.requestAnimeScrape(@anime.series_animedb_id)
+
+    if @coverExists == false
+      $("#coverImg").addClass("loadingSomething")
+      $(".cIm").addClass("rotateLogo")
+
   getCoverImage:() ->
-    coverPath = Chiika.chiikaNode.rootOptions.imagePath + "anime/" + @anime.series_animedb_id + ".jpg"
+    coverPath = "./../assets/images/topLeftLogo.png"
+    if @coverExists
+      coverPath = Chiika.chiikaNode.rootOptions.imagePath + "anime/" + @anime.series_animedb_id + ".jpg"
+      coverPath += "?rnd=" + new Date().getTime()
     coverPath
   getStatus:() ->
     id = @anime.my_status
@@ -102,11 +120,14 @@ AnimeDetails = React.createClass
       duration = "24 min. per ep."
     duration
   getStudio: () ->
-    studio = "Unknown"
+    studio = null
+    firstStudioName = "Unknown"
     if @anime.Misc.studios != null
       studio = @anime.Misc.studios[0]
+      if studio != undefined
+        firstStudioName = studio.studio_name
 
-    studio.studio_name
+    firstStudioName
   getSeason: () ->
     startDate = @anime.anime.series_start
 
@@ -171,6 +192,10 @@ AnimeDetails = React.createClass
     Chiika.testListener()
   trigger: ->
     @anime = Chiika.getAnimeById(@props.params.animeId)
+
+    @coverExists = true
+    $("#coverImg").removeClass("loadingSomething")
+    $(".cIm").removeClass("rotateLogo")
     @forceUpdate()
 
   render: () ->
@@ -197,7 +222,7 @@ AnimeDetails = React.createClass
         </div>
         <div className="row" id="detailsRow">
             <div className="coverImage">
-                <div className="cIm"><img src={@getCoverImage()} /></div>
+                <div className="cIm"><img id="coverImg" src={@getCoverImage()} /></div>
             </div>
             <div className="cardColumn" id="col1">
                 <div className="detailCard cardInfo card-twoLine" id="typeCard">
