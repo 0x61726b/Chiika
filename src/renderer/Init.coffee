@@ -52,6 +52,7 @@ Chiika.getReady ChiikaIsReady
 
 
 
+
 #Chiika.verifyUser()
 #Chiika.RequestMyAnimelist()
 #console.log Chiika.GetMyAnimelist()

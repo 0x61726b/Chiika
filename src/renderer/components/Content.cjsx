@@ -30,7 +30,6 @@ class Content extends React.Component
         {this.props.props.children}
       </div>
       <div className="statusBar">
-        status bar here
       </div>
     </div>)
 

@@ -19,14 +19,16 @@
 .noDecoration,
 a:link,
 a:visited {
+    display: block;
+    color: black;
     text-decoration: none;
+    cursor: default;
 }
 
 //User Avatar and user name
 .avatar {
-    width: 75px;
-    height: 75px;
-    -webkit-clip-path: circle(50%);
+    width: 80px;
+    height: 80px;
     margin-left: auto;
     margin-right: auto;
     display: block;

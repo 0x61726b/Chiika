@@ -16,7 +16,8 @@
 React = require 'react'
 electron = require 'electron'
 Chiika = require './../../ChiikaNode'
-
+electron = require 'electron'
+ipcRenderer = electron.ipcRenderer
 
 class Home extends React.Component
   utility:null
@@ -25,6 +26,7 @@ class Home extends React.Component
 
   onOpen: ->
     Chiika.openMyAnimeListLoginWindow()
+    #Chiika.testListener()
   render: () ->
     (<div><a href="#" onClick={this.onOpen}>Click me</a></div>);
 

@@ -21,14 +21,15 @@ ipcRenderer = electron.ipcRenderer
 h = require './components/Helpers'
 BrowserWindow = electron.remote.BrowserWindow
 
-class ChiikaNode
+class ChiikaRenderer
   DbIpcKeys:[
     'databaseRequest'
   ],
   IpcKeys:[
     'requestVerify',
     'requestMyAnimelist',
-    'requestMyMangalist'
+    'requestMyMangalist',
+    'requestAnimeScrape'
   ]
   ipcStatus:[],
   apiBusy:false
@@ -38,6 +39,8 @@ class ChiikaNode
   databaseMyMangalist:null
   firstLaunch:true
   initialized:false
+  chiikaNode:null
+  listener:null
   requestData: () ->
     @apiBusy = true
     ipcRenderer.send 'rendererPing','databaseRequest'
@@ -85,6 +88,9 @@ class ChiikaNode
       $("div.userInfo").html("No User")
     else
       $("div.userInfo").html(@getUserInfo().UserInfo.user_name)
+      imageUrl = @chiikaNode.rootOptions.imagePath + @getUserInfo().UserInfo.user_id+".jpg"
+
+      $("img#userAvatar").attr('src',imageUrl)
 
   requestVerifyUser: ->
     ipcRenderer.send 'rendererPing',@IpcKeys[0]
@@ -97,6 +103,8 @@ class ChiikaNode
   requestMyMangalist: ->
     ipcRenderer.send 'rendererPing',@IpcKeys[2]
 
+  requestAnimeScrape: (id) ->
+    ipcRenderer.send 'requestAnimeScrape',id
 
   getMyAnimelist:() ->
     @databaseMyAnimelist
@@ -107,6 +115,9 @@ class ChiikaNode
 
   getReady: (callback) ->
     @readyCallback = callback
+
+  testListener: () ->
+    @listener.trigger()
 
 
   #Helpers functions for Lists
@@ -143,6 +154,7 @@ class ChiikaNode
        if serieStatus == "2"
          icon = '#26448f'
 
+       entry['animeId'] = value.series_animedb_id
        entry['recid'] = data.length
        entry['icon'] = icon
        entry['title'] = animeTitle
@@ -191,37 +203,48 @@ class ChiikaNode
          data.push entry
       data
 
+  getAnimeById:(id) ->
+    wholeList = @databaseMyAnimelist
+    anime = null
+    for value in wholeList['AnimeArray']
+      if parseInt(value['series_animedb_id']) == parseInt(id)
+        anime = value
 
-chiikaNode = new ChiikaNode
+    anime
+
+
+
+
+chiikaRenderer = new ChiikaRenderer
 
 ipcRenderer.on 'loginSuccess', (event,arg) ->
-    chiikaNode.requestMyAnimelist()
+    chiikaRenderer.requestMyAnimelist()
 
-    chiikaNode.setApiBusy(true)
+    chiikaRenderer.setApiBusy(true)
 
 ipcRenderer.on 'browserPing',(event,arg) ->
   if arg == 'refreshData'
     console.log "[Renderer]IPC Message from browser process -refreshData- "
-    chiikaNode.requestData()
+    chiikaRenderer.requestData()
 
 ipcRenderer.on 'databaseRequest', (event,arg) ->
     console.log 'Receiving IPC message from browser process!Event:databaseRequest'
 
-    chiikaNode.databaseMyAnimelist = arg.animeList
-    chiikaNode.databaseMyMangalist = arg.mangaList
-    chiikaNode.databaseMyUserInfo = arg.userInfo
-
+    chiikaRenderer.databaseMyAnimelist = arg.animeList
+    chiikaRenderer.databaseMyMangalist = arg.mangaList
+    chiikaRenderer.databaseMyUserInfo = arg.userInfo
+    chiikaRenderer.chiikaNode = arg.chiikaNode
     #Important!!! Dont remove
-    chiikaNode.initialized = true
-    chiikaNode.checkApiBusy()
-    chiikaNode.setApiBusy(false)
+    chiikaRenderer.initialized = true
+    chiikaRenderer.checkApiBusy()
+    chiikaRenderer.setApiBusy(false)
 
 #
 
 ipcRenderer.on 'setApiBusy', (event,arg) ->
     console.log 'Receiving IPC message from browser process!Event:setApiBusy'
-    chiikaNode.setApiBusy(arg)
+    chiikaRenderer.setApiBusy(arg)
 #
 #
 #Export
-module.exports = chiikaNode
+module.exports = chiikaRenderer

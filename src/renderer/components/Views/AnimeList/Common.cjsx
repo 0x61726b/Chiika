@@ -15,21 +15,24 @@
 #----------------------------------------------------------------------------
 React = require 'React'
 Search = require './../../Search'
-
+cn = require './../../../ChiikaNode'
 Grid = {
     name   : '',
     reorderColumns:true,
     columns: [
       { field: 'icon', caption: '',attr: "align=center", size: '40px',render:(icon) ->
         '<i class="fa fa-desktop" style="color:'+icon.icon+'"></i>'  },
-        { field: 'title', caption: 'Title', size: '40%',resizable: true, sortable: true  },
-        { field: 'score', caption: 'Score', size: '10%',resizable: true, sortable: true,
-        render:(score) ->
-          if score.score == 0
-            '<div>-</div>'
-          else
-            '<div>'+score.score+'</div>'  },
-        { field: 'progress', caption: 'Progress', size: '40%',resizable: true, sortable: true },
+        {
+           field: 'title',
+           caption: 'Title',
+           size: '40%',
+           resizable: true,
+           sortable: true,
+           render:(title) ->
+             '<div anime-id="'+title.animeId+'" id="details">'+title.title+'</a>'
+        },
+        { field: 'score', caption: 'Score', size: '10%',resizable: true, sortable: true},
+        { field: 'progress', caption: 'Progress', size: '40%',resizable: true, sortable: true}
         { field: 'season', caption: 'Season', size: '120px',resizable: true, sortable: true  },
     ],
     records: [
@@ -42,8 +45,12 @@ Grid = {
         { id: 6, text: 'Edit', icon: 'fa fa-minus' },
         { id: 7, text: 'Css', icon: 'fa fa-minus' }
     ],
-    onMenuClick: (event) ->
-      console.log event
+    onClick: (event) ->
+      #cn.requestAnimeScrape(Grid.records[event.recid].animeId)
+      false
+    onDblClick: (event) ->
+      window.location = "#Anime/" + Grid.records[event.recid].animeId
+
 }
 
 AnimeListMixin =

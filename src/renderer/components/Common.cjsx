@@ -23,6 +23,7 @@ IndexRoute = _ReactRouter.IndexRoute;
 Redirect = _ReactRouter.Redirect;
 Link = _ReactRouter.Link;
 IndexLink = _ReactRouter.IndexLink;
+BrowserHistory = _ReactRouter.browserHistory
 
 class CommonComponents
   _React = React
@@ -33,3 +34,4 @@ module.exports =
   Router: Router
   Route: Route
   Link: Link
+  BrowserHistory:BrowserHistory

@@ -1,0 +1,40 @@
+.detailsTop
+{
+  width:100%;
+  background-color:#eeeeee;
+  height:50px;
+  font-size:20px;
+  border-bottom: 1px solid #cecece;
+}
+.detailsTitle {
+  height:inherit;
+  padding-left:10px;
+  padding-top:10px;
+  float:left;
+  display:inline;
+}
+.detailsArrow{
+  padding-right:10px;
+  font-size:18px;
+}
+.detailsGenres
+{
+  width:100%;
+  background-color:rgb(249,249,249);
+  height:40px;
+  line-height: 40px;
+  border-bottom: 1px solid #cecece;
+  padding-left:20px;
+  color:red;
+  font-size:18px;
+}
+
+.rightIcons{
+  float:right;
+  padding-left:10px;
+  padding-top:10px;
+}
+.gobackLink
+{
+  display:inline!important;
+}

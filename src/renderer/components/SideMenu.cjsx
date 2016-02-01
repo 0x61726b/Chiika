@@ -30,7 +30,7 @@ class SideMenu extends React.Component
         </div>
         <Link to="User" className="userArea noDecoration">
           <div className="imageContainer">
-            <img className="avatar" src="./../assets/images/avatar.jpg"/>
+            <img id="userAvatar" className="img-circle avatar" src="./../assets/images/avatar.jpg"/>
           </div>
           <div className="userInfo">
             No User

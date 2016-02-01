@@ -28,6 +28,7 @@ template = [{
           label: 'Verify'
           click: () ->
             Chiika.RequestVerifyUser()
+
           },
           {
           label: 'Get MyAnimeList'
@@ -38,7 +39,12 @@ template = [{
             label: 'Get MyMangaList'
             click: () ->
               Chiika.RequestMyMangalist()
-          }]
+          },
+                    {
+                      label: 'Anime Scrape'
+                      click: () ->
+                        Chiika.RequestAnimeScrape(10080)
+                    }]
         },
         {
             label: 'Database'

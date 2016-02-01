@@ -27,7 +27,6 @@ appMenu = require './menu/appMenu'
 Menu = require 'menu'
 Chiika = require './Chiika'
 
-
 # ---------------------------
 #
 # ---------------------------
@@ -50,7 +49,7 @@ class Application
 
   openWindow: ->
     isBorderless = true
-
+    process.env.Show_CA_Debug_Tools = 'yeah'
     if process.env.Show_CA_Debug_Tools == 'yeah'
       isBorderless = false;
     htmlURL = "file://#{__dirname}/../renderer/index.html#Home"
@@ -67,6 +66,7 @@ class Application
     if process.env.Show_CA_Debug_Tools == 'yeah'
       Menu.setApplicationMenu(appMenu)
 
+    Chiika.init()
     Chiika.setMainWindow(@window.getWindow())
 
 

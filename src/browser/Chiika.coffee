@@ -18,7 +18,9 @@ fs = require('fs')
 electron = require 'electron'
 ipcMain = electron.ipcMain
 BrowserWindow = electron.BrowserWindow
-ChiikaNode = require("./../../../chiika-node")
+
+
+
 
 class Chiika
   rootOptions:{
@@ -29,36 +31,45 @@ class Chiika
   @root:null
   @db:null
   @request:null
+  @nativeUser:null
   @modulePath:''
   @mainWinId:-1
   @mainWindow:null
   @malLoginWindow:null
-  constructor: (user,pass) ->
-    @chiika = ChiikaNode
+  @requestCallbackCounter:0
+  @requestCallbackStop:4
+  init: () ->
+    @chiika = require("./../../../chiika-node")
     @modulePath = path.join(path.dirname(fs.realpathSync(@chiika.path)), '../')
     @rootOptions.modulePath = @modulePath
-    @rootOptions.userName = user
-    @rootOptions.pass = pass
+    @rootOptions.userName = "arkenthera"
+    @rootOptions.dataPath = @modulePath + "Data/"
+    @rootOptions.imagePath = @rootOptions.dataPath + "Images/"
+    @rootOptions.pass = "12345678"
     @root = @chiika.Root(@rootOptions)
+
     @db = @chiika.Database()
     @request = @chiika.Request()
+    @nativeUser = @db.User
 
-    @userInfo = @db.User.UserInfo
-    userName = @userInfo.user_name
+    @requestCallbackCounter = 0
 
-    console.log "Logged user " + userName
-
+    console.log "Browser process init successful"
+  destroy: () ->
+    @chiika.DestroyChiika()
 
   setMainWindow: (wnd) ->
     @mainWindow = wnd
 
   sendAsyncMessageToRenderer:(msg,arg) ->
     @mainWindow.webContents.send msg,arg
+    console.log "Browser process sending message: " + msg
   sendRendererData:() ->
     al = @getMyAnimelist()
     ml = @getMyMangalist()
     ui = @getUserInfo()
-    db = { animeList: al,mangaList:ml,userInfo:ui}
+    cn =  { rootOptions:@rootOptions }
+    db = { animeList: al,mangaList:ml,userInfo:ui,chiikaNode:cn }
     @sendAsyncMessageToRenderer 'databaseRequest',db
 
   #Native Request JS Wrappers
@@ -69,8 +80,30 @@ class Chiika
   #Note: These functions will exit immediately.Since cURL requests run its own
   #thread, success or error callbacks will be called when the request thread finally exists.
   #Native functions and its wrappers start with capitals
-  requestMyAnimeListSuccess:(ret) =>
-    @RequestMyMangalist()
+  requestSuccessCallback:(ret) =>
+    @requestCallbackCounter = @requestCallbackCounter + 1
+
+    console.log "Counter: " + @requestCallbackCounter
+    if ret.request_name == 'UserVerifySuccess'
+      @malLoginWindow.send 'browserPing','close'
+      console.log "Close window"
+
+    if @requestCallbackCounter == @requestCallbackStop
+      @sendAsyncMessageToRenderer 'setApiBusy',false
+      @sendRendererData()
+      @requestCallbackCounter = 0
+
+
+  requestErrorCallback:(ret) =>
+    @requestCallbackCounter = @requestCallbackCounter + 1
+
+    if @requestCallbackCounter == @requestCallbackStop
+      @sendAsyncMessageToRenderer 'setApiBusy',false
+      @sendRendererData()
+      @requestCallbackCounter = 0
+
+  requestMyAnimeListSuccess:(ret) ->
+    console.log ""
 
   requestMyAnimeListError:(ret) =>
     console.log ret
@@ -84,23 +117,26 @@ class Chiika
     console.log ret
 
 
-  verifyRequestSuccess: (ret) =>
-    @malLoginWindow.send 'browserPing','close'
-    @RequestMyAnimelist()
+  requestAnimeScrapeSuccess:(ret) =>
+    @sendRendererData()
 
 
-  verifyRequestError: (ret) =>
-    @malLoginWindow.send 'browserPing','error'
-    @requestError(ret)
+  requestAnimeScrapeError:(ret) ->
+    console.log ret
 
-  RequestVerifyUser: () ->
+  RequestVerifyUser: () =>
+    console.log "I'm going in"
+    @requestCallbackStop = 4
     @sendAsyncMessageToRenderer('setApiBusy',true)
-    @request.VerifyUser(@verifyRequestSuccess,@verifyRequestError)
+    @request.VerifyUser(@requestSuccessCallback,@requestErrorCallback)
+
+  RequestAnimeScrape: (Id) =>
+    @request.AnimeScrape(@requestAnimeScrapeSuccess,@requestAnimeScrapeError,{ animeId: Id })
 
   RequestMyAnimelist: () =>
     @request.GetMyAnimelist(@requestMyAnimeListSuccess,@requestMyAnimeListError)
 
-  RequestMyMangalist: ->
+  RequestMyMangalist: =>
     @request.GetMyMangalist(@requestMyMangaListSuccess,@requestMyMangaListError)
 
   SetUser: (user,pass) ->
@@ -124,10 +160,11 @@ ipcMain.on 'setRootOpts',(event,arg) ->
 
   chiikaNode.SetUser userName,pass
   chiikaNode.RequestVerifyUser()
-  chiikaNode.sendAsyncMessageToRenderer('setApiBusy',true)
 
 
 
+ipcMain.on 'requestAnimeScrape', (event,arg) ->
+  chiikaNode.RequestAnimeScrape(arg)
 
 
 ipcMain.on 'rendererPing',(event,arg) ->
@@ -137,18 +174,18 @@ ipcMain.on 'rendererPing',(event,arg) ->
     chiikaNode.RequestVerifyUser()
 
 
+
   if arg == 'requestMyAnimelist'
     chiikaNode.RequestMyAnimelist()
-    chiikaNode.RequestMyMangalist()
 
   if arg == 'requestMyMangalist'
     chiikaNode.RequestMyMangalist()
 
   if arg == 'databaseRequest'
-    al = chiikaNode.getMyAnimelist()
-    ml = chiikaNode.getMyMangalist()
-    ui = data = chiikaNode.getUserInfo()
-    db = { animeList: al,mangaList:ml,userInfo:ui}
-    event.sender.send arg,db
+    chiikaNode.sendRendererData()
+
+process.on 'exit', (code) ->
+  console.log 'Im exiting kappa'
+  chiikaNode.destroy()
 
 module.exports = chiikaNode

@@ -16,7 +16,7 @@
 React = require('./Common').React
 Router = require('./Common').Router
 Route = require('./Common').Route
-
+BrowserHistory = require('./Common').BrowserHistory
 SideMenu = require './SideMenu'
 Content = require './Content'
 
@@ -24,6 +24,7 @@ Content = require './Content'
 #Views
 Home = require './Views/Home'
 AnimeList = require './Views/AnimeList'
+AnimeDetails = require './Views/AnimeDetails'
 MangaList = require './Views/MangaList'
 Library = require './Views/Library'
 Calendar = require './Views/Calendar'
@@ -33,6 +34,8 @@ User = require './Views/User'
 
 h = require './Helpers'
 Search = require './Search'
+
+Chiika = require './../ChiikaNode'
 
 
 Root = React.createClass
@@ -55,12 +58,11 @@ Root = React.createClass
 
     Search.updateState(routeIndex)
     h.SetActiveMenuItem(routeIndex)
-  componentWillUnmount:
-    console.log "Root:Unmount"
   render: () ->
     (<div><SideMenu /><Content props={this.props}/></div>)
 
 ChiikaRouter = React.createClass
+  lastAnimeDetailsData:null
   onEnter:(nextState) ->
     path = nextState.location.pathname
 
@@ -82,20 +84,23 @@ ChiikaRouter = React.createClass
       Search.updateState(7)
 
   getInitialState: ->
-
     animeListLastTab:0
-
+    shouldUpdateDetails:false
   componentDidMount: ->
-
-
+    Chiika.listener = this
+  trigger: () ->
+    console.log "triggered"
+    
+    @setState( {shouldUpdateDetails:true })
   onAnimeListTabSelect: (index,last) ->
     @state.animeListLastTab = index
 
-
   CreateAnimeList: (props) ->
     (<AnimeList onSelect={@onAnimeListTabSelect} startWithTabIndex={@state.animeListLastTab} />)
+  CreateAnimeDetails: (props) ->
+    (<AnimeDetails {...props} shouldUpdateDetails={@state.shouldUpdateDetails}/>)
   render: () ->
-    (<Router>
+    (<Router history={BrowserHistory}>
       <Route component={Root}>
         #<Route path="/" component={Home} onEnter={@onEnter}/>
         <Route name="Home" path="Home" component={Home} onEnter={@onEnter}/>
@@ -106,6 +111,7 @@ ChiikaRouter = React.createClass
         <Route name="Seasons" path="Seasons" component={Seasons} onEnter={@onEnter}/>
         <Route name="Torrents" path="Torrents" component={Torrents} onEnter={@onEnter}/>
         <Route name="User" path="User" component={User} onEnter={@onEnter}/>
+        <Route name="Anime" path="/Anime/:animeId" component={@CreateAnimeDetails} onEnter={@onEnter}/>
       </Route>
     </Router>)
 
