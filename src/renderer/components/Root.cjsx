@@ -87,10 +87,10 @@ ChiikaRouter = React.createClass
     animeListLastTab:0
     shouldUpdateDetails:false
   componentDidMount: ->
-    Chiika.listener = this
+    
   trigger: () ->
     console.log "triggered"
-    
+
     @setState( {shouldUpdateDetails:true })
   onAnimeListTabSelect: (index,last) ->
     @state.animeListLastTab = index

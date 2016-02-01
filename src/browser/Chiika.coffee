@@ -120,6 +120,8 @@ class Chiika
   requestAnimeScrapeSuccess:(ret) =>
     @sendRendererData()
 
+    console.log "Kappa"
+
 
   requestAnimeScrapeError:(ret) ->
     console.log ret

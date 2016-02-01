@@ -84,7 +84,7 @@ class ChiikaRenderer
       LoginWindow = null
 
   setSidebarInfo: () ->
-    if @getUserInfo().UserInfo.user_name == 'undefined'
+    if @getUserInfo().UserInfo.user_name == 'undefined' || @getUserInfo().UserInfo.user_id == 'user_id'
       $("div.userInfo").html("No User")
     else
       $("div.userInfo").html(@getUserInfo().UserInfo.user_name)
@@ -115,10 +115,8 @@ class ChiikaRenderer
 
   getReady: (callback) ->
     @readyCallback = callback
-
   testListener: () ->
     @listener.trigger()
-
 
   #Helpers functions for Lists
   #The return value is formatted to match the grid
@@ -238,6 +236,9 @@ ipcRenderer.on 'databaseRequest', (event,arg) ->
     chiikaRenderer.initialized = true
     chiikaRenderer.checkApiBusy()
     chiikaRenderer.setApiBusy(false)
+
+    if chiikaRenderer.listener != undefined
+      chiikaRenderer.listener.trigger()
 
 #
 

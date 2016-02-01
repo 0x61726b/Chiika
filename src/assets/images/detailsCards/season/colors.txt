@@ -1,0 +1,6 @@
+winter : #07355c
+spring : #251915
+summer : #345019
+autumn : #251915 //fall
+   -webkit-text-stroke-width: 2px;
+   -webkit-text-stroke-color: black;

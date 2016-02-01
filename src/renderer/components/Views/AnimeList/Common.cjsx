@@ -46,9 +46,9 @@ Grid = {
         { id: 7, text: 'Css', icon: 'fa fa-minus' }
     ],
     onClick: (event) ->
-      #cn.requestAnimeScrape(Grid.records[event.recid].animeId)
       false
     onDblClick: (event) ->
+      cn.requestAnimeScrape(Grid.records[event.recid].animeId)
       window.location = "#Anime/" + Grid.records[event.recid].animeId
 
 }
