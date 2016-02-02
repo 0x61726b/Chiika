@@ -65,7 +65,6 @@
     float: left;
     font-family: 'Roboto', sans-serif;
 }
-
 #animeName {
     position: relative;
     top: 50%;
@@ -428,3 +427,69 @@
 
 
 /*********************/
+
+/****Synopsis Row*****/
+
+#synopsisRow {
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 10px;
+    display: flex;
+    flex-direction: row;
+    align-content: center;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.synopsisContainer {
+    display: flex;
+    width: 655px;
+}
+
+.synopsisColumn {
+    height: inherit;
+    width: 66%;
+    float: left;
+    display: flex;
+    flex-direction: column;
+}
+
+.synopsisColumn h3 {
+    text-align: left;
+    float: left;
+    margin-top: 10px;
+    margin-left: 25px;
+    font-family: 'Roboto', 'sans-serif';
+    font-weight: 300;
+    text-transform: capitalize;
+    color: black;
+    opacity: 0.87;
+}
+
+.synopsisColumn p {
+    float: left;
+    margin-left: 15px;
+    margin-right: 10px;
+    word-wrap: normal;
+    word-break: initial;
+    text-align: left;
+}
+
+.characterColumn {
+    height: inherit;
+    width: 33%;
+    float: right;
+}
+
+.characterColumn h3 {
+    text-align: right;
+    float: right;
+    margin-top: 10px;
+    margin-right: 25px;
+    font-family: 'Roboto', 'sans-serif';
+    font-weight: 300;
+    text-transform: capitalize;
+    color: black;
+    opacity: 0.87;
+}

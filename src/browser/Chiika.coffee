@@ -42,10 +42,8 @@ class Chiika
     @chiika = require("./../../../chiika-node")
     @modulePath = path.join(path.dirname(fs.realpathSync(@chiika.path)), '../')
     @rootOptions.modulePath = @modulePath
-    @rootOptions.userName = "arkenthera"
     @rootOptions.dataPath = @modulePath + "Data/"
     @rootOptions.imagePath = @rootOptions.dataPath + "Images/"
-    @rootOptions.pass = "12345678"
     @root = @chiika.Root(@rootOptions)
 
     @db = @chiika.Database()
@@ -71,6 +69,8 @@ class Chiika
     cn =  { rootOptions:@rootOptions }
     db = { animeList: al,mangaList:ml,userInfo:ui,chiikaNode:cn }
     @sendAsyncMessageToRenderer 'databaseRequest',db
+  signalRendererToRerender:() ->
+    @sendAsyncMessageToRenderer 'reRender','42'
 
   #Native Request JS Wrappers
   #These are Native function calls on chiika-node
@@ -120,14 +120,21 @@ class Chiika
   requestAnimeScrapeSuccess:(ret) =>
     @sendRendererData()
 
-    console.log "Kappa"
-
-
   requestAnimeScrapeError:(ret) ->
     console.log ret
 
+  requestRefreshAnimeSuccess:(ret) =>
+    if ret.request_name == "GetImageSuccess"
+      @signalRendererToRerender()
+    else
+      @sendRendererData()
+
+  requestRefreshAnimeError:(ret) ->
+
+  RequestAnimeDetailsRefresh:(Id) =>
+    @request.RefreshAnimeDetails(@requestRefreshAnimeSuccess,@requestRefreshAnimeError,{ animeId: Id })
+
   RequestVerifyUser: () =>
-    console.log "I'm going in"
     @requestCallbackStop = 4
     @sendAsyncMessageToRenderer('setApiBusy',true)
     @request.VerifyUser(@requestSuccessCallback,@requestErrorCallback)
@@ -163,7 +170,9 @@ ipcMain.on 'setRootOpts',(event,arg) ->
   chiikaNode.SetUser userName,pass
   chiikaNode.RequestVerifyUser()
 
-
+ipcMain.on 'requestAnimeRefresh',(event,arg) ->
+  console.log "Receiving IPC message from renderer process! Args: " + arg
+  chiikaNode.RequestAnimeDetailsRefresh(arg)
 
 ipcMain.on 'requestAnimeScrape', (event,arg) ->
   chiikaNode.RequestAnimeScrape(arg)

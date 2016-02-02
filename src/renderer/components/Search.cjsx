@@ -34,28 +34,24 @@ class SearchManager
     "gridMangaDroppedList"
   ]
   activeRoute:0
+  activePath:""
   constructor: ->
 
-  updateState:(activeRoute) ->
+  updateState:(activeRoute,path) ->
     @activeRoute = activeRoute
-    console.log "Updating Search Manager Route " + @activeRoute
+    @activePath = path
+    console.log "Updating Search Manager Route " + @activeRoute + " Path: " + @activePath
   updateAnimelistState:(index) ->
     @activeTabs.animeList = index
-    console.log "Updating Animelist state " + @determineGridName()
 
   updateAnimelistStateIndex:(index) ->
     @activeTabs.animeList = @animeGrids[index]
 
-    console.log "Updating Animelist state index " + @determineGridName()
-
   updateMangalistState:(index) ->
     @activeTabs.mangaList = index
-    console.log "Updating Mangalist state " + @determineGridName()
 
   updateMangalistStateIndex:(index) ->
     @activeTabs.mangaList = @animeGrids[index]
-
-    console.log "Updating Mangalist state index " + @determineGridName()
 
   determineGridName:() ->
     gridName = ''

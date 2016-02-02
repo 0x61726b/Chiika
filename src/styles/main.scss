@@ -3,6 +3,7 @@
 @import "Lists";
 @import "MalLogin";
 @import "Details";
+@import "_Statusbar";
 
 .hidden
 {
@@ -19,6 +20,7 @@
 .content
 {
   height: calc(100% - #{$titlebar-height+$statusBarHeight});
+  overflow:auto;
 }
 .statusBar
 {

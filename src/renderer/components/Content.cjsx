@@ -19,9 +19,9 @@ Router = require('./Common').Router
 Route = require('./Common').Route
 Link = require('./Common').Link
 
-class Content extends React.Component
-  constructor: (props) ->
-    super props
+StatusBar = require('./StatusBar')
+
+Content = React.createClass
   render: () ->
     (<div className="main">
       <div id="titleBar">
@@ -30,6 +30,7 @@ class Content extends React.Component
         {this.props.props.children}
       </div>
       <div className="statusBar">
+        <StatusBar />
       </div>
     </div>)
 

@@ -105,6 +105,8 @@ class ChiikaRenderer
 
   requestAnimeScrape: (id) ->
     ipcRenderer.send 'requestAnimeScrape',id
+  requestAnimeRefresh:(id) ->
+    ipcRenderer.send 'requestAnimeRefresh',id
 
   getMyAnimelist:() ->
     @databaseMyAnimelist
@@ -241,6 +243,10 @@ ipcRenderer.on 'databaseRequest', (event,arg) ->
       chiikaRenderer.listener.trigger()
 
 #
+ipcRenderer.on 'reRender', (event,arg) ->
+    console.log 'Receiving IPC message from browser process!Event:reRender'
+    if chiikaRenderer.listener != null
+      chiikaRenderer.listener.trigger()
 
 ipcRenderer.on 'setApiBusy', (event,arg) ->
     console.log 'Receiving IPC message from browser process!Event:setApiBusy'

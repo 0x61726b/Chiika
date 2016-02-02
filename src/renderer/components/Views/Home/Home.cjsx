@@ -15,7 +15,7 @@
 #----------------------------------------------------------------------------
 React = require 'react'
 electron = require 'electron'
-Chiika = require './../../ChiikaNode'
+Chiika = require './../../../ChiikaNode'
 electron = require 'electron'
 ipcRenderer = electron.ipcRenderer
 

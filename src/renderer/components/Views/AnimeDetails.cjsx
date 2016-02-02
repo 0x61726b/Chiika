@@ -25,7 +25,7 @@ AnimeDetails = React.createClass
   anime:null
   coverPath:""
   coverExists:false
-  componentWillMount:->
+  componentWillMount:-> #We can't put jQuery here because DOM is not constructed yet.
     Chiika.listener = this
     @anime = Chiika.getAnimeById(@props.params.animeId)
     console.log @anime
@@ -39,22 +39,25 @@ AnimeDetails = React.createClass
     catch error
       @coverExists = false
 
+
   componentDidMount:->
     if @anime.Misc.broadcast_time == "broadcast_time"
         $(".airingStatsuDiv").hide()
     $("#seasonId").addClass @getSeasonClass()
-    Chiika.requestAnimeScrape(@anime.series_animedb_id)
+    #Chiika.requestAnimeScrape(@anime.series_animedb_id)
 
-    if @coverExists == false
+    @getCoverImage()
+
+    @getSynopsis()
+
+  getCoverImage: () ->
+    if @coverExists
+      animeCover = Chiika.chiikaNode.rootOptions.imagePath + "Anime/" + @anime.series_animedb_id + ".jpg"
+      animeCover = animeCover.replace("/\\/g","/")
+      $("#coverImg").attr("src",animeCover)
+    else
       $("#coverImg").addClass("loadingSomething")
       $(".cIm").addClass("rotateLogo")
-
-  getCoverImage:() ->
-    coverPath = "./../assets/images/topLeftLogo.png"
-    if @coverExists
-      coverPath = Chiika.chiikaNode.rootOptions.imagePath + "anime/" + @anime.series_animedb_id + ".jpg"
-      coverPath += "?rnd=" + new Date().getTime()
-    coverPath
   getStatus:() ->
     id = @anime.my_status
     status = ""
@@ -100,6 +103,10 @@ AnimeDetails = React.createClass
     animeType
   getSource:() ->
     source = @anime.Misc.source
+
+    if source == "source"
+      source = "Unknown"
+
     bgImage = ""
     if source == "Manga"
       bgImage = "./../assets/images/detailsCards/source/manga-50.png"
@@ -188,14 +195,23 @@ AnimeDetails = React.createClass
     if episodeCount == "0"
       episodeCount = "-"
     episodeCount
+  getSynopsis: ->
+    synopsis = @anime.anime.synopsis
+
+    synopsis = synopsis.replace(/\[i\]/g,"<i>")
+    synopsis = synopsis.replace(/\[\/i\]/g,'</i>')
+
+    if @anime.anime.synopsis == "synopsis"
+      $("#synopsisText").html("Loading...")
+    else
+      $("#synopsisText").html(synopsis)
   requestUpdate: ->
     Chiika.testListener()
   trigger: ->
     @anime = Chiika.getAnimeById(@props.params.animeId)
 
-    @coverExists = true
-    $("#coverImg").removeClass("loadingSomething")
-    $(".cIm").removeClass("rotateLogo")
+    @getCoverImage()
+
     @forceUpdate()
 
   render: () ->
@@ -204,7 +220,7 @@ AnimeDetails = React.createClass
                 <i className="centerMe fa fa-angle-left fa-2x" id="backButton"></i>
             </div>
             <div className="titleDiv">
-                <h2 className="centerMe noSpace" id="animeName">{@anime.anime.series_title}</h2>
+              <h2 className="centerMe noSpace" id="animeName">{@anime.anime.series_title}</h2>
             </div>
             <div className="airingStatsuDiv">
                 <span className="label label-primary" id="airingStatus">Airing {@anime.Misc.broadcast_time}</span>
@@ -222,7 +238,7 @@ AnimeDetails = React.createClass
         </div>
         <div className="row" id="detailsRow">
             <div className="coverImage">
-                <div className="cIm"><img id="coverImg" src={@getCoverImage()} /></div>
+                <div className="cIm"><img id="coverImg" src="./../assets/images/topLeftLogo.png" /></div>
             </div>
             <div className="cardColumn" id="col1">
                 <div className="detailCard cardInfo card-twoLine" id="typeCard">
@@ -306,6 +322,17 @@ AnimeDetails = React.createClass
                 </div>
                 <div id="seasonId" className='detailCard card-season'>
                     <h3 className="noSpace seasonInfo">{@getSeason()}</h3>
+                </div>
+            </div>
+        </div>
+        <div className="row" id="synopsisRow">
+            <div className="synopsisContainer">
+                <div className="synopsisColumn">
+                    <h3>synopsis</h3>
+                    <p id="synopsisText">Loading...</p>
+                </div>
+                <div className="characterColumn">
+                    <h3>characters</h3>
                 </div>
             </div>
         </div>

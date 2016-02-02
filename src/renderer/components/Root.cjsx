@@ -22,7 +22,7 @@ Content = require './Content'
 
 
 #Views
-Home = require './Views/Home'
+Home = require './Views/Home/Home'
 AnimeList = require './Views/AnimeList'
 AnimeDetails = require './Views/AnimeDetails'
 MangaList = require './Views/MangaList'
@@ -47,7 +47,8 @@ Root = React.createClass
     'Calendar',
     'Seasons',
     'Torrents',
-    'User'
+    'User',
+    'AnimeDetails'
   ]
   componentDidMount: ->
     path = @props.routes[@props.routes.length-1]
@@ -56,7 +57,7 @@ Root = React.createClass
       if path.path == val
         routeIndex = index
 
-    Search.updateState(routeIndex)
+    Search.updateState(routeIndex,path.path)
     h.SetActiveMenuItem(routeIndex)
   render: () ->
     (<div><SideMenu /><Content props={this.props}/></div>)
@@ -65,40 +66,41 @@ ChiikaRouter = React.createClass
   lastAnimeDetailsData:null
   onEnter:(nextState) ->
     path = nextState.location.pathname
-
+    console.log path
     if path == '/Home' || path == 'Home'
-      Search.updateState(0)
-    if path == 'AnimeList'
-      Search.updateState(1)
+      Search.updateState(0,path)
+    if path == 'AnimeList' || path == '/AnimeList'
+      Search.updateState(1,path)
     if path == 'MangaList'
-      Search.updateState(2)
+      Search.updateState(2,path)
     if path == 'Library'
-      Search.updateState(3)
+      Search.updateState(3,path)
     if path == 'Calendar'
-      Search.updateState(4)
+      Search.updateState(4,path)
     if path == 'Seasons'
-      Search.updateState(5)
+      Search.updateState(5,path)
     if path == 'Torrents'
-      Search.updateState(6)
+      Search.updateState(6,path)
     if path == 'User'
-      Search.updateState(7)
+      Search.updateState(7,path)
+    if path.indexOf('/Anime') >= 0 && path != '/AnimeList'
+      Search.updateState(8,path)
+
+
+
 
   getInitialState: ->
     animeListLastTab:0
     shouldUpdateDetails:false
   componentDidMount: ->
-    
-  trigger: () ->
-    console.log "triggered"
 
-    @setState( {shouldUpdateDetails:true })
   onAnimeListTabSelect: (index,last) ->
     @state.animeListLastTab = index
 
   CreateAnimeList: (props) ->
     (<AnimeList onSelect={@onAnimeListTabSelect} startWithTabIndex={@state.animeListLastTab} />)
   CreateAnimeDetails: (props) ->
-    (<AnimeDetails {...props} shouldUpdateDetails={@state.shouldUpdateDetails}/>)
+    (<AnimeDetails {...props}/>)
   render: () ->
     (<Router history={BrowserHistory}>
       <Route component={Root}>
