@@ -105,8 +105,12 @@ class ChiikaRenderer
 
   requestAnimeScrape: (id) ->
     ipcRenderer.send 'requestAnimeScrape',id
+
   requestAnimeRefresh:(id) ->
     ipcRenderer.send 'requestAnimeRefresh',id
+
+  requestAnimeDetails:(id) ->
+    ipcRenderer.send 'requestAnimeDetails',id
 
   getMyAnimelist:() ->
     @databaseMyAnimelist
@@ -141,22 +145,26 @@ class ChiikaRenderer
        season     = "Spring 2016"
        score      = value['my_score']
 
-       if score == '0'
-         score = 0
-       else
-         score = parseInt(score)
-
-       icon = 'black'
-       if serieStatus == "1"
-         icon = '#2db039'
-       if serieStatus == "0"
-         icon = 'gray'
-       if serieStatus == "2"
-         icon = '#26448f'
+       type = value.anime['series_type']
+       animeType = "fa fa-question"
+       if type == "0"
+        animeType = "fa fa-question"
+       if type == "1"
+        animeType = "fa fa-tv"
+       if type == "2"
+        animeType = "glyphicon glyphicon-cd"
+       if type == "3"
+        animeType = "fa fa-film"
+       if type == "4"
+        animeType = "fa fa-star"
+       if type == "5"
+        animeType = "fa fa-chrome"
+       if type == "6"
+        animeType = "fa fa-music"
 
        entry['animeId'] = value.series_animedb_id
        entry['recid'] = data.length
-       entry['icon'] = icon
+       entry['icon'] = animeType
        entry['title'] = animeTitle
        entry['progress'] = progress
        entry['score'] = score

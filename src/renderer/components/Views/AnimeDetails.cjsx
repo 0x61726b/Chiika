@@ -41,20 +41,31 @@ AnimeDetails = React.createClass
 
 
   componentDidMount:->
-    if @anime.Misc.broadcast_time == "broadcast_time"
-        $(".airingStatsuDiv").hide()
     $("#seasonId").addClass @getSeasonClass()
-    #Chiika.requestAnimeScrape(@anime.series_animedb_id)
+    Chiika.requestAnimeDetails(@anime.series_animedb_id)
 
     @getCoverImage()
-
+    @getBroadcastTime()
     @getSynopsis()
+    @getSource()
 
+  getBroadcastTime: () ->
+    if @anime.Misc.broadcast_time == "broadcast_time" || @anime.Misc.broadcast_time == "Unknown"
+        $(".airingStatsuDiv").hide()
+    @anime.Misc.broadcast_time
   getCoverImage: () ->
+    animeCover = Chiika.chiikaNode.rootOptions.imagePath + "Anime/" + @anime.series_animedb_id + ".jpg"
+    try
+      file = fs.statSync(animeCover)
+      @coverExists = true
+    catch error
+      @coverExists = false
     if @coverExists
       animeCover = Chiika.chiikaNode.rootOptions.imagePath + "Anime/" + @anime.series_animedb_id + ".jpg"
       animeCover = animeCover.replace("/\\/g","/")
       $("#coverImg").attr("src",animeCover)
+      $("#coverImg").removeClass("loadingSomething")
+      $(".cIm").removeClass("rotateLogo")
     else
       $("#coverImg").addClass("loadingSomething")
       $(".cIm").addClass("rotateLogo")
@@ -116,7 +127,8 @@ AnimeDetails = React.createClass
       bgImage = "./../assets/images/detailsCards/source/unknown-50.png"
     if source == "Light novel"
       bgImage = "./../assets/images/detailsCards/source/light-novel-50.png"
-
+    if source == "Novel"
+      bgImage = "./../assets/images/detailsCards/source/novel-50.png"
     if bgImage != ""
       $("#sourceCard").css('background-image',"url('"+bgImage+"')")
     source
@@ -197,14 +209,30 @@ AnimeDetails = React.createClass
     episodeCount
   getSynopsis: ->
     synopsis = @anime.anime.synopsis
+    synopsisInMisc = @anime.Misc.synopsis
 
     synopsis = synopsis.replace(/\[i\]/g,"<i>")
     synopsis = synopsis.replace(/\[\/i\]/g,'</i>')
 
+    synInAnime = false
     if @anime.anime.synopsis == "synopsis"
+      synInAnime = false
+    else
+      synInAnime = true
+
+    synInMisc = false
+    if @anime.Misc.synopsis == "synopsis"
+      synInMisc = false
+    else
+      synInMisc = true
+
+    if !synInMisc && !synInAnime
       $("#synopsisText").html("Loading...")
     else
-      $("#synopsisText").html(synopsis)
+      if synInMisc
+        $("#synopsisText").html(synopsisInMisc)
+      if synInAnime
+        $("#synopsisText").html(synopsis)
   requestUpdate: ->
     Chiika.testListener()
   trigger: ->
@@ -212,18 +240,21 @@ AnimeDetails = React.createClass
 
     @getCoverImage()
 
+    @getSource()
+    @getSynopsis()
+    @getBroadcastTime()
     @forceUpdate()
 
   render: () ->
     (<div><div className="" id="animeTitle">
-            <div className="backButtonDiv" onClick={this.requestUpdate}>
+            <div className="backButtonDiv" onClick={this.history.goBack}>
                 <i className="centerMe fa fa-angle-left fa-2x" id="backButton"></i>
             </div>
             <div className="titleDiv">
               <h2 className="centerMe noSpace" id="animeName">{@anime.anime.series_title}</h2>
             </div>
             <div className="airingStatsuDiv">
-                <span className="label label-primary" id="airingStatus">Airing {@anime.Misc.broadcast_time}</span>
+                <span className="label label-primary" id="airingStatus">Airing {@getBroadcastTime()}</span>
             </div>
             <div id="animeInteractions">
                 <i className="fa fa-play fa-2x" id="playNext"></i>

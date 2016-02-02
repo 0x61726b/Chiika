@@ -21,7 +21,7 @@ Grid = {
     reorderColumns:true,
     columns: [
       { field: 'icon', caption: '',attr: "align=center", size: '40px',render:(icon) ->
-        '<i class="fa fa-desktop" style="color:'+icon.icon+'"></i>'  },
+        '<i class="'+icon.icon+'"></i>'  },
         {
            field: 'title',
            caption: 'Title',

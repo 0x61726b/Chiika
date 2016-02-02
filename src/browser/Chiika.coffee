@@ -130,7 +130,21 @@ class Chiika
       @sendRendererData()
 
   requestRefreshAnimeError:(ret) ->
+    console.log ret
 
+  requestAnimeDetailsSuccess:(ret) =>
+    if ret.request_name == "GetImageSuccess"
+      @signalRendererToRerender()
+    else
+      @sendRendererData()
+
+  requestAnimeDetailsError:(ret) ->
+    console.log ret
+
+
+
+  RequestAnimeDetails:(Id) =>
+    @request.GetAnimeDetails(@requestAnimeDetailsSuccess,@requestAnimeDetailsError,{ animeId: Id })
   RequestAnimeDetailsRefresh:(Id) =>
     @request.RefreshAnimeDetails(@requestRefreshAnimeSuccess,@requestRefreshAnimeError,{ animeId: Id })
 
@@ -170,9 +184,14 @@ ipcMain.on 'setRootOpts',(event,arg) ->
   chiikaNode.SetUser userName,pass
   chiikaNode.RequestVerifyUser()
 
+ipcMain.on 'requestAnimeDetails',(event,arg) ->
+  console.log "Receiving IPC message from renderer process! Args: " + arg
+  chiikaNode.RequestAnimeDetails(arg)
+
 ipcMain.on 'requestAnimeRefresh',(event,arg) ->
   console.log "Receiving IPC message from renderer process! Args: " + arg
   chiikaNode.RequestAnimeDetailsRefresh(arg)
+
 
 ipcMain.on 'requestAnimeScrape', (event,arg) ->
   chiikaNode.RequestAnimeScrape(arg)
