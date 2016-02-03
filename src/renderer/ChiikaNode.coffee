@@ -201,8 +201,8 @@ class ChiikaRenderer
          title = value.manga['series_title']
          readChapters = value['my_read_chapters']
          readVolumes = value['my_read_volumes']
-         totalVols   = value.manga['series_chapters']
-         totalChaps = value.manga['series_volumes']
+         totalVols   = value.manga['series_volumes']
+         totalChaps = value.manga['series_chapters']
          serieStatus = value.manga['series_status']
          progress   = 0
 

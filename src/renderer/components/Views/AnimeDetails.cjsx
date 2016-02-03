@@ -53,6 +53,8 @@ AnimeDetails = React.createClass
   getBroadcastTime: () ->
     if @anime.Misc.broadcast_time == "broadcast_time" || @anime.Misc.broadcast_time == "Unknown"
         $(".airingStatsuDiv").hide()
+      else
+        $(".airingStatsuDiv").show()
     @anime.Misc.broadcast_time
   getCoverImage: () ->
     animeCover = Chiika.chiikaNode.rootOptions.imagePath + "Anime/" + @anime.series_animedb_id + ".jpg"

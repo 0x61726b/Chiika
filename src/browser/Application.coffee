@@ -49,14 +49,14 @@ class Application
 
   openWindow: ->
     isBorderless = true
-    process.env.Show_CA_Debug_Tools = 'yeah'
+
     if process.env.Show_CA_Debug_Tools == 'yeah'
       isBorderless = false;
     htmlURL = "file://#{__dirname}/../renderer/index.html#Home"
     @window = new ApplicationWindow htmlURL,
       width: 1200
       height: 800
-      minWidth:800
+      minWidth:900
       minHeight:600
       title: 'Chiika - Development Mode'
       icon: "./resources/icon.png"
