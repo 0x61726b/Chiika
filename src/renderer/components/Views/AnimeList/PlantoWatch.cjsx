@@ -30,6 +30,9 @@ PlantoWatchList = React.createClass
     $("#gridPlantoWatchList").w2grid(@getGrid())
   componentWillUnmount: ->
     $('#gridPlantoWatchList').w2destroy()
+  refreshDataSource: ->
+    list = cn.getAnimeListByUserStatus(6)
+    @setList(list)
   render: () ->
     (<div id="gridPlantoWatchList" className="listCommon"></div>);
 

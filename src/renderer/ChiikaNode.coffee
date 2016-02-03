@@ -19,6 +19,7 @@ remote = require('remote')
 electron = require 'electron'
 ipcRenderer = electron.ipcRenderer
 h = require './components/Helpers'
+RouteManager = require './components/Search'
 BrowserWindow = electron.remote.BrowserWindow
 
 class ChiikaRenderer
@@ -224,6 +225,12 @@ class ChiikaRenderer
 
 
 chiikaRenderer = new ChiikaRenderer
+
+ipcRenderer.on 'requestMyAnimelistSuccess', (event,arg) ->
+  chiikaRenderer.databaseMyAnimelist = arg.animeList
+  RouteManager.refreshGrid()
+  console.log arg.animeList
+
 
 ipcRenderer.on 'loginSuccess', (event,arg) ->
     chiikaRenderer.requestMyAnimelist()

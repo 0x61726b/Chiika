@@ -12,7 +12,7 @@
 #Date: 27.1.2016
 #authors: arkenthera
 #Description:
-#----------------------------------------------------------------------------
+#---------------------------------------------------------------------------
 
 class SearchManager
   activeTabs:{
@@ -26,6 +26,14 @@ class SearchManager
     "gridOnHoldList",
     "gridDroppedList"
   ],
+  animeStatusIndices:[
+    1,
+    6,
+    2,
+    3,
+    4
+  ]
+  animeListJsObjects:null
   mangaGrids:[
     "gridMangaReadingList",
     "gridPlantoReadList",
@@ -36,6 +44,8 @@ class SearchManager
   activeRoute:0
   activePath:""
   constructor: ->
+    @animeListJsObjects = new Map()
+    console.log "constructor"
 
   updateState:(activeRoute,path) ->
     @activeRoute = activeRoute
@@ -65,6 +75,15 @@ class SearchManager
         if @activeRoute == 1 || @activeRoute == 2 #animeList or #mangaList
           gridName = @determineGridName()
           w2ui[gridName].search('title',$("#gridSearch").val())
+
+  refreshGrid: () ->
+    if @activeRoute == 1 || @activeRoute == 2 #animeList or mangaList
+      gridName = @determineGridName()
+      console.log "Refreshing grid: " + gridName
+      if @activeRoute == 1
+        console.log "Id is " + @animeGrids.indexOf(gridName)
+        @animeListJsObjects.get(gridName).refreshDataSource()
+        w2ui[gridName].refresh()
 
 
 

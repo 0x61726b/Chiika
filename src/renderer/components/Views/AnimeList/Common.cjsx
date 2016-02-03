@@ -49,6 +49,8 @@ Grid = {
       false
     onDblClick: (event) ->
       window.location = "#Anime/" + Grid.records[event.recid].animeId
+    onRefresh: ->
+      console.log "Refreshed"
 }
 
 AnimeListMixin =
@@ -57,6 +59,7 @@ AnimeListMixin =
   setGridName: (grid) ->
     Grid.name = grid
     Search.updateAnimelistState grid
+    Search.animeListJsObjects.set grid,this
   setList: (l) ->
     @list = l
     Grid.records = @list

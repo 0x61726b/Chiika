@@ -102,11 +102,11 @@ class Chiika
       @sendRendererData()
       @requestCallbackCounter = 0
 
-  requestMyAnimeListSuccess:(ret) ->
-    console.log ""
+  requestMyAnimeListSuccess:(ret) =>
+    @sendAsyncMessageToRenderer 'requestMyAnimelistSuccess', { animeList:ret }
 
   requestMyAnimeListError:(ret) =>
-    console.log ret
+    @sendAsyncMessageToRenderer 'requestMyAnimelistError',false
 
 
   requestMyMangaListSuccess:(ret) =>

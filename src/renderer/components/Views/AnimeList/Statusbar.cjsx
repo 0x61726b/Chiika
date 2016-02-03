@@ -28,15 +28,19 @@ AnimelistStatusbar = React.createClass
   refresh: () ->
     activeRoute = RouteManager.activeRoute
 
-    if activeRoute == 8
+    if activeRoute == 8 #Details is active
       animeId = @getAnimeId()
       console.log "Refreshing.... AnimeId:" + animeId
       Chiika.requestAnimeRefresh(animeId)
+    if activeRoute == 1 #Anime List is active
+      console.log "Syncing anime list..."
+      Chiika.requestMyAnimelist()
   render: () ->
-    (<div className="animelistStatusbar">
+    (<div>This bar is active when its Anime List or Details
+    <div className="animelistStatusbar">
       <div className="animelistIcons">
         <div onClick={@refresh}><i className="fa fa-refresh"></i></div>
       </div>
-    </div>);
+    </div></div>);
 
 module.exports = AnimelistStatusbar

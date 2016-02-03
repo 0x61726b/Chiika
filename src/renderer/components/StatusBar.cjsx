@@ -31,10 +31,10 @@ StatusBar = React.createClass
 
   render: () ->
     (<div>
-    { if RouteManager.activeRoute == 8
+    { if RouteManager.activeRoute == 8 || RouteManager.activeRoute == 1
      <AnimelistStatusbar />
     }
-    { if RouteManager.activeRoute == 0 || RouteManager.activeRoute == 1 || RouteManager.activeRoute == 2
+    { if RouteManager.activeRoute == 0
      <HomeStatusbar />
     }
     </div>);

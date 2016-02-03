@@ -29,7 +29,9 @@ WatchingList = React.createClass
     $("#gridWatchingList").w2grid(@getGrid())
   componentWillUnmount: ->
     $('#gridWatchingList').w2destroy();
-
+  refreshDataSource: ->
+    list = cn.getAnimeListByUserStatus(1)
+    @setList(list)
 
   render: () ->
     (<div id="gridWatchingList" className="listCommon"></div>);
