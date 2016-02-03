@@ -34,11 +34,16 @@
 }
 
 .statusDd {
-    text-align: center;
+    text-align: left;
+    padding-left: 15px;
+    width: 180px;
+    font-weight: 400;
+    outline: none;
 }
 
 .statusDd li {
     color: black;
+    opacity: 0.87;
 }
 
 
@@ -306,6 +311,7 @@
     align-items: center;
     justify-content: center;
     text-transform: uppercase;
+    padding-bottom: 4px;
 }
 
 .inputArea {
@@ -328,10 +334,10 @@
 }
 
 .episodeInput {
-    background-color: transparent;
+    background-color: transparent!important;
     width: 40px;
     border: 0px;
-    border-bottom: 1px solid white;
+    border-bottom: 1px solid white!important;
     display: flex;
     flex-direction: column;
     align-content: center;
@@ -409,7 +415,7 @@
     background-color: transparent;
     text-transform: uppercase;
     border: 0px;
-    width: 180;
+    width: 180px;
     display: flex;
     flex-direction: row;
     align-content: space-between;
@@ -417,6 +423,8 @@
     justify-content: space-between;
     color: white;
     margin-bottom: -2px;
+    text-align: left;
+    outline: none;
 }
 
 
