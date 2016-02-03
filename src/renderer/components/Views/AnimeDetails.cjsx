@@ -256,15 +256,12 @@ AnimeDetails = React.createClass
             <div className="airingStatsuDiv">
                 <span className="label label-primary" id="airingStatus">Airing {@getBroadcastTime()}</span>
             </div>
-            <div id="animeInteractions">
-                <i className="fa fa-play fa-2x" id="playNext"></i>
-                <i className="fa fa-folder fa-2x" id="openFolder"></i>
-            </div>
+
         </div>
         <div className="vCenter" id="animeGenre">
                 <h4 className="vCenter">
                 {@anime.Misc.genres.map((tab, i) =>
-                  <span key={i} className="label label-default">{tab.genre}</span>)}
+                  <span key={i} className="label label-default animeGenreChip">{tab.genre}</span>)}
                 </h4>
         </div>
         <div className="row" id="detailsRow">
@@ -354,6 +351,14 @@ AnimeDetails = React.createClass
                 <div id="seasonId" className='detailCard card-season'>
                     <h3 className="noSpace seasonInfo">{@getSeason()}</h3>
                 </div>
+            </div>
+        </div>
+        <div className="row" id="buttonRow">
+            <div className="buttonConatiner">
+                <button type="button" className="chiika-button" id="btn-play">Play Next Episode</button>
+                <button type="button" className="chiika-button" id="btn-folder">Open Folder</button>
+                <button type="button" className="chiika-button" id="btn-torrent">Check for Torrent</button>
+                <button type="button" className="chiika-button" id="btn-mal">Open on MAL</button>
             </div>
         </div>
         <div className="row" id="synopsisRow">

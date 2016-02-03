@@ -1,4 +1,3 @@
-
 .noSpace {
     padding-top: 0px;
     margin-top: 0px;
@@ -20,32 +19,38 @@
     transform: translateY(-50%);
 }
 
-.scoreDd
-{
-  width:35px;
-  min-width:25px;
-  text-align:center;
+.scoreDd {
+    width: 35px;
+    min-width: 25px;
+    text-align: center;
 }
-.scoreDd li
-{
-  color:black;
+
+.scoreDd li {
+    color: black;
 }
-.scoreDd li#selected
-{
-  background-color:red;
+
+.scoreDd li#selected {
+    background-color: red;
 }
-.statusDd
-{
-  text-align:center;
+
+.statusDd {
+    text-align: center;
 }
-.statusDd li
-{
-  color:black;
+
+.statusDd li {
+    color: black;
 }
+
+
 /***********************/
 
 #animeTitle {
     padding-left: 20px;
+    height: 51px;
+    background-color: #eeeeee;
+    border-bottom: 1px solid silver;
+    display: flex;
+    flex-direction: row;
 }
 
 .backButtonDiv {
@@ -60,11 +65,22 @@
 }
 
 .titleDiv {
-    display: block;
+    display: inline-block;
     height: inherit;
     float: left;
     font-family: 'Roboto', sans-serif;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    margin-right: 5px;
 }
+
+.titleDiv h2 {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
 #animeName {
     position: relative;
     top: 50%;
@@ -75,20 +91,18 @@
 }
 
 .airingStatsuDiv {
-    display: block;
     height: inherit;
     float: left;
-    margin-left: 1em;
 }
 
 #airingStatus {
     position: relative;
-    top: 45%;
+    top: 35%;
     transform: translateY(-50%);
     margin-bottom: 2px;
     text-transform: uppercase;
     font-weight: 300;
-    margin-bottom:auto;
+    margin-bottom: auto;
 }
 
 #animeInteractions {
@@ -127,26 +141,36 @@
 }
 
 .coverImage {
+    /*
     padding-left: 10;
     padding-right: 0;
+    */
     align-items: center;
     align-content: center;
     float: left;
+    transition: box-shadow .3s;
+    margin-bottom: 5px;
+}
+
+.coverImage:hover {
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, .2);
 }
 
 .cIm {
-    width: 215px;
-    height: 280px;
+    width: 205px;
+    height: 275px;
+    padding-right: 0px;
 }
+
 .cIm img {
-  object-fit: contain;
-  width: 215px;
-  height: 280px;
+    object-fit: fill;
+    width: 205px;
+    height: 275px;
 }
 
 .cardColumn {
     padding-left: 10px;
-    padding-right: 0;
+    padding-right: 0px;
     float: left;
 }
 
@@ -154,13 +178,11 @@
     width: 205px;
     height: 65px;
     margin-bottom: 5px;
+    transition: box-shadow .3s;
 }
 
-#animeTitle {
-    height: 51px;
-    background-color: #eeeeee;
-    display: block;
-    border-bottom: 1px solid silver;
+.detailCard:hover {
+    box-shadow: 1px 2px 5px rgba(0, 0, 0, .5);
 }
 
 #animeGenre {
@@ -168,6 +190,13 @@
     display: block;
     background-color: #f9f9f9;
     box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.25);
+}
+
+.animeGenreChip {
+    background-color: $secondaryColor;
+    margin-left: 2px;
+    margin-right: 2px;
+    font-weight: 400;
 }
 
 #col1 {
@@ -179,7 +208,7 @@
 }
 
 #typeCard {
-    background-image:url("./../assets/images/detailsCards/type/alt-tv.png");
+    background-image: url("./../assets/images/detailsCards/type/alt-tv.png");
 }
 
 #sourceCard {
@@ -342,6 +371,9 @@
     color: white;
     margin-left: 5px;
     margin-bottom: 3px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 .cardInfo h5 {
@@ -427,6 +459,54 @@
 
 
 /*********************/
+
+
+/****Button Row*******/
+
+
+/*Can i make a Jenson Button joke?***/
+
+#buttonRow {
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 10px;
+    display: flex;
+    flex-direction: row;
+    align-content: center;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background-color: white;
+}
+
+#buttonContainer {
+    display: flex;
+    width: 655px;
+    background-color: white;
+}
+
+.chiika-button {
+    background-color: #00796B;
+    color: white;
+    font-family: sans-serif, 'Roboto';
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .6);
+    border-radius: 2px;
+    border: 0px;
+    padding-top: 3px;
+    padding-bottom: 4px;
+    padding-left: 15px;
+    padding-right: 15px;
+    margin-left: 5px;
+    margin-right: 5px;
+    transition: background-color .3s, box-shadow .3s;
+    outline: none;
+}
+
+.chiika-button:hover {
+    background-color: #00695C;
+    box-shadow: 0px 1px 4px rgba(0, 0, 0, .6);
+}
+
 
 /****Synopsis Row*****/
 
