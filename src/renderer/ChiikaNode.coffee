@@ -143,7 +143,24 @@ class ChiikaRenderer
        if parseInt(totalEps) > 0
          progress   = Math.ceil((parseInt(watchedEps) / parseInt(totalEps)) * 100)
 
-       season     = "Spring 2016"
+       startDate = value.anime.series_start
+
+       parts = startDate.split("-");
+       year = parts[0];
+       month = parts[1];
+
+       iMonth = parseInt(month);
+
+       season = "Unknown"
+       if iMonth > 0 && iMonth < 4
+         season =  "Winter " + year
+       if iMonth > 3 && iMonth < 7
+         season =  "Spring " + year
+       if iMonth > 6 && iMonth < 10
+         season =  "Summer " + year
+       if iMonth > 9 && iMonth <= 12
+         season = "Fall " + year
+
        score      = value['my_score']
 
        type = value.anime['series_type']

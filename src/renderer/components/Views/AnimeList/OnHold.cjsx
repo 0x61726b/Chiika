@@ -21,8 +21,6 @@ Mixin = require './Common'
 #Dropped List
 OnHoldList = React.createClass
   mixins:[Mixin]
-
-
   componentDidMount: ->
     list = cn.getAnimeListByUserStatus(3)
     @setGridName("gridOnHoldList")
@@ -30,7 +28,10 @@ OnHoldList = React.createClass
     $("#gridOnHoldList").w2grid(@getGrid())
 
   componentWillUnmount: ->
-    $('#gridOnHoldList').w2destroy();
+    $('#gridOnHoldList').w2destroy()
+  refreshDataSource: ->
+    list = cn.getAnimeListByUserStatus(3)
+    @setList(list)
   render: () ->
     (<div id="gridOnHoldList" className="listCommon"></div>);
 

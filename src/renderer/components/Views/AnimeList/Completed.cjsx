@@ -27,7 +27,10 @@ CompletedList = React.createClass
     @setList(list)
     $("#gridCompletedList").w2grid(@getGrid())
   componentWillUnmount: ->
-    $('#gridCompletedList').w2destroy();
+    $('#gridCompletedList').w2destroy()
+  refreshDataSource: ->
+    list = cn.getAnimeListByUserStatus(2)
+    @setList(list)
   render: () ->
     (<div id="gridCompletedList" className="listCommon"></div>);
 

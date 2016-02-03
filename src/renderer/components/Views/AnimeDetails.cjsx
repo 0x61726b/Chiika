@@ -18,6 +18,7 @@ React = require 'react'
 h = require './../Helpers'
 Router = require 'react-router'
 Chiika = require './../../ChiikaNode'
+shell = require 'shell'
 History = Router.History
 
 AnimeDetails = React.createClass
@@ -244,7 +245,8 @@ AnimeDetails = React.createClass
     @getSynopsis()
     @getBroadcastTime()
     @forceUpdate()
-
+  openMalLink: ->
+    shell.openExternal("http://myanimelist.net/anime/" + @anime.anime.series_animedb_id)
   render: () ->
     (<div><div className="" id="animeTitle">
             <div className="backButtonDiv" onClick={this.history.goBack}>
@@ -266,7 +268,7 @@ AnimeDetails = React.createClass
         </div>
         <div className="row" id="detailsRow">
             <div className="coverImage">
-                <div className="cIm"><img id="coverImg" src="./../assets/images/topLeftLogo.png" /></div>
+                <div className="cIm"><img id="coverImg" onClick={@openMalLink} src="./../assets/images/topLeftLogo.png" /></div>
             </div>
             <div className="cardColumn" id="col1">
                 <div className="detailCard cardInfo card-twoLine" id="typeCard">
@@ -358,7 +360,7 @@ AnimeDetails = React.createClass
                 <button type="button" className="chiika-button" id="btn-play">Play Next Episode</button>
                 <button type="button" className="chiika-button" id="btn-folder">Open Folder</button>
                 <button type="button" className="chiika-button" id="btn-torrent">Check for Torrent</button>
-                <button type="button" className="chiika-button" id="btn-mal">Open on MAL</button>
+                <button onClick={this.openMalLink} type="button" className="chiika-button" id="btn-mal">Open on MAL</button>
             </div>
         </div>
         <div className="row" id="synopsisRow">

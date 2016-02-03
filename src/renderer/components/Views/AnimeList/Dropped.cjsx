@@ -29,6 +29,9 @@ DroppedList = React.createClass
     $("#gridDroppedList").w2grid(@getGrid())
   componentWillUnmount: ->
     $('#gridDroppedList').w2destroy()
+  refreshDataSource: ->
+    list = cn.getAnimeListByUserStatus(4)
+    @setList(list)
   render: () ->
     (<div id="gridDroppedList" className="listCommon"></div>);
 
