@@ -46,6 +46,8 @@ AnimeDetails = React.createClass
       @coverExists = true
     catch error
       @coverExists = false
+
+    Chiika.keyboardListenerMap.set 'AnimeDetails',this
   componentDidMount:->
     $("#seasonId").addClass @getSeasonClass()
     Chiika.requestAnimeDetails(@anime.series_animedb_id)
@@ -56,6 +58,10 @@ AnimeDetails = React.createClass
     @getSource()
 
     @handleProgressEnter()
+
+  onKeyPressed:(arg) ->
+    if arg == 'Backspace'
+      @history.goBack()
   getBroadcastTime: () ->
     if @anime.anime.series_status == "0"
       $(".airingStatsuDiv span").text("Not aired")

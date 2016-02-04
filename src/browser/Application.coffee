@@ -21,6 +21,7 @@
 app = require "app"
 BrowserWindow = require 'browser-window'
 crashReporter = require 'crash-reporter'
+localShortcut = require 'electron-localshortcut'
 
 ApplicationWindow = require './ApplicationWindow'
 appMenu = require './menu/appMenu'
@@ -45,7 +46,11 @@ class Application
        app.quit()
     app.on 'ready', =>
        @openWindow()
+       @registerShortcuts()
 
+  registerShortcuts: ->
+    localShortcut.register @window.window,'Backspace', () ->
+      Chiika.onKeyPressed 'Backspace'
 
   openWindow: ->
     isBorderless = true

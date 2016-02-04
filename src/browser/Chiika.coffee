@@ -175,6 +175,8 @@ class Chiika
     @db.Mangalist
   getUserInfo:() ->
     @db.User
+  onKeyPressed:(arg) ->
+    @sendAsyncMessageToRenderer 'browserKeyboardEvent',arg
 
 chiikaNode = new Chiika
 

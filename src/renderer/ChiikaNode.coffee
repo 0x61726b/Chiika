@@ -42,6 +42,7 @@ class ChiikaRenderer
   initialized:false
   chiikaNode:null
   listener:null
+  keyboardListenerMap:new Map()
   requestData: () ->
     @apiBusy = true
     ipcRenderer.send 'rendererPing','databaseRequest'
@@ -255,11 +256,19 @@ class ChiikaRenderer
         anime = value
 
     anime
+  onKeyPressed:(arg) ->
+    if arg == 'Backspace'
+      console.log "Backspace kappa"
+      @keyboardListenerMap.forEach (value,key) =>
+        value.onKeyPressed arg
 
 
 
 
 chiikaRenderer = new ChiikaRenderer
+
+ipcRenderer.on 'browserKeyboardEvent', (event,arg) ->
+    chiikaRenderer.onKeyPressed(arg)
 
 ipcRenderer.on 'requestMyAnimelistSuccess', (event,arg) ->
   chiikaRenderer.databaseMyAnimelist = arg.animeList
