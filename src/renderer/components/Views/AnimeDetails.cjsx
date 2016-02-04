@@ -26,6 +26,13 @@ AnimeDetails = React.createClass
   anime:null
   coverPath:""
   coverExists:false
+  statusTextMap:[
+    { status:1,text:"Watching" },
+    { status:6,text:"Plan to Watch" },
+    { status:2,text:"Completed" },
+    { status:3,text:"On Hold" },
+    { status:4,text:"Dropped" }
+  ]
   componentWillMount:-> #We can't put jQuery here because DOM is not constructed yet.
     Chiika.listener = this
     @anime = Chiika.getAnimeById(@props.params.animeId)
@@ -39,23 +46,24 @@ AnimeDetails = React.createClass
       @coverExists = true
     catch error
       @coverExists = false
-
-
   componentDidMount:->
     $("#seasonId").addClass @getSeasonClass()
     Chiika.requestAnimeDetails(@anime.series_animedb_id)
-
+    $("#episodeWatchedInput").val(@anime.my_watched_episodes)
     @getCoverImage()
     @getBroadcastTime()
     @getSynopsis()
     @getSource()
 
+    @handleProgressEnter()
   getBroadcastTime: () ->
-    if @anime.Misc.broadcast_time == "broadcast_time" || @anime.Misc.broadcast_time == "Unknown"
-        $(".airingStatsuDiv").hide()
-      else
-        $(".airingStatsuDiv").show()
-    @anime.Misc.broadcast_time
+    if @anime.anime.series_status == "0"
+      $(".airingStatsuDiv span").text("Not aired")
+    if @anime.anime.series_status == "1"
+      if @anime.Misc.broadcast_time != "broadcast_time" || @anime.Misc.broadcast_time != "Unknown" || @anime.Misc.broadcast_time != ""
+        $(".airingStatsuDiv span").text("Airing " + @anime.Misc.broadcast_time)
+    if @anime.anime.series_status == "2"
+      $(".airingStatsuDiv span").text("Finished Airing")
   getCoverImage: () ->
     animeCover = Chiika.chiikaNode.rootOptions.imagePath + "Anime/" + @anime.series_animedb_id + ".jpg"
     try
@@ -240,7 +248,6 @@ AnimeDetails = React.createClass
     Chiika.testListener()
   trigger: ->
     @anime = Chiika.getAnimeById(@props.params.animeId)
-
     @getCoverImage()
 
     @getSource()
@@ -249,6 +256,59 @@ AnimeDetails = React.createClass
     @forceUpdate()
   openMalLink: ->
     shell.openExternal("http://myanimelist.net/anime/" + @anime.anime.series_animedb_id)
+  updateScore: (e) ->
+    score = $(e.target).text()
+    if score == "-"
+      score = "0"
+    console.log "Updating score to " + score + " for " + @anime.anime.series_animedb_id
+    $("#scoreDropdown button h4").text(score)
+    Chiika.requestAnimeUpdate(@anime.anime.series_animedb_id,parseInt(score),-1,-1)
+  updateStatus: (e) ->
+    status = $(e.target).attr("data-status")
+    console.log "Updating status to " + status + " for " + @anime.anime.series_animedb_id
+
+    res = $.grep @statusTextMap, (e) ->
+      e.status == parseInt(status)
+
+
+    $("#statusDropdown button h4").text(res[0].text)
+    Chiika.requestAnimeUpdate(@anime.anime.series_animedb_id,-1,-1,parseInt(status))
+  plusProgress: (e) ->
+    currentWatched = $("#episodeWatchedInput").val()
+    totalEps = @anime.anime.series_episodes
+    totalEps = parseInt(totalEps)
+    currentWatched = parseInt(currentWatched)
+
+    plusOne = currentWatched + 1
+    if plusOne <= totalEps
+      console.log "Updating progress from " + currentWatched + "/" + totalEps + " to " + plusOne + "/" + totalEps;
+      $("#episodeWatchedInput").val(plusOne)
+      Chiika.requestAnimeUpdate(@anime.anime.series_animedb_id,-1,plusOne,-1)
+  minusProgress: (e) ->
+    currentWatched = $("#episodeWatchedInput").val()
+    totalEps = @anime.anime.series_episodes
+    totalEps = parseInt(totalEps)
+    currentWatched = parseInt(currentWatched)
+
+    minusOne = currentWatched - 1
+
+    if minusOne >= 0
+      console.log "Updating progress from " + currentWatched + "/" + totalEps + " to " + minusOne + "/" + totalEps;
+      $("#episodeWatchedInput").val(minusOne)
+      Chiika.requestAnimeUpdate(@anime.anime.series_animedb_id,-1,minusOne,-1)
+  handleProgressEnter: ->
+    anime = @anime
+    $("#episodeWatchedInput").keyup (e) ->
+      if e.keyCode == 13 #Enter
+        newProgress = $(this).val()
+        newProgress = parseInt(newProgress)
+        totalEps = anime.anime.series_episodes
+        totalEps = parseInt(totalEps)
+        if newProgress >= 0 && newProgress <= totalEps
+          console.log "Updating progress to " + newProgress + "/" + totalEps;
+          Chiika.requestAnimeUpdate(anime.anime.series_animedb_id,-1,newProgress,-1)
+
+
   render: () ->
     (<div><div className="" id="animeTitle">
             <div className="backButtonDiv" onClick={this.history.goBack}>
@@ -258,7 +318,7 @@ AnimeDetails = React.createClass
               <h2 className="centerMe noSpace" id="animeName">{@anime.anime.series_title}</h2>
             </div>
             <div className="airingStatsuDiv">
-                <span className="label label-primary" id="airingStatus">Airing {@getBroadcastTime()}</span>
+                <span className="label label-primary" id="airingStatus"></span>
             </div>
 
         </div>
@@ -298,22 +358,24 @@ AnimeDetails = React.createClass
                     </div>
                     <div id="userScore" className="why">
                         <h5 className="noSpace">RATE</h5>
-                        <div className="dropdown">
+                        <div className="dropdown" id="scoreDropdown">
                           <button type="button" className="scoreButton dropdown-toggle" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                               <h4 className="noSpace">{@anime.my_score}</h4>
                               <span className="caret"></span>
                           </button>
                           <ul className="dropdown-menu scoreDd" aria-labelledby="dropdownMenu1">
-                              <li>1</li>
-                              <li>2</li>
-                              <li>3</li>
-                              <li>4</li>
-                              <li>5</li>
-                              <li>6</li>
-                              <li>7</li>
-                              <li>8</li>
-                              <li>9</li>
-                              <li>10</li>
+                          {[0,1,2,3,4,5,6,7,8,9,10].map((score, i) =>
+                            <li key={i}>
+                              {
+                                s = score
+                                if score == 0
+                                  s = "-"
+                                if score == parseInt(@anime.my_score)
+                                  (<div id="selected" onClick={@updateScore}>{s}</div>)
+                                else
+                                  (<div onClick={@updateScore}>{s}</div>)
+                                }
+                            </li>)}
                           </ul>
                         </div>
                     </div>
@@ -326,28 +388,29 @@ AnimeDetails = React.createClass
                     <div id="epWatched">
                         <h5 className="noSpace" id="watched">Watched</h5>
                         <div className="inputArea">
-                            <i className=" fa  fa-minus-square" id="progressMinus"></i>
+                            <i className=" fa  fa-minus-square" id="progressMinus" onClick={@minusProgress}></i>
                             <div className="input-group">
-                              <input type="text" className="episodeInput" aria-describedby="basic-addon1" placeholder={@anime.my_watched_episodes} />
+                              <input id="episodeWatchedInput" type="text" className="episodeInput" aria-describedby="basic-addon1" />
                             </div>
-                            <i className=" fa fa-plus-square" id="progressPlus"></i>
+                            <i className="fa fa-plus-square" id="progressPlus" onClick={@plusProgress}></i>
                         </div>
                     </div>
                 </div>
                 <div className="detailCard" id="statusCard">
                     <div id="userScore" className="why">
                         <h5 className="noSpace">STATUS</h5>
-                        <div className="dropdown">
+                        <div className="dropdown" id="statusDropdown">
                           <button type="button" className="statusButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                               <h4 className="noSpace">{@getStatus()}</h4>
                               <span className="caret"></span>
                           </button>
                           <ul className="dropdown-menu statusDd">
-                              <li>Watching</li>
-                              <li>Completed</li>
-                              <li>Plan to Watch</li>
-                              <li>On Hold</li>
-                              <li>Dropped</li>
+                              {
+                                @statusTextMap.map((status,i) =>
+                                  <li key={i}>
+                                    <div onClick={@updateStatus} data-status={status.status}>{status.text}</div>
+                                  </li>
+                              )}
                           </ul>
                         </div>
                     </div>

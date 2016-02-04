@@ -32,6 +32,7 @@ DroppedList = React.createClass
   refreshDataSource: ->
     list = cn.getAnimeListByUserStatus(4)
     @setList(list)
+    w2ui["gridDroppedList"].records = list
   render: () ->
     (<div id="gridDroppedList" className="listCommon"></div>);
 

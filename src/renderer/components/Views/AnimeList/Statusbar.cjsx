@@ -18,14 +18,14 @@ electron = require 'electron'
 Chiika = require './../../../ChiikaNode'
 electron = require 'electron'
 ipcRenderer = electron.ipcRenderer
-RouteManager = require './../../Search'
+RouteManager = require './../../RouteManager'
 
 AnimelistStatusbar = React.createClass
   getAnimeId: ->
     path = RouteManager.activePath
     v = path.split("/")
     v[2]
-  refresh: () ->
+  refresh: (e) ->
     activeRoute = RouteManager.activeRoute
 
     if activeRoute == 8 #Details is active
@@ -33,13 +33,20 @@ AnimelistStatusbar = React.createClass
       console.log "Refreshing.... AnimeId:" + animeId
       Chiika.requestAnimeRefresh(animeId)
     if activeRoute == 1 #Anime List is active
-      console.log "Syncing anime list..."
-      Chiika.requestMyAnimelist()
+      if $(e.target).attr('disabled') != 'disabled'
+        console.log "Syncing anime list..."
+        Chiika.requestMyAnimelist()
+        @disableButton(e.target)
+   disableButton: (btn) ->
+     $(btn).addClass('iconDisabled')
+           .delay(2000)
+           .queue( -> $(btn).removeClass('iconDisabled').dequeue() )
+
   render: () ->
-    (<div>This bar is active when its Anime List or Details
+    (<div id="animelistStatusbar">
     <div className="animelistStatusbar">
       <div className="animelistIcons">
-        <div onClick={@refresh}><i className="fa fa-refresh"></i></div>
+        <div onClick={@refresh} id="syncAnimelistButton"><i className="fa fa-refresh"></i></div>
       </div>
     </div></div>);
 

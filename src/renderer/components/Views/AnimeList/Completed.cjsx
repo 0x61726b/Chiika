@@ -31,6 +31,7 @@ CompletedList = React.createClass
   refreshDataSource: ->
     list = cn.getAnimeListByUserStatus(2)
     @setList(list)
+    w2ui["gridCompletedList"].records = list
   render: () ->
     (<div id="gridCompletedList" className="listCommon"></div>);
 

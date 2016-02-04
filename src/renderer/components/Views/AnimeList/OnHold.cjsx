@@ -32,6 +32,7 @@ OnHoldList = React.createClass
   refreshDataSource: ->
     list = cn.getAnimeListByUserStatus(3)
     @setList(list)
+    w2ui["gridOnHoldList"].records = list
   render: () ->
     (<div id="gridOnHoldList" className="listCommon"></div>);
 

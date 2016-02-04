@@ -25,12 +25,17 @@
     text-align: center;
 }
 
+
 .scoreDd li {
     color: black;
 }
 
-.scoreDd li#selected {
+.scoreDd li div#selected {
     background-color: red;
+}
+.dropdown-menu > li > a
+{
+  padding:0!important;
 }
 
 .statusDd {

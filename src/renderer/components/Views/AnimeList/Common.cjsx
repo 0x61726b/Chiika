@@ -14,7 +14,7 @@
 #Description:
 #----------------------------------------------------------------------------
 React = require 'React'
-Search = require './../../Search'
+Search = require './../../RouteManager'
 cn = require './../../../ChiikaNode'
 Grid = {
     name   : '',
@@ -49,8 +49,6 @@ Grid = {
       false
     onDblClick: (event) ->
       window.location = "#Anime/" + Grid.records[event.recid].animeId
-    onRefresh: ->
-      console.log "Refreshed"
 }
 
 AnimeListMixin =
@@ -65,7 +63,6 @@ AnimeListMixin =
     Grid.records = @list
   getGrid: () ->
     Grid
-  componentWillUnmount: ->
 
 
 module.exports = AnimeListMixin

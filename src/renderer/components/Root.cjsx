@@ -33,7 +33,7 @@ Torrents = require './Views/Torrents'
 User = require './Views/User'
 
 h = require './Helpers'
-Search = require './Search'
+Search = require './RouteManager'
 
 Chiika = require './../ChiikaNode'
 

@@ -32,6 +32,7 @@ WatchingList = React.createClass
   refreshDataSource: ->
     list = cn.getAnimeListByUserStatus(1)
     @setList(list)
+    w2ui["gridWatchingList"].records = list
 
   render: () ->
     (<div id="gridWatchingList" className="listCommon"></div>);

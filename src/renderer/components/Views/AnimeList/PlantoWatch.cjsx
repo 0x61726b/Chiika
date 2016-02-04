@@ -33,6 +33,7 @@ PlantoWatchList = React.createClass
   refreshDataSource: ->
     list = cn.getAnimeListByUserStatus(6)
     @setList(list)
+    w2ui["gridPlantoWatchList"].records = list
   render: () ->
     (<div id="gridPlantoWatchList" className="listCommon"></div>);
 

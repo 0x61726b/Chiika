@@ -19,7 +19,7 @@ remote = require('remote')
 electron = require 'electron'
 ipcRenderer = electron.ipcRenderer
 h = require './components/Helpers'
-RouteManager = require './components/Search'
+RouteManager = require './components/RouteManager'
 BrowserWindow = electron.remote.BrowserWindow
 
 class ChiikaRenderer
@@ -80,7 +80,7 @@ class ChiikaRenderer
     }
     LoginWindow = new BrowserWindow(options);
     LoginWindow.loadURL("file://#{__dirname}/../renderer/MyAnimeListLogin.html")
-    #LoginWindow.openDevTools()
+    LoginWindow.openDevTools()
     LoginWindow.on 'closed', () ->
       LoginWindow = null
 
@@ -93,25 +93,40 @@ class ChiikaRenderer
 
       $("img#userAvatar").attr('src',imageUrl)
 
+  setStatusText: (text,fadeout) ->
+    $(".statusText").show()
+    $(".statusText").html(text)
+
+    if fadeout > 0
+      $(".statusText").delay(fadeout).fadeOut(500)
   requestVerifyUser: ->
     ipcRenderer.send 'rendererPing',@IpcKeys[0]
 
-
   requestMyAnimelist: () ->
     ipcRenderer.send 'rendererPing',@IpcKeys[1]
+    @setStatusText("Syncing Animelist...")
+
 
 
   requestMyMangalist: ->
     ipcRenderer.send 'rendererPing',@IpcKeys[2]
+    @setStatusText("Syncing Mangalist...")
 
   requestAnimeScrape: (id) ->
     ipcRenderer.send 'requestAnimeScrape',id
+    @setStatusText("Syncing anime...")
 
   requestAnimeRefresh:(id) ->
     ipcRenderer.send 'requestAnimeRefresh',id
+    @setStatusText("Syncing anime...")
 
   requestAnimeDetails:(id) ->
     ipcRenderer.send 'requestAnimeDetails',id
+    @setStatusText("Syncing anime...")
+
+  requestAnimeUpdate:(id,score,progress,status) ->
+    ipcRenderer.send 'requestAnimeUpdate', {animeId: id,score:score,progress:progress,status:status}
+    @setStatusText("Updating anime...")
 
   getMyAnimelist:() ->
     @databaseMyAnimelist
@@ -162,6 +177,9 @@ class ChiikaRenderer
          season = "Fall " + year
 
        score      = value['my_score']
+
+       if score == "0"
+         score = "-"
 
        type = value.anime['series_type']
        animeType = "fa fa-question"
@@ -247,17 +265,22 @@ ipcRenderer.on 'requestMyAnimelistSuccess', (event,arg) ->
   chiikaRenderer.databaseMyAnimelist = arg.animeList
   RouteManager.refreshGrid()
   console.log arg.animeList
+  chiikaRenderer.setStatusText("")
 
+ipcRenderer.on 'requestUpdateAnimeStatus', (event,arg) ->
+  if arg == true
+    chiikaRenderer.setStatusText("")
+  else
+    chiikaRenderer.setStatusText("Error occured while updating anime..." + arg,2000)
 
-ipcRenderer.on 'loginSuccess', (event,arg) ->
-    chiikaRenderer.requestMyAnimelist()
+ipcRenderer.on 'requestAnimeDetailsNotRequired', (event,arg) ->
+  chiikaRenderer.setStatusText("")
+ipcRenderer.on 'requestRefreshAnimeDetailsSuccess', (event,arg) ->
+  chiikaRenderer.setStatusText("")
 
-    chiikaRenderer.setApiBusy(true)
-
-ipcRenderer.on 'browserPing',(event,arg) ->
-  if arg == 'refreshData'
-    console.log "[Renderer]IPC Message from browser process -refreshData- "
-    chiikaRenderer.requestData()
+ipcRenderer.on 'requestVerifyError', (event,arg) ->
+  chiikaRenderer.setStatusText("Error occured while processing verifying user...",2000)
+  console.log arg
 
 ipcRenderer.on 'databaseRequest', (event,arg) ->
     console.log 'Receiving IPC message from browser process!Event:databaseRequest'
@@ -273,6 +296,7 @@ ipcRenderer.on 'databaseRequest', (event,arg) ->
 
     if chiikaRenderer.listener != null
       chiikaRenderer.listener.trigger()
+
 
 #
 ipcRenderer.on 'reRender', (event,arg) ->

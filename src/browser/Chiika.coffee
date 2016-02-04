@@ -80,7 +80,7 @@ class Chiika
   #Note: These functions will exit immediately.Since cURL requests run its own
   #thread, success or error callbacks will be called when the request thread finally exists.
   #Native functions and its wrappers start with capitals
-  requestSuccessCallback:(ret) =>
+  requestVerifySuccessCallback:(ret) =>
     @requestCallbackCounter = @requestCallbackCounter + 1
 
     console.log "Counter: " + @requestCallbackCounter
@@ -94,13 +94,9 @@ class Chiika
       @requestCallbackCounter = 0
 
 
-  requestErrorCallback:(ret) =>
-    @requestCallbackCounter = @requestCallbackCounter + 1
-
-    if @requestCallbackCounter == @requestCallbackStop
-      @sendAsyncMessageToRenderer 'setApiBusy',false
-      @sendRendererData()
-      @requestCallbackCounter = 0
+  requestVerifyErrorCallback:(ret) =>
+    @sendAsyncMessageToRenderer 'setApiBusy',false
+    @sendAsyncMessageToRenderer 'requestVerifyError',ret
 
   requestMyAnimeListSuccess:(ret) =>
     @sendAsyncMessageToRenderer 'requestMyAnimelistSuccess', { animeList:ret }
@@ -124,24 +120,30 @@ class Chiika
     console.log ret
 
   requestRefreshAnimeSuccess:(ret) =>
-    if ret.request_name == "GetImageSuccess"
-      @signalRendererToRerender()
-    else
-      @sendRendererData()
+    if ret.request_name == "GetAnimePageScrapeSuccess"
+      @sendAsyncMessageToRenderer 'requestRefreshAnimeDetailsSuccess',true
+    @sendRendererData()
 
   requestRefreshAnimeError:(ret) ->
     console.log ret
 
   requestAnimeDetailsSuccess:(ret) =>
-    if ret.request_name == "GetImageSuccess"
-      @signalRendererToRerender()
+    if ret.request_name == "FakeRequestSuccess"
+      @sendAsyncMessageToRenderer 'requestAnimeDetailsNotRequired',true
     else
-      @sendRendererData()
+      @sendRendererData() #Need optimizations later
 
   requestAnimeDetailsError:(ret) ->
     console.log ret
 
+  requestUpdateAnimeSuccess:(ret) =>
+    @sendAsyncMessageToRenderer 'requestUpdateAnimeStatus',true
+    @sendRendererData()
+  requestUpdateAnimeError:(ret) ->
+    @sendAsyncMessageToRenderer 'requestUpdateAnimeStatus',ret
 
+  RequestAnimeUpdate:(Id,score,progress,status) =>
+    @request.UpdateAnime(@requestUpdateAnimeSuccess,@requestUpdateAnimeError,{animeId: Id,score:score,progress:progress,status:status})
 
   RequestAnimeDetails:(Id) =>
     @request.GetAnimeDetails(@requestAnimeDetailsSuccess,@requestAnimeDetailsError,{ animeId: Id })
@@ -151,7 +153,7 @@ class Chiika
   RequestVerifyUser: () =>
     @requestCallbackStop = 4
     @sendAsyncMessageToRenderer('setApiBusy',true)
-    @request.VerifyUser(@requestSuccessCallback,@requestErrorCallback)
+    @request.VerifyUser(@requestVerifySuccessCallback,@requestVerifyErrorCallback)
 
   RequestAnimeScrape: (Id) =>
     @request.AnimeScrape(@requestAnimeScrapeSuccess,@requestAnimeScrapeError,{ animeId: Id })
@@ -196,6 +198,13 @@ ipcMain.on 'requestAnimeRefresh',(event,arg) ->
 ipcMain.on 'requestAnimeScrape', (event,arg) ->
   chiikaNode.RequestAnimeScrape(arg)
 
+ipcMain.on 'requestAnimeUpdate', (event,arg) ->
+  animeId = arg.animeId
+  score = arg.score
+  progress = arg.progress
+  status = arg.status
+  chiikaNode.RequestAnimeUpdate(animeId,score,progress,status)
+
 
 ipcMain.on 'rendererPing',(event,arg) ->
   console.log "Receiving IPC message from renderer process! Args: " + arg
@@ -208,6 +217,7 @@ ipcMain.on 'rendererPing',(event,arg) ->
   if arg == 'requestMyAnimelist'
     chiikaNode.RequestMyAnimelist()
 
+
   if arg == 'requestMyMangalist'
     chiikaNode.RequestMyMangalist()
 
@@ -215,7 +225,6 @@ ipcMain.on 'rendererPing',(event,arg) ->
     chiikaNode.sendRendererData()
 
 process.on 'exit', (code) ->
-  console.log 'Im exiting kappa'
   chiikaNode.destroy()
 
 module.exports = chiikaNode

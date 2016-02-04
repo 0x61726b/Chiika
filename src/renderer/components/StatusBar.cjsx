@@ -19,7 +19,7 @@ Chiika = require './../ChiikaNode'
 electron = require 'electron'
 ipcRenderer = electron.ipcRenderer
 
-RouteManager = require './Search'
+RouteManager = require './RouteManager'
 
 #Include sub Views
 AnimelistStatusbar = require './Views/Animelist/Statusbar'
@@ -28,15 +28,15 @@ HomeStatusbar = require './Views/Home/Statusbar'
 StatusBar = React.createClass
   refresh: () ->
     console.log @props
-
   render: () ->
-    (<div>
+    (<div><span className="statusText"></span>
+    <div className="statusbarGlobal">
     { if RouteManager.activeRoute == 8 || RouteManager.activeRoute == 1
      <AnimelistStatusbar />
     }
     { if RouteManager.activeRoute == 0
      <HomeStatusbar />
     }
-    </div>);
+    </div></div>);
 
 module.exports = StatusBar

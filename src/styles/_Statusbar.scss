@@ -1,11 +1,20 @@
 .animelistStatusbar
 {
-  height:$statusBarHeight;
   float:right;
 }
 
 .animelistIcons
 {
-  margin-top:0;
-  margin-botom:0;
+
+}
+
+.statusText
+{
+  height:inherit;
+  width:70%;
+}
+.statusbarGlobal
+{
+  width:30%;
+  float:right;
 }
