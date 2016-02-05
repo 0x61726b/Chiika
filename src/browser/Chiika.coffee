@@ -20,11 +20,121 @@ ipcMain = electron.ipcMain
 BrowserWindow = electron.BrowserWindow
 
 
+class RequestTracker
+  listener:null
+  count:0
+  results:null
+  keys:null
+  self:null
+  constructor:(listener,keys) ->
+    @listener = listener
+    @results = new Map()
+    @keys = keys
+    RequestTracker::self = this
+    console.log "RequestTracker::RequestTracker"
+
+  onRequestSuccess: (ret) ->
+    console.log "RequestTracker::onRequestSuccess "
+    RequestTracker::self.results.set(ret.request_name,true)
+
+    RequestTracker::self.listener.onRequestSuccess(ret)
+
+    RequestTracker::self.checkStatus()
+
+  onRequestError: (ret) ->
+    console.log "RequestTracker::onRequestError "
+
+    RequestTracker::self.results.set(ret.request_name,false)
+    RequestTracker::self.listener.onRequestError(ret)
+
+    RequestTracker::self.checkStatus()
+  checkStatus: ->
+    status = false
+    index = 0
+    @results.forEach (value,key) =>
+      status = value
+      index = index + 1
+
+    if index == @keys.length
+      @onAllComplete()
+
+
+  onAllComplete: ->
+    @listener.onAllComplete(@results)
+  onAllSuccess: ->
+    console.log "RequestTracker::onAllSuccess"
+  onAllError: ->
+    console.log "RequestTracker::onAllError"
+
+class RequestChainBase
+  name:""
+  count:0
+  tracker: null
+  requestNative:null
+  requestKeys:null
+  constructor: (requestNative,name,keys) ->
+    @name = name
+    @requestKeys = keys
+    @tracker = new RequestTracker this,@requestKeys
+    @requestNative = requestNative
+  initiate: ->
+    chiikaNode.sendAsyncMessageToRenderer 'setApiBusy',true
+    @requestNative[@name](@tracker.onRequestSuccess,@tracker.onRequestError)
+    # ret = { request_name:"kappa"}
+    # @tracker.onRequestSuccess(ret)
+    # ret = { request_name:"kappa2"}
+    # @tracker.onRequestSuccess(ret)
+    # ret = { request_name:"kappa3"}
+    # @tracker.onRequestError(ret)
+    # ret = { request_name:"kappa4"}
+    # @tracker.onRequestError(ret)
+
+  OnRequestSuccess: (ret) ->
+    console.log "RequestChainBase::OnRequestSuccess"
+  OnRequestError: (ret) ->
+    console.log "RequestChainBase::OnRequestError"
+  OnAllComplete: (results) ->
+    chiikaNode.sendAsyncMessageToRenderer 'setApiBusy',false
+
+class UserVerifyRequestChain extends RequestChainBase
+  allCompleteCallback:null
+  successCallback:null
+  errorCallback:null
+  keys:[
+    'UserVerify',
+    'GetMyAnimelist',
+    'GetMyMangalist',
+    'GetImage'
+  ]
+  constructor: (requestNative) ->
+    super requestNative,"VerifyUser",@keys
+  Initiate: ->
+    @initiate()
+  onRequestSuccess: (ret) ->
+    @OnRequestSuccess ret
+
+    console.log "UserVerifyRequestChain::onRequestSuccess -> " + ret.request_name
+
+    requestName = ret.request_name
+
+    if requestName == 'UserVerifySuccess'
+      chiikaNode.malLoginWindow.send 'browserPing','close'
+    if requestName == 'GetMyAnimelistSuccess' || requestName == 'GetMyMangalistSuccess' || requestName == 'GetImageSuccess' 
+      chiikaNode.sendRendererData()
+
+
+  onRequestError: (ret) ->
+    @OnRequestError ret
+    console.log "UserVerifyRequestChain::onRequestError -> " + ret.request_name
+  onAllComplete: (results) ->
+    @OnAllComplete results
+    console.log "Results: "
+    console.log results
 
 
 class Chiika
   rootOptions:{
-    debugMode:true,
+    debugMode:false,
     appMode:true
   }
   @chiika: null
@@ -151,10 +261,8 @@ class Chiika
     @request.RefreshAnimeDetails(@requestRefreshAnimeSuccess,@requestRefreshAnimeError,{ animeId: Id })
 
   RequestVerifyUser: () =>
-    @requestCallbackStop = 4
-    @sendAsyncMessageToRenderer('setApiBusy',true)
-    @request.VerifyUser(@requestVerifySuccessCallback,@requestVerifyErrorCallback)
-
+    req = new UserVerifyRequestChain @request
+    req.Initiate()
   RequestAnimeScrape: (Id) =>
     @request.AnimeScrape(@requestAnimeScrapeSuccess,@requestAnimeScrapeError,{ animeId: Id })
 
@@ -179,6 +287,12 @@ class Chiika
     @sendAsyncMessageToRenderer 'browserKeyboardEvent',arg
 
 chiikaNode = new Chiika
+
+ipcMain.on 'registerShortcuts', (event,arg) ->
+  console.log "Registering " + arg
+
+ipcMain.on 'unregisterShortcuts', (event,arg) ->
+  console.log "Un-Registering " + arg
 
 ipcMain.on 'setRootOpts',(event,arg) ->
   userName = arg.user;

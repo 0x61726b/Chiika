@@ -14,7 +14,7 @@
 #Description:
 #----------------------------------------------------------------------------
 React = require 'React'
-Search = require './../../Search'
+Search = require './../../RouteManager'
 
 Grid = {
     name   : '',

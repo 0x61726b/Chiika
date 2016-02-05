@@ -39,8 +39,6 @@ ChiikaIsReady = ->
 
 
 
-
-
 Chiika = require './ChiikaNode'
 
 #Entry point

@@ -20,9 +20,24 @@ electron = require 'electron'
 ipcRenderer = electron.ipcRenderer
 
 HomeStatusbar = React.createClass
+  currentTheme:"Default"
+  nextTheme:0
+  changeStyle: () ->
+    styles = [ 'Green','Default','Orange','Yellow']
+
+    newTheme = styles[@nextTheme]
+
+    console.log newTheme
+    $('link[href="../styles/Main'+@currentTheme+'.css"]').attr('href','../styles/Main'+newTheme+'.css')
+    @currentTheme = newTheme
+    @nextTheme = @nextTheme + 1
+
+    if @nextTheme >= 3
+      @nextTheme = 0
+
   render: () ->
     (<div>
-      <div onClick={@refresh}><i className="fa fa-refresh"></i>Home Statusbar here</div>
+      <div onClick={@changeStyle}><i className="fa fa-refresh"></i>Change theme</div>
     </div>);
 
 module.exports = HomeStatusbar

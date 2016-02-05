@@ -49,8 +49,7 @@ class Application
        @registerShortcuts()
 
   registerShortcuts: ->
-    localShortcut.register @window.window,'Backspace', () ->
-      Chiika.onKeyPressed 'Backspace'
+    #To-do
 
   openWindow: ->
     isBorderless = true

@@ -34,7 +34,6 @@ AnimeDetails = React.createClass
     { status:4,text:"Dropped" }
   ]
   componentWillMount:-> #We can't put jQuery here because DOM is not constructed yet.
-    Chiika.listener = this
     @anime = Chiika.getAnimeById(@props.params.animeId)
     console.log @anime
 
@@ -47,7 +46,7 @@ AnimeDetails = React.createClass
     catch error
       @coverExists = false
 
-    Chiika.keyboardListenerMap.set 'AnimeDetails',this
+    Chiika.addRequestListener 'AnimeDetails',this
   componentDidMount:->
     $("#seasonId").addClass @getSeasonClass()
     Chiika.requestAnimeDetails(@anime.series_animedb_id)
@@ -59,6 +58,23 @@ AnimeDetails = React.createClass
 
     @handleProgressEnter()
 
+    $("#animeDetails :input").focus ->
+      Chiika.unregisterShortcut 'Backspace'
+    $("#animeDetails :input").blur ->
+      Chiika.registerShortcut 'Backspace'
+
+  componentWillUnmount: ->
+    console.log "Unmount"
+    Chiika.removeRequestListener 'AnimeDetails',this
+
+  onRequest: (request) ->
+    @anime = Chiika.getAnimeById(@props.params.animeId)
+    @getCoverImage()
+
+    @getSource()
+    @getSynopsis()
+    @getBroadcastTime()
+    @forceUpdate()  
   onKeyPressed:(arg) ->
     if arg == 'Backspace'
       @history.goBack()
@@ -250,16 +266,6 @@ AnimeDetails = React.createClass
         $("#synopsisText").html(synopsisInMisc)
       if synInAnime
         $("#synopsisText").html(synopsis)
-  requestUpdate: ->
-    Chiika.testListener()
-  trigger: ->
-    @anime = Chiika.getAnimeById(@props.params.animeId)
-    @getCoverImage()
-
-    @getSource()
-    @getSynopsis()
-    @getBroadcastTime()
-    @forceUpdate()
   openMalLink: ->
     shell.openExternal("http://myanimelist.net/anime/" + @anime.anime.series_animedb_id)
   updateScore: (e) ->
@@ -316,7 +322,7 @@ AnimeDetails = React.createClass
 
 
   render: () ->
-    (<div><div className="" id="animeTitle">
+    (<div id="animeDetails"><div className="" id="animeTitle">
             <div className="backButtonDiv" onClick={this.history.goBack}>
                 <i className="centerMe fa fa-angle-left fa-2x" id="backButton"></i>
             </div>

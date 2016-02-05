@@ -38,7 +38,7 @@ Inject_css___compiled_and_depedent___files_into_html = () ->
 
     inject = require "gulp-inject"
     concat = require "gulp-concat"
-    files = mainBowerFiles().concat([serveDir + '/styles/**/*.css'])
+    files = mainBowerFiles().concat([serveDir + '/styles/MainDefault.css'])
     options =
       relative: true
       ignorePath: ['../../.serve', '..']

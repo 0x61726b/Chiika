@@ -1,4 +1,4 @@
-@import "_color-palette.scss";
+
 body {
     cursor: default;
     -webkit-user-select: none;
@@ -43,13 +43,9 @@ $navigation-font-size:15px;
 $userInfo-font-size:16px;
 $mainArea-height:calc(100% - #{$titlebar-height});
 $chiika-rot-speed:2s;
-$mainColor:#005d5d; //color: 800
-$secondaryColor:#4527A0; // color: 600
-$thirdColor:#6200EA; //color: A700
 $tabListHeight:35px; //Fix me ?
 $statusBarHeight:30px;
-$userColor: $teal;
-$accentColor: $deep-purple;
+
 .strecthToMainArea {
     height: $mainArea-height;
 }

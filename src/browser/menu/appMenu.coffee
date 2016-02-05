@@ -27,8 +27,7 @@ template = [{
   submenu: [{
           label: 'Verify'
           click: () ->
-            #Chiika.RequestVerifyUser()
-            Chiika.init()
+            Chiika.RequestVerifyUser()
           },
           {
           label: 'Get MyAnimeList'

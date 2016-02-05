@@ -43,6 +43,7 @@ class ChiikaRenderer
   chiikaNode:null
   listener:null
   keyboardListenerMap:new Map()
+  requestListenerMap:new Map()
   requestData: () ->
     @apiBusy = true
     ipcRenderer.send 'rendererPing','databaseRequest'
@@ -208,7 +209,16 @@ class ChiikaRenderer
        entry['season'] = season
        data.push entry
     data
+  addRequestListener:(name,listener) ->
+    @requestListenerMap.set(name,listener)
+    console.log "Registering " + name + " for request listening"
+  removeRequestListener:(name) ->
+    @requestListenerMap.delete(name)
+    console.log "Removing " + name + " for request listening"
 
+  notifyRequestListeners: (request) ->
+    @requestListenerMap.forEach (value,key) =>
+      value.onRequest request
   getMangaListByUserStatus:(status) ->
       data = []
 
@@ -256,6 +266,10 @@ class ChiikaRenderer
         anime = value
 
     anime
+  unregisterShortcut:(arg) ->
+    ipcRenderer.send 'unregisterShortcuts',arg
+  registerShortcut:(arg) ->
+    ipcRenderer.send 'registerShortcuts',arg
   onKeyPressed:(arg) ->
     if arg == 'Backspace'
       console.log "Backspace kappa"
@@ -303,8 +317,7 @@ ipcRenderer.on 'databaseRequest', (event,arg) ->
     chiikaRenderer.checkApiBusy()
     chiikaRenderer.setApiBusy(false)
 
-    if chiikaRenderer.listener != null
-      chiikaRenderer.listener.trigger()
+    chiikaRenderer.notifyRequestListeners 'databaseRequest'
 
 
 #
