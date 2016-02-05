@@ -4,20 +4,23 @@
 
 // List title
 .w2ui-head {
-    color: $thirdColor!important;
+    color: color($userColor, a700)!important;
     font-weight: 500;
     font-size: 1.4em;
     font-family: roboto;
     background-image: linear-gradient(#f9f9f9, #f9f9f9)!important;
     border-right: 0px!important;
     border-bottom: 0px!important;
-    cursor:default
+    cursor: default
 }
 
 //List items overriding!
 .w2ui-grid-data {
+    /* I think this is better
     color: black;
     opacity: 0.90;
+    */
+    height: 30px;
     font-family: roboto;
     font-size: 1.3em;
     border-right: 0px!important;
@@ -78,7 +81,7 @@ $tabListBackground:#eeeeee;
     opacity: 0.87;
     font-weight: 400;
     background-color: $tabListBackground;
-    border-bottom: 2px solid $secondaryColor;
+    border-bottom: 2px solid color($userColor, 600);
     font-family: roboto;
 }
 
@@ -97,7 +100,7 @@ $tabListBackground:#eeeeee;
 .react-tabs [role=tab][aria-selected=false]:hover {
     color: black;
     opacity: 0.87;
-    border-bottom: 2px solid $secondaryColor;
+    border-bottom: 2px solid color($userColor, 600);
 }
 
 .react-tabs [role=tab]:focus:after {

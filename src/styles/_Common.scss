@@ -1,3 +1,4 @@
+@import "_color-palette.scss";
 body {
     cursor: default;
     -webkit-user-select: none;
@@ -45,9 +46,10 @@ $chiika-rot-speed:2s;
 $mainColor:#005d5d; //color: 800
 $secondaryColor:#4527A0; // color: 600
 $thirdColor:#6200EA; //color: A700
-$tabListHeight:33px; //Fix me ?
-
+$tabListHeight:35px; //Fix me ?
 $statusBarHeight:30px;
+$userColor: $teal;
+$accentColor: $deep-purple;
 .strecthToMainArea {
     height: $mainArea-height;
 }
@@ -71,9 +73,32 @@ $statusBarHeight:30px;
 }
 
 .loadingSomething {
-  width:40px!important;
-  height:40px!important;
-  position: relative;
-  top: 50%;
-  transform: translateY(-50%);;
+    width: 40px!important;
+    height: 40px!important;
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+    ;
+}
+
+.chiika-button {
+    background-color: color($userColor, 800);
+    color: white;
+    font-family: sans-serif, 'Roboto';
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .6);
+    border-radius: 2px;
+    border: 0px;
+    padding-top: 3px;
+    padding-bottom: 4px;
+    padding-left: 15px;
+    padding-right: 15px;
+    margin-left: 5px;
+    margin-right: 5px;
+    transition: background-color .3s, box-shadow .3s;
+    outline: none;
+}
+
+.chiika-button:hover {
+    background-color: color($userColor, 900);
+    box-shadow: 0px 1px 4px rgba(0, 0, 0, .6);
 }

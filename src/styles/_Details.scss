@@ -25,7 +25,6 @@
     text-align: center;
 }
 
-
 .scoreDd li {
     color: black;
 }
@@ -33,9 +32,9 @@
 .scoreDd li div#selected {
     background-color: red;
 }
-.dropdown-menu > li > a
-{
-  padding:0!important;
+
+.dropdown-menu > li > a {
+    padding: 0!important;
 }
 
 .statusDd {
@@ -55,7 +54,6 @@
 /***********************/
 
 #animeTitle {
-    padding-left: 20px;
     height: 51px;
     background-color: #eeeeee;
     border-bottom: 1px solid silver;
@@ -64,14 +62,22 @@
 }
 
 .backButtonDiv {
+    padding-left: 15px;
+    padding-right: 15px;
     height: inherit;
     float: left;
-    margin-right: 1.2em;
+    transition: background-color .3s, color .3s;
+    ;
+}
+
+.backButtonDiv:hover {
+    background-color: darken(#eeeeee, 10%);
+    color: color($accentColor, a700);
 }
 
 #backButton {
     padding-bottom: 3px;
-    opacity: 0.87
+    opacity: 0.87;
 }
 
 .titleDiv {
@@ -82,7 +88,8 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
-    margin-right: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
 .titleDiv h2 {
@@ -103,6 +110,8 @@
 .airingStatsuDiv {
     height: inherit;
     float: left;
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
 #airingStatus {
@@ -203,7 +212,7 @@
 }
 
 .animeGenreChip {
-    background-color: $secondaryColor;
+    background-color: color($accentColor, 900);
     margin-left: 2px;
     margin-right: 2px;
     font-weight: 400;
@@ -498,26 +507,20 @@
     background-color: white;
 }
 
-.chiika-button {
-    background-color: #00796B;
-    color: white;
-    font-family: sans-serif, 'Roboto';
-    box-shadow: 0 1px 4px rgba(0, 0, 0, .6);
-    border-radius: 2px;
-    border: 0px;
-    padding-top: 3px;
-    padding-bottom: 4px;
-    padding-left: 15px;
-    padding-right: 15px;
-    margin-left: 5px;
-    margin-right: 5px;
-    transition: background-color .3s, box-shadow .3s;
-    outline: none;
+#btn-mal {
+    background-color: color($indigo, 800);
 }
 
-.chiika-button:hover {
-    background-color: #00695C;
-    box-shadow: 0px 1px 4px rgba(0, 0, 0, .6);
+#btn-mal:hover {
+    background-color: color($indigo, 900);
+}
+
+#btn-torrent {
+    background-color: color($orange, 800);
+}
+
+#btn-torrent:hover {
+    background-color: color($orange, 900);
 }
 
 
