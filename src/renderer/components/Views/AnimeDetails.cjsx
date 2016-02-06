@@ -49,7 +49,7 @@ AnimeDetails = React.createClass
     Chiika.addRequestListener 'AnimeDetails',this
   componentDidMount:->
     $("#seasonId").addClass @getSeasonClass()
-    Chiika.requestAnimeDetails(@anime.series_animedb_id)
+
     $("#episodeWatchedInput").val(@anime.my_watched_episodes)
     @getCoverImage()
     @getBroadcastTime()
@@ -62,7 +62,7 @@ AnimeDetails = React.createClass
       Chiika.unregisterShortcut 'Backspace'
     $("#animeDetails :input").blur ->
       Chiika.registerShortcut 'Backspace'
-
+    Chiika.requestAnimeDetails(@anime.series_animedb_id)
   componentWillUnmount: ->
     console.log "Unmount"
     Chiika.removeRequestListener 'AnimeDetails',this
@@ -74,7 +74,7 @@ AnimeDetails = React.createClass
     @getSource()
     @getSynopsis()
     @getBroadcastTime()
-    @forceUpdate()  
+    @forceUpdate()
   onKeyPressed:(arg) ->
     if arg == 'Backspace'
       @history.goBack()

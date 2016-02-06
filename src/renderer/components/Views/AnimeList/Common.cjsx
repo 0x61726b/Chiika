@@ -20,7 +20,7 @@ Grid = {
     name   : '',
     reorderColumns:true,
     columns: [
-      { field: 'icon', caption: '',attr: "align=center", size: '40px',render:(icon) ->
+      { field: 'typeWithIcon', caption: '',attr: "align=center", size: '40px',render:(icon) ->
         '<i class="'+icon.icon+'"></i>'  },
         {
            field: 'title',
@@ -34,17 +34,13 @@ Grid = {
         { field: 'score', caption: 'Score', size: '10%',resizable: true, sortable: true},
         { field: 'progress', caption: 'Progress', size: '40%',resizable: true, sortable: true}
         { field: 'season', caption: 'Season', size: '120px',resizable: true, sortable: true  },
+        { field: 'typeWithText', caption: 'Type', size: '120px',resizable: true, sortable: true,hidden:true  },
+        { field: 'typeWithIconColors',  caption: '',attr: "align=center", hidden:true,size: '40px',render:(icon) ->
+          '<i class="'+icon.icon+'" style="color:'+icon.airingStatusColor+'"></i>' }
+        { field: 'airingStatusText', caption: 'Type', size: '120px',resizable: true, sortable: true,hidden:true  },
     ],
     records: [
-    ],
-    menu: [
-        { id: 1, text: 'Free', icon: 'fa fa-hashtag' },
-        { id: 2, text: 'Stuff', icon: 'fa fa-camera' },
-        { id: 4, text: 'Here', icon: 'fa fa-minus' },
-        { id: 5, text: 'Maybe', icon: 'fa fa-minus' },
-        { id: 6, text: 'Edit', icon: 'fa fa-minus' },
-        { id: 7, text: 'Css', icon: 'fa fa-minus' }
-    ],
+    ]
     onClick: (event) ->
       false
     onDblClick: (event) ->
@@ -52,17 +48,74 @@ Grid = {
 }
 
 AnimeListMixin =
+  gridName:""
+  fileFuncMap:[
+    { column: 'typeWithIcon',fnc: 'addTypeWithIconColumn' },
+    { column: 'Title',fnc: 'addTitleColumn' },
+    { column: 'Score',fnc: 'addScoreColumn' },
+    { column: 'Progress',fnc: 'addProgressColumn' },
+    { column: 'Season',fnc: 'addSeasonColumn' },
+  ]
+  localGrid:{
+    name:'',
+    reorderColumn:true
+    columns:[]
+    records:[]
+    onClick: (event) ->
+      false
+    onDblClick: (event) =>
+      window.location = "#Anime/" + @localGrid.records[event.recid].animeId
+  }
   componentWillMount: ->
     @list = []
+
+    @props.columns.sort( (a,b) ->
+      x = a.order
+      y = b.order
+      return !((x < y) ? -1 : ((x > y) ? 1 : 0)))
+
+    for col in @props.columns
+      func = $.grep(@fileFuncMap, (e) -> return e.column == col.name)
+      console.log func[0].fnc
+      this[func[0].fnc]()
+  componentWillUnmount: ->
+    @localGrid.columns = []
+
   setGridName: (grid) ->
-    Grid.name = grid
+    @localGrid.name = grid
     Search.updateAnimelistState grid
     Search.animeListJsObjects.set grid,this
+    @gridName = grid
   setList: (l) ->
     @list = l
-    Grid.records = @list
+    @localGrid.records = @list
+
+  addTypeWithIconColumn: ->
+    @localGrid.columns.push { field: 'typeWithIcon', caption: '',attr: "align=center", size: '40px',render:(icon) ->
+      '<i class="'+icon.icon+'"></i>'  }
+  addTitleColumn: ->
+    @localGrid.columns.push {
+       field: 'title',
+       caption: 'Title',
+       size: '40%',
+       resizable: true,
+       sortable: true,
+       render:(title) ->
+         '<div anime-id="'+title.animeId+'" id="details">'+title.title+'</a>'
+    }
+  addScoreColumn: ->
+    @localGrid.columns.push { field: 'score', caption: 'Score', size: '10%',resizable: true, sortable: true }
+  addProgressColumn: ->
+    @localGrid.columns.push { field: 'progress', caption: 'Progress', size: '40%',resizable: true, sortable: true}
+  addSeasonColumn: ->
+    @localGrid.columns.push { field: 'season', caption: 'Season', size: '120px',resizable: true, sortable: true  }
+
+
   getGrid: () ->
-    Grid
+    @localGrid
+  componentDidMount: ->
+
+
 
 
 module.exports = AnimeListMixin

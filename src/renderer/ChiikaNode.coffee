@@ -100,35 +100,30 @@ class ChiikaRenderer
     $(".statusText").html(text)
 
     if fadeout > 0
-      $(".statusText").delay(fadeout).fadeOut(500)
+      $(".statusText").delay(fadeout).fadeOut fadeout, ->
+        $(this).html("")
   requestVerifyUser: ->
     ipcRenderer.send 'rendererPing',@IpcKeys[0]
 
   requestMyAnimelist: () ->
     ipcRenderer.send 'rendererPing',@IpcKeys[1]
-    @setStatusText("Syncing Animelist...")
 
 
 
   requestMyMangalist: ->
     ipcRenderer.send 'rendererPing',@IpcKeys[2]
-    @setStatusText("Syncing Mangalist...")
 
   requestAnimeScrape: (id) ->
     ipcRenderer.send 'requestAnimeScrape',id
-    @setStatusText("Syncing anime...")
 
   requestAnimeRefresh:(id) ->
     ipcRenderer.send 'requestAnimeRefresh',id
-    @setStatusText("Syncing anime...")
 
   requestAnimeDetails:(id) ->
     ipcRenderer.send 'requestAnimeDetails',id
-    @setStatusText("Syncing anime...")
 
   requestAnimeUpdate:(id,score,progress,status) ->
     ipcRenderer.send 'requestAnimeUpdate', {animeId: id,score:score,progress:progress,status:status}
-    @setStatusText("Updating anime...")
 
   getMyAnimelist:() ->
     @databaseMyAnimelist
@@ -183,30 +178,56 @@ class ChiikaRenderer
        if score == "0"
          score = "-"
 
+       airingStatusColor = ""
+       airingStatusText = ""
+       if serieStatus == "0"
+         airingStatusText = "Not Aired"
+         airingStatusColor = "gray"
+       if serieStatus == "1"
+         airingStatusText = "Airing"
+         airingStatusColor = "green"
+       if serieStatus == "2"
+         airingStatusText = "Finished"
+         airingStatusColor = "black"
+
+
+
+
        type = value.anime['series_type']
+       typeText = ""
        animeType = "fa fa-question"
        if type == "0"
         animeType = "fa fa-question"
+        typeText = "Unknown"
        if type == "1"
         animeType = "fa fa-tv"
+        typeText = "Tv"
        if type == "2"
         animeType = "glyphicon glyphicon-cd"
+        typeText = "Ova"
        if type == "3"
         animeType = "fa fa-film"
+        typeText = "Movie"
        if type == "4"
         animeType = "fa fa-star"
+        typeText = "Special"
        if type == "5"
         animeType = "fa fa-chrome"
+        typeText = "Ona"
        if type == "6"
         animeType = "fa fa-music"
+        typeText = "Music"
 
        entry['animeId'] = value.series_animedb_id
        entry['recid'] = data.length
+       entry['typeWithText'] = typeText
        entry['icon'] = animeType
        entry['title'] = animeTitle
        entry['progress'] = progress
        entry['score'] = score
        entry['season'] = season
+       entry['airingStatusText'] = airingStatusText
+       entry['airingStatusColor'] = airingStatusColor
        data.push entry
     data
   addRequestListener:(name,listener) ->
@@ -280,6 +301,11 @@ class ChiikaRenderer
 
 
 chiikaRenderer = new ChiikaRenderer
+
+ipcRenderer.on 'setStatusText', (event,arg) ->
+  message = arg.message
+  fadeOut = arg.fadeOut
+  chiikaRenderer.setStatusText message,fadeOut
 
 ipcRenderer.on 'browserKeyboardEvent', (event,arg) ->
     chiikaRenderer.onKeyPressed(arg)

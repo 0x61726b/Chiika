@@ -22,6 +22,7 @@ TabPanel = ReactTabs.TabPanel;
 
 Helpers = require('./../Helpers')
 
+ContextMenu = require './AnimeList/ContextMenu'
 
 WatchingList = require './AnimeList/Watching'
 PlantoWatchList = require './AnimeList/PlantoWatch'
@@ -29,26 +30,78 @@ DroppedList = require './AnimeList/Dropped'
 OnHoldList = require './AnimeList/OnHold'
 CompletedList = require './AnimeList/Completed'
 
+
+Chiika = require './../../ChiikaNode'
+fs = require 'fs'
+
 Tabs.setUseDefaultStyles(false)
 AnimeList = React.createClass
+  contextMenu:null
+  columnArray:[]
+  loadColumnData: ->
+    columnData =
+      [
+        {column: { name:"typeWithIcon",order:0} },
+        {column: { name:"Title",order:1} },
+        {column: { name:"Score",order:2} },
+        {column: { name:"Season",order:4 }},
+        {column: { name:"Progress",order:3 }},
+      ]
+    #fs.appendFile Chiika.chiikaNode.rootOptions.modulePath + "Data/column.json",JSON.stringify(columnData), (err) => console.log err
+
+    columnDataPath = Chiika.chiikaNode.rootOptions.modulePath+'Data/column.json'
+
+    columnFileJson = {}
+    try
+      file = fs.statSync(columnDataPath)
+      bf = fs.readFileSync columnDataPath,'utf8'
+      columnFileJson = JSON.parse(bf)
+    catch error
+      stream = fs.createWriteStream(columnDataPath)
+
+      stream.once 'open', (fd) =>
+        stream.write JSON.stringify columnData
+        stream.end('')
+      columnFileJson = columnData
+
+    for val in columnFileJson
+      @columnArray.push val.column
+
+
+
+  getColumnArray: ->
+    @columnArray
   getInitialState: () ->
     selectedIndex: -1
     tabs:[
-        { label:"Watching",element:"gridWatchingList" },
-        { label:"Plan to Watch",element:"gridPlantoWatchList" },
-        { label:"Completed",element:"gridCompletedList" },
-        { label:"On Hold",element:"gridOnHoldList" },
-        { label:"Dropped",element:"gridDroppedList" }
+        { index:0, label:"Watching",element:"gridWatchingList" },
+        { index:1, label:"Plan to Watch",element:"gridPlantoWatchList" },
+        { index:2, label:"Completed",element:"gridCompletedList" },
+        { index:3, label:"On Hold",element:"gridOnHoldList" },
+        { index:4, label:"Dropped",element:"gridDroppedList" }
     ]
+  componentWillMount: ->
+    @loadColumnData()
+  componentDidMount: ->
+
+    startingIndex = this.props.startWithTabIndex
+    result = $.grep(@state.tabs, (e) -> return e.index == startingIndex )
+    @contextMenu = new ContextMenu result[0].element
+  onSelect: (index,last) ->
+    result = $.grep(@state.tabs, (e) -> return e.index == index )
+    gridName = result[0].element
+    @contextMenu.onSelect gridName
+
+    this.props.onSelect index,last
   render: () ->
-    (<Tabs selectedIndex={this.props.startWithTabIndex} onSelect={this.props.onSelect} forceRenderTabPanel={false}>
+    (<Tabs selectedIndex={this.props.startWithTabIndex} onSelect={this.onSelect} forceRenderTabPanel={false}>
         <TabList>
           {this.state.tabs.map((tab, i) =>
                 <Tab key={i}>{tab.label}</Tab>
                 )}
         </TabList>
         <TabPanel key={0}>
-          <WatchingList />
+          <WatchingList columns={@getColumnArray()} />
         </TabPanel>
         <TabPanel key={1}>
           <PlantoWatchList />

@@ -13,124 +13,14 @@
 #authors: arkenthera
 #Description:
 #----------------------------------------------------------------------------
+
 path = require('path')
 fs = require('fs')
 electron = require 'electron'
 ipcMain = electron.ipcMain
 BrowserWindow = electron.BrowserWindow
 
-
-class RequestTracker
-  listener:null
-  count:0
-  results:null
-  keys:null
-  self:null
-  constructor:(listener,keys) ->
-    @listener = listener
-    @results = new Map()
-    @keys = keys
-    RequestTracker::self = this
-    console.log "RequestTracker::RequestTracker"
-
-  onRequestSuccess: (ret) ->
-    console.log "RequestTracker::onRequestSuccess "
-    RequestTracker::self.results.set(ret.request_name,true)
-
-    RequestTracker::self.listener.onRequestSuccess(ret)
-
-    RequestTracker::self.checkStatus()
-
-  onRequestError: (ret) ->
-    console.log "RequestTracker::onRequestError "
-
-    RequestTracker::self.results.set(ret.request_name,false)
-    RequestTracker::self.listener.onRequestError(ret)
-
-    RequestTracker::self.checkStatus()
-  checkStatus: ->
-    status = false
-    index = 0
-    @results.forEach (value,key) =>
-      status = value
-      index = index + 1
-
-    if index == @keys.length
-      @onAllComplete()
-
-
-  onAllComplete: ->
-    @listener.onAllComplete(@results)
-  onAllSuccess: ->
-    console.log "RequestTracker::onAllSuccess"
-  onAllError: ->
-    console.log "RequestTracker::onAllError"
-
-class RequestChainBase
-  name:""
-  count:0
-  tracker: null
-  requestNative:null
-  requestKeys:null
-  constructor: (requestNative,name,keys) ->
-    @name = name
-    @requestKeys = keys
-    @tracker = new RequestTracker this,@requestKeys
-    @requestNative = requestNative
-  initiate: ->
-    chiikaNode.sendAsyncMessageToRenderer 'setApiBusy',true
-    @requestNative[@name](@tracker.onRequestSuccess,@tracker.onRequestError)
-    # ret = { request_name:"kappa"}
-    # @tracker.onRequestSuccess(ret)
-    # ret = { request_name:"kappa2"}
-    # @tracker.onRequestSuccess(ret)
-    # ret = { request_name:"kappa3"}
-    # @tracker.onRequestError(ret)
-    # ret = { request_name:"kappa4"}
-    # @tracker.onRequestError(ret)
-
-  OnRequestSuccess: (ret) ->
-    console.log "RequestChainBase::OnRequestSuccess"
-  OnRequestError: (ret) ->
-    console.log "RequestChainBase::OnRequestError"
-  OnAllComplete: (results) ->
-    chiikaNode.sendAsyncMessageToRenderer 'setApiBusy',false
-
-class UserVerifyRequestChain extends RequestChainBase
-  allCompleteCallback:null
-  successCallback:null
-  errorCallback:null
-  keys:[
-    'UserVerify',
-    'GetMyAnimelist',
-    'GetMyMangalist',
-    'GetImage'
-  ]
-  constructor: (requestNative) ->
-    super requestNative,"VerifyUser",@keys
-  Initiate: ->
-    @initiate()
-  onRequestSuccess: (ret) ->
-    @OnRequestSuccess ret
-
-    console.log "UserVerifyRequestChain::onRequestSuccess -> " + ret.request_name
-
-    requestName = ret.request_name
-
-    if requestName == 'UserVerifySuccess'
-      chiikaNode.malLoginWindow.send 'browserPing','close'
-    if requestName == 'GetMyAnimelistSuccess' || requestName == 'GetMyMangalistSuccess' || requestName == 'GetImageSuccess' 
-      chiikaNode.sendRendererData()
-
-
-  onRequestError: (ret) ->
-    @OnRequestError ret
-    console.log "UserVerifyRequestChain::onRequestError -> " + ret.request_name
-  onAllComplete: (results) ->
-    @OnAllComplete results
-    console.log "Results: "
-    console.log results
-
+RequestManager = require './common/RequestManager'
 
 class Chiika
   rootOptions:{
@@ -148,6 +38,7 @@ class Chiika
   @malLoginWindow:null
   @requestCallbackCounter:0
   @requestCallbackStop:4
+  @requestManager:null
   init: () ->
     @chiika = require("./../../../chiika-node")
     @modulePath = path.join(path.dirname(fs.realpathSync(@chiika.path)), '../')
@@ -161,6 +52,8 @@ class Chiika
     @nativeUser = @db.User
 
     @requestCallbackCounter = 0
+
+    @requestManager = new RequestManager this
 
     console.log "Browser process init successful"
   destroy: () ->
@@ -181,47 +74,9 @@ class Chiika
     @sendAsyncMessageToRenderer 'databaseRequest',db
   signalRendererToRerender:() ->
     @sendAsyncMessageToRenderer 'reRender','42'
-
-  #Native Request JS Wrappers
-  #These are Native function calls on chiika-node
-  #See https://github.com/arkenthera/chiika-node/blob/master/src/RequestWrapper.cc
-  #for implementations of the methods below
-  #
-  #Note: These functions will exit immediately.Since cURL requests run its own
-  #thread, success or error callbacks will be called when the request thread finally exists.
-  #Native functions and its wrappers start with capitals
-  requestVerifySuccessCallback:(ret) =>
-    @requestCallbackCounter = @requestCallbackCounter + 1
-
-    console.log "Counter: " + @requestCallbackCounter
-    if ret.request_name == 'UserVerifySuccess'
-      @malLoginWindow.send 'browserPing','close'
-      console.log "Close window"
-
-    if @requestCallbackCounter == @requestCallbackStop
-      @sendAsyncMessageToRenderer 'setApiBusy',false
-      @sendRendererData()
-      @requestCallbackCounter = 0
-
-
-  requestVerifyErrorCallback:(ret) =>
-    @sendAsyncMessageToRenderer 'setApiBusy',false
-    @sendAsyncMessageToRenderer 'requestVerifyError',ret
-
-  requestMyAnimeListSuccess:(ret) =>
-    @sendAsyncMessageToRenderer 'requestMyAnimelistSuccess', { animeList:ret }
-
-  requestMyAnimeListError:(ret) =>
-    @sendAsyncMessageToRenderer 'requestMyAnimelistError',false
-
-
-  requestMyMangaListSuccess:(ret) =>
-    @sendRendererData()
-
-
-  requestMyMangaListError:(ret) =>
-    console.log ret
-
+  setRendererStatusText: (text,fade) ->
+    msg = {message:text,fadeOut:fade}
+    chiikaNode.sendAsyncMessageToRenderer 'setStatusText',msg
 
   requestAnimeScrapeSuccess:(ret) =>
     @sendRendererData()
@@ -256,21 +111,21 @@ class Chiika
     @request.UpdateAnime(@requestUpdateAnimeSuccess,@requestUpdateAnimeError,{animeId: Id,score:score,progress:progress,status:status})
 
   RequestAnimeDetails:(Id) =>
-    @request.GetAnimeDetails(@requestAnimeDetailsSuccess,@requestAnimeDetailsError,{ animeId: Id })
+    @requestManager.GetAnimeDetails Id
   RequestAnimeDetailsRefresh:(Id) =>
-    @request.RefreshAnimeDetails(@requestRefreshAnimeSuccess,@requestRefreshAnimeError,{ animeId: Id })
+    @requestManager.RefreshAnime Id
 
   RequestVerifyUser: () =>
-    req = new UserVerifyRequestChain @request
-    req.Initiate()
+    @requestManager.UserVerify()
+
   RequestAnimeScrape: (Id) =>
     @request.AnimeScrape(@requestAnimeScrapeSuccess,@requestAnimeScrapeError,{ animeId: Id })
 
   RequestMyAnimelist: () =>
-    @request.GetMyAnimelist(@requestMyAnimeListSuccess,@requestMyAnimeListError)
+    @requestManager.GetMyAnimelist()
 
   RequestMyMangalist: =>
-    @request.GetMyMangalist(@requestMyMangaListSuccess,@requestMyMangaListError)
+    @requestManager.GetMyMangalist()
 
   SetUser: (user,pass) ->
     @db.SetUser( { userName: user,password: pass} )

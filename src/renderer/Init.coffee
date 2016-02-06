@@ -43,14 +43,3 @@ Chiika = require './ChiikaNode'
 
 #Entry point
 Chiika.getReady ChiikaIsReady
-
-
-
-
-
-
-
-
-#Chiika.verifyUser()
-#Chiika.RequestMyAnimelist()
-#console.log Chiika.GetMyAnimelist()

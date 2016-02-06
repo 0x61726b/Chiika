@@ -23,7 +23,7 @@ CompletedList = React.createClass
 
   componentDidMount: ->
     list = cn.getAnimeListByUserStatus(2)
-    @setGridName("gridDroppedList")
+    @setGridName("gridCompletedList")
     @setList(list)
     $("#gridCompletedList").w2grid(@getGrid())
   componentWillUnmount: ->
