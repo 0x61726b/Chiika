@@ -37,14 +37,14 @@ class MyAnimelistLogin extends React.Component
   render: () ->
     (<div className="container">
       <div className="row">
-          <div className="col-sm-6 col-md-4 col-md-offset-4">
-              <h1 className="text-center login-title">MyAnimeList Login</h1>
+          <div className="loginContainer">
+              <h1 className="text-center login-title">Please login to your Myanimelist.net Account</h1>
                 <div className="account-wall">
-                    <img className="profile-img" src="http://i48.tinypic.com/2ed4azd.jpg" />
+                    <img className="profile-img" src="./../assets/images/my.png" />
                     <div className="form-signin">
-                    <input type="text" id="email" className="form-control" placeholder="Email" required autofocus />
-                    <input type="password" id="password" className="form-control" placeholder="Password" required />
-                    <button onClick={this.onSubmit} className="btn btn-lg btn-primary btn-block">Sign in</button>
+                    <input type="text" id="email" className="form-control chiika-input" placeholder="Email" required autofocus />
+                    <input type="password" id="password" className="form-control chiika-input" placeholder="Password" required />
+                    <button onClick={this.onSubmit} className="chiika-button" id="login-button">Sign in</button>
                     </div>
                 </div>
           </div>

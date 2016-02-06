@@ -39,10 +39,18 @@
 
 .statusDd {
     text-align: left;
-    padding-left: 15px;
     width: 180px;
     font-weight: 400;
     outline: none;
+}
+
+.statusDd li {
+    padding-left: 15px;
+    transition: color .3s;
+}
+
+.statusDd li:hover {
+    color: color($userColor, 800);
 }
 
 .statusDd li {
@@ -52,6 +60,11 @@
 
 
 /***********************/
+
+#animeDetails {
+    background-image: url(./../assets/images/gplaypattern.png);
+    background-repeat: repeat;
+}
 
 #animeTitle {
     height: 51px;
@@ -347,10 +360,19 @@
     opacity: 0.87
 }
 
+#episodeWatchedInput {
+    color: white!important;
+}
+
+#watched {
+    margin-top: 3px;
+}
+
 .episodeInput {
     background-color: transparent!important;
     width: 40px;
     border: 0px;
+    top: 5px;
     border-bottom: 1px solid white!important;
     display: flex;
     flex-direction: column;
@@ -361,6 +383,7 @@
     color: white;
     margin-left: 5px;
     margin-right: 5px;
+    margin-top: 3px;
 }
 
 
@@ -498,7 +521,6 @@
     align-items: center;
     justify-content: center;
     text-align: center;
-    background-color: white;
 }
 
 #buttonContainer {

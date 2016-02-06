@@ -1,20 +1,19 @@
-.animelistStatusbar
-{
-  float:right;
+.statusBar {
+    box-shadow: 0px -1px 5px rgba(0, 0, 0, 0.2);
 }
 
-.animelistIcons
-{
-
+.animelistStatusbar {
+    float: right;
 }
 
-.statusText
-{
-  height:inherit;
-  width:70%;
+.animelistIcons {}
+
+.statusText {
+    height: inherit;
+    width: 70%;
 }
-.statusbarGlobal
-{
-  width:30%;
-  float:right;
+
+.statusbarGlobal {
+    width: 30%;
+    float: right;
 }
