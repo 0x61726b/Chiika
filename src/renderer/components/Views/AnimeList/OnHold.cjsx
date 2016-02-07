@@ -25,6 +25,7 @@ OnHoldList = React.createClass
     list = cn.getAnimeListByUserStatus(3)
     @setGridName("gridOnHoldList")
     @setList(list)
+    @addColumns()
     $("#gridOnHoldList").w2grid(@getGrid())
 
   componentWillUnmount: ->

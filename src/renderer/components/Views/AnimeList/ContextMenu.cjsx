@@ -13,80 +13,66 @@
 #authors: arkenthera
 #Description:
 #----------------------------------------------------------------------------
-class ContextMenu
-  currentGrid:""
-  activeMap:[
 
-  ]
-  onSelect: (gridName) ->
-    @currentGrid = gridName
-    console.log @currentGrid
-  getIfActive: (col) ->
-    res = $.grep @activeMap, (e) -> e.key == col
-    ret = false
-    if res[0] == undefined
-      ret = false
+React = require 'react'
+ReactDOM = require 'react-dom'
+
+
+GridHelper = require './GridHelper'
+
+TestContextMenu = React.createClass
+  contextMenuData:{ }
+  handleSelect: (e) ->
+    if e.currentTarget.checked == true
+      for columns in @props.columns
+        res =  $.grep $(e.target).parent().parent().attr('class').split(" "), (e) -> e == columns.name
+        if res.length > 0
+          gh  = new GridHelper w2ui[@props.gridName]
+          gh.addColumn res[0]
+          w2ui[@props.gridName] = gh.getGrid()
+          w2ui[@props.gridName].refresh()
     else
-      ret = res[0].value
-    ret
-  constructor: (mixin,gridName,activeMap)->
-    @currentGrid = gridName
-    @activeMap = activeMap
+      for columns in @props.columns
+        res =  $.grep $(e.target).parent().parent().attr('class').split(" "), (e) -> e == columns.name
+        if res.length > 0
+          gh  = new GridHelper w2ui[@props.gridName]
+          gh.removeColumn res[0]
+
+  componentDidMount: ->
+    toggleables = $.grep @props.columns, (e) -> e.toggleable == true
+
+    contextMenuItems = {}
+
+
+
+    for val,index in @props.columns
+      if val.toggleable == true
+        contextMenuItems[val.name] = {}
+        contextMenuItems[val.name].name = val.name
+        contextMenuItems[val.name].type = "checkbox"
+        contextMenuItems[val.name].events = { click: @handleSelect }
+        contextMenuItems[val.name].className = val.name
+
+        if val.order != -1
+          @contextMenuData[val.name] = true
+
 
     $.contextMenu({
-                  selector: '.w2ui-head',
-                  items: {
-                    typeWithIcon: {
-                      name:"Type Icon"
-                      type:"checkbox"
-                      selected:@getIfActive 'typeWithIcon'
-                      events:{
-                        click: (e) =>
-                          if e.currentTarget.checked == true
-                            mixin.addTypeWithIconColumn()
-                            mixin.refresh()
-                          else
-                            mixin.removeColumn 'typeWithIcon'
-                      }
-                    }
-                    typeWithText: {
-                      name:"Type with Text"
-                      type:"checkbox"
-                      selected:@getIfActive 'typeWithText'
-                      events:{
-                        click: (e) =>
-                          if e.currentTarget.checked == true
-                            mixin.addTypeWithTextColumn()
-                            mixin.refresh()
-                          else
-                            mixin.removeColumn 'typeWithText'
-                      }
-                    },
-                    typeIconsColors: {
-                      name:"Type Icon + Airing Status"
-                      type:"checkbox"
-                      events: {
-                        click: (e) =>
-                          if e.currentTarget.checked == true
-                            w2ui[@currentGrid].showColumn 'typeWithIconColors'
-                          else
-                            w2ui[@currentGrid].hideColumn 'typeWithIconColors'
-                      }
-                    },
-                    separator1: { type: "cm_seperator" }
-                    airingStatus: {
-                      name:"Airing Status"
-                      type:"checkbox"
-                      events: {
-                        click: (e) =>
-                          if e.currentTarget.checked == true
-                            w2ui[@currentGrid].showColumn 'airingStatusText'
-                          else
-                            w2ui[@currentGrid].hideColumn 'airingStatusText'
-                      }
-                    }
-                  }
-              })
+    selector: ".w2ui-head",
+    items:contextMenuItems,
+    events: {
+      show: (opt) =>
+        $.contextMenu.setInputValues(opt, @contextMenuData)
+      hide: (opt) =>
+        $.contextMenu.getInputValues(opt, @contextMenuData)
 
-
-module.exports = ContextMenu
+        for input in opt.inputs
+          checked = input.$input[0].checked
+          @contextMenuData.input = checked
+        console.log @contextMenuData
+    }})
+  componentWillUnmount: ->
+    $.contextMenu ('destroy')
+  render: ->
+    (<div id="contextMenuTest"></div>)
+module.exports = TestContextMenu

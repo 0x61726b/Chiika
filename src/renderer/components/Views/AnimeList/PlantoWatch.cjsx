@@ -26,7 +26,7 @@ PlantoWatchList = React.createClass
     list = cn.getAnimeListByUserStatus(6)
     @setGridName("gridPlantoWatchList")
     @setList(list)
-
+    @addColumns()
     $("#gridPlantoWatchList").w2grid(@getGrid())
   componentWillUnmount: ->
     $('#gridPlantoWatchList').w2destroy()

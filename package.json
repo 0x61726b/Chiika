@@ -27,6 +27,7 @@
     "react": "^0.14.6",
     "react-bootstrap": "^0.28.2",
     "react-bootstrap-table": "^1.4.4",
+    "react-contextmenu": "^0.3.0",
     "react-dom": "^0.14.6",
     "react-router": "^1.0.3",
     "react-tabs": "^0.5.1"

@@ -26,6 +26,7 @@ DroppedList = React.createClass
     list = cn.getAnimeListByUserStatus(4)
     @setGridName("gridDroppedList")
     @setList(list)
+    @addColumns()
     $("#gridDroppedList").w2grid(@getGrid())
   componentWillUnmount: ->
     $('#gridDroppedList').w2destroy()

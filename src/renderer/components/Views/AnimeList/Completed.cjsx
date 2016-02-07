@@ -25,6 +25,7 @@ CompletedList = React.createClass
     list = cn.getAnimeListByUserStatus(2)
     @setGridName("gridCompletedList")
     @setList(list)
+    @addColumns()
     $("#gridCompletedList").w2grid(@getGrid())
   componentWillUnmount: ->
     $('#gridCompletedList').w2destroy()

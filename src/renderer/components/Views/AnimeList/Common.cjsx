@@ -16,38 +16,14 @@
 React = require 'React'
 Search = require './../../RouteManager'
 cn = require './../../../ChiikaNode'
-ContextMenu = require './ContextMenu'
 fs = require 'fs'
 
-
-Grid = {
-    name   : '',
-    reorderColumns:true,
-    columns: [
-
-
-    ],
-    records: [
-    ]
-    onClick: (event) ->
-      false
-    onDblClick: (event) ->
-      window.location = "#Anime/" + Grid.records[event.recid].animeId
-}
+GridHelper = require './GridHelper'
 
 AnimeListMixin =
   gridName:""
   contextMenu:null
-  fileFuncMap:[
-    { column: 'typeWithIcon',fnc: 'addTypeWithIconColumn' },
-    { column: 'title',fnc: 'addTitleColumn' },
-    { column: 'score',fnc: 'addScoreColumn' },
-    { column: 'progress',fnc: 'addProgressColumn' },
-    { column: 'season',fnc: 'addSeasonColumn' },
-    { column: 'typeWithText',fnc: 'addTypeWithTextColumn' },
-    { column: 'typeWithIconColors',fnc: 'addTypeWithIconColors' },
-    { column: 'airingStatusText',fnc: 'addAiringStatusText' },
-  ]
+  gh:null
   localGrid:{
     name:'',
     reorderColumns:true
@@ -58,26 +34,41 @@ AnimeListMixin =
     onDblClick: (event) ->
       window.location = "#Anime/" + @records[event.recid].animeId
   }
-  componentWillMount: ->
+  componentDidMount: ->
     @list = []
+
+  addColumns: ->
     @props.columns.sort( (a,b) ->
       x = a.order
       y = b.order
       return !((x < y) ? -1 : ((x > y) ? 1 : 0)))
-    console.log @props.columns
+
+    @gh = new GridHelper @localGrid
+
+
 
     for col in @props.columns
-      func = $.grep(@fileFuncMap, (e) -> return e.column == col.name)
-      if func != undefined
-        this[func[0].fnc]()
+      if col.hiddenDefault == false
+          @gh.addColumn col.name
   componentWillUnmount: ->
     columnDataPath = cn.chiikaNode.rootOptions.modulePath+'Data/column.json'
     stream = fs.createWriteStream(columnDataPath)
     columnData = []
 
-    for col,index in w2ui[@localGrid.name].columns
-      columnData.push { column: { name: col.field, order: index }}
-    console.log JSON.stringify columnData
+    for col,index in @props.columns
+      findInGrid = $.grep w2ui[@localGrid.name].columns, (e) -> e.field == col.name
+
+      orderInGrid = -1
+      for column,j in w2ui[@localGrid.name].columns
+        if column.field == col.name
+          orderInGrid = j
+
+      hidden = true
+      i = -1
+      if findInGrid.length > 0
+        hidden = false
+        i = orderInGrid
+      columnData.push { column: { name: col.name, order: i,toggleable: col.toggleable,hiddenDefault:hidden}}
 
 
     stream.once 'open', (fd) =>
@@ -85,6 +76,7 @@ AnimeListMixin =
       stream.end('')
 
     @localGrid.columns = []
+
 
   setGridName: (grid) ->
     @localGrid.name = grid
@@ -97,51 +89,18 @@ AnimeListMixin =
   removeColumn: (name) ->
     _ = require 'lodash'
     _.remove w2ui[@localGrid.name].columns, { field: name }
+    _.remove @localGrid.columns, { field: name }
     w2ui[@localGrid.name].refresh()
   refresh: ->
-    w2ui[@localGrid.name].refresh()
     w2ui[@localGrid.name].columns = @localGrid.columns
-  addTypeWithIconColors: ->
-    @localGrid.columns.push { field: 'typeWithIconColors',  caption: '',attr: "align=center", hidden:true,size: '40px',render:(icon) ->
-      '<i class="'+icon.icon+'" style="color:'+icon.airingStatusColor+'"></i>' }
-  addTypeWithTextColumn: ->
-    @localGrid.columns.push { field: 'typeWithText', caption: 'Type', size: '120px',resizable: true, sortable: true  },
-  addTypeWithIconColumn: ->
-    @localGrid.columns.push { field: 'typeWithIcon', caption: '',attr: "align=center", size: '40px',render:(icon) ->
-      '<i class="'+icon.icon+'"></i>'  }
-  addTitleColumn: ->
-    @localGrid.columns.push {
-       field: 'title',
-       caption: 'Title',
-       size: '40%',
-       resizable: true,
-       sortable: true,
-       render:(title) ->
-         '<div anime-id="'+title.animeId+'" id="details">'+title.title+'</a>'
-    }
-  addAiringStatusTextColumn: ->
-    @localGrid.columns.push { field: 'airingStatusText', caption: 'Type', size: '120px',resizable: true, sortable: true,hidden:true  },
-  addScoreColumn: ->
-    @localGrid.columns.push { field: 'score', caption: 'Score', size: '10%',resizable: true, sortable: true }
-  addProgressColumn: ->
-    @localGrid.columns.push { field: 'progress', caption: 'Progress', size: '40%',resizable: true, sortable: true}
-  addSeasonColumn: ->
-    @localGrid.columns.push { field: 'season', caption: 'Season', size: '120px',resizable: true, sortable: true  }
+    w2ui[@localGrid.name].refresh()
 
 
   getGrid: () ->
-    @localGrid
-  componentDidMount: ->
-    activeMap = []
+    @gh.getGrid()
+  attachContextMenu: () ->
 
-    for val in @localGrid.columns
-      obj = {}
-      obj.key = val.field
-      obj.value = true
-      activeMap.push obj
 
-    console.log activeMap
-    @contextMenu = new ContextMenu this,@localGrid.name,activeMap
 
 
 

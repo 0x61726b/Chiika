@@ -26,7 +26,11 @@ WatchingList = React.createClass
     @setGridName("gridWatchingList")
     @setList(list)
 
+    @addColumns()
     $("#gridWatchingList").w2grid(@getGrid())
+
+
+
   componentWillUnmount: ->
     $('#gridWatchingList').w2destroy();
   refreshDataSource: ->

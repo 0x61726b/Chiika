@@ -29,6 +29,7 @@ PlantoWatchList = require './AnimeList/PlantoWatch'
 DroppedList = require './AnimeList/Dropped'
 OnHoldList = require './AnimeList/OnHold'
 CompletedList = require './AnimeList/Completed'
+ContextMenu = require './AnimeList/ContextMenu'
 
 
 Chiika = require './../../ChiikaNode'
@@ -41,11 +42,14 @@ AnimeList = React.createClass
   loadColumnData: ->
     columnData =
       [
-        {column: { name:"typeWithIcon",order:0} },
-        {column: { name:"title",order:1} },
-        {column: { name:"score",order:2} },
-        {column: { name:"season",order:4 }},
-        {column: { name:"progress",order:3 }},
+        {column: { name:"typeWithIcon",order:0,toggleable:true,hiddenDefault:false} },
+        {column: { name:"title",order:1,toggleable:false,hiddenDefault:false} },
+        {column: { name:"score",order:2,toggleable:false,hiddenDefault:false} },
+        {column: { name:"season",order:4,toggleable:false,hiddenDefault:false }},
+        {column: { name:"progress",order:3,toggleable:false,hiddenDefault:false }},
+        {column: { name:"typeWithIconColors",order:-1,toggleable:true,hiddenDefault:true }},
+        {column: { name:"typeWithText",order:-1,toggleable:true,hiddenDefault:true }},
+        {column: { name:"airingStatusText",order:-1,toggleable:true,hiddenDefault:true }},
       ]
     #fs.appendFile Chiika.chiikaNode.rootOptions.modulePath + "Data/column.json",JSON.stringify(columnData), (err) => console.log err
 
@@ -86,13 +90,9 @@ AnimeList = React.createClass
 
     startingIndex = this.props.startWithTabIndex
     result = $.grep(@state.tabs, (e) -> return e.index == startingIndex )
-    
-  onSelect: (index,last) ->
-    result = $.grep(@state.tabs, (e) -> return e.index == index )
-    gridName = result[0].element
-    @contextMenu.onSelect gridName
 
-    this.props.onSelect index,last
+  onSelect: (index,last) ->
+        this.props.onSelect index,last
   render: () ->
     (<Tabs selectedIndex={this.props.startWithTabIndex} onSelect={this.onSelect} forceRenderTabPanel={false}>
         <TabList>
@@ -102,18 +102,23 @@ AnimeList = React.createClass
         </TabList>
         <TabPanel key={0}>
           <WatchingList columns={@getColumnArray()} />
+          <ContextMenu columns={@getColumnArray()} gridName="gridWatchingList" />
         </TabPanel>
         <TabPanel key={1}>
-          <PlantoWatchList />
+          <PlantoWatchList columns={@getColumnArray()} />
+          <ContextMenu columns={@getColumnArray()} gridName="gridPlantoWatchList" />
         </TabPanel>
         <TabPanel key={2}>
-          <CompletedList />
+          <CompletedList columns={@getColumnArray()}/>
+          <ContextMenu columns={@getColumnArray()} gridName="gridCompletedList" />
         </TabPanel>
         <TabPanel key={3}>
-          <OnHoldList />
+          <OnHoldList columns={@getColumnArray()} />
+          <ContextMenu columns={@getColumnArray()} gridName="gridOnHoldList" />
         </TabPanel>
         <TabPanel key={4}>
-          <DroppedList />
+          <DroppedList columns={@getColumnArray()} />
+          <ContextMenu columns={@getColumnArray()} gridName="gridDroppedList" />
         </TabPanel>
       </Tabs>);
 

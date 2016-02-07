@@ -1,1 +1,0 @@
-[{"column":{"name":"Title"}},{"column":{"name":"Score"}},{"column":{"name":"Progress"}},{"column":{"name":"Season"}}]
