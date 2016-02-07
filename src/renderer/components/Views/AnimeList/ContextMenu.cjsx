@@ -15,35 +15,51 @@
 #----------------------------------------------------------------------------
 class ContextMenu
   currentGrid:""
+  activeMap:[
+
+  ]
   onSelect: (gridName) ->
     @currentGrid = gridName
     console.log @currentGrid
-  constructor: (gridName)->
+  getIfActive: (col) ->
+    res = $.grep @activeMap, (e) -> e.key == col
+    ret = false
+    if res[0] == undefined
+      ret = false
+    else
+      ret = res[0].value
+    ret
+  constructor: (mixin,gridName,activeMap)->
     @currentGrid = gridName
+    @activeMap = activeMap
+
     $.contextMenu({
                   selector: '.w2ui-head',
                   items: {
                     typeWithIcon: {
                       name:"Type Icon"
                       type:"checkbox"
-                      selected:true
+                      selected:@getIfActive 'typeWithIcon'
                       events:{
                         click: (e) =>
                           if e.currentTarget.checked == true
-                            w2ui[@currentGrid].showColumn 'typeWithIcon'
+                            mixin.addTypeWithIconColumn()
+                            mixin.refresh()
                           else
-                            w2ui[@currentGrid].hideColumn 'typeWithIcon'
+                            mixin.removeColumn 'typeWithIcon'
                       }
                     }
                     typeWithText: {
                       name:"Type with Text"
                       type:"checkbox"
+                      selected:@getIfActive 'typeWithText'
                       events:{
                         click: (e) =>
                           if e.currentTarget.checked == true
-                            w2ui[@currentGrid].showColumn 'typeWithText'
+                            mixin.addTypeWithTextColumn()
+                            mixin.refresh()
                           else
-                            w2ui[@currentGrid].hideColumn 'typeWithText'
+                            mixin.removeColumn 'typeWithText'
                       }
                     },
                     typeIconsColors: {

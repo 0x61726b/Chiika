@@ -42,16 +42,16 @@ AnimeList = React.createClass
     columnData =
       [
         {column: { name:"typeWithIcon",order:0} },
-        {column: { name:"Title",order:1} },
-        {column: { name:"Score",order:2} },
-        {column: { name:"Season",order:4 }},
-        {column: { name:"Progress",order:3 }},
+        {column: { name:"title",order:1} },
+        {column: { name:"score",order:2} },
+        {column: { name:"season",order:4 }},
+        {column: { name:"progress",order:3 }},
       ]
     #fs.appendFile Chiika.chiikaNode.rootOptions.modulePath + "Data/column.json",JSON.stringify(columnData), (err) => console.log err
 
     columnDataPath = Chiika.chiikaNode.rootOptions.modulePath+'Data/column.json'
 
-    columnFileJson = {}
+    columnFileJson = []
     try
       file = fs.statSync(columnDataPath)
       bf = fs.readFileSync columnDataPath,'utf8'
@@ -64,9 +64,9 @@ AnimeList = React.createClass
         stream.end('')
       columnFileJson = columnData
 
+    @columnArray = []
     for val in columnFileJson
       @columnArray.push val.column
-
 
 
   getColumnArray: ->
@@ -86,7 +86,7 @@ AnimeList = React.createClass
 
     startingIndex = this.props.startWithTabIndex
     result = $.grep(@state.tabs, (e) -> return e.index == startingIndex )
-    @contextMenu = new ContextMenu result[0].element
+    
   onSelect: (index,last) ->
     result = $.grep(@state.tabs, (e) -> return e.index == index )
     gridName = result[0].element
