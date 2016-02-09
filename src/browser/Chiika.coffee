@@ -40,7 +40,7 @@ class Chiika
   @requestCallbackStop:4
   @requestManager:null
   init: () ->
-    @chiika = require("./../../../chiika-node")
+    @chiika = require("./../../lib/chiika-node")
     @modulePath = path.join(path.dirname(fs.realpathSync(@chiika.path)), '../')
     @rootOptions.modulePath = @modulePath
     @rootOptions.dataPath = @modulePath + "Data/"
