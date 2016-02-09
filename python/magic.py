@@ -11,65 +11,29 @@ import argparse
 # push = args.push;
 
 git_command_fetch_origin            = ['git', 'fetch','origin']
-git_command_pull                    = ['git','pull']
-git_command_clone_chiikaNode        = ['git','clone','https://github.com/arkenthera/chiika-node']
-git_command_clone_chiikaApi         = ['git','clone','https://github.com/arkenthera/ChiikaApi']
-git_command_init_submodules         = ['git','submodule','update', '--init','--recursive']
+git_command_merge                   = ['git','merge','FETCH_HEAD']
+git_command_submodule_init          = ['git','submodule','init']
+git_command_submodule_update        = ['git','submodule','update','--recursive']
 chiika  = os.getcwd() + "/../";
-chiikaNode  = os.getcwd() + "/../../chiika-node";
-chiikaApi   = os.getcwd() + "/../../ChiikaApi";
+chiikaNode  = os.getcwd() + "/../lib/chiika-node";
+chiikaApi   = os.getcwd() + "/../lib/ChiikaApi";
 
-def Check_If_Chiika_Exists_Otherwise_Clone():
-    if os.path.isdir(chiikaNode):
-        print "Chiika-Node exists on " + os.path.abspath(chiikaNode)
-    else:
-        print "Chiika-Node doesn't exist.Cloning from https://github.com/arkenthera/chiika-node"
+print "Creating magic.."
+print "Mixing tomes..."
+git_query = Popen(git_command_fetch_origin, cwd=chiika, stdout=PIPE, stderr=PIPE)
+print "Creating staff of wizardy..."
+git_query = Popen(git_command_merge, cwd=chiika, stdout=PIPE, stderr=PIPE)
+print "Merging dark particles.."
+git_query = Popen(git_command_submodule_init, cwd=chiika, stdout=PIPE, stderr=PIPE)
+print "Using sacred stones.."
+git_query = Popen(git_command_submodule_update, cwd=chiika, stdout=PIPE, stderr=PIPE)
 
-        git_query = Popen(git_command_clone_chiikaNode, cwd=chiikaNode + '/..', stdout=PIPE, stderr=PIPE)
-        (git_status, error) = git_query.communicate()
-    if os.path.isdir(chiikaApi):
-        print "ChiikaApi exists on " + os.path.abspath(chiikaApi)
-    else:
-        print "ChiikaApi doesn't exist.Cloning from https://github.com/arkenthera/ChiikaApi"
+print "Receiving flux of dark magic.."
+git_query = Popen(git_command_submodule_init, cwd=chiikaApi, stdout=PIPE, stderr=PIPE)
+git_query = Popen(git_command_submodule_update, cwd=chiikaApi, stdout=PIPE, stderr=PIPE)
 
-        git_query = Popen(git_command_clone_chiikaApi, cwd=chiikaApi + '/..', stdout=PIPE, stderr=PIPE)
-        (git_status, error) = git_query.communicate()
+print "Igniting fire particles.."
+git_query = Popen(git_command_submodule_init, cwd=chiikaApi + "/ChiikaAPI/ThirdParty/log4cplus", stdout=PIPE, stderr=PIPE)
+git_query = Popen(git_command_submodule_update, cwd=chiikaApi + "/ChiikaAPI/ThirdParty/log4cplus", stdout=PIPE, stderr=PIPE)
 
-def Pull_Chiika():
-    print "Fetching ChiikaApi..."
-    #Fetch ChiikaApi
-    git_query = Popen(git_command_fetch_origin, cwd=chiikaApi, stdout=PIPE, stderr=PIPE)
-    (git_status, error) = git_query.communicate()
-
-    print "Pulling ChiikaApi..."
-    #Pull ChiikaApi
-    git_query = Popen(git_command_pull, cwd=chiikaApi, stdout=PIPE, stderr=PIPE)
-    (git_status, error) = git_query.communicate()
-
-    print "Pulling submodules..."
-    git_query = Popen(git_command_init_submodules, cwd=chiikaApi, stdout=PIPE, stderr=PIPE)
-    (git_status, error) = git_query.communicate()
-
-    #Fetch ChiikaApi
-    print "Fetching Chiika-Node..."
-    git_query = Popen(git_command_fetch_origin, cwd=chiikaNode, stdout=PIPE, stderr=PIPE)
-    (git_status, error) = git_query.communicate()
-
-    print "Pulling Chiika-Node..."
-    #Pull ChiikaApi
-    git_query = Popen(git_command_pull, cwd=chiikaNode, stdout=PIPE, stderr=PIPE)
-    (git_status, error) = git_query.communicate()
-
-
-    #Fetch Chiika
-    print "Fetching Chiika..."
-    git_query = Popen(git_command_fetch_origin, cwd=chiika, stdout=PIPE, stderr=PIPE)
-    (git_status, error) = git_query.communicate()
-
-    print "Pulling Chiika..."
-    #Pull ChiikaApi
-    git_query = Popen(git_command_pull, cwd=chiika, stdout=PIPE, stderr=PIPE)
-    (git_status, error) = git_query.communicate()
-
-Check_If_Chiika_Exists_Otherwise_Clone()
-Pull_Chiika()
+print "Magic ready."
