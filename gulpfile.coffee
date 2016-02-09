@@ -125,9 +125,28 @@ Write_a_package_json_for_distribution = () ->
     json.main = './browser/Application.js'
     fs.writeFile(distDir + '/package.json', JSON.stringify(json), () -> done())
 
+Copy_Chiika_Node = () ->
+  gulp.task 'copyChiikaNode', (done) ->
+    chiikaNodePath = "lib/chiika-node"
+
+    debugExists = false
+    releaseExists = false
+    try
+      fs.accessSync(chiikaNodePath + "/build/Debug")
+      chiikaNodePath = chiikaNodePath + "/build/Debug"
+      debugExists = true
+
+    catch error
+      console.log error
+      debugExists = false
+      return;
+
+    gulp.src(chiikaNodePath + "/**/*")
+        .pipe(gulp.dest(distDir + "/" + chiikaNodePath))
+
 Package_for_each_platforms = () ->
 
-  gulp.task 'package', ['win32', 'darwin', 'linux'].map (platform) ->
+  gulp.task 'package', ['win32'].map (platform) ->
 
     taskName = 'package:' + platform
 
@@ -163,13 +182,15 @@ do Your_Application_will_ = () ->
   Copy_Node_modules()
   Write_a_package_json_for_distribution()
   Package_for_each_platforms()
+  Copy_Chiika_Node()
 
   gulp.task('build', ['html', 'compile:scripts', 'packageJson', 'copy:fonts', 'misc'])
   gulp.task 'serve', ['inject:css', 'compile:scripts:watch', 'compile:styles', 'misc'], () ->
     development = null
+    development = Object.create( process.env );
+    development.CHIIKA_ENV = 'debug';
     if argv.pls
-      development = Object.create( process.env );
-      development.Show_CA_Debug_Tools = 'yeah';
+      development.Show_CA_Debug_Tools = 'yeah'
 
     electron = require('arkenthera-electron-connect').server.create({
         electron:ep,

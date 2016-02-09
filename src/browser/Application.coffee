@@ -28,6 +28,10 @@ appMenu = require './menu/appMenu'
 Menu = require 'menu'
 Chiika = require './Chiika'
 
+yargs = require 'yargs'
+path = require 'path'
+
+fs = require 'fs'
 # ---------------------------
 #
 # ---------------------------
@@ -41,6 +45,8 @@ class Application
     # Report crashes to our server.
     require('crash-reporter').start()
 
+    @parseCommandLine()
+    @setupChiikaConfig()
     # Quit when all windows are closed.
     app.on 'window-all-closed', ->
        app.quit()
@@ -48,6 +54,14 @@ class Application
        @openWindow()
        @registerShortcuts()
 
+  setupChiikaConfig: ->
+    chiikaHome = path.join(app.getPath('appData'),"Chiika")
+    chiikaLog = path.join(app.getPath('appData'),"Logs")
+    process.env.CHIIKA_HOME = chiikaHome
+    process.env.CHIIKA_LOG_HOME ?= chiikaLog
+  parseCommandLine: ->
+    options = yargs(process.argv[1..]).wrap(100)
+    args = options.argv
   registerShortcuts: ->
     #To-do
 

@@ -16,6 +16,7 @@
 
 path = require('path')
 fs = require('fs')
+path = require 'path'
 electron = require 'electron'
 ipcMain = electron.ipcMain
 BrowserWindow = electron.BrowserWindow
@@ -40,8 +41,11 @@ class Chiika
   @requestCallbackStop:4
   @requestManager:null
   init: () ->
-    @chiika = require("./../../lib/chiika-node")
-    @modulePath = path.join(path.dirname(fs.realpathSync(@chiika.path)), '../')
+    if process.env.CHIIKA_ENV == 'debug'
+      @chiika = require("./../../lib/chiika-node")
+    else
+      @chiika = require("./../lib/chiika-node")
+    @modulePath = process.env.CHIIKA_HOME
     @rootOptions.modulePath = @modulePath
     @rootOptions.dataPath = @modulePath + "Data/"
     @rootOptions.imagePath = @rootOptions.dataPath + "Images/"
@@ -56,6 +60,14 @@ class Chiika
     @requestManager = new RequestManager this
 
     console.log "Browser process init successful"
+
+    @copyConfigFiles()
+  copyConfigFiles: ->
+    console.log  process.env_CHIIKA_HOME
+    if process.env.CHIIKA_ENV == 'debug'
+      configPath =  path.join(path.dirname(fs.realpathSync(@chiika.path)), '../','Debug','config')
+    fs.createReadStream(configPath + "/log4cplusconfig")
+      .pipe(fs.createWriteStream( process.env_CHIIKA_HOME + "/Logs/log4cplusconfig"))
   destroy: () ->
     @chiika.DestroyChiika()
 
