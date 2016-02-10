@@ -25,7 +25,7 @@ RequestManager = require './common/RequestManager'
 
 class Chiika
   rootOptions:{
-    debugMode:false,
+    logLevel:1,
     appMode:true
   }
   @chiika: null
