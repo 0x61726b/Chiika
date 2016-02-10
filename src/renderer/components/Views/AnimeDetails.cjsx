@@ -14,6 +14,7 @@
 #Description:
 #
 fs = require 'fs'
+path = require 'path'
 React = require 'react'
 h = require './../Helpers'
 Router = require 'react-router'
@@ -37,8 +38,7 @@ AnimeDetails = React.createClass
     @anime = Chiika.getAnimeById(@props.params.animeId)
     console.log @anime
 
-    animeCover = Chiika.chiikaNode.rootOptions.imagePath + "Anime/" + @anime.series_animedb_id + ".jpg"
-    animeCover = animeCover.replace("/\\/g","/")
+    animeCover = path.join(Chiika.chiikaNode.rootOptions.imagePath,"Anime", @anime.series_animedb_id + ".jpg")
 
     try
       file = fs.statSync(animeCover)
@@ -87,15 +87,14 @@ AnimeDetails = React.createClass
     if @anime.anime.series_status == "2"
       $(".airingStatsuDiv span").text("Finished Airing")
   getCoverImage: () ->
-    animeCover = Chiika.chiikaNode.rootOptions.imagePath + "Anime/" + @anime.series_animedb_id + ".jpg"
+    animeCover = path.join(Chiika.chiikaNode.rootOptions.imagePath,"Anime",@anime.series_animedb_id + ".jpg")
     try
       file = fs.statSync(animeCover)
       @coverExists = true
     catch error
       @coverExists = false
     if @coverExists
-      animeCover = Chiika.chiikaNode.rootOptions.imagePath + "Anime/" + @anime.series_animedb_id + ".jpg"
-      animeCover = animeCover.replace("/\\/g","/")
+      animeCover = path.join(Chiika.chiikaNode.rootOptions.imagePath,"Anime",@anime.series_animedb_id + ".jpg")
       $("#coverImg").attr("src",animeCover)
       $("#coverImg").removeClass("loadingSomething")
       $(".cIm").removeClass("rotateLogo")

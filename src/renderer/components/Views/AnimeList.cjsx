@@ -31,6 +31,8 @@ OnHoldList = require './AnimeList/OnHold'
 CompletedList = require './AnimeList/Completed'
 ContextMenu = require './AnimeList/ContextMenu'
 
+path = require 'path'
+
 
 Chiika = require './../../ChiikaNode'
 fs = require 'fs'
@@ -53,7 +55,7 @@ AnimeList = React.createClass
       ]
     #fs.appendFile Chiika.chiikaNode.rootOptions.modulePath + "Data/column.json",JSON.stringify(columnData), (err) => console.log err
 
-    columnDataPath = Chiika.chiikaNode.rootOptions.modulePath+'Data/column.json'
+    columnDataPath = path.join(process.env.CHIIKA_HOME,'Config','animeListTable.json')
 
     columnFileJson = []
     try

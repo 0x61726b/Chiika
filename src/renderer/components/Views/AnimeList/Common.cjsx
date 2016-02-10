@@ -17,6 +17,7 @@ React = require 'React'
 Search = require './../../RouteManager'
 cn = require './../../../ChiikaNode'
 fs = require 'fs'
+path = require 'path'
 
 GridHelper = require './GridHelper'
 
@@ -51,7 +52,7 @@ AnimeListMixin =
       if col.hiddenDefault == false
           @gh.addColumn col.name
   componentWillUnmount: ->
-    columnDataPath = cn.chiikaNode.rootOptions.modulePath+'Data/column.json'
+    columnDataPath = path.join(process.env.CHIIKA_HOME,'Config','animeListTable.json')
     stream = fs.createWriteStream(columnDataPath)
     columnData = []
 

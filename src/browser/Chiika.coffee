@@ -47,8 +47,8 @@ class Chiika
       @chiika = require("./../lib/chiika-node")
     @modulePath = process.env.CHIIKA_HOME
     @rootOptions.modulePath = @modulePath
-    @rootOptions.dataPath = @modulePath + "Data/"
-    @rootOptions.imagePath = @rootOptions.dataPath + "Images/"
+    @rootOptions.dataPath = path.join(@modulePath,"Data")
+    @rootOptions.imagePath = path.join(@rootOptions.dataPath,"Images")
     @root = @chiika.Root(@rootOptions)
 
     @db = @chiika.Database()
@@ -61,13 +61,6 @@ class Chiika
 
     console.log "Browser process init successful"
 
-    @copyConfigFiles()
-  copyConfigFiles: ->
-    console.log  process.env_CHIIKA_HOME
-    if process.env.CHIIKA_ENV == 'debug'
-      configPath =  path.join(path.dirname(fs.realpathSync(@chiika.path)), '../','Debug','config')
-    fs.createReadStream(configPath + "/log4cplusconfig")
-      .pipe(fs.createWriteStream( process.env_CHIIKA_HOME + "/Logs/log4cplusconfig"))
   destroy: () ->
     @chiika.DestroyChiika()
 

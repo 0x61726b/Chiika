@@ -91,7 +91,7 @@ class ChiikaRenderer
       $("div.userInfo").html("No User")
     else
       $("div.userInfo").html(@getUserInfo().UserInfo.user_name)
-      imageUrl = @chiikaNode.rootOptions.imagePath + @getUserInfo().UserInfo.user_id+".jpg"
+      imageUrl = path.join(@chiikaNode.rootOptions.imagePath, @getUserInfo().UserInfo.user_id+".jpg")
 
       $("img#userAvatar").attr('src',imageUrl)
 
