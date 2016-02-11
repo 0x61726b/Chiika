@@ -18,11 +18,12 @@ class Utility
   apiBusy:false
   currentlySelectedAnimelistTab:0
   animelistTabs:[]
+  self:null
   constructor: () ->
     @RunEverything()
+    Utility::self = this
   RunEverything: () ->
     @SideMenuClickHandler()
-    @RotateLogoOnHover()
   FadeInElement: (element) ->
     element.fadeIn(1000).removeClass "hidden"
   FadeInOnPageLoad: () ->
@@ -44,19 +45,11 @@ class Utility
   SetApiBusy: (busy) ->
     @apiBusy = busy
     @RotateLogo(busy)
+    console.log "sss"
   SetActiveMenuItem: (index) ->
     $("div.navigation ul li").removeClass "active"
     console.log index
     $("div.navigation ul li:nth-child(" +(index+1)+ ")").toggleClass "active"
-  RotateLogoOnHover: () ->
-    $(".chiikaLogo").
-    hover(=>
-      if !@apiBusy
-        @RotateLogo(true)
-    =>
-      if !@apiBusy
-        @RotateLogo(false)
-    )
 
 
 

@@ -51,7 +51,7 @@ class Chiika
     @rootOptions.imagePath = path.join(@rootOptions.dataPath,"Images")
     @root = @chiika.Root(@rootOptions)
 
-    @db = @chiika.Database()
+    @db = @chiika.Database(@chiikaNativeEventListener)
     @request = @chiika.Request()
     @nativeUser = @db.User
 
@@ -59,9 +59,11 @@ class Chiika
 
     @requestManager = new RequestManager this
 
-    console.log "Browser process init successful"
-    console.log process.env.TZ
+    @sendAsyncMessageToRenderer 'chiikaInitialized',true
 
+  chiikaNativeEventListener:(ret) ->
+    console.log "Chiika System Event: "
+    console.log ret
   destroy: () ->
     @chiika.DestroyChiika()
 
@@ -75,9 +77,8 @@ class Chiika
     al = @getMyAnimelist()
     ml = @getMyMangalist()
     ui = @getUserInfo()
-    senpai = @getSenpaiData()
     cn =  { rootOptions:@rootOptions }
-    db = { animeList: al,mangaList:ml,userInfo:ui,chiikaNode:cn,senpai: senpai }
+    db = { animeList: al,mangaList:ml,userInfo:ui,chiikaNode:cn }
     @sendAsyncMessageToRenderer 'databaseRequest',db
   signalRendererToRerender:() ->
     @sendAsyncMessageToRenderer 'reRender','42'
@@ -188,6 +189,9 @@ ipcMain.on 'requestAnimeUpdate', (event,arg) ->
 
 ipcMain.on 'rendererPing',(event,arg) ->
   console.log "Receiving IPC message from renderer process! Args: " + arg
+
+  if arg == 'takeMeToTheHeavens'
+    chiikaNode.sendRendererData()
 
   if arg == 'requestVerify'
     chiikaNode.RequestVerifyUser()

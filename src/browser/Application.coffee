@@ -84,8 +84,9 @@ class Application
     if process.env.Show_CA_Debug_Tools == 'yeah'
       Menu.setApplicationMenu(appMenu)
 
-    Chiika.init()
     Chiika.setMainWindow(@window.getWindow())
+    Chiika.init()
+
 
 
 

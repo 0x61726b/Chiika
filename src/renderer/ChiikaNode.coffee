@@ -47,7 +47,10 @@ class ChiikaRenderer
   requestListenerMap:new Map()
   requestData: () ->
     @apiBusy = true
-    ipcRenderer.send 'rendererPing','databaseRequest'
+    ipcRenderer.send 'rendererPing','takeMeToTheHeavens'
+
+
+    @setApiBusy(true)
 
   #Send browser async requests to retrieve data
   constructor: ->
@@ -332,6 +335,11 @@ ipcRenderer.on 'requestVerifyError', (event,arg) ->
   chiikaRenderer.setStatusText("Error occured while processing verifying user...",2000)
   console.log arg
 
+ipcRenderer.on 'chiikaInitialized', (event,arg) ->
+  console.log 'Receiving IPC message from browser process!Event:chiikaInitialized'
+  chiikaRenderer.initialized = true
+  chiikaRenderer.checkApiBusy()
+
 ipcRenderer.on 'databaseRequest', (event,arg) ->
     console.log 'Receiving IPC message from browser process!Event:databaseRequest'
 
@@ -340,11 +348,6 @@ ipcRenderer.on 'databaseRequest', (event,arg) ->
     chiikaRenderer.databaseMyUserInfo = arg.userInfo
     chiikaRenderer.chiikaNode = arg.chiikaNode
     chiikaRenderer.databaseSenpai = arg.senpai
-    #Important!!! Dont remove
-    chiikaRenderer.initialized = true
-    chiikaRenderer.checkApiBusy()
-    chiikaRenderer.setApiBusy(false)
-
     chiikaRenderer.notifyRequestListeners 'databaseRequest'
 
     console.log arg.senpai
