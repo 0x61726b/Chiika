@@ -20,12 +20,64 @@
     color: black;
     opacity: 0.90;
     */
-    height: 30px;
+    height: 100%;
     font-family: roboto;
     font-size: 1.3em;
+    margin-top: 5px!important;
+    margin-bottom: 5px!important;
+    border-bottom: 1px solid #f5f5f5!important;
     border-right: 0px!important;
-    border-bottom: 1px solid #e5e5e5!important;
 }
+
+
+/***Odd Rows***/
+
+.w2ui-grid .w2ui-grid-body table tr.w2ui-odd td.w2ui-grid-data>div {
+    padding-top: .5em!important;
+    padding-bottom: .5em!important;
+}
+
+.w2ui-grid .w2ui-grid-body table tr.w2ui-odd {
+    background-color: white!important;
+}
+
+.w2ui-grid .w2ui-grid-body table tr.w2ui-odd:hover {
+    background-color: color($grey, 50)!important;
+}
+
+.w2ui-grid .w2ui-grid-body table tr.w2ui-odd:active {
+    background-color: color($grey, 100)!important;
+}
+
+
+/***Even Rows***/
+
+.w2ui-grid .w2ui-grid-body table tr.w2ui-even td.w2ui-grid-data>div {
+    padding-top: .5em!important;
+    padding-bottom: .5em!important;
+}
+
+.w2ui-grid .w2ui-grid-body table tr.w2ui-even {
+    background-color: white!important;
+}
+
+.w2ui-grid .w2ui-grid-body table tr.w2ui-even:hover {
+    background-color: color($grey, 50)!important;
+}
+
+.w2ui-grid .w2ui-grid-body table tr.w2ui-even:active {
+    background-color: color($grey, 100)!important;
+}
+
+
+/***All Rows : Selected***/
+
+.w2ui-grid .w2ui-grid-body .w2ui-grid-records table tr.w2ui-selected,
+.w2ui-grid .w2ui-grid-body .w2ui-grid-records table tr td.w2ui-selected {
+    background-color: color($blue-grey, 50)!important;
+}
+
+.w2ui-grid .w2ui-grid-body .w2ui-grid-records table tr.w2ui-odd:active {}
 
 //Override Tab page border
 .w2ui-grid {

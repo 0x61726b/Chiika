@@ -17,8 +17,15 @@ React = require 'react'
 h = require './../Helpers'
 
 class Calendar extends React.Component
-  componentWillMount:() ->
-    
+  tooltip: () -> $(document).ready ->
+                    $('.animeChip').tooltipster({
+                        content: $('<div class="tooltip-content"><div class="tooltip-animeTitle"><h4>{animeneym}</h4></div><div class = "tooltip-littleInfo"><h5>Progress: 5/12 | Your Score: - | Score: 40</h5></div><div class="tooltip-buttons"><button class="tooltipButton">Play Next</button> <button class = "tooltipButton buttonActive">Check Torrent</button> <button class = "tooltipButton buttonActive">Open Folder</button><button class = "tooltipButton buttonActive">Details</button></div></div >'),
+                        trigger: 'click',
+                        theme: 'tooltipster-light';
+                        interactive: true
+                });
+  componentDidMount: ->
+    @tooltip();
   render: () ->
     (<div>
         <div className="calendar-titleBar">
@@ -66,6 +73,7 @@ class Calendar extends React.Component
                     <h5 className="day-text">Fri</h5>
                 </div>
                 <div className="chipContainer">
+                    <button className="animeChip chip-notAired">Gintama S4 13:30</button>
                 </div>
             </div>
 

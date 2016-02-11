@@ -1,6 +1,8 @@
 [submodule "lib/ChiikaApi"]
 	path = lib/ChiikaApi
 	url = https://github.com/arkenthera/ChiikaApi
+	branch = master
 [submodule "lib/chiika-node"]
 	path = lib/chiika-node
 	url = https://github.com/arkenthera/chiika-node
+	branch = master

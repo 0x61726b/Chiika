@@ -196,7 +196,16 @@ body {
     box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.23);
     outline: none;
     margin: 2px;
-    background: darkblue;
+    background: color($grey, 700);
+    transition: background .3s, color .3s;
+}
+
+.tooltipButton:hover {
+    background: color($grey, 600);
+}
+
+.tooltipButton:active {
+    background: color($grey, 500);
 }
 
 .tooltipButton:hover {
@@ -204,14 +213,38 @@ body {
 }
 
 .buttonActive {
-    background-color: #616161;
-    transition: background .3s, color .3s;
+    background-color: color($accentColor, 700);
 }
 
 .buttonActive:hover {
-    background: #757575;
+    background: color($accentColor, 600);
 }
 
 .buttonActive:active {
-    background: #9E9E9E;
+    background: color($accentColor, 500);
+}
+
+.tooltipster-light {
+    border-radius: 5px;
+    border: 1px solid #cccccc;
+    background: #ededed;
+    color: #666666;
+}
+
+.tooltipster-light .tooltipster-content {
+    font-size: 14px;
+    line-height: 20px;
+    padding: 8px 10px;
+}
+
+.tooltipster-light h4 {
+    font-weight: 400;
+    margin-top: 2px;
+    margin-bottom: 5px;
+}
+
+.tooltipster-light h5 {
+    font-weight: 300;
+    margin-top: 2px;
+    margin-bottom: 5px;
 }

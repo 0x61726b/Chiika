@@ -146,7 +146,7 @@ class Chiika
   getUserInfo:() ->
     @db.User
   getSenpaiData: () ->
-    @dt.Senpai
+    @db.Senpai
   onKeyPressed:(arg) ->
     @sendAsyncMessageToRenderer 'browserKeyboardEvent',arg
 

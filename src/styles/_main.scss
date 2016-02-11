@@ -25,35 +25,29 @@
 }
 
 td {
-    background-color: white;
-    background-image: '';
-}
+background-image: '';
 
+}
 .gridSearch {
     margin-left: auto;
     margin-right: auto;
     width: 60%;
 }
-
 #gridSearch {
     -webkit-app-region: no-drag;
     height: 30px!important;
 }
-
 .form-control {
     box-shadow: inset 0 0px 0px rgba(0, 0, 0, 0);
 }
-
 input:not([type=button]) {
     padding: 0!important;
     background-color: #e0e0e0;
     border-radius: 0px;
     border: 0px;
 }
-
 .w2ui-overlay table.w2ui-drop-menu .w2ui-icon {
     color: black;
 }
-
 
 /*# sourceMappingURL=main.css.map */
