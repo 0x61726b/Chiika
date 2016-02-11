@@ -17,6 +17,7 @@ git_command_submodule_init          = ['git','submodule','init']
 git_command_submodule_update_rec    = ['git','submodule','update','--recursive']
 git_command_submodule_update        = ['git','submodule','update']
 git_command_status                  = ['git','status']
+git_checkout_master                 = ['git','checkout','master']
 
 chiika  = os.getcwd() + "/../";
 chiikaApi   = os.getcwd() + "/../lib/ChiikaApi";
@@ -31,7 +32,14 @@ def Review_Magic():
     print git_status
 def Magic_Not_enough():
     print "Channeling inner peace.."
+
+    git_query = Popen(git_checkout_master, cwd=chiikaApi, stdout=PIPE, stderr=PIPE)
+    (git_status, error) = git_query.communicate()
+
     git_query = Popen(git_command_pull, cwd=chiikaApi, stdout=PIPE, stderr=PIPE)
+    (git_status, error) = git_query.communicate()
+
+    git_query = Popen(git_checkout_master, cwd=chiikaNode, stdout=PIPE, stderr=PIPE)
     (git_status, error) = git_query.communicate()
 
     git_query = Popen(git_command_pull, cwd=chiikaNode, stdout=PIPE, stderr=PIPE)
