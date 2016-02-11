@@ -75,8 +75,9 @@ class Chiika
     al = @getMyAnimelist()
     ml = @getMyMangalist()
     ui = @getUserInfo()
+    senpai = @getSenpaiData()
     cn =  { rootOptions:@rootOptions }
-    db = { animeList: al,mangaList:ml,userInfo:ui,chiikaNode:cn }
+    db = { animeList: al,mangaList:ml,userInfo:ui,chiikaNode:cn,senpai: senpai }
     @sendAsyncMessageToRenderer 'databaseRequest',db
   signalRendererToRerender:() ->
     @sendAsyncMessageToRenderer 'reRender','42'
@@ -144,6 +145,8 @@ class Chiika
     @db.Mangalist
   getUserInfo:() ->
     @db.User
+  getSenpaiData: () ->
+    @dt.Senpai
   onKeyPressed:(arg) ->
     @sendAsyncMessageToRenderer 'browserKeyboardEvent',arg
 

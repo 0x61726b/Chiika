@@ -17,6 +17,8 @@ React = require 'react'
 h = require './../Helpers'
 
 class Calendar extends React.Component
+  componentWillMount:() ->
+    
   render: () ->
     (<div>
         <div className="calendar-titleBar">

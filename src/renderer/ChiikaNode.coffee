@@ -38,6 +38,7 @@ class ChiikaRenderer
   databaseMyUserInfo:null
   databaseMyAnimelist:null
   databaseMyMangalist:null
+  databaseSenpai:null
   firstLaunch:true
   initialized:false
   chiikaNode:null
@@ -338,12 +339,15 @@ ipcRenderer.on 'databaseRequest', (event,arg) ->
     chiikaRenderer.databaseMyMangalist = arg.mangaList
     chiikaRenderer.databaseMyUserInfo = arg.userInfo
     chiikaRenderer.chiikaNode = arg.chiikaNode
+    chiikaRenderer.databaseSenpai = arg.senpai
     #Important!!! Dont remove
     chiikaRenderer.initialized = true
     chiikaRenderer.checkApiBusy()
     chiikaRenderer.setApiBusy(false)
 
     chiikaRenderer.notifyRequestListeners 'databaseRequest'
+
+    console.log arg.senpai
 
 
 #
