@@ -114,7 +114,8 @@ class UserVerifyRequestChain extends RequestChainBase
     'UserVerify',
     'GetMyAnimelist',
     'GetMyMangalist',
-    'GetImage'
+    'GetImage',
+    'GetSenpaiMoeData'
   ]
   constructor: (chiika) ->
     super chiika,"VerifyUser",@keys

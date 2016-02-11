@@ -60,6 +60,7 @@ class Chiika
     @requestManager = new RequestManager this
 
     console.log "Browser process init successful"
+    console.log process.env.TZ
 
   destroy: () ->
     @chiika.DestroyChiika()
