@@ -11,7 +11,7 @@ import argparse
 # push = args.push;
 
 git_command_fetch_origin            = ['git', 'fetch','origin']
-git_command_pull                    = ['git','pull']
+git_command_pull                    = ['git','pull','origin','master']
 git_command_merge                   = ['git','merge','FETCH_HEAD']
 git_command_submodule_init          = ['git','submodule','init']
 git_command_submodule_update_rec    = ['git','submodule','update','--recursive']
@@ -62,10 +62,7 @@ def Use_Dark_Magic():
 def Use_Sacred_Magic():
     print "Creating magic.."
     print "Mixing tomes..."
-    git_query = Popen(git_command_fetch_origin, cwd=chiika, stdout=PIPE, stderr=PIPE)
-    (git_status, error) = git_query.communicate()
-    print "Creating staff of wizardy..."
-    git_query = Popen(git_command_merge, cwd=chiika, stdout=PIPE, stderr=PIPE)
+    git_query = Popen(git_command_pull, cwd=chiika, stdout=PIPE, stderr=PIPE)
     (git_status, error) = git_query.communicate()
 
 
