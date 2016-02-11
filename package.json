@@ -4,7 +4,6 @@
   "description": "Electron boilerplate project with React-coffee",
   "main": ".serve/browser/Application.js",
   "scripts": {
-    "install": "bower install",
     "start": "gulp serve",
     "test": "coffeelint src/browser/Application.coffee"
   },
