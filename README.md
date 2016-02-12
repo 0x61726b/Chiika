@@ -36,18 +36,17 @@ It is necessary that you follow the recommended directory structure so you wont 
 ```
 ...
   -Chiika/
-  -chiika-node/
-  -ChiikaApi/
+  -Chiika/lib/chiika-node/build
+  -Chiika/ChiikaApi/build
 ```
 
-If you run the Magic.py you'll get the above structure.
-
-CD to ChiikaApi and run CMake,set ```-DCopyFinalDepsDir=<chiika-node>/<deps>``` for automatic copying of the DLLs generated.After generating the .SLN file run then build.
+CD to ChiikaApi and create a directory called 'build',run CMake in the build folder.After generating the .SLN file build the solution.
 
 When the building of ChiikaApi is done,
 
 ```
 cd chiika-node
+npm install
 npm run rebuild
 ```
 
