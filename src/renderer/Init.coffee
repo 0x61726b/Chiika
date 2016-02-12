@@ -16,31 +16,15 @@
 React = require("React");
 ReactDOM = require("react-dom");
 Root = require('./components/Root')
-Helpers = require("./components/Helpers")
+Chiika = require './ChiikaNode'
 
 
 
 
-
-do Render = () ->
-  console.log "Chiika-Node kickin' in!"
+$ ->
+  console.log "Doc ready"
 
   ReactDOM.render(React.createElement(Root), document.getElementById('app'))
   # React.render(<div>start</div>, document.getElementById('app'))
-
-
-  Chiika = require './ChiikaNode'
-  Titlebar = require("./components/Titlebar")
-
-  t = new Titlebar
-  t.appendTitlebar()
-
-  Helpers.FadeInOnPageLoad()
-  Helpers.RunEverything()
-
-  $(".chiikaLogo").hover( () -> Helpers.RotateLogo(true)
-  () -> Helpers.RotateLogo(false) )
-
-
-  RouteManager = require './components/RouteManager'
-  RouteManager.startSearching()
+    # $(".chiikaLogo").hover( () -> Helpers.RotateLogo(true)
+  # () -> Helpers.RotateLogo(false) )

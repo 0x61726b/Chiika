@@ -14,8 +14,6 @@
 #Description:
 #----------------------------------------------------------------------------
 React = require 'react'
-h = require './../Helpers'
-
 class Calendar extends React.Component
   tooltip: () -> $(document).ready ->
                     $('.animeChip').tooltipster({

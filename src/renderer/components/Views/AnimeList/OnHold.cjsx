@@ -22,7 +22,7 @@ Mixin = require './Common'
 OnHoldList = React.createClass
   mixins:[Mixin]
   componentDidMount: ->
-    list = cn.getAnimeListByUserStatus(3)
+    list = chiika.chiika.getAnimeListByUserStatus(3)
     @setGridName("gridOnHoldList")
     @setList(list)
     @addColumns()
@@ -31,7 +31,7 @@ OnHoldList = React.createClass
   componentWillUnmount: ->
     $('#gridOnHoldList').w2destroy()
   refreshDataSource: ->
-    list = cn.getAnimeListByUserStatus(3)
+    list = chiika.chiika.getAnimeListByUserStatus(3)
     @setList(list)
     w2ui["gridOnHoldList"].records = list
   render: () ->

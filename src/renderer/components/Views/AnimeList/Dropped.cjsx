@@ -23,7 +23,7 @@ DroppedList = React.createClass
 
 
   componentDidMount: ->
-    list = cn.getAnimeListByUserStatus(4)
+    list = chiika.chiika.getAnimeListByUserStatus(4)
     @setGridName("gridDroppedList")
     @setList(list)
     @addColumns()
@@ -31,7 +31,7 @@ DroppedList = React.createClass
   componentWillUnmount: ->
     $('#gridDroppedList').w2destroy()
   refreshDataSource: ->
-    list = cn.getAnimeListByUserStatus(4)
+    list = chiika.chiika.getAnimeListByUserStatus(4)
     @setList(list)
     w2ui["gridDroppedList"].records = list
   render: () ->

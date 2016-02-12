@@ -53,5 +53,4 @@ class RequestKeyHelper
     msg = @requstErrorMap[req]
     msg
 
-requestKeyHelper = new RequestKeyHelper
-module.exports = requestKeyHelper
+module.exports = RequestKeyHelper

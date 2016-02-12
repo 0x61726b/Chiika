@@ -25,6 +25,10 @@ class MyAnimelistLogin extends React.Component
   utility:null
   constructor: (props) ->
     super props
+
+    ipcRenderer.on 'set-login-info',(event,arg) ->
+      if arg == 'error'
+        console.log "Error!"
   onSubmit: =>
     user = $("#email").val()
     pass = $("#password").val()
@@ -33,7 +37,7 @@ class MyAnimelistLogin extends React.Component
       console.log "?"
     else
       ipcData = { user: user, pass:pass }
-      ipcRenderer.send 'setRootOpts',ipcData
+      ipcRenderer.send 'set-login-info',ipcData
   render: () ->
     (<div className="container">
       <div className="row">
@@ -50,12 +54,6 @@ class MyAnimelistLogin extends React.Component
           </div>
       </div>
 </div>);
-
-ipcRenderer.on 'browserPing',(event,arg) ->
-  if arg == 'close'
-    console.log remote.getCurrentWindow().close()
-  if arg == 'error'
-    console.log "Error!"
 Content = React.createClass
   render: () ->
     (<div><div id="titleBar"></div>

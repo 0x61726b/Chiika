@@ -21,7 +21,15 @@ Link = require('./Common').Link
 
 StatusBar = require('./StatusBar')
 
+Titlebar = require("./Titlebar")
+
+
+
+
 Content = React.createClass
+  componentDidMount: ->
+    t = new Titlebar()
+    t.appendTitlebar()
   render: () ->
     (<div className="main">
       <div id="titleBar">

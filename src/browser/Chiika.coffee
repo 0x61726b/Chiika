@@ -18,28 +18,20 @@ path = require('path')
 fs = require('fs')
 path = require 'path'
 electron = require 'electron'
-ipcMain = electron.ipcMain
+ipc = electron.ipcMain
 BrowserWindow = electron.BrowserWindow
 
-RequestManager = require './common/RequestManager'
+RequestManager = require './RequestManager'
+
+{Emitter,Disposable} = require 'event-kit'
 
 class Chiika
   rootOptions:{
-    logLevel:1,
+    logLevel:10,
     appMode:true
   }
-  @chiika: null
-  @root:null
-  @db:null
-  @request:null
-  @nativeUser:null
-  @modulePath:''
-  @mainWinId:-1
-  @mainWindow:null
-  @malLoginWindow:null
-  @requestCallbackCounter:0
-  @requestCallbackStop:4
-  @requestManager:null
+  constructor: ->
+    global.chiika = this
   init: () ->
     if process.env.CHIIKA_ENV == 'debug'
       @chiika = require("./../../lib/chiika-node")
@@ -49,42 +41,72 @@ class Chiika
     @rootOptions.modulePath = @modulePath
     @rootOptions.dataPath = path.join(@modulePath,"Data")
     @rootOptions.imagePath = path.join(@rootOptions.dataPath,"Images")
+
+    @emitter = new Emitter
+
     @root = @chiika.Root(@rootOptions)
-
-    @db = @chiika.Database(@chiikaNativeEventListener)
-    @request = @chiika.Request()
-    @nativeUser = @db.User
-
-    @requestCallbackCounter = 0
-
+    @db = new @chiika.Database(@chiikaNativeEventListener)
+    @request = new @chiika.Request()
     @requestManager = new RequestManager this
 
-    @sendAsyncMessageToRenderer 'chiikaInitialized',true
+
+
+
+    @nativeUser = @db.User
+
+    process.on 'exit', (code) =>
+      @destroy()
+
+    application.logDebug "Initialization successful."
+
+
+    chiika.mainWindow.webContents.on 'did-finish-load', @onMainWindowLoaded
+    @emitter.on 'chiika-fs-ready',@onFileSystemReady
+
+
+
+
+  onMainWindowLoaded: ->
+    application.logDebug("Main Window is loaded successfully")
+
+    chiika.mainWindowLoaded = true
+    if chiika.isFileSystemReady?= true
+      application.sendEvent 'chiika-fs-ready',true
+      chiika.setAnimelistData()
+      chiika.setMangalistData()
+      chiika.setUserInfoData()
+      chiika.setAppOptions()
+
+  onFileSystemReady: ->
+    chiika.isFileSystemReady = true
+
+    if chiika.mainWindowLoaded?= false
+      application.sendEvent 'chiika-fs-ready',true
 
   chiikaNativeEventListener:(ret) ->
-    console.log "Chiika System Event: "
-    console.log ret
+    if ret.event_name == "chiika_fs_ready"
+      chiika.emitter.emit 'chiika-fs-ready'
+
   destroy: () ->
     @chiika.DestroyChiika()
 
   setMainWindow: (wnd) ->
     @mainWindow = wnd
 
-  sendAsyncMessageToRenderer:(msg,arg) ->
-    @mainWindow.webContents.send msg,arg
-    console.log "Browser process sending message: " + msg
-  sendRendererData:() ->
+  setAnimelistData: () ->
     al = @getMyAnimelist()
+    application.sendEvent 'db-update-animelist',al
+
+  setMangalistData: () ->
     ml = @getMyMangalist()
+    application.sendEvent 'db-update-mangalist',ml
+
+  setUserInfoData: () ->
     ui = @getUserInfo()
-    cn =  { rootOptions:@rootOptions }
-    db = { animeList: al,mangaList:ml,userInfo:ui,chiikaNode:cn }
-    @sendAsyncMessageToRenderer 'databaseRequest',db
-  signalRendererToRerender:() ->
-    @sendAsyncMessageToRenderer 'reRender','42'
-  setRendererStatusText: (text,fade) ->
-    msg = {message:text,fadeOut:fade}
-    chiikaNode.sendAsyncMessageToRenderer 'setStatusText',msg
+    application.sendEvent 'db-update-userinfo',ui
+
+  setAppOptions: () ->
+    application.sendEvent 'db-update-app-options',@rootOptions
 
   requestAnimeScrapeSuccess:(ret) =>
     @sendRendererData()
@@ -150,65 +172,58 @@ class Chiika
     @db.Senpai
   onKeyPressed:(arg) ->
     @sendAsyncMessageToRenderer 'browserKeyboardEvent',arg
+#
+# ipcMain.on 'registerShortcuts', (event,arg) ->
+#   console.log "Registering " + arg
+#
+# ipcMain.on 'unregisterShortcuts', (event,arg) ->
+#   console.log "Un-Registering " + arg
+#
+# ipcMain.on 'setRootOpts',(event,arg) ->
+#   userName = arg.user;
+#   pass     = arg.pass;
+#   chiikaNode.malLoginWindow = event.sender
+#
+#   chiikaNode.SetUser userName,pass
+#   chiikaNode.RequestVerifyUser()
+#
+# ipcMain.on 'requestAnimeDetails',(event,arg) ->
+#   console.log "Receiving IPC message from renderer process! Args: " + arg
+#   chiikaNode.RequestAnimeDetails(arg)
+#
+# ipcMain.on 'requestAnimeRefresh',(event,arg) ->
+#   console.log "Receiving IPC message from renderer process! Args: " + arg
+#   chiikaNode.RequestAnimeDetailsRefresh(arg)
+#
+#
+# ipcMain.on 'requestAnimeScrape', (event,arg) ->
+#   chiikaNode.RequestAnimeScrape(arg)
+#
+# ipcMain.on 'requestAnimeUpdate', (event,arg) ->
+#   animeId = arg.animeId
+#   score = arg.score
+#   progress = arg.progress
+#   status = arg.status
+#   chiikaNode.RequestAnimeUpdate(animeId,score,progress,status)
+#
+#
+# ipcMain.on 'rendererPing',(event,arg) ->
+#   console.log "Receiving IPC message from renderer process! Args: " + arg
+#
+#
+#   if arg == 'requestVerify'
+#     chiikaNode.RequestVerifyUser()
+#
+#
+#
+#   if arg == 'requestMyAnimelist'
+#     chiikaNode.RequestMyAnimelist()
+#
+#
+#   if arg == 'requestMyMangalist'
+#     chiikaNode.RequestMyMangalist()
+#
+#   if arg == 'databaseRequest'
+#     chiikaNode.sendRendererData()
 
-chiikaNode = new Chiika
-
-ipcMain.on 'registerShortcuts', (event,arg) ->
-  console.log "Registering " + arg
-
-ipcMain.on 'unregisterShortcuts', (event,arg) ->
-  console.log "Un-Registering " + arg
-
-ipcMain.on 'setRootOpts',(event,arg) ->
-  userName = arg.user;
-  pass     = arg.pass;
-  chiikaNode.malLoginWindow = event.sender
-
-  chiikaNode.SetUser userName,pass
-  chiikaNode.RequestVerifyUser()
-
-ipcMain.on 'requestAnimeDetails',(event,arg) ->
-  console.log "Receiving IPC message from renderer process! Args: " + arg
-  chiikaNode.RequestAnimeDetails(arg)
-
-ipcMain.on 'requestAnimeRefresh',(event,arg) ->
-  console.log "Receiving IPC message from renderer process! Args: " + arg
-  chiikaNode.RequestAnimeDetailsRefresh(arg)
-
-
-ipcMain.on 'requestAnimeScrape', (event,arg) ->
-  chiikaNode.RequestAnimeScrape(arg)
-
-ipcMain.on 'requestAnimeUpdate', (event,arg) ->
-  animeId = arg.animeId
-  score = arg.score
-  progress = arg.progress
-  status = arg.status
-  chiikaNode.RequestAnimeUpdate(animeId,score,progress,status)
-
-
-ipcMain.on 'rendererPing',(event,arg) ->
-  console.log "Receiving IPC message from renderer process! Args: " + arg
-
-  if arg == 'takeMeToTheHeavens'
-    chiikaNode.sendRendererData()
-
-  if arg == 'requestVerify'
-    chiikaNode.RequestVerifyUser()
-
-
-
-  if arg == 'requestMyAnimelist'
-    chiikaNode.RequestMyAnimelist()
-
-
-  if arg == 'requestMyMangalist'
-    chiikaNode.RequestMyMangalist()
-
-  if arg == 'databaseRequest'
-    chiikaNode.sendRendererData()
-
-process.on 'exit', (code) ->
-  chiikaNode.destroy()
-
-module.exports = chiikaNode
+module.exports = Chiika

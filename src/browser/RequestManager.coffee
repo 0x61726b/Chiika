@@ -70,40 +70,47 @@ class RequestChainBase
   chiika:null
   additionalArgs:null
   results:null
-  constructor: (chiika,name,keys,args) ->
+  constructor: (name,keys,args) ->
     @name = name
     @requestKeys = keys
     @tracker = new RequestTracker this,@requestKeys
     @requestNative = chiika.request
-    @chiika = chiika
     @additionalArgs = args
   initiate: ->
-    @chiika.sendAsyncMessageToRenderer 'setApiBusy',true
-    @chiika.setRendererStatusText RequestMessageHelper.getRequestMessage(@name),0
-    if @additionalArgs != null
-      console.log "Initiating request" + @name + " with args: "
+    application.setApiBusy(true)
+
+    application.setRendererStatusText requestMessageHelper.getRequestMessage(@name),0
+    if @additionalArgs?
+      application.logDebug("Request " + @name + " is starting with args ..." + @additionalArgs)
       console.log @additionalArgs
       @requestNative[@name](@tracker.onRequestSuccess,@tracker.onRequestError,@additionalArgs)
     else
-      console.log "Initiating request " + @name
+      application.logDebug "Request " + @name + " is starting..."
       @requestNative[@name](@tracker.onRequestSuccess,@tracker.onRequestError)
 
 
 
   OnRequestSuccess: (ret) ->
-    @chiika.setRendererStatusText RequestMessageHelper.getRequestSuccessMessage(ret.request_name),0
+    application.logDebug "Request " + ret.request_name + " is successful."
+    application.setRendererStatusText requestMessageHelper.getRequestSuccessMessage(ret.request_name),0
 
     @results = @tracker.results
 
   OnRequestError: (ret) ->
-    @chiika.setRendererStatusText RequestMessageHelper.getRequestErrorMessage(ret.request_name),0
+    application.logDebug "Request " + ret.request_name + " has some errors!."
+    application.setRendererStatusText requestMessageHelper.getRequestErrorMessage(ret.request_name),0
+
   OnAllComplete: (results) ->
-    @chiika.sendAsyncMessageToRenderer 'setApiBusy',false
+    application.setApiBusy(false)
     last = null
     results.forEach (value,key) =>
       last = key
 
-    @chiika.setRendererStatusText RequestMessageHelper.getRequestSuccessMessage(last),1000
+    application.setRendererStatusText requestMessageHelper.getRequestSuccessMessage(last),1000
+
+    application.logDebug "Results: "
+    application.logDebug results
+
 
 
 class UserVerifyRequestChain extends RequestChainBase
@@ -114,33 +121,32 @@ class UserVerifyRequestChain extends RequestChainBase
     'UserVerify',
     'GetMyAnimelist',
     'GetMyMangalist',
-    'GetImage',
-    'GetSenpaiMoeData'
+    'GetImage'
   ]
-  constructor: (chiika) ->
-    super chiika,"VerifyUser",@keys
+  constructor: () ->
+    super "VerifyUser",@keys
   Initiate: ->
     @initiate()
   onRequestSuccess: (ret) ->
     @OnRequestSuccess ret
 
-    console.log "UserVerifyRequestChain::onRequestSuccess -> " + ret.request_name
-
     requestName = ret.request_name
 
     if requestName == 'UserVerifySuccess'
-      @chiika.malLoginWindow.send 'browserPing','close'
-    if requestName == 'GetMyAnimelistSuccess' || requestName == 'GetMyMangalistSuccess' || requestName == 'GetImageSuccess'
-      @chiika.sendRendererData()
+      application.emitter.emit 'login-success'
+    if requestName == 'GetMyAnimelistSuccess'
+      chiika.setAnimelistData()
+    if requestName == 'GetMyMangalistSuccess'
+      chiika.setMangalistData()
+    if requestName == 'GetImageSuccess'
+      application.sendEvent 'db-update-image-downloaded',true
+
 
 
   onRequestError: (ret) ->
     @OnRequestError ret
-    console.log "UserVerifyRequestChain::onRequestError -> " + ret.request_name
   onAllComplete: (results) ->
     @OnAllComplete results
-    console.log "Results: "
-    console.log results
 
 class GetMyAnimelistRequest extends RequestChainBase
   allCompleteCallback:null
@@ -149,17 +155,15 @@ class GetMyAnimelistRequest extends RequestChainBase
   keys:[
     'GetMyAnimelist'
   ]
-  constructor: (chiika) ->
-    super chiika,"GetMyAnimelist",@keys
+  constructor: () ->
+    super "GetMyAnimelist",@keys
   Initiate: ->
     @initiate()
   onRequestSuccess: (ret) ->
     @OnRequestSuccess ret
 
     requestName = ret.request_name
-    @chiika.sendRendererData()
-
-    @chiika.sendAsyncMessageToRenderer 'requestMyAnimelistSuccess',{ animeList:ret }
+    chiika.setAnimelistData()
 
 
   onRequestError: (ret) ->
@@ -175,15 +179,15 @@ class GetMyMangalistRequest extends RequestChainBase
   keys:[
     'GetMyMangalist'
   ]
-  constructor: (chiika) ->
-    super chiika,"GetMyMangalist",@keys
+  constructor: () ->
+    super "GetMyMangalist",@keys
   Initiate: ->
     @initiate()
   onRequestSuccess: (ret) ->
     @OnRequestSuccess ret
 
     requestName = ret.request_name
-    @chiika.sendRendererData()
+    chiika.setMangalistData()
 
   onRequestError: (ret) ->
     @OnRequestError ret
@@ -201,15 +205,15 @@ class RefreshAnimeRequest extends RequestChainBase
     'GetSearchAnime',
     'GetAnimePageScrape'
   ]
-  constructor: (chiika,animeId) ->
-    super chiika,"RefreshAnimeDetails",@keys,{ animeId: animeId }
+  constructor: (animeId) ->
+    super "RefreshAnimeDetails",@keys,{ animeId: animeId }
   Initiate: ->
     @initiate()
   onRequestSuccess: (ret) ->
     @OnRequestSuccess ret
 
     requestName = ret.request_name
-    @chiika.sendRendererData()
+    chiika.setAnimelistData()
 
   onRequestError: (ret) ->
     @OnRequestError ret
@@ -227,8 +231,8 @@ class GetAnimeDetailsRequest extends RequestChainBase
     'GetSearchAnime',
     'GetAnimePageScrape'
   ]
-  constructor: (chiika,animeId) ->
-    super chiika,"GetAnimeDetails",@keys,{ animeId: animeId }
+  constructor: (animeId) ->
+    super "GetAnimeDetails",@keys,{ animeId: animeId }
   Initiate: ->
     @initiate()
   onRequestSuccess: (ret) ->
@@ -239,36 +243,37 @@ class GetAnimeDetailsRequest extends RequestChainBase
     if requestName == "FakeRequestSuccess"
       @onAllComplete(@results)
 
-    console.log "Request success for " + requestName
-    @chiika.sendRendererData()
+    chiika.setAnimelistData()
 
   onRequestError: (ret) ->
     @OnRequestError ret
   onAllComplete: (results) ->
     @OnAllComplete results
 
+    application.sendEvent 'request-anime-details',true
+
 class RequestManager
-  chiika:null
-  constructor: (chiika) ->
-    @chiika = chiika
+  constructor: ->
+    global.requestManager = this
+    global.requestMessageHelper = new RequestMessageHelper
   UserVerify: ->
-    req = new UserVerifyRequestChain @chiika
+    req = new UserVerifyRequestChain
     req.Initiate()
 
   GetMyAnimelist: ->
-    req = new GetMyAnimelistRequest @chiika
+    req = new GetMyAnimelistRequest
     req.Initiate()
   GetMyMangalist: ->
-    req = new GetMyMangalistRequest @chiika
+    req = new GetMyMangalistRequest
     req.Initiate()
 
   #Hard refresh
   RefreshAnime: (id) ->
-    req = new RefreshAnimeRequest @chiika,id
+    req = new RefreshAnimeRequest id
     req.Initiate()
   #Soft refresh
   GetAnimeDetails: (id) ->
-    req = new GetAnimeDetailsRequest @chiika,id
+    req = new GetAnimeDetailsRequest id
     req.Initiate()
 
 module.exports = RequestManager

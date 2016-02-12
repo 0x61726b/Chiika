@@ -20,8 +20,6 @@ Tabs = ReactTabs.Tabs;
 TabList = ReactTabs.TabList;
 TabPanel = ReactTabs.TabPanel;
 
-Helpers = require('./../Helpers')
-
 
 ReadingList = require './MangaList/Reading'
 PlantoReadList = require './MangaList/PlantoRead'

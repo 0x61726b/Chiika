@@ -14,15 +14,13 @@
 #Description:
 #----------------------------------------------------------------------------
 React = require 'react'
-cn = require './../../../ChiikaNode'
 Mixin = require './Common'
 
-Helpers = require('./../../Helpers')
 #Watching List
 WatchingList = React.createClass
   mixins:[Mixin]
   componentDidMount: ->
-    list = cn.getAnimeListByUserStatus(1)
+    list = chiika.chiika.getAnimeListByUserStatus(1)
     @setGridName("gridWatchingList")
     @setList(list)
 
@@ -34,7 +32,7 @@ WatchingList = React.createClass
   componentWillUnmount: ->
     $('#gridWatchingList').w2destroy();
   refreshDataSource: ->
-    list = cn.getAnimeListByUserStatus(1)
+    list = chiika.chiika.getAnimeListByUserStatus(1)
     @setList(list)
     w2ui["gridWatchingList"].records = list
 

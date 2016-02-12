@@ -72,9 +72,10 @@ class ChiikaRouteManager
     gridName
   startSearching: () ->
     $("#gridSearch").on 'input', () =>
-        if @activeRoute == 1 || @activeRoute == 2 #animeList or #mangaList
-          gridName = @determineGridName()
-          w2ui[gridName].search('title',$("#gridSearch").val())
+      console.log "?"
+      if @activeRoute == 1 || @activeRoute == 2 #animeList or #mangaList
+        gridName = @determineGridName()
+        w2ui[gridName].search('title',$("#gridSearch").val())
 
   refreshGrid: () ->
     if @activeRoute == 1 || @activeRoute == 2 #animeList or mangaList
@@ -86,5 +87,4 @@ class ChiikaRouteManager
         w2ui[gridName].refresh()
 
 
-chiikaRouter = new ChiikaRouteManager()
-module.exports = chiikaRouter
+module.exports = ChiikaRouteManager

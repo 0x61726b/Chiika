@@ -22,7 +22,7 @@ CompletedList = React.createClass
 
 
   componentDidMount: ->
-    list = cn.getAnimeListByUserStatus(2)
+    list = chiika.chiika.getAnimeListByUserStatus(2)
     @setGridName("gridCompletedList")
     @setList(list)
     @addColumns()
@@ -30,7 +30,7 @@ CompletedList = React.createClass
   componentWillUnmount: ->
     $('#gridCompletedList').w2destroy()
   refreshDataSource: ->
-    list = cn.getAnimeListByUserStatus(2)
+    list = chiika.chiika.getAnimeListByUserStatus(2)
     @setList(list)
     w2ui["gridCompletedList"].records = list
   render: () ->

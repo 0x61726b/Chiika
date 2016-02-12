@@ -29,3 +29,4 @@ class ApplicationWindow
     @window.on(args...)
   openDevTools: () ->
     @window.openDevTools();
+    

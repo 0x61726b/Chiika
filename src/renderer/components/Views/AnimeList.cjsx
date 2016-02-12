@@ -20,7 +20,6 @@ Tabs = ReactTabs.Tabs;
 TabList = ReactTabs.TabList;
 TabPanel = ReactTabs.TabPanel;
 
-Helpers = require('./../Helpers')
 
 ContextMenu = require './AnimeList/ContextMenu'
 

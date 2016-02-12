@@ -16,7 +16,6 @@
 fs = require 'fs'
 path = require 'path'
 React = require 'react'
-h = require './../Helpers'
 Router = require 'react-router'
 Chiika = require './../../ChiikaNode'
 shell = require 'shell'
@@ -35,10 +34,10 @@ AnimeDetails = React.createClass
     { status:4,text:"Dropped" }
   ]
   componentWillMount:-> #We can't put jQuery here because DOM is not constructed yet.
-    @anime = Chiika.getAnimeById(@props.params.animeId)
+    @anime = chiika.chiika.getAnimeById(@props.params.animeId)
     console.log @anime
 
-    animeCover = path.join(Chiika.chiikaNode.rootOptions.imagePath,"Anime", @anime.series_animedb_id + ".jpg")
+    animeCover = path.join(chiika.appOptions.imagePath,"Anime", @anime.series_animedb_id + ".jpg")
 
     try
       file = fs.statSync(animeCover)
@@ -46,7 +45,7 @@ AnimeDetails = React.createClass
     catch error
       @coverExists = false
 
-    Chiika.addRequestListener 'AnimeDetails',this
+    chiika.chiika.addRequestListener 'AnimeDetails',this
   componentDidMount:->
     $("#seasonId").addClass @getSeasonClass()
 
@@ -58,17 +57,13 @@ AnimeDetails = React.createClass
 
     @handleProgressEnter()
 
-    $("#animeDetails :input").focus ->
-      Chiika.unregisterShortcut 'Backspace'
-    $("#animeDetails :input").blur ->
-      Chiika.registerShortcut 'Backspace'
-    Chiika.requestAnimeDetails(@anime.series_animedb_id)
+    chiika.appDel.requestAnimeDetails(@anime.series_animedb_id)
   componentWillUnmount: ->
     console.log "Unmount"
-    Chiika.removeRequestListener 'AnimeDetails',this
+    chiika.chiika.removeRequestListener 'AnimeDetails',this
 
   onRequest: (request) ->
-    @anime = Chiika.getAnimeById(@props.params.animeId)
+    @anime = chiika.chiika.getAnimeById(@props.params.animeId)
     @getCoverImage()
 
     @getSource()
@@ -87,14 +82,14 @@ AnimeDetails = React.createClass
     if @anime.anime.series_status == "2"
       $(".airingStatsuDiv span").text("Finished Airing")
   getCoverImage: () ->
-    animeCover = path.join(Chiika.chiikaNode.rootOptions.imagePath,"Anime",@anime.series_animedb_id + ".jpg")
+    animeCover = path.join(chiika.appOptions.imagePath,"Anime",@anime.series_animedb_id + ".jpg")
     try
       file = fs.statSync(animeCover)
       @coverExists = true
     catch error
       @coverExists = false
     if @coverExists
-      animeCover = path.join(Chiika.chiikaNode.rootOptions.imagePath,"Anime",@anime.series_animedb_id + ".jpg")
+      animeCover = path.join(chiika.appOptions.imagePath,"Anime",@anime.series_animedb_id + ".jpg")
       $("#coverImg").attr("src",animeCover)
       $("#coverImg").removeClass("loadingSomething")
       $(".cIm").removeClass("rotateLogo")

@@ -17,7 +17,7 @@ React = require 'react'
 cn = require './../../../ChiikaNode'
 Mixin = require './Common'
 
-Helpers = require('./../../Helpers')
+
 #Watching List
 DroppedList = React.createClass
   mixins:[Mixin]

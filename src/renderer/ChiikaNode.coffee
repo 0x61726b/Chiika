@@ -18,9 +18,13 @@ fs = require('fs')
 remote = require('remote')
 electron = require 'electron'
 ipcRenderer = electron.ipcRenderer
-h = require './components/Helpers'
 RouteManager = require './components/RouteManager'
 BrowserWindow = electron.remote.BrowserWindow
+
+ApplicationDelegate = require './ApplicationDelegate'
+ChiikaEnvironment = require './ChiikaEnvironment'
+
+{Emitter} = require 'event-kit'
 
 class ChiikaRenderer
   DbIpcKeys:[
@@ -45,37 +49,18 @@ class ChiikaRenderer
   listener:null
   keyboardListenerMap:new Map()
   requestListenerMap:new Map()
-  requestData: () ->
-    @apiBusy = true
-    ipcRenderer.send 'rendererPing','takeMeToTheHeavens'
-
-
-    @setApiBusy(true)
 
   #Send browser async requests to retrieve data
   constructor: ->
-    @requestData()
+    @appDel       =   new ApplicationDelegate()
+    @routeManager =   new RouteManager()
 
-  #Check if browser answered everything
-  isInitialized: () ->
-    @initialized
+    window.chiika =   new ChiikaEnvironment(this,@appDel,@routeManager)
 
-  setApiBusy:(busy) ->
-    @apiBusy = busy
-    h.SetApiBusy(@apiBusy)
+    @appDel.handleEvents()
 
-
-  checkApiBusy: () ->
-    if @isInitialized() == false
-      @apiBusy = true
-
-    h.SetApiBusy(@apiBusy)
-
-    if @isInitialized()
-      if @readyCallback
-        @readyCallback()
-        @readyCallback = null
-      @setSidebarInfo()
+    chiika.onChiikaReady =>
+      chiika.setApiBusy true
 
   openMyAnimeListLoginWindow: () ->
     options = {
@@ -86,26 +71,9 @@ class ChiikaRenderer
     }
     LoginWindow = new BrowserWindow(options);
     LoginWindow.loadURL("file://#{__dirname}/../renderer/MyAnimeListLogin.html")
-    LoginWindow.openDevTools()
     LoginWindow.on 'closed', () ->
       LoginWindow = null
 
-  setSidebarInfo: () ->
-    if @getUserInfo().UserInfo.user_name == 'undefined' || @getUserInfo().UserInfo.user_id == 'user_id'
-      $("div.userInfo").html("No User")
-    else
-      $("div.userInfo").html(@getUserInfo().UserInfo.user_name)
-      imageUrl = path.join(@chiikaNode.rootOptions.imagePath, @getUserInfo().UserInfo.user_id+".jpg")
-
-      $("img#userAvatar").attr('src',imageUrl)
-
-  setStatusText: (text,fadeout) ->
-    $(".statusText").show()
-    $(".statusText").html(text)
-
-    if fadeout > 0
-      $(".statusText").delay(fadeout).fadeOut fadeout, ->
-        $(this).html("")
   requestVerifyUser: ->
     ipcRenderer.send 'rendererPing',@IpcKeys[0]
 
@@ -122,9 +90,6 @@ class ChiikaRenderer
 
   requestAnimeRefresh:(id) ->
     ipcRenderer.send 'requestAnimeRefresh',id
-
-  requestAnimeDetails:(id) ->
-    ipcRenderer.send 'requestAnimeDetails',id
 
   requestAnimeUpdate:(id,score,progress,status) ->
     ipcRenderer.send 'requestAnimeUpdate', {animeId: id,score:score,progress:progress,status:status}
@@ -146,94 +111,95 @@ class ChiikaRenderer
   getAnimeListByUserStatus:(status) ->
     data = []
 
-    wholeList = @databaseMyAnimelist
-    for value in wholeList['AnimeArray']
-     animeStatus = value['my_status']
-     if parseInt(animeStatus) == status #Watching
-       entry = {}
-       animeTitle = value.anime['series_title']
-       watchedEps = value['my_watched_episodes']
-       totalEps   = value.anime['series_episodes']
-       serieStatus = value.anime['series_status']
-       progress   = 0
-       if parseInt(totalEps) > 0
-         progress   = Math.ceil((parseInt(watchedEps) / parseInt(totalEps)) * 100)
+    if chiika.dbAnimelist?
+      wholeList = chiika.dbAnimelist
+      for value in wholeList['AnimeArray']
+       animeStatus = value['my_status']
+       if parseInt(animeStatus) == status #Watching
+         entry = {}
+         animeTitle = value.anime['series_title']
+         watchedEps = value['my_watched_episodes']
+         totalEps   = value.anime['series_episodes']
+         serieStatus = value.anime['series_status']
+         progress   = 0
+         if parseInt(totalEps) > 0
+           progress   = Math.ceil((parseInt(watchedEps) / parseInt(totalEps)) * 100)
 
-       startDate = value.anime.series_start
+         startDate = value.anime.series_start
 
-       parts = startDate.split("-");
-       year = parts[0];
-       month = parts[1];
+         parts = startDate.split("-");
+         year = parts[0];
+         month = parts[1];
 
-       iMonth = parseInt(month);
+         iMonth = parseInt(month);
 
-       season = "Unknown"
-       if iMonth > 0 && iMonth < 4
-         season =  "Winter " + year
-       if iMonth > 3 && iMonth < 7
-         season =  "Spring " + year
-       if iMonth > 6 && iMonth < 10
-         season =  "Summer " + year
-       if iMonth > 9 && iMonth <= 12
-         season = "Fall " + year
+         season = "Unknown"
+         if iMonth > 0 && iMonth < 4
+           season =  "Winter " + year
+         if iMonth > 3 && iMonth < 7
+           season =  "Spring " + year
+         if iMonth > 6 && iMonth < 10
+           season =  "Summer " + year
+         if iMonth > 9 && iMonth <= 12
+           season = "Fall " + year
 
-       score      = value['my_score']
+         score      = value['my_score']
 
-       if score == "0"
-         score = "-"
+         if score == "0"
+           score = "-"
 
-       airingStatusColor = ""
-       airingStatusText = ""
-       if serieStatus == "0"
-         airingStatusText = "Not Aired"
-         airingStatusColor = "gray"
-       if serieStatus == "1"
-         airingStatusText = "Airing"
-         airingStatusColor = "green"
-       if serieStatus == "2"
-         airingStatusText = "Finished"
-         airingStatusColor = "black"
-
-
+         airingStatusColor = ""
+         airingStatusText = ""
+         if serieStatus == "0"
+           airingStatusText = "Not Aired"
+           airingStatusColor = "gray"
+         if serieStatus == "1"
+           airingStatusText = "Airing"
+           airingStatusColor = "green"
+         if serieStatus == "2"
+           airingStatusText = "Finished"
+           airingStatusColor = "black"
 
 
-       type = value.anime['series_type']
-       typeText = ""
-       animeType = "fa fa-question"
-       if type == "0"
-        animeType = "fa fa-question"
-        typeText = "Unknown"
-       if type == "1"
-        animeType = "fa fa-tv"
-        typeText = "Tv"
-       if type == "2"
-        animeType = "glyphicon glyphicon-cd"
-        typeText = "Ova"
-       if type == "3"
-        animeType = "fa fa-film"
-        typeText = "Movie"
-       if type == "4"
-        animeType = "fa fa-star"
-        typeText = "Special"
-       if type == "5"
-        animeType = "fa fa-chrome"
-        typeText = "Ona"
-       if type == "6"
-        animeType = "fa fa-music"
-        typeText = "Music"
 
-       entry['animeId'] = value.series_animedb_id
-       entry['recid'] = data.length
-       entry['typeWithText'] = typeText
-       entry['icon'] = animeType
-       entry['title'] = animeTitle
-       entry['progress'] = progress
-       entry['score'] = score
-       entry['season'] = season
-       entry['airingStatusText'] = airingStatusText
-       entry['airingStatusColor'] = airingStatusColor
-       data.push entry
-    data
+
+         type = value.anime['series_type']
+         typeText = ""
+         animeType = "fa fa-question"
+         if type == "0"
+          animeType = "fa fa-question"
+          typeText = "Unknown"
+         if type == "1"
+          animeType = "fa fa-tv"
+          typeText = "Tv"
+         if type == "2"
+          animeType = "glyphicon glyphicon-cd"
+          typeText = "Ova"
+         if type == "3"
+          animeType = "fa fa-film"
+          typeText = "Movie"
+         if type == "4"
+          animeType = "fa fa-star"
+          typeText = "Special"
+         if type == "5"
+          animeType = "fa fa-chrome"
+          typeText = "Ona"
+         if type == "6"
+          animeType = "fa fa-music"
+          typeText = "Music"
+
+         entry['animeId'] = value.series_animedb_id
+         entry['recid'] = data.length
+         entry['typeWithText'] = typeText
+         entry['icon'] = animeType
+         entry['title'] = animeTitle
+         entry['progress'] = progress
+         entry['score'] = score
+         entry['season'] = season
+         entry['airingStatusText'] = airingStatusText
+         entry['airingStatusColor'] = airingStatusColor
+         data.push entry
+      data
   addRequestListener:(name,listener) ->
     @requestListenerMap.set(name,listener)
     console.log "Registering " + name + " for request listening"
@@ -247,7 +213,7 @@ class ChiikaRenderer
   getMangaListByUserStatus:(status) ->
       data = []
 
-      wholeList = @databaseMyMangalist
+      wholeList = chiika.dbMangalist
       for value in wholeList['MangaArray']
        mangaStatus = value['my_status']
        if parseInt(mangaStatus) == status
@@ -284,13 +250,14 @@ class ChiikaRenderer
       data
 
   getAnimeById:(id) ->
-    wholeList = @databaseMyAnimelist
+    wholeList = chiika.dbAnimelist
     anime = null
-    for value in wholeList['AnimeArray']
-      if parseInt(value['series_animedb_id']) == parseInt(id)
-        anime = value
+    if wholeList?
+      for value in wholeList['AnimeArray']
+        if parseInt(value['series_animedb_id']) == parseInt(id)
+          anime = value
 
-    anime
+      anime
   unregisterShortcut:(arg) ->
     ipcRenderer.send 'unregisterShortcuts',arg
   registerShortcut:(arg) ->
@@ -301,68 +268,39 @@ class ChiikaRenderer
       @keyboardListenerMap.forEach (value,key) =>
         value.onKeyPressed arg
 
-
-
-
-chiikaRenderer = new ChiikaRenderer
-
-ipcRenderer.on 'setStatusText', (event,arg) ->
-  message = arg.message
-  fadeOut = arg.fadeOut
-  chiikaRenderer.setStatusText message,fadeOut
-
-ipcRenderer.on 'browserKeyboardEvent', (event,arg) ->
-    chiikaRenderer.onKeyPressed(arg)
-
-ipcRenderer.on 'requestMyAnimelistSuccess', (event,arg) ->
-  chiikaRenderer.databaseMyAnimelist = arg.animeList
-  RouteManager.refreshGrid()
-  console.log arg.animeList
-  chiikaRenderer.setStatusText("")
-
-ipcRenderer.on 'requestUpdateAnimeStatus', (event,arg) ->
-  if arg == true
-    chiikaRenderer.setStatusText("")
-  else
-    chiikaRenderer.setStatusText("Error occured while updating anime..." + arg,2000)
-
-ipcRenderer.on 'requestAnimeDetailsNotRequired', (event,arg) ->
-  chiikaRenderer.setStatusText("")
-ipcRenderer.on 'requestRefreshAnimeDetailsSuccess', (event,arg) ->
-  chiikaRenderer.setStatusText("")
-
-ipcRenderer.on 'requestVerifyError', (event,arg) ->
-  chiikaRenderer.setStatusText("Error occured while processing verifying user...",2000)
-  console.log arg
-
-ipcRenderer.on 'chiikaInitialized', (event,arg) ->
-  console.log 'Receiving IPC message from browser process!Event:chiikaInitialized'
-  chiikaRenderer.initialized = true
-  chiikaRenderer.checkApiBusy()
-
-ipcRenderer.on 'databaseRequest', (event,arg) ->
-    console.log 'Receiving IPC message from browser process!Event:databaseRequest'
-
-    chiikaRenderer.databaseMyAnimelist = arg.animeList
-    chiikaRenderer.databaseMyMangalist = arg.mangaList
-    chiikaRenderer.databaseMyUserInfo = arg.userInfo
-    chiikaRenderer.chiikaNode = arg.chiikaNode
-    chiikaRenderer.databaseSenpai = arg.senpai
-    chiikaRenderer.notifyRequestListeners 'databaseRequest'
-
-    console.log arg.senpai
-
-
 #
-ipcRenderer.on 'reRender', (event,arg) ->
-    console.log 'Receiving IPC message from browser process!Event:reRender'
-    if chiikaRenderer.listener != null
-      chiikaRenderer.listener.trigger()
-
-ipcRenderer.on 'setApiBusy', (event,arg) ->
-    console.log 'Receiving IPC message from browser process!Event:setApiBusy'
-    chiikaRenderer.setApiBusy(arg)
+# ipcRenderer.on 'setStatusText', (event,arg) ->
+#   message = arg.message
+#   fadeOut = arg.fadeOut
+#   chiikaRenderer.setStatusText message,fadeOut
+#
+# ipcRenderer.on 'browserKeyboardEvent', (event,arg) ->
+#     chiikaRenderer.onKeyPressed(arg)
+#
+# ipcRenderer.on 'requestMyAnimelistSuccess', (event,arg) ->
+#   chiikaRenderer.databaseMyAnimelist = arg.animeList
+#   RouteManager.refreshGrid()
+#   console.log arg.animeList
+#   chiikaRenderer.setStatusText("")
+#
+#
+#
+# ipcRenderer.on 'chiikaInitialized', (event,arg) ->
+#   console.log 'Receiving IPC message from browser process!Event:chiikaInitialized'
+#   chiikaRenderer.initialized = true
+#   chiikaRenderer.checkApiBusy()
+#
+#
+# #
+# ipcRenderer.on 'reRender', (event,arg) ->
+#     console.log 'Receiving IPC message from browser process!Event:reRender'
+#     if chiikaRenderer.listener != null
+#       chiikaRenderer.listener.trigger()
+#
+# ipcRenderer.on 'setApiBusy', (event,arg) ->
+#     console.log 'Receiving IPC message from browser process!Event:setApiBusy'
+#     chiikaRenderer.setApiBusy(arg)
 #
 #
 #Export
-module.exports = chiikaRenderer
+module.exports = ChiikaRenderer

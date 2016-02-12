@@ -14,7 +14,6 @@
 #Description:
 #----------------------------------------------------------------------------
 React = require 'react'
-h = require './../Helpers'
 
 class User extends React.Component
   render: () ->

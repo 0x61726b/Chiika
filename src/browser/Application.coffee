@@ -21,6 +21,8 @@
 app = require "app"
 BrowserWindow = require 'browser-window'
 crashReporter = require 'crash-reporter'
+electron = require 'electron'
+ipc = electron.ipcMain
 localShortcut = require 'electron-localshortcut'
 
 ApplicationWindow = require './ApplicationWindow'
@@ -32,6 +34,8 @@ yargs = require 'yargs'
 path = require 'path'
 
 fs = require 'fs'
+
+{Emitter,Disposable} = require 'event-kit'
 # ---------------------------
 #
 # ---------------------------
@@ -42,17 +46,91 @@ class Application
   window: null
   constructor: (options) ->
     global.application = this
+    @emitter = new Emitter
+
+
     # Report crashes to our server.
     require('crash-reporter').start()
 
     @parseCommandLine()
     @setupChiikaConfig()
+
+    @handleEvents()
     # Quit when all windows are closed.
+
+
+  onLoginSuccess: () ->
+    application.loginWindow.getOwnerBrowserWindow().close()
+    application.loginWindow = null
+  onLoginError: (loginWnd) ->
+    @loginWindow.send 'login-error'
+
+  handleEvents: ->
     app.on 'window-all-closed', ->
        app.quit()
     app.on 'ready', =>
        @openWindow()
        @registerShortcuts()
+       @setupLogServer()
+
+
+       @logDebug("Initializing...")
+
+
+       @chiika = new Chiika()
+       @chiika.setMainWindow(@window.getWindow())
+       @chiika.init()
+
+
+    ipc.on 'set-login-info',(event,arg) =>
+      userName = arg.user
+      pass     = arg.pass
+
+      @loginWindow = event.sender
+      @emitter.on 'login-success',@onLoginSuccess
+      @emitter.on 'login-error',@onLoginError
+
+
+      requestManager.UserVerify()
+
+    ipc.on 'request-anime-details', (event,arg) =>
+      requestManager.GetAnimeDetails arg
+
+  sendEvent: (evt,args) ->
+    @logDebug "Sending IPC -> " + evt
+    @window.getWindow().webContents.send evt,args
+  setupLogServer: ->
+    scribe = require 'scribe-js'
+    express = require 'express'
+
+    scribe = scribe()
+    console = process.console
+    eapp = express()
+
+    eapp.set('port',(process.env.PORT || 5000))
+
+
+    eapp.get '/', (req,res) ->
+      res.send 'hello,world'
+
+    eapp.use '/logs',scribe.webPanel()
+
+    console.addLogger('debug','red')
+
+    port = eapp.get("port")
+
+    eapp.listen port,->
+      console.time().log('Server listening at port ' + port)
+  logDebug:(text) ->
+    process.console.tag("chiika-browser").time().debug(text)
+
+
+  setApiBusy:(cond) ->
+    @sendEvent 'set-api-busy',cond
+
+  setRendererStatusText: (text,fade) ->
+    msg = {message:text,fadeOut:fade}
+    @sendEvent 'set-status-bar-text',msg
 
   setupChiikaConfig: ->
     chiikaHome = path.join(app.getPath('appData'),"Chiika")
@@ -83,9 +161,6 @@ class Application
 
     if process.env.Show_CA_Debug_Tools == 'yeah'
       Menu.setApplicationMenu(appMenu)
-
-    Chiika.setMainWindow(@window.getWindow())
-    Chiika.init()
 
 
 

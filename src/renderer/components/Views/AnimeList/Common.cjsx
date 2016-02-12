@@ -81,8 +81,8 @@ AnimeListMixin =
 
   setGridName: (grid) ->
     @localGrid.name = grid
-    Search.updateAnimelistState grid
-    Search.animeListJsObjects.set grid,this
+    chiika.routeManager.updateAnimelistState grid
+    chiika.routeManager.animeListJsObjects.set grid,this
     @gridName = grid
   setList: (l) ->
     @list = l

@@ -23,7 +23,7 @@ PlantoWatchList = React.createClass
 
 
   componentDidMount: ->
-    list = cn.getAnimeListByUserStatus(6)
+    list = chiika.chiika.getAnimeListByUserStatus(6)
     @setGridName("gridPlantoWatchList")
     @setList(list)
     @addColumns()
@@ -31,7 +31,7 @@ PlantoWatchList = React.createClass
   componentWillUnmount: ->
     $('#gridPlantoWatchList').w2destroy()
   refreshDataSource: ->
-    list = cn.getAnimeListByUserStatus(6)
+    list = chiika.chiika.getAnimeListByUserStatus(6)
     @setList(list)
     w2ui["gridPlantoWatchList"].records = list
   render: () ->

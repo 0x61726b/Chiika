@@ -25,7 +25,7 @@ class Home extends React.Component
     super props
 
   onOpen: ->
-    Chiika.openMyAnimeListLoginWindow()
+    chiika.chiika.openMyAnimeListLoginWindow()
     #Chiika.testListener()
   render: () ->
     (<div><a href="#" onClick={this.onOpen}>Click me</a></div>);

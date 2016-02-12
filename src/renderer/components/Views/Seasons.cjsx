@@ -14,8 +14,6 @@
 #Description:
 #----------------------------------------------------------------------------
 React = require 'react'
-h = require './../Helpers'
-
 class Seasons extends React.Component
   render: () ->
     (<div>Seasons here</div>);

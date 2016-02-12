@@ -32,10 +32,10 @@ Seasons = require './Views/Seasons'
 Torrents = require './Views/Torrents'
 User = require './Views/User'
 
-h = require './Helpers'
 Search = require './RouteManager'
 
 Chiika = require './../ChiikaNode'
+
 
 
 Root = React.createClass
@@ -57,34 +57,41 @@ Root = React.createClass
       if path.path == val
         routeIndex = index
 
-    Search.updateState(routeIndex,path.path)
-    h.SetActiveMenuItem(routeIndex)
+    chiika.chiikaReady()
+
+    chiika.routeManager.updateState(routeIndex,path.path)
+    chiika.setActiveMenuItem(routeIndex)
+
+
   render: () ->
     (<div><SideMenu /><Content props={this.props}/></div>)
 
 ChiikaRouter = React.createClass
   lastAnimeDetailsData:null
+  componentWillMount: ->
+    #Entry point
+    chiika = new Chiika()
   onEnter:(nextState) ->
     path = nextState.location.pathname
     console.log path
     if path == '/Home' || path == 'Home'
-      Search.updateState(0,path)
+      chiika.routeManager.updateState(0,path)
     if path == 'AnimeList' || path == '/AnimeList'
-      Search.updateState(1,path)
+      chiika.routeManager.updateState(1,path)
     if path == 'MangaList'
-      Search.updateState(2,path)
+      chiika.routeManager.updateState(2,path)
     if path == 'Library'
-      Search.updateState(3,path)
+      chiika.routeManager.updateState(3,path)
     if path == 'Calendar'
-      Search.updateState(4,path)
+      chiika.routeManager.updateState(4,path)
     if path == 'Seasons'
-      Search.updateState(5,path)
+      chiika.routeManager.updateState(5,path)
     if path == 'Torrents'
-      Search.updateState(6,path)
+      chiika.routeManager.updateState(6,path)
     if path == 'User'
-      Search.updateState(7,path)
+      chiika.routeManager.updateState(7,path)
     if path.indexOf('/Anime') >= 0 && path != '/AnimeList'
-      Search.updateState(8,path)
+      chiika.routeManager.updateState(8,path)
 
 
 
@@ -92,8 +99,6 @@ ChiikaRouter = React.createClass
   getInitialState: ->
     animeListLastTab:0
     shouldUpdateDetails:false
-  componentDidMount: ->
-
   onAnimeListTabSelect: (index,last) ->
     @state.animeListLastTab = index
 
