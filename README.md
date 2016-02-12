@@ -6,7 +6,7 @@
 [![Test Coverage](https://codeclimate.com/github/arkenthera/Chiika/badges/coverage.svg)](https://codeclimate.com/github/arkenthera/Chiika/coverage)
 [![Issue Count](https://codeclimate.com/github/arkenthera/Chiika/badges/issue_count.svg)](https://codeclimate.com/github/arkenthera/Chiika)
 
-Chiika is an upcoming cross platform desktop application which helps you manage anything related to your anime/manga.Chiika is written with [Electron](https://github.com/atom/electron) and powers [Chiika-Node](https://github.com/arkenthera/chiika-node) alongside with [Chiika Api](https://github.com/arkenthera/ChiikaApi).
+[Chiika](http://chiika.moe/) is an upcoming cross platform desktop application which helps you manage anything related to your anime/manga.Chiika is written with [Electron](https://github.com/atom/electron) and powers [Chiika-Node](https://github.com/arkenthera/chiika-node) alongside with [Chiika Api](https://github.com/arkenthera/ChiikaApi).
 
 #Building on Windows
 
