@@ -559,6 +559,11 @@
     justify-content: center;
     text-align: center;
 }
+.leftColumn {
+    display: flex;
+    flex-direction: column;
+    width: 70%;
+}
 
 .synopsisContainer {
     display: flex;
@@ -567,7 +572,8 @@
 
 .synopsisColumn {
     height: inherit;
-    width: 66%;
+    width: 100%;
+    align-self: flex-start;
     float: left;
     display: flex;
     flex-direction: column;
@@ -610,4 +616,26 @@
     text-transform: capitalize;
     color: black;
     opacity: 0.87;
+}
+.characterRow {
+    width: 100%;
+    padding: 5px;
+    display: flex;
+    align-self: center;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.characterRow h4,
+.characterRow h5 {
+    text-align: left;
+    font-weight: 300;
+    align-self: flex-start;
+    justify-content: flex-start;
+    margin-left: 0px;
+    padding-left: 0px;
+}
+
+.characterRow h5 {
+    font-weight: 400;
 }

@@ -35,7 +35,7 @@ class RequestKeyHelper
     GetSearchAnimeSuccess: 'Syncing anime info.'
   },
   requestErrorMap:{
-    UserVerifyError:'Error verifying user!',
+    UserVerify:'Error verifying user!',
     GetMyAnimelistError:'Error syncing anime list!',
     GetMyMangalistError:'Error syncing manga list!',
     GetImageError: 'Error downloading user image!',

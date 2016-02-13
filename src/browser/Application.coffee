@@ -90,11 +90,14 @@ class Application
       @emitter.on 'login-success',@onLoginSuccess
       @emitter.on 'login-error',@onLoginError
 
-
+      chiika.SetUser userName,pass
       requestManager.UserVerify()
 
     ipc.on 'request-anime-details', (event,arg) =>
       requestManager.GetAnimeDetails arg
+
+    ipc.on 'request-anime-refresh', (event,arg) =>
+      requestManager.RefreshAnime arg
 
   sendEvent: (evt,args) ->
     @logDebug "Sending IPC -> " + evt
@@ -150,8 +153,8 @@ class Application
       isBorderless = false;
     htmlURL = "file://#{__dirname}/../renderer/index.html#Home"
     @window = new ApplicationWindow htmlURL,
-      width: 1200
-      height: 800
+      width: 1400
+      height: 900
       minWidth:900
       minHeight:600
       title: 'Chiika - Development Mode'

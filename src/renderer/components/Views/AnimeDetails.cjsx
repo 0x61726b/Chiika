@@ -64,15 +64,33 @@ AnimeDetails = React.createClass
 
   onRequest: (request) ->
     @anime = chiika.chiika.getAnimeById(@props.params.animeId)
-    @getCoverImage()
 
     @getSource()
     @getSynopsis()
     @getBroadcastTime()
     @forceUpdate()
-  onKeyPressed:(arg) ->
-    if arg == 'Backspace'
-      @history.goBack()
+  refreshImage: () ->
+    @getCoverImage()
+    @forceUpdate()
+
+  refreshMinorInfo: () ->
+    @anime = chiika.chiika.getAnimeById(@props.params.animeId)
+
+    @getSource()
+    @getSynopsis()
+    @getBroadcastTime()
+    @forceUpdate()
+
+    console.log "Refresh anime Info"
+
+  getCharacters: () ->
+    @anime.Misc.characters
+  openCharacterPage: (e) ->
+    id = $(e.target).attr("data-ch-id")
+    url = "http://myanimelist.net/character/" + id
+    shell.openExternal(url)
+  getGenres: () ->
+    @anime.Misc.genres
   getBroadcastTime: () ->
     if @anime.anime.series_status == "0"
       $(".airingStatsuDiv span").text("Not aired")
@@ -330,7 +348,7 @@ AnimeDetails = React.createClass
         </div>
         <div className="vCenter" id="animeGenre">
                 <h4 className="vCenter">
-                {@anime.Misc.genres.map((tab, i) =>
+                {@getGenres().map((tab, i) =>
                   <span key={i} className="label label-default animeGenreChip">{tab.genre}</span>)}
                 </h4>
         </div>
@@ -436,12 +454,39 @@ AnimeDetails = React.createClass
         </div>
         <div className="row" id="synopsisRow">
             <div className="synopsisContainer">
-                <div className="synopsisColumn">
-                    <h3>synopsis</h3>
-                    <p id="synopsisText">Loading...</p>
+              <div className="leftColumn">
+                  <div className="synopsisColumn">
+                      <h3>Alternative Titles</h3>
+                      <p>
+                          <b>English:</b> {@anime.anime.series_english}
+                      </p>
+
+                      <p>
+                          <b>Synonyms:</b> {@anime.anime.series_synonyms}
+                      </p>
+                      <p>
+                          <b>Japanese:</b> {@anime.Misc.japanese}
+                      </p>
+                  </div>
+                  <div className="synopsisColumn">
+                      <h3>synopsis</h3>
+                      <p id="synopsisText">Loading...</p>
+                  </div>
                 </div>
                 <div className="characterColumn">
                     <h3>characters</h3>
+                        {
+                          @getCharacters().map((ch,i) =>
+                            <div key={i} className="characterRow">
+                              <span className="characterInfo">
+                                  <h4>{ch.character_name}</h4>
+                                  <h5>{ch.character_va}</h5>
+                              </span>
+                              <span className="characterImage">
+                                  <img src={ch.character_image_link} onClick={@openCharacterPage} data-ch-id={ch.character_id} width="50px"/>
+                              </span>
+                            </div>
+                        )}
                 </div>
             </div>
         </div>

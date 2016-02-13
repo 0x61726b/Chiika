@@ -24,6 +24,8 @@ BrowserWindow = electron.remote.BrowserWindow
 ApplicationDelegate = require './ApplicationDelegate'
 ChiikaEnvironment = require './ChiikaEnvironment'
 
+_ = require 'lodash'
+
 {Emitter} = require 'event-kit'
 
 class ChiikaRenderer
@@ -94,12 +96,16 @@ class ChiikaRenderer
   requestAnimeUpdate:(id,score,progress,status) ->
     ipcRenderer.send 'requestAnimeUpdate', {animeId: id,score:score,progress:progress,status:status}
 
-  getMyAnimelist:() ->
-    @databaseMyAnimelist
-  getMyMangalist:() ->
-    @databaseMyMangalist
-  getUserInfo:() ->
-    @databaseMyUserInfo
+  dbUpdateAnime: (anime) ->
+    wholeList = chiika.dbAnimelist['AnimeArray']
+    console.log anime
+    if wholeList? && anime?
+      key = {'series_animedb_id':anime.series_animedb_id}
+      updateAnime = _.find( wholeList , key)
+
+      if updateAnime?
+        index = _.indexOf(wholeList,_.find( wholeList, key ))
+        chiika.dbAnimelist['AnimeArray'].splice(index,1,anime)
 
   getReady: (callback) ->
     @readyCallback = callback
@@ -200,6 +206,8 @@ class ChiikaRenderer
          entry['airingStatusColor'] = airingStatusColor
          data.push entry
       data
+
+
   addRequestListener:(name,listener) ->
     @requestListenerMap.set(name,listener)
     console.log "Registering " + name + " for request listening"
@@ -210,6 +218,10 @@ class ChiikaRenderer
   notifyRequestListeners: (request) ->
     @requestListenerMap.forEach (value,key) =>
       value.onRequest request
+  onRequestComplete: (request) ->
+    @requestListenerMap.forEach (value,key) =>
+      value[request]()
+
   getMangaListByUserStatus:(status) ->
       data = []
 
@@ -258,49 +270,5 @@ class ChiikaRenderer
           anime = value
 
       anime
-  unregisterShortcut:(arg) ->
-    ipcRenderer.send 'unregisterShortcuts',arg
-  registerShortcut:(arg) ->
-    ipcRenderer.send 'registerShortcuts',arg
-  onKeyPressed:(arg) ->
-    if arg == 'Backspace'
-      console.log "Backspace kappa"
-      @keyboardListenerMap.forEach (value,key) =>
-        value.onKeyPressed arg
-
-#
-# ipcRenderer.on 'setStatusText', (event,arg) ->
-#   message = arg.message
-#   fadeOut = arg.fadeOut
-#   chiikaRenderer.setStatusText message,fadeOut
-#
-# ipcRenderer.on 'browserKeyboardEvent', (event,arg) ->
-#     chiikaRenderer.onKeyPressed(arg)
-#
-# ipcRenderer.on 'requestMyAnimelistSuccess', (event,arg) ->
-#   chiikaRenderer.databaseMyAnimelist = arg.animeList
-#   RouteManager.refreshGrid()
-#   console.log arg.animeList
-#   chiikaRenderer.setStatusText("")
-#
-#
-#
-# ipcRenderer.on 'chiikaInitialized', (event,arg) ->
-#   console.log 'Receiving IPC message from browser process!Event:chiikaInitialized'
-#   chiikaRenderer.initialized = true
-#   chiikaRenderer.checkApiBusy()
-#
-#
-# #
-# ipcRenderer.on 'reRender', (event,arg) ->
-#     console.log 'Receiving IPC message from browser process!Event:reRender'
-#     if chiikaRenderer.listener != null
-#       chiikaRenderer.listener.trigger()
-#
-# ipcRenderer.on 'setApiBusy', (event,arg) ->
-#     console.log 'Receiving IPC message from browser process!Event:setApiBusy'
-#     chiikaRenderer.setApiBusy(arg)
-#
-#
 #Export
 module.exports = ChiikaRenderer

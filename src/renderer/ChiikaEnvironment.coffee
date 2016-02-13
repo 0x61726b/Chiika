@@ -68,9 +68,25 @@ module.exports =
         $(".statusText").delay(fadeout).fadeOut fadeout, ->
           $(this).html("")
     setSidebarInfo: () -> #Put user info here
-      $("div.userInfo").html(@getUserInfo().UserInfo.user_name?= "Reina")
+      userName = @getUserInfo().UserInfo.user_name
+      userName ?= "user_name"
+      if userName == "user_name"
+        userName = "Chiika"
+
+      userId = @localUserInfo.UserInfo.user_id
+
+      userId ?= "user_id"
+      userImage = "../assets/images/avatar.jpg"
+      if userId != "user_id"
+        if @appOptions?
+          userImage =path.join(@appOptions.imagePath, userId+".jpg")
+      else
+        userImage = "../assets/images/avatar.jpg"
+
+
+      $("div.userInfo").html(userName)
       if @appOptions?
-        imageUrl = path.join(@appOptions.imagePath, @localUserInfo.UserInfo.user_id+".jpg")
+        imageUrl = userImage
 
         $("img#userAvatar").attr('src',imageUrl)
     setActiveMenuItem: (index) ->

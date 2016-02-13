@@ -31,10 +31,10 @@ StatusBar = React.createClass
   render: () ->
     (<div><span className="statusText"></span>
     <div className="statusbarGlobal">
-    { if RouteManager.activeRoute == 8 || RouteManager.activeRoute == 1
+    { if chiika.routeManager.activeRoute == 8 || chiika.routeManager.activeRoute == 1
      <AnimelistStatusbar />
     }
-    { if RouteManager.activeRoute == 0
+    { if chiika.routeManager.activeRoute == 0
      <HomeStatusbar />
     }
     </div></div>);

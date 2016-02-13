@@ -23,10 +23,13 @@ module.exports =
   class ApplicationDelegate
     requestAnimeDetails:(id) ->
       ipc.send 'request-anime-details',id
+
+    requestRefreshAnimeDetails:(id) ->
+      ipc.send 'request-anime-refresh',id
+
     handleEvents: ->
       ipc.on 'db-update-animelist', (event,arg) ->
         chiika.dbAnimelist = arg
-
         chiika.routeManager.refreshGrid()
 
       ipc.on 'db-update-mangalist', (event,arg) ->
@@ -46,7 +49,14 @@ module.exports =
         chiika.setApiBusy arg
 
       ipc.on 'db-update-image-downloaded', (event,arg) ->
-        console.log "Image dl"
+        chiika.chiika.onRequestComplete 'refreshImage'
+
+      ipc.on 'db-update-user-image-downloaded', (event,arg) ->
+        chiika.setSidebarInfo()
+
+      ipc.on 'db-update-anime', (event,arg) ->
+        chiika.chiika.dbUpdateAnime arg
+        chiika.chiika.onRequestComplete 'refreshMinorInfo'
 
       ipc.on 'chiika-fs-ready',(event,arg) ->
         chiika.debug "Chiika-Fs is ready"

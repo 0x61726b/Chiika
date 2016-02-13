@@ -15,6 +15,7 @@
 #
 #----------------------------------------------------------------------------
 RequestMessageHelper = require './RequestStatusMessages'
+_ = require 'lodash'
 
 #Native Request JS Wrappers
 #These are Native function calls on chiika-node
@@ -88,7 +89,7 @@ class RequestChainBase
       application.logDebug "Request " + @name + " is starting..."
       @requestNative[@name](@tracker.onRequestSuccess,@tracker.onRequestError)
 
-
+    @checkTimeout()
 
   OnRequestSuccess: (ret) ->
     application.logDebug "Request " + ret.request_name + " is successful."
@@ -96,10 +97,19 @@ class RequestChainBase
 
     @results = @tracker.results
 
+
   OnRequestError: (ret) ->
     application.logDebug "Request " + ret.request_name + " has some errors!."
+    application.logDebug ret
     application.setRendererStatusText requestMessageHelper.getRequestErrorMessage(ret.request_name),0
 
+  checkTimeout: () ->
+    _.debounce(@onTimeout,7000)
+    application.logDebug "Setting timeout to ... 7000"
+  onTimeout: () ->
+    application.logDebug "Request " + ret.request_name + " has timed out."
+
+    application.setRendererStatusText "Request timed out.",1000
   OnAllComplete: (results) ->
     application.setApiBusy(false)
     last = null
@@ -134,12 +144,13 @@ class UserVerifyRequestChain extends RequestChainBase
 
     if requestName == 'UserVerifySuccess'
       application.emitter.emit 'login-success'
+      chiika.setUserInfoData()
     if requestName == 'GetMyAnimelistSuccess'
       chiika.setAnimelistData()
     if requestName == 'GetMyMangalistSuccess'
       chiika.setMangalistData()
     if requestName == 'GetImageSuccess'
-      application.sendEvent 'db-update-image-downloaded',true
+      application.sendEvent 'db-update-user-image-downloaded',true
 
 
 
@@ -213,7 +224,15 @@ class RefreshAnimeRequest extends RequestChainBase
     @OnRequestSuccess ret
 
     requestName = ret.request_name
-    chiika.setAnimelistData()
+
+    if requestName == "GetImageSuccess"
+      application.sendEvent 'db-update-image-downloaded',true
+    if requestName == "GetMalAjaxSuccess"
+      application.sendEvent 'db-update-anime',ret
+    if requestName == "GetAnimePageScrapeSuccess"
+      application.sendEvent 'db-update-anime',ret
+    if requestName == "GetSearchAnimeSuccess"
+      application.sendEvent 'db-update-anime',ret
 
   onRequestError: (ret) ->
     @OnRequestError ret
@@ -242,8 +261,14 @@ class GetAnimeDetailsRequest extends RequestChainBase
 
     if requestName == "FakeRequestSuccess"
       @onAllComplete(@results)
-
-    chiika.setAnimelistData()
+    if requestName == "GetImageSuccess"
+      application.sendEvent 'db-update-image-downloaded',true
+    if requestName == "GetMalAjaxSuccess"
+      application.sendEvent 'db-update-anime',ret
+    if requestName == "GetAnimePageScrapeSuccess"
+      application.sendEvent 'db-update-anime',ret
+    if requestName == "GetSearchAnimeSuccess"
+      application.sendEvent 'db-update-anime',ret
 
   onRequestError: (ret) ->
     @OnRequestError ret

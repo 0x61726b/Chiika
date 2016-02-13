@@ -22,16 +22,16 @@ RouteManager = require './../../RouteManager'
 
 AnimelistStatusbar = React.createClass
   getAnimeId: ->
-    path = RouteManager.activePath
+    path = chiika.routeManager.activePath
     v = path.split("/")
     v[2]
   refresh: (e) ->
-    activeRoute = RouteManager.activeRoute
+    activeRoute = chiika.routeManager.activeRoute
 
     if activeRoute == 8 #Details is active
       animeId = @getAnimeId()
       console.log "Refreshing.... AnimeId:" + animeId
-      Chiika.requestAnimeRefresh(animeId)
+      chiika.appDel.requestRefreshAnimeDetails(animeId)
     if activeRoute == 1 #Anime List is active
       if $(e.target).attr('disabled') != 'disabled'
         console.log "Syncing anime list..."
