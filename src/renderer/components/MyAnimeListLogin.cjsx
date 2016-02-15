@@ -59,7 +59,7 @@ Content = React.createClass
     (<div><div id="titleBar"></div>
     <MyAnimelistLogin /></div>)
 
-React = require("React");
+React = require("react");
 ReactDOM = require("react-dom");
 
 ReactDOM.render(React.createElement(Content), document.getElementById('malLogin'))

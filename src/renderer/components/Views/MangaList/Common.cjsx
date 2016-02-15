@@ -13,7 +13,7 @@
 #authors: arkenthera
 #Description:
 #----------------------------------------------------------------------------
-React = require 'React'
+React = require 'react'
 Search = require './../../RouteManager'
 
 Grid = {

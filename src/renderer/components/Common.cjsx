@@ -13,7 +13,7 @@
 #authors: arkenthera
 #Description:
 #----------------------------------------------------------------------------
-React = require 'React'
+React = require 'react'
 ReactDOM = require 'react-dom'
 ReactRouter = require 'react-router'
 _ReactRouter = ReactRouter;

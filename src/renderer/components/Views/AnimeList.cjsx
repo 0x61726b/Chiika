@@ -53,7 +53,7 @@ AnimeList = React.createClass
         {column: { name:"airingStatusText",order:-1,toggleable:true,hiddenDefault:true }},
       ]
     #fs.appendFile Chiika.chiikaNode.rootOptions.modulePath + "Data/column.json",JSON.stringify(columnData), (err) => console.log err
-
+    process.env.CHIIKA_HOME = "/home/arkenthera/Chiika"
     columnDataPath = path.join(process.env.CHIIKA_HOME,'Config','animeListTable.json')
 
     columnFileJson = []

@@ -72,7 +72,9 @@ class ChiikaRenderer
        icon:'./resources/icon.png'
     }
     LoginWindow = new BrowserWindow(options);
+    console.log "file://#{__dirname}/../renderer/MyAnimeListLogin.html"
     LoginWindow.loadURL("file://#{__dirname}/../renderer/MyAnimeListLogin.html")
+    LoginWindow.openDevTools()
     LoginWindow.on 'closed', () ->
       LoginWindow = null
 

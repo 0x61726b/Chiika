@@ -13,7 +13,7 @@
 #authors: arkenthera
 #Description:
 #----------------------------------------------------------------------------
-React = require("React");
+React = require("react");
 ReactDOM = require("react-dom");
 Root = require('./components/Root')
 Chiika = require './ChiikaNode'
