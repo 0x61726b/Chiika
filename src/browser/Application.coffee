@@ -136,7 +136,7 @@ class Application
     @sendEvent 'set-status-bar-text',msg
 
   setupChiikaConfig: ->
-    chiikaHome = path.join(app.getPath('appData'),"Chiika")
+    chiikaHome = path.join(app.getPath('appData'),"chiika")
     chiikaLog = path.join(app.getPath('appData'),"Logs")
     process.env.CHIIKA_HOME = chiikaHome
     process.env.CHIIKA_LOG_HOME ?= chiikaLog

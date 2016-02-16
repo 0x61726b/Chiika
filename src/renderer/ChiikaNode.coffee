@@ -17,6 +17,7 @@ path = require('path')
 fs = require('fs')
 remote = require('remote')
 electron = require 'electron'
+app = remote.app
 ipcRenderer = electron.ipcRenderer
 RouteManager = require './components/RouteManager'
 BrowserWindow = electron.remote.BrowserWindow
@@ -54,6 +55,7 @@ class ChiikaRenderer
 
   #Send browser async requests to retrieve data
   constructor: ->
+    process.env.CHIIKA_HOME = path.join(app.getPath('appData'),"chiika")
     @appDel       =   new ApplicationDelegate()
     @routeManager =   new RouteManager()
 
