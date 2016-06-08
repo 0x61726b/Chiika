@@ -1,4 +1,0 @@
-[submodule "lib/chiika-node"]
-	path = lib/chiika-node
-	url = https://github.com/arkenthera/chiika-node
-	branch = master

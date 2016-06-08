@@ -89,7 +89,11 @@ class RequestChainBase
       application.logDebug "Request " + @name + " is starting..."
       @requestNative[@name](@tracker.onRequestSuccess,@tracker.onRequestError)
 
-    @checkTimeout()
+    d = {}
+
+    @checkTimeout = _.debounce(@onTimeout,15000)
+
+
 
   OnRequestSuccess: (ret) ->
     application.logDebug "Request " + ret.request_name + " is successful."
@@ -97,19 +101,22 @@ class RequestChainBase
 
     @results = @tracker.results
 
+    @checkTimeout()
 
   OnRequestError: (ret) ->
     application.logDebug "Request " + ret.request_name + " has some errors!."
     application.logDebug ret
     application.setRendererStatusText requestMessageHelper.getRequestErrorMessage(ret.request_name),0
 
+    @checkTimeout()
   checkTimeout: () ->
-    _.debounce(@onTimeout,7000)
-    application.logDebug "Setting timeout to ... 7000"
+    application.logDebug "Setting timeout to ... 15seconds"
   onTimeout: () ->
-    application.logDebug "Request " + ret.request_name + " has timed out."
+    application.logDebug "Request has timed out."
 
-    application.setRendererStatusText "Request timed out.",1000
+    application.setRendererStatusText "",0
+
+    application.setApiBusy(false)
   OnAllComplete: (results) ->
     application.setApiBusy(false)
     last = null
