@@ -27,6 +27,8 @@ ChiikaEnvironment = require './ChiikaEnvironment'
 
 _ = require 'lodash'
 
+T = require './tools'
+
 {Emitter} = require 'event-kit'
 
 class ChiikaRenderer
@@ -62,6 +64,8 @@ class ChiikaRenderer
     window.chiika =   new ChiikaEnvironment(this,@appDel,@routeManager)
 
     @appDel.handleEvents()
+
+    console.log T
 
     chiika.onChiikaReady =>
       chiika.setApiBusy true

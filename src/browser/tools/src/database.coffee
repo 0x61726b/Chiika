@@ -1,6 +1,6 @@
 #----------------------------------------------------------------------------
 #Chiika
-#Copyright (C) 2016 arkenthera
+#
 #This program is free software; you can redistribute it and/or modify
 #it under the terms of the GNU General Public License as published by
 #the Free Software Foundation; either version 2 of the License, or
@@ -9,14 +9,34 @@
 #but WITHOUT ANY WARRANTY; without even the implied warranty of
 #MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #GNU General Public License for more details.
-#Date: 23.1.2016
+#Date: 9.6.2016
 #authors: arkenthera
 #Description:
 #----------------------------------------------------------------------------
-React = require("react")
-ReactDOM = require("react-dom")
 
-Chiika = require("./chiika")
+NoSQL = require('nosql')
 
-$ ->
-  ReactDOM.render(React.createElement(Chiika), document.getElementById('app'))
+
+class Database
+  animelistDb: null,
+  mangalistDb: null
+  init: () ->
+    #Load list for caching reasons
+    @animelistDb = NoSQL.load(global.chiika.chiikaPath + '/Data/anime.nosql')
+
+    @animelistDb.on 'load', ->
+      console.log "Anime list Db loaded"
+
+  QueryDb: (db,query,callback) ->
+    Filter: (doc) ->
+      doc
+
+    Callback: (err, selected) ->
+      filtered = _.filter selected,_.matches(query)
+      callback filtered
+
+
+    db.all Filter,Callback
+
+
+module.exports = new Database();

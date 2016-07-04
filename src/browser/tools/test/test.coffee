@@ -13,10 +13,36 @@
 #authors: arkenthera
 #Description:
 #----------------------------------------------------------------------------
-React = require("react")
-ReactDOM = require("react-dom")
 
-Chiika = require("./chiika")
 
-$ ->
-  ReactDOM.render(React.createElement(Chiika), document.getElementById('app'))
+Tools = require './..'
+
+#Tools.login 'arkenthera','sezalpg44242',(result) ->
+#  console.log result
+
+#Tools.getAnimelistOfUser 'julesawdupin', (result) ->
+#  console.log result.list.myanimelist
+#  console.log result.list.myanimelist.myinfo
+
+#Tools.getMangalistOfUser 'julesawdupin', (result) ->
+#  console.log result.list.myanimelist
+#  console.log result.list.myanimelist.myinfo
+
+onReady = ->
+  #Tools.saveList 'anime',Tools.dummyList.myanimelist.anime, (error) -> console.log error
+
+
+  # cbAnime = (error,selected) ->
+  #   console.log selected
+  #
+  # Tools.loadList 'anime',cbAnime
+
+Tools.init(onReady)
+
+#Tools.saveList 'animelist','test'
+
+
+
+
+
+#console.log Tools

@@ -13,10 +13,9 @@
 #authors: arkenthera
 #Description:
 #----------------------------------------------------------------------------
-React = require("react")
-ReactDOM = require("react-dom")
 
-Chiika = require("./chiika")
+DefaultOptions = {
+  RefreshUponLaunch: true
+}
 
-$ ->
-  ReactDOM.render(React.createElement(Chiika), document.getElementById('app'))
+module.exports = DefaultOptions

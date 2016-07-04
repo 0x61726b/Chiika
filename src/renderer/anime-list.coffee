@@ -13,10 +13,17 @@
 #authors: arkenthera
 #Description:
 #----------------------------------------------------------------------------
-React = require("react")
-ReactDOM = require("react-dom")
 
-Chiika = require("./chiika")
+React = require('react')
+{Router,Route,BrowserHistory,Link} = require('react-router')
 
-$ ->
-  ReactDOM.render(React.createElement(Chiika), document.getElementById('app'))
+
+#Views
+
+AnimeList = React.createClass
+  componentDidMount: () ->
+
+  render: () ->
+    (<div> Anime List </div>)
+
+module.exports = AnimeList

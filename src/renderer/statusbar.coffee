@@ -9,14 +9,17 @@
 #but WITHOUT ANY WARRANTY; without even the implied warranty of
 #MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #GNU General Public License for more details.
-#Date: 23.1.2016
+#Date: 2.2.2016
 #authors: arkenthera
 #Description:
 #----------------------------------------------------------------------------
-React = require("react")
-ReactDOM = require("react-dom")
+React = require 'react'
+electron = require 'electron'
+ipcRenderer = electron.ipcRenderer
 
-Chiika = require("./chiika")
 
-$ ->
-  ReactDOM.render(React.createElement(Chiika), document.getElementById('app'))
+StatusBar = React.createClass
+  render: () ->
+    (<div><span className="statusText"></span></div>);
+
+module.exports = StatusBar

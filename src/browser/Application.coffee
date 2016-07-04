@@ -25,10 +25,11 @@ electron = require 'electron'
 ipc = electron.ipcMain
 localShortcut = require 'electron-localshortcut'
 
+
+
 ApplicationWindow = require './ApplicationWindow'
 appMenu = require './menu/appMenu'
 Menu = require 'menu'
-Chiika = require './Chiika'
 
 yargs = require 'yargs'
 path = require 'path'
@@ -43,7 +44,8 @@ process.on('uncaughtException',(err) -> console.log err)
 
 module.exports =
 class Application
-  window: null
+  window: null,
+  loginWindow: null
   constructor: (options) ->
     global.application = this
     @emitter = new Emitter
@@ -59,12 +61,6 @@ class Application
     # Quit when all windows are closed.
 
 
-  onLoginSuccess: () ->
-    application.loginWindow.getOwnerBrowserWindow().close()
-    application.loginWindow = null
-  onLoginError: (loginWnd) ->
-    @loginWindow.send 'login-error'
-
   handleEvents: ->
     app.on 'window-all-closed', ->
        app.quit()
@@ -76,32 +72,6 @@ class Application
 
        @logDebug("Initializing...")
 
-
-       @chiika = new Chiika()
-       @chiika.setMainWindow(@window.getWindow())
-       @chiika.init()
-
-
-    ipc.on 'set-login-info',(event,arg) =>
-      userName = arg.user
-      pass     = arg.pass
-
-      @loginWindow = event.sender
-      @emitter.on 'login-success',@onLoginSuccess
-      @emitter.on 'login-error',@onLoginError
-
-      chiika.SetUser userName,pass
-      requestManager.UserVerify()
-
-    ipc.on 'request-anime-details', (event,arg) =>
-      requestManager.GetAnimeDetails arg
-
-    ipc.on 'request-anime-refresh', (event,arg) =>
-      requestManager.RefreshAnime arg
-
-  sendEvent: (evt,args) ->
-    @logDebug "Sending IPC -> " + evt
-    @window.getWindow().webContents.send evt,args
   setupLogServer: ->
     scribe = require 'scribe-js'
     express = require 'express'
@@ -111,8 +81,6 @@ class Application
     eapp = express()
 
     eapp.set('port',(process.env.PORT || 5000))
-
-
     eapp.get '/', (req,res) ->
       res.send 'hello,world'
 
@@ -127,14 +95,6 @@ class Application
   logDebug:(text) ->
     process.console.tag("chiika-browser").time().debug(text)
 
-
-  setApiBusy:(cond) ->
-    @sendEvent 'set-api-busy',cond
-
-  setRendererStatusText: (text,fade) ->
-    msg = {message:text,fadeOut:fade}
-    @sendEvent 'set-status-bar-text',msg
-
   setupChiikaConfig: ->
     chiikaHome = path.join(app.getPath('appData'),"chiika")
     chiikaLog = path.join(app.getPath('appData'),"Logs")
@@ -146,6 +106,17 @@ class Application
   registerShortcuts: ->
     #To-do
 
+  openLoginWindow: ->
+    options = {
+       frame:false,
+       width:600,
+       height:600,
+       icon:'./resources/icon.png'
+    }
+    LoginWindow = new BrowserWindow(options);
+    console.log "file://#{__dirname}/../renderer/MyAnimeListLogin.html"
+    LoginWindow.loadURL("file://#{__dirname}/../renderer/MyAnimeListLogin.html")
+    LoginWindow.openDevTools()
   openWindow: ->
     isBorderless = true
 

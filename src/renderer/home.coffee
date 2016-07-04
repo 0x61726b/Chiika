@@ -13,10 +13,17 @@
 #authors: arkenthera
 #Description:
 #----------------------------------------------------------------------------
-React = require("react")
-ReactDOM = require("react-dom")
 
-Chiika = require("./chiika")
+React = require('react')
+{Router,Route,BrowserHistory,Link} = require('react-router')
 
-$ ->
-  ReactDOM.render(React.createElement(Chiika), document.getElementById('app'))
+
+#Views
+
+Home = React.createClass
+  componentDidMount: () ->
+
+  render: () ->
+    (<div> Home </div>)
+
+module.exports = Home
