@@ -18,14 +18,56 @@ NoSQL = require('nosql')
 
 
 class Database
-  animelistDb: null,
-  mangalistDb: null
   init: () ->
+    _self = this
     #Load list for caching reasons
-    @animelistDb = NoSQL.load(global.chiika.chiikaPath + '/Data/anime.nosql')
+    @animelistDb = NoSQL.load(application.chiikaHome + '/Data/anime.nosql')
+    @userDb = NoSQL.load(application.chiikaHome + '/Data/user.nosql')
+
+    @userDb.stored.create 'saveUserInfoBasic', (nosql,next,params) ->
+      test = 1
+      updateP = (doc) ->
+        doc.userName = params.userName
+        doc.password = params.password
+        doc
+
+
+
+      this.update( updateP, -> next())
 
     @animelistDb.on 'load', ->
-      console.log "Anime list Db loaded"
+      application.logDebug "Anime list Db loaded"
+
+    @userDb.on 'load', =>
+      getUserCb = (user) ->
+        application.logDebug "User DB loaded - Welcome " + user.userName
+      @getUser getUserCb
+
+
+
+  #This function is for updating user info, can only update userName and password
+  saveUserInfo: (user) ->
+    encodePass = new Buffer(user.password).toString('base64')
+    @userDb.stored.execute('saveUserInfoBasic', { userName: user.userName, password: encodePass } )
+
+  #This function will only get called after succesful login
+  addUser: (user) ->
+    @userDb.clear( -> )
+
+    encodePass = new Buffer(user.password).toString('base64')
+    @userDb.insert({ userName: user.userName, password: encodePass })
+
+    application.logDebug "Adding user " + user.userName
+
+  getUser: (cb) ->
+    map = (doc) ->
+      doc
+    callback = (err,data) ->
+      user = data
+      user.password = new Buffer(user.password,'base64').toString('ascii')
+      cb user
+
+    @userDb.one(map,callback)
 
   QueryDb: (db,query,callback) ->
     Filter: (doc) ->

@@ -18,23 +18,27 @@
 #--------------------
 #
 #--------------------
+{BrowserWindow, ipcMain} = require 'electron'
 app = require "app"
-BrowserWindow = require 'browser-window'
 crashReporter = require 'crash-reporter'
 electron = require 'electron'
-ipc = electron.ipcMain
 localShortcut = require 'electron-localshortcut'
 
-
+AppOptions = require './tools/options'
 
 ApplicationWindow = require './ApplicationWindow'
 appMenu = require './menu/appMenu'
 Menu = require 'menu'
+Tools = require './tools'
+Database = require './tools/src/database'
 
 yargs = require 'yargs'
 path = require 'path'
 
 fs = require 'fs'
+_ = require 'lodash'
+
+ipcHelpers = require '../ipcHelpers'
 
 {Emitter,Disposable} = require 'event-kit'
 # ---------------------------
@@ -45,10 +49,14 @@ process.on('uncaughtException',(err) -> console.log err)
 module.exports =
 class Application
   window: null,
-  loginWindow: null
+  loginWindow: null,
+  tools: null
   constructor: (options) ->
     global.application = this
     @emitter = new Emitter
+
+
+
 
 
     # Report crashes to our server.
@@ -62,15 +70,56 @@ class Application
 
 
   handleEvents: ->
+    _self = this
     app.on 'window-all-closed', ->
        app.quit()
     app.on 'ready', =>
-       @openWindow()
+       if @firstLaunch
+         @openLoginWindow()
+       else
+         @openWindow()
+
+
+
        @registerShortcuts()
        @setupLogServer()
 
 
        @logDebug("Initializing...")
+
+       @tools = new Tools()
+       @tools.init( -> )
+
+
+
+    ipcMain.on 'get-user-info',(event) ->
+      getUserCb = (user) ->
+        application.logDebug "Querying user database..."
+        event.sender.send 'get-user-info-response',user
+      Database.getUser getUserCb
+
+
+    ipcMain.on 'call-window-method', (event,method,args...) =>
+      win = BrowserWindow.fromWebContents(event.sender)
+      win[method](args...)
+    ipcMain.on 'set-user-login', (event,data) =>
+      application.logDebug("IPC: set-user-login")
+
+      @tools.login data.user,data.pass, (response) =>
+        application.logDebug("Login: " + response.success)
+        if response.success
+          application.logDebug("Loading...")
+
+
+          @LoginWindow.close()
+          @LoginWindow = null
+          @openWindow()
+
+          Database.addUser { userName: data.user, password: data.pass }
+        else
+          application.logDebug("Error: " + response.errorMessage)
+          event.sender.send('set-user-login-response',response)
+
 
   setupLogServer: ->
     scribe = require 'scribe-js'
@@ -96,10 +145,32 @@ class Application
     process.console.tag("chiika-browser").time().debug(text)
 
   setupChiikaConfig: ->
-    chiikaHome = path.join(app.getPath('appData'),"chiika")
-    chiikaLog = path.join(app.getPath('appData'),"Logs")
-    process.env.CHIIKA_HOME = chiikaHome
-    process.env.CHIIKA_LOG_HOME ?= chiikaLog
+    @chiikaHome = path.join(app.getPath('appData'),"chiika")
+    @chiikaLog = path.join(app.getPath('appData'),"Logs")
+    process.env.CHIIKA_HOME = @chiikaHome
+    process.env.CHIIKA_LOG_HOME ?= @chiikaLog
+
+    configFilePath = path.join(path.join(@chiikaHome, "Config"),"Chiika.json");
+
+    try
+      configFile = fs.statSync configFilePath
+    catch e
+      configFile = undefined
+
+    if _.isUndefined configFile
+      fs.openSync configFilePath, 'w'
+
+      fs.writeFileSync configFilePath,JSON.stringify(AppOptions),'utf-8'
+
+      @firstLaunch = true
+    else
+      configFile = fs.readFileSync configFilePath, 'utf-8'
+      @firstLaunch = false
+
+      AppOptions = configFile
+
+
+
   parseCommandLine: ->
     options = yargs(process.argv[1..]).wrap(100)
     args = options.argv
@@ -109,23 +180,30 @@ class Application
   openLoginWindow: ->
     options = {
        frame:false,
-       width:600,
+       width:800,
        height:600,
        icon:'./resources/icon.png'
     }
-    LoginWindow = new BrowserWindow(options);
-    console.log "file://#{__dirname}/../renderer/MyAnimeListLogin.html"
-    LoginWindow.loadURL("file://#{__dirname}/../renderer/MyAnimeListLogin.html")
-    LoginWindow.openDevTools()
+
+    @LoginWindow = new BrowserWindow(options);
+    @LoginWindow.loadURL("file://#{__dirname}/../renderer/MyAnimeListLogin.html")
+    @LoginWindow.openDevTools()
+  showMainWindow: ->
+    @window.window.show()
+    @window.window.restore()
+  hideMainWindow: ->
+    @window.window.minimize()
+    @window.window.hide()
+
   openWindow: ->
     isBorderless = true
-
-    if process.env.Show_CA_Debug_Tools == 'yeah'
-      isBorderless = false;
-    htmlURL = "file://#{__dirname}/../renderer/index.html#Home"
+    windowUrl = "file://#{__dirname}/../renderer/index.html#Home"
+    windowWidth = 1400
+    windowHeight = 900
+    htmlURL = windowUrl
     @window = new ApplicationWindow htmlURL,
-      width: 1400
-      height: 900
+      width: windowWidth
+      height: windowHeight
       minWidth:900
       minHeight:600
       title: 'Chiika - Development Mode'
@@ -133,8 +211,8 @@ class Application
       frame:!isBorderless
     @window.openDevTools()
 
-    if process.env.Show_CA_Debug_Tools == 'yeah'
-      Menu.setApplicationMenu(appMenu)
+    @window.window.webContents.on 'did-finish-load', =>
+      @window.window.webContents.send('window-reload')
 
 
 

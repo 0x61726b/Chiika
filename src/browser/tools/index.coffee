@@ -18,7 +18,7 @@ Request = require('./src/request');
 Parser = require('./src/parser');
 Database = require('./src/database');
 
-defOptions = require './options'
+
 
 NoSQL = require 'nosql'
 
@@ -31,14 +31,13 @@ class Tools
   chiikaPath: null,
   readyCallback: null
   init: (callback) ->
+    application.logDebug "Initializing tools"
     @readyCallback = callback
     @chiikaPath = "C:/Users/alperen/AppData/Roaming/Chiika/"
 
     GLOBAL.chiika = this
 
     _self = this
-
-    @initConfig()
 
     @dummyList = fs.readFileSync @chiikaPath + "Data/dummydata.txt", "utf-8"
     Parser.ParseSync(@dummyList)
@@ -49,25 +48,6 @@ class Tools
     Database.init()
 
     _self.readyCallback()
-
-  initConfig: () ->
-    #Create config file if not exist
-
-    configFilePath = @chiikaPath + "Config/chiika.json"
-
-    try
-      configFile = fs.statSync configFilePath
-    catch e
-      configFile = undefined
-
-    if _.isUndefined configFile
-      fs.openSync configFilePath, 'w'
-
-      fs.writeFileSync configFilePath,JSON.stringify(defOptions),'utf-8'
-    else
-      configFile = fs.readFileSync configFilePath, 'utf-8'
-
-      defOptions = configFile
 
   #Saves list data to %chiikahome%/data
   saveList: (listName,data,callback) ->
@@ -105,9 +85,11 @@ class Tools
     Request.getMangalist userName,callback
   login:(userName,password,callback) ->
     if _.isEmpty(userName) || _.isEmpty(password)
+      application.logDebug "Empty user name or password."
       return
+    application.logDebug "Login: " + userName
 
     Request.verifyCredentials {userName: userName, password:password},callback
 
 
-module.exports = new Tools()
+module.exports = Tools

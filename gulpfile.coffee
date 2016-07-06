@@ -67,6 +67,10 @@ Incremental_compile_cjsx_coffee_files_with_sourcemaps = () ->
       .pipe(coffee())
       .pipe(sourcemaps.write('.'))
       .pipe(gulp.dest(serveDir))
+
+
+    gulp.src('src/*.js')
+        .pipe(gulp.dest(serveDir))
     done()
 
 Compile_scripts_for_distribution = () ->

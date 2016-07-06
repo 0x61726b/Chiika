@@ -16,15 +16,22 @@
 
 React = require('react')
 {Router,Route,BrowserHistory,Link} = require('react-router')
+{BrowserWindow, ipcRenderer,remote} = require 'electron'
 
 
 #Views
 
 SideMenu = React.createClass
-  componentDidMount: () ->
+  componentDidMount: ->
+    hoverIn = ->
+      $(this).addClass "rotateLogo"
+    hoverOut = ->
+      $(this).removeClass "rotateLogo"
+    $(".chiikaLogo").hover(hoverIn, hoverOut)
     $("div.navigation ul li").click ->
       $("div.navigation ul li").removeClass "active"
       $(this).toggleClass "active"
+
   render: () ->
     (<div className="sidebar">
       <div className="topLeft">
@@ -36,7 +43,7 @@ SideMenu = React.createClass
             <img id="userAvatar" className="img-circle avatar" src="./../assets/images/avatar.jpg"/>
           </div>
           <div className="userInfo">
-            No User
+            Chiika
           </div>
         </Link>
       </div>

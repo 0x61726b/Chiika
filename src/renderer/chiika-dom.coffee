@@ -13,17 +13,13 @@
 #authors: arkenthera
 #Description:
 #----------------------------------------------------------------------------
+{Emitter} = require 'event-kit'
+ipcHelpers = require '../ipcHelpers'
+{BrowserWindow, ipcRenderer,remote} = require 'electron'
 
-React = require('react')
-{Router,Route,BrowserHistory,Link} = require('react-router')
+class ChiikaDomManager
+  setUserInfo: (user) ->
+    $("div.userInfo").html(user.userName)
 
 
-#Views
-
-Home = React.createClass
-  componentDidMount: () ->
-
-  render: () ->
-    (<div> <a href="#" onclick={this.onButton1}> Button 1 </a> </div>)
-
-module.exports = Home
+module.exports = ChiikaDomManager

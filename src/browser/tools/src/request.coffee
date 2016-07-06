@@ -23,8 +23,10 @@ class RequestAPI
   #Verify user credentials on MyAnimeList
   verifyCredentials: (args,callback) ->
     _self = this
+
     request.post({
-      url:"http://" + args.userName + ":" + args.password + "@myanimelist.net/api/account/verify_credentials.xml"},(error,response,body) -> _self.onVerifyCredentials(error,response,body,callback))
+      url:"http://" + args.userName + ":" + args.password + "@myanimelist.net/api/account/verify_credentials.xml"},(error,response,body) ->
+        _self.onVerifyCredentials(error,response,body,callback))
 
 
   #Get animelist of a user
@@ -46,25 +48,25 @@ class RequestAPI
 
 
 
-    @handleRequestResult(error,response,body)
+    @handleRequestResult(error,response,body,callback)
 
   #verifycredentials callback
   onVerifyCredentials: (error,response,body,callback) ->
     if response.statusCode == 200 && !error
       Parser.ParseSync(body)
             .then (result) ->
-              callback { user: result.user, statusCode: response.statusCode }
+              callback { success: true,user: result.user, statusCode: response.statusCode }
 
 
-    @handleRequestResult(error,response,body)
+    @handleRequestResult(error,response,body,callback)
 
-  handleRequestResult: (error,response,body) ->
+  handleRequestResult: (error,response,body,callback) ->
     if response.statusCode != 200
       @onError error,response,body,callback
     else if error
       @onError error,response,"No connection probably.",callback
   onError: (error,response,body,callback) ->
-    callback { statusCode: response.statusCode, errorMessage: "Something went wrong. Whoops.." + body}
+    callback { success:false, statusCode: response.statusCode, errorMessage: "Something went wrong. Whoops.." + body}
 
 
 

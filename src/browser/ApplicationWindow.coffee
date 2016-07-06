@@ -29,4 +29,5 @@ class ApplicationWindow
     @window.on(args...)
   openDevTools: () ->
     @window.openDevTools();
-    
+  loadURL: (url) ->
+    @window.loadURL(url)

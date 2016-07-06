@@ -13,9 +13,11 @@ template = [{
       label: 'Chiika'
       submenu:[{
           label: 'Reload'
-          accelerator: 'CmdOrCtrl+R'
+          accelerator: 'CmdOrCtrl+X'
           click: () ->
              BrowserWindow.getFocusedWindow().reload()
+             BrowserWindow.webContents.send('window-reload')
+             console.log "Is this working"
       },
       {
           label: 'Quit'
