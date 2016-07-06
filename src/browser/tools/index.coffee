@@ -39,12 +39,6 @@ class Tools
 
     _self = this
 
-    @dummyList = fs.readFileSync @chiikaPath + "Data/dummydata.txt", "utf-8"
-    Parser.ParseSync(@dummyList)
-          .then (result) ->
-            _self.dummyList = result
-
-
     Database.init()
 
     _self.readyCallback()

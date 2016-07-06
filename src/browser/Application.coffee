@@ -36,6 +36,7 @@ yargs = require 'yargs'
 path = require 'path'
 
 fs = require 'fs'
+mkdirp = require 'mkdirp'
 _ = require 'lodash'
 
 ipcHelpers = require '../ipcHelpers'
@@ -109,13 +110,15 @@ class Application
         application.logDebug("Login: " + response.success)
         if response.success
           application.logDebug("Loading...")
+          Database.addUser { userName: data.user, password: data.pass }
 
 
           @LoginWindow.close()
           @LoginWindow = null
+
           @openWindow()
 
-          Database.addUser { userName: data.user, password: data.pass }
+
         else
           application.logDebug("Error: " + response.errorMessage)
           event.sender.send('set-user-login-response',response)
@@ -151,6 +154,9 @@ class Application
     process.env.CHIIKA_LOG_HOME ?= @chiikaLog
 
     configFilePath = path.join(path.join(@chiikaHome, "Config"),"Chiika.json");
+
+    mkdirp(path.join(@chiikaHome, "Config"), ->)
+    mkdirp(path.join(@chiikaHome, "Data"), ->)
 
     try
       configFile = fs.statSync configFilePath

@@ -15,11 +15,12 @@
 #----------------------------------------------------------------------------
 
 NoSQL = require('nosql')
-
+_ = require 'lodash'
 
 class Database
   init: () ->
     _self = this
+    console.log application.chiikaHome
     #Load list for caching reasons
     @animelistDb = NoSQL.load(application.chiikaHome + '/Data/anime.nosql')
     @userDb = NoSQL.load(application.chiikaHome + '/Data/user.nosql')
@@ -64,6 +65,9 @@ class Database
       doc
     callback = (err,data) ->
       user = data
+
+      if _.isEmpty user
+        return
       user.password = new Buffer(user.password,'base64').toString('ascii')
       cb user
 

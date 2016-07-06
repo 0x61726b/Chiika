@@ -6,8 +6,6 @@ BrowserWindow = require 'browser-window'
 electron = require 'electron'
 ipcMain = electron.ipcMain
 
-Chiika = require './../Chiika'
-
 
 template = [{
       label: 'Chiika'
