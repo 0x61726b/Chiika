@@ -43,13 +43,6 @@ class Tools
 
     _self.readyCallback()
 
-  #Saves list data to %chiikahome%/data
-  saveList: (listName,data,callback) ->
-    lisql = NoSQL.load @chiikaPath + listName
-
-    lisql.clear ( -> )
-    lisql.insert data, (err,count) -> callback err
-
 
   #Loads list data from %chiikahome%/data , Async
   loadList: (listName,callback) ->
@@ -68,9 +61,15 @@ class Tools
 
   getAnimelistOfUser: (userName,callback) ->
     if _.isEmpty(userName)
+      application.logDebug "Empty user name."
       return
+    #Strip away user info
+    getAnimelistCb = (response) ->
+      callback response
 
-    Request.getAnimelist userName,callback
+
+    application.logDebug "GetAnimelist: " + userName
+    Request.getAnimelist userName,getAnimelistCb
 
   getMangalistOfUser: (userName,callback) ->
     if _.isEmpty(userName)

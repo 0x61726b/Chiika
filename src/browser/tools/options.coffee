@@ -15,7 +15,17 @@
 #----------------------------------------------------------------------------
 
 DefaultOptions = {
-  RefreshUponLaunch: true
+  RefreshUponLaunch: true,
+  AnimeListColumns:[
+    {column: { name:"typeWithIcon",order:0,toggleable:true,hiddenDefault:false} },
+    {column: { name:"title",order:1,toggleable:false,hiddenDefault:false} },
+    {column: { name:"score",order:2,toggleable:false,hiddenDefault:false} },
+    {column: { name:"season",order:4,toggleable:false,hiddenDefault:false }},
+    {column: { name:"progress",order:3,toggleable:false,hiddenDefault:false }},
+    {column: { name:"typeWithIconColors",order:-1,toggleable:true,hiddenDefault:true }},
+    {column: { name:"typeWithText",order:-1,toggleable:true,hiddenDefault:true }},
+    {column: { name:"airingStatusText",order:-1,toggleable:true,hiddenDefault:true }},
+  ]
 }
 
 module.exports = DefaultOptions

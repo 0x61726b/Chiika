@@ -17,9 +17,46 @@
 ipcHelpers = require '../ipcHelpers'
 {BrowserWindow, ipcRenderer,remote} = require 'electron'
 
+_ = require 'lodash'
 class ChiikaDomManager
   setUserInfo: (user) ->
     $("div.userInfo").html(user.userName)
+  destroyGrid: (name) ->
+    $("#" + name).w2destroy()
+    window.chiika.gridManager.removeGrid name
+  addNewGrid: (type,name,status) ->
+    name = name
+
+    if window.chiika.gridManager.checkIfGridExists name
+      return
+
+    localGrid = {
+      name:name,
+      reorderColumns:true,
+      columns:[],
+      records:[]
+    }
+
+    columns = []
+    if type == 'anime'
+      columns = window.chiika.gridManager.animeListColumns
+    if type == 'manga'
+      columns = window.chiika.gridManager.mangaListColumns
+
+    #Sort by order
+    columns = _.sortBy columns, (o) ->
+      return o.order
+
+    _.forEach columns, (v,k) ->
+      findFunction = (fnc) ->
+        fncMap = window.chiika.gridManager.fileFuncMap
+        _.find fncMap,_.matchesProperty 'column', fnc
+      if v.order != -1
+        window.chiika.gridManager[findFunction(v.name).fnc](localGrid)
+    localGrid.records = window.chiika.getAnimeListByType(status)
+
+    window.chiika.gridManager.addGrid localGrid
+    $("#" + name).w2grid(localGrid)
 
 
 module.exports = ChiikaDomManager

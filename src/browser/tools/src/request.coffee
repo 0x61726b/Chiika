@@ -44,7 +44,8 @@ class RequestAPI
     if response.statusCode == 200 && !error
       Parser.ParseSync(body)
             .then (result) ->
-              callback { list: result, statusCode: response.statusCode }
+              result = (result)
+              callback { success: true,list: result, statusCode: response.statusCode }
 
 
 

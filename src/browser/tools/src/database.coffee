@@ -20,7 +20,7 @@ _ = require 'lodash'
 class Database
   init: () ->
     _self = this
-    console.log application.chiikaHome
+
     #Load list for caching reasons
     @animelistDb = NoSQL.load(application.chiikaHome + '/Data/anime.nosql')
     @userDb = NoSQL.load(application.chiikaHome + '/Data/user.nosql')
@@ -36,14 +36,26 @@ class Database
 
       this.update( updateP, -> next())
 
-    @animelistDb.on 'load', ->
+    @animelistDb.on 'load', =>
       application.logDebug "Anime list Db loaded"
+
+      getAnimelistCb = (data) ->
+        @animelistDb = data
+      @loadAnimelist getAnimelistCb
 
     @userDb.on 'load', =>
       getUserCb = (user) ->
         application.logDebug "User DB loaded - Welcome " + user.userName
       @getUser getUserCb
 
+
+
+  saveList: (listName,data,callback) ->
+    application.logDebug "Saving list " + listName
+    lisql = NoSQL.load(application.chiikaHome + '/Data/' + listName)
+
+    lisql.clear ( -> )
+    lisql.insert data, (err,count) -> callback err
 
 
   #This function is for updating user info, can only update userName and password
@@ -60,6 +72,17 @@ class Database
 
     application.logDebug "Adding user " + user.userName
 
+  loadAnimelist: (cb) ->
+    application.logDebug "Loading anime list..."
+    map = (doc) ->
+      doc
+
+    cba = (err,data) ->
+      if _.isEmpty data
+        console.log "No data"
+        return
+      cb data
+    @animelistDb.all(map,cba)
   getUser: (cb) ->
     map = (doc) ->
       doc

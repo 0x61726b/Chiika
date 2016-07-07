@@ -57,9 +57,6 @@ class Application
     @emitter = new Emitter
 
 
-
-
-
     # Report crashes to our server.
     require('crash-reporter').start()
 
@@ -92,7 +89,8 @@ class Application
        @tools.init( -> )
 
 
-
+    ipcMain.on 'get-options', (event) ->
+      event.sender.send 'get-options-response', AppOptions
     ipcMain.on 'get-user-info',(event) ->
       getUserCb = (user) ->
         application.logDebug "Querying user database..."
@@ -103,6 +101,29 @@ class Application
     ipcMain.on 'call-window-method', (event,method,args...) =>
       win = BrowserWindow.fromWebContents(event.sender)
       win[method](args...)
+
+    ipcMain.on 'request-animelist', (event,user,args...) =>
+      application.logDebug("IPC: request-animelist")
+
+      reqAnimeListCb = (response) =>
+        #To-do implement error
+        if response.success
+          list = response.list.myanimelist
+          delete list.myinfo
+          Database.saveList 'anime',list
+
+          event.sender.send 'request-animelist-response',list
+
+      @tools.getAnimelistOfUser user.userName, reqAnimeListCb
+
+    ipcMain.on 'db-request-animelist', (event,user,args...) =>
+      application.logDebug("IPC: db-request-animelist")
+
+      dbReqAnimeListCb = (response) =>
+        event.sender.send 'request-animelist-response',response
+
+      Database.loadAnimelist dbReqAnimeListCb
+
     ipcMain.on 'set-user-login', (event,data) =>
       application.logDebug("IPC: set-user-login")
 
@@ -173,7 +194,7 @@ class Application
       configFile = fs.readFileSync configFilePath, 'utf-8'
       @firstLaunch = false
 
-      AppOptions = configFile
+      AppOptions = JSON.parse(configFile)
 
 
 
