@@ -41,7 +41,7 @@ AnimeList = React.createClass
   componentDidMount: () ->
 
   render: () ->
-    (<Tabs onSelect={this.onSelect} forceRenderTabPanel={false}>
+    (<Tabs onSelect={this.onSelect}>
         <TabList>
           {this.state.tabs.map((tab, i) =>
                 <Tab key={i}>{tab.label}</Tab>

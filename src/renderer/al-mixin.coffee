@@ -18,10 +18,18 @@ React = require('react')
 {Router,Route,BrowserHistory,Link} = require('react-router')
 {ReactTabs,Tab,Tabs,TabList,TabPanel} = require 'react-tabs'
 
+_ = require 'lodash'
+
 AnimeListMixin =
+  name: null
+  ipcCall: ->
+    @setGrid()
+  setGrid: ->
+    if @name == "watching"
+      window.chiika.domManager.addNewGrid 'anime',@name,1
   componentDidMount: ->
-    console.log "Mixin Mount"
+    window.chiika.ipcListeners.push this
   componentWillUnmount: ->
-    console.log "Mixin Unmount"
+    _.pull window.chiika.ipcListeners,this
 
 module.exports = AnimeListMixin

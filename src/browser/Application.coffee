@@ -64,6 +64,8 @@ class Application
     @setupChiikaConfig()
 
     @handleEvents()
+
+    console.log process.env.version
     # Quit when all windows are closed.
 
 
@@ -119,10 +121,24 @@ class Application
     ipcMain.on 'db-request-animelist', (event,user,args...) =>
       application.logDebug("IPC: db-request-animelist")
 
-      dbReqAnimeListCb = (response) =>
-        event.sender.send 'request-animelist-response',response
+      if !@tools.checkIfFileExists 'Data/anime.nosql'
+        application.logDebug "Anime file is requested but it doesn't exist.Fixing that..."
+        reqAnimeListCb = (response) =>
+          #To-do implement error
+          if response.success
+            list = response.list.myanimelist
+            delete list.myinfo
+            Database.saveList 'anime',list
 
-      Database.loadAnimelist dbReqAnimeListCb
+            #Why?
+            event.sender.send 'request-animelist-response',list
+
+        @tools.getAnimelistOfUser user.userName, reqAnimeListCb
+      else
+        dbReqAnimeListCb = (response) =>
+          event.sender.send 'request-animelist-response',response
+
+        Database.loadAnimelist dbReqAnimeListCb
 
     ipcMain.on 'set-user-login', (event,data) =>
       application.logDebug("IPC: set-user-login")
@@ -132,6 +148,7 @@ class Application
         if response.success
           application.logDebug("Loading...")
           Database.addUser { userName: data.user, password: data.pass }
+
 
 
           @LoginWindow.close()
@@ -187,6 +204,8 @@ class Application
     if _.isUndefined configFile
       fs.openSync configFilePath, 'w'
 
+      AppOptions.Version = process.env.version
+
       fs.writeFileSync configFilePath,JSON.stringify(AppOptions),'utf-8'
 
       @firstLaunch = true
@@ -196,8 +215,20 @@ class Application
 
       AppOptions = JSON.parse(configFile)
 
+      packageVersion = process.env.version
+      appVersion = AppOptions.Version
+
+      if appVersion? && packageVersion != appVersion
+        @firstLaunch = true
+        AppOptions.Version = packageVersion
+        @saveOptions()
 
 
+
+
+  saveOptions: ->
+    configFilePath = path.join(path.join(@chiikaHome, "Config"),"Chiika.json");
+    fs.writeFileSync configFilePath,JSON.stringify(AppOptions),'utf-8'
   parseCommandLine: ->
     options = yargs(process.argv[1..]).wrap(100)
     args = options.argv

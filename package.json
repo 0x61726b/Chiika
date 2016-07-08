@@ -1,6 +1,6 @@
 {
   "name": "chiika",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Electron boilerplate project with React-coffee",
   "main": ".serve/browser/Application.js",
   "scripts": {
@@ -32,7 +32,10 @@
     "react-contextmenu": "^0.3.0",
     "react-dom": "^0.14.6",
     "react-router": "^1.0.3",
-    "react-tabs": "^0.5.1"
+    "react-tabs": "^0.5.1",
+    "reactable": "^0.13.2",
+    "when": "^3.7.7",
+    "yargs": "^4.7.1"
   },
   "devDependencies": {
     "arkenthera-titlebar": "1.4.2",

@@ -53,8 +53,9 @@ class ChiikaDomManager
         _.find fncMap,_.matchesProperty 'column', fnc
       if v.order != -1
         window.chiika.gridManager[findFunction(v.name).fnc](localGrid)
-    localGrid.records = window.chiika.getAnimeListByType(status)
-
+    data = window.chiika.getAnimeListByType(status)
+    
+    localGrid.records = data
     window.chiika.gridManager.addGrid localGrid
     $("#" + name).w2grid(localGrid)
 

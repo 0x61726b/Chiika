@@ -22,7 +22,11 @@ GridManager = require './grid-manager'
 
 _ = require 'lodash'
 
+_when = require 'when'
+
 class ChiikaEnvironment
+  ipcListeners: [],
+  isWaiting: true
   constructor: (params={}) ->
     {@applicationDelegate, @window,@configDirPath} = params
 
@@ -33,35 +37,69 @@ class ChiikaEnvironment
     scribe = scribe()
     console = process.console
 
-    @emitter = new Emitter
-    @domManager = new ChiikaDomManager
-    @gridManager = new GridManager
+    @emitter          = new Emitter
+    @domManager       = new ChiikaDomManager
+    @gridManager      = new GridManager
 
 
     console.addLogger('rendererDebug','red')
     @logDebug("Renderer initializing...")
 
+
+    ipcRenderer.on 'window-reload', (event,arg) =>
+      @logDebug("window-reload")
+
+    #When the window is reloaded using Ctrl+R (which will never happen in prod environment),
+    #renderer side of the application will request user data and app data such as user info,lists,app options
+    #when reloading occurs,if the current route is one of the lists (anime,manga list), tables will be ready even before the data arrives at renderer process
+    #In another words, if you refresh the app while looking at anime list,
+    #when refreshing finishes anime list will be empty because data isn't arrived when the React's mount function called (didComponentMount)
+    #To workaround this we first have to wait for the data to arrive at renderer process, then tell React to fill the table
+    @ipcWaitforDeferredCalls().then( =>
+      @isWaiting = false
+      _.forEach @ipcListeners, (v,k) =>
+        v.ipcCall()
+    )
+
+  ipcWaitforDeferredCalls: ->
+    Dfs = []
+
+    Dfs.push @ipcGetUserInfo()
+    Dfs.push @ipcGetAnimelist()
+    Dfs.push @ipcGetOptions()
+
+    _when.all Dfs
+
+  ipcGetUserInfo: ->
+    deferred = _when.defer()
+    ipcRenderer.send('get-user-info')
+
     ipcRenderer.on 'get-user-info-response', (event,arg) =>
       @user = arg
       @domManager.setUserInfo @user
+      deferred.resolve()
+    deferred.promise
 
+  ipcGetAnimelist: ->
+    deferred = _when.defer()
+    ipcRenderer.send('db-request-animelist',{ userName: 'arkenthera'})
     ipcRenderer.on 'request-animelist-response', (event,arg) =>
       @animeList = arg
+      console.log "???"
+      deferred.resolve()
+      console.log @animeList
+    deferred.promise
+
+  ipcGetOptions: ->
+    deferred = _when.defer()
+    ipcRenderer.send('get-options')
 
     ipcRenderer.on 'get-options-response', (event,arg) =>
       @appOptions = arg
       @gridManager.prepareGridData @appOptions
+      deferred.resolve()
 
-    ipcRenderer.on 'window-reload', (event,arg) =>
-      @logDebug("window-reload")
-      @reset()
-
-
-  reset: ->
-    ipcRenderer.send('get-user-info')
-    ipcRenderer.send('get-options')
-    ipcRenderer.send('db-request-animelist',{ userName: 'arkenthera'})
-    #ipcRenderer.send('request-animelist',{ userName: 'arkenthera'})
+    deferred.promise
 
 
   logDebug: (text) ->

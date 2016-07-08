@@ -23,7 +23,7 @@ Database = require('./src/database');
 NoSQL = require 'nosql'
 
 _ = require 'lodash'
-
+path = require 'path'
 
 fs = require 'fs'
 
@@ -76,6 +76,18 @@ class Tools
       return
 
     Request.getMangalist userName,callback
+
+  #Should be used as checkIfFileExists('Data/anime.nosql')
+  checkIfFileExists: (fileName) ->
+    appPath = application.chiikaHome
+    try
+      file = fs.statSync path.join(appPath,fileName)
+    catch e
+      file = undefined
+    if _.isUndefined file
+      return false
+    else
+      return true
   login:(userName,password,callback) ->
     if _.isEmpty(userName) || _.isEmpty(password)
       application.logDebug "Empty user name or password."

@@ -195,6 +195,7 @@ do Your_Application_will_ = () ->
     development.CHIIKA_ENV = 'debug';
     if argv.pls
       development.Show_CA_Debug_Tools = 'yeah'
+    development.version = packageJson.version
 
     electron = require('arkenthera-electron-connect').server.create({
         electron:ep,

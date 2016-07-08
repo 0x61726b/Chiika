@@ -18,14 +18,18 @@ React = require('react')
 {Router,Route,BrowserHistory,Link} = require('react-router')
 
 Mixin = require './al-mixin'
+{Table,Tr,Td} = require 'reactable'
 
 
 #Views
 
 WatchingList = React.createClass
   mixins: [Mixin],
-  componentDidMount: () ->
-    window.chiika.domManager.addNewGrid 'anime','watching',1
+  componentWillMount: ->
+    @name = "watching"
+  componentDidMount: ->
+    if !window.chiika.isWaiting
+      @setGrid()
   componentWillUnmount: () ->
     window.chiika.domManager.destroyGrid 'watching'
   render: () ->
