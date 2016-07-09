@@ -85,9 +85,7 @@ class ChiikaEnvironment
     ipcRenderer.send('db-request-animelist',{ userName: 'arkenthera'})
     ipcRenderer.on 'request-animelist-response', (event,arg) =>
       @animeList = arg
-      console.log "???"
       deferred.resolve()
-      console.log @animeList
     deferred.promise
 
   ipcGetOptions: ->

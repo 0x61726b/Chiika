@@ -19,7 +19,7 @@
 
 .content {
     height: calc(100% - #{$titlebar-height+$statusBarHeight});
-    overflow: auto;
+    overflow: hidden;
 }
 
 .statusBar {

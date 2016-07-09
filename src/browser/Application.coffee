@@ -18,7 +18,7 @@
 #--------------------
 #
 #--------------------
-{BrowserWindow, ipcMain} = require 'electron'
+{BrowserWindow, ipcMain,globalShortcut} = require 'electron'
 app = require "app"
 crashReporter = require 'crash-reporter'
 electron = require 'electron'
@@ -42,6 +42,8 @@ _ = require 'lodash'
 ipcHelpers = require '../ipcHelpers'
 
 {Emitter,Disposable} = require 'event-kit'
+
+keypress = require 'keypress'
 # ---------------------------
 #
 # ---------------------------
@@ -73,6 +75,8 @@ class Application
     _self = this
     app.on 'window-all-closed', ->
        app.quit()
+    app.on 'will-quit', () =>
+      globalShortcut.unregisterAll()
     app.on 'ready', =>
        if @firstLaunch
          @openLoginWindow()
@@ -89,6 +93,12 @@ class Application
 
        @tools = new Tools()
        @tools.init( -> )
+
+       globalShortcut.register 'F10', () =>
+         if @window.window.isDevToolsOpened()
+           @window.window.closeDevTools()
+         else
+           @window.window.openDevTools()
 
 
     ipcMain.on 'get-options', (event) ->
@@ -137,7 +147,7 @@ class Application
             #Why?
             event.sender.send 'request-animelist-response',list
 
-        @tools.getAnimelistOfUser @loggedUser.userName, reqAnimeListCb
+        @tools.getAnimelistOfUser @loggedUser.userName , reqAnimeListCb
       else
         dbReqAnimeListCb = (response) =>
           event.sender.send 'request-animelist-response',response

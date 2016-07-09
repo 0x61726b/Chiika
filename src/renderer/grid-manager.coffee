@@ -70,7 +70,10 @@ class GridManager
   addScoreColumn: (grid) ->
     grid.columns.push { field: 'score', caption: 'Score', size: '10%',resizable: true, sortable: true }
   addProgressColumn: (grid) ->
-    grid.columns.push { field: 'progress', caption: 'Progress', size: '40%',resizable: true, sortable: true}
+    grid.columns.push { field: 'progress', caption: 'Progress', size: '40%',resizable: true, sortable: true, render:(progress) ->
+      '<div class="progress-bar thin">
+      <div class="indigo" style="width:'+progress.progress+'%;height: 14px;" />
+      </div>' }
   addSeasonColumn: (grid) ->
     grid.columns.push { field: 'season', caption: 'Season', size: '120px',resizable: true, sortable: true  }
 

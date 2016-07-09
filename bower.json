@@ -13,11 +13,23 @@
     "tests"
   ],
     "dependencies": {
-        "bootstrap": "3.3.4",
         "roboto-fontface": "~0.4.3",
         "w2ui": "~1.4.3",
         "components-font-awesome": "~4.5.0",
         "jQuery-contextMenu": "^2.1.0",
-        "tooltipster": "3.3.0"
+        "tooltipster": "3.3.0",
+        "yui": "^0.0.1"
+    },
+    "overrides": {
+      "isotope": {
+        "dependencies": {
+          "roboto-fontface": "~0.4.3",
+          "w2ui": "~1.4.3",
+          "components-font-awesome": "~4.5.0",
+          "jQuery-contextMenu": "^2.1.0",
+          "tooltipster": "3.3.0",
+          "yui": "^0.0.1"
+        }
+      }
     }
 }

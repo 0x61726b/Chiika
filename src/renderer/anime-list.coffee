@@ -37,14 +37,33 @@ AnimeList = React.createClass
         { index:4, label:"Dropped",element:"gridDroppedList" }
     ]
   onSelect: ->
+  setListCounts: ->
+    watching = window.chiika.getAnimeListByType(1)
+    ptw = window.chiika.getAnimeListByType(6)
+    completed = window.chiika.getAnimeListByType(2)
+    onhold = window.chiika.getAnimeListByType(3)
+    dropped = window.chiika.getAnimeListByType(4)
+    @state.tabs[0].length = watching.length
+    @state.tabs[1].length = ptw.length
+    @state.tabs[2].length = completed.length
+    @state.tabs[3].length = onhold.length
+    @state.tabs[4].length = dropped.length
+    @forceUpdate()
+  ipcCall: ->
+    @setListCounts()
+  componentDidMount: ->
+    window.chiika.ipcListeners.push this
 
-  componentDidMount: () ->
+    if !window.chiika.isWaiting
+      @setListCounts()
+  componentWillUnmount: ->
+    _.pull window.chiika.ipcListeners,this
 
   render: () ->
     (<Tabs onSelect={this.onSelect}>
         <TabList>
           {this.state.tabs.map((tab, i) =>
-                <Tab key={i}>{tab.label}</Tab>
+                <Tab key={i}>{tab.label} <span className="label raised pink">{tab.length}</span></Tab>
                 )}
         </TabList>
         <TabPanel key={0}>

@@ -25,10 +25,11 @@
   border-right: 0px!important;
 }
 /***Odd Rows***/
-.w2ui-grid .w2ui-grid-body table tr.w2ui-odd td.w2ui-grid-data > div {
+.w2ui-grid .w2ui-grid-body table tr.w2ui-odd td.w2ui-grid-data > div:not(.progress-bar) {
   padding-top: 0.5em !important;
   padding-bottom: 0.5em !important;
 }
+
 .w2ui-grid .w2ui-grid-body table tr.w2ui-odd {
   background-color: white!important;
 }
@@ -40,8 +41,8 @@
 }
 /***Even Rows***/
 .w2ui-grid .w2ui-grid-body table tr.w2ui-even td.w2ui-grid-data > div {
-  padding-top: 0.5em !important;
-  padding-bottom: 0.5em !important;
+  padding-top: 0.5em ;
+  padding-bottom: 0.5em ;
 }
 .w2ui-grid .w2ui-grid-body table tr.w2ui-even {
   background-color: white!important;
@@ -58,10 +59,22 @@
   background-color: color($blue-grey, 50)!important;
 }
 .w2ui-grid .w2ui-grid-body .w2ui-grid-records table tr.w2ui-odd:active {}
+
+/*** All rows progress-bar ***/
+.w2ui-grid .w2ui-grid-body table tr.w2ui-odd td.w2ui-grid-data > .progress-bar,
+.w2ui-grid .w2ui-grid-body table tr.w2ui-even td.w2ui-grid-data > .progress-bar {
+  padding: 0;
+  margin: 0;
+}
+
 //Override Tab page border
 .w2ui-grid {
   border: 0px!important;
   border-top: 1px solid #e5e5e5!important;
+}
+.w2ui-col-header {
+  text-transform: uppercase;
+  font-family: Montserrat;
 }
 
 .w2ui-empty-record{

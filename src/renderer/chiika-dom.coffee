@@ -24,6 +24,8 @@ class ChiikaDomManager
   destroyGrid: (name) ->
     $("#" + name).w2destroy()
     window.chiika.gridManager.removeGrid name
+  setProgress: (progress) ->
+    $(".progress-bar").children().css("width",progress + "%");
   addNewGrid: (type,name,status) ->
     name = name
 
@@ -54,7 +56,13 @@ class ChiikaDomManager
       if v.order != -1
         window.chiika.gridManager[findFunction(v.name).fnc](localGrid)
     data = window.chiika.getAnimeListByType(status)
-    
+
+    # if name == "watching"
+    #   _.forEach data, (v,k) ->
+    #     for i in [0...500]
+    #       v.recid = i*100 + v.recid
+    #       data.push v
+
     localGrid.records = data
     window.chiika.gridManager.addGrid localGrid
     $("#" + name).w2grid(localGrid)
