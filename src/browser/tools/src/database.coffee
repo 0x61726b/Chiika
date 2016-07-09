@@ -50,12 +50,13 @@ class Database
 
 
 
-  saveList: (listName,data,callback) ->
+  saveList: (listName,data,done) ->
     application.logDebug "Saving list " + listName
     lisql = NoSQL.load(application.chiikaHome + '/Data/' + listName)
 
     lisql.clear ( -> )
-    lisql.insert data, (err,count) -> callback err
+    lisql.insert data, (err,count) -> done err
+    done()
 
 
   #This function is for updating user info, can only update userName and password
@@ -81,7 +82,7 @@ class Database
       if _.isEmpty data
         console.log "No data"
         return
-      cb data
+      cb data[0]
     @animelistDb.all(map,cba)
   getUser: (cb) ->
     map = (doc) ->

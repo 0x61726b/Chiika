@@ -124,16 +124,20 @@ class Application
       if !@tools.checkIfFileExists 'Data/anime.nosql'
         application.logDebug "Anime file is requested but it doesn't exist.Fixing that..."
         reqAnimeListCb = (response) =>
+
+          dbSaved = ->
+            i = 0
+
           #To-do implement error
           if response.success
             list = response.list.myanimelist
             delete list.myinfo
-            Database.saveList 'anime',list
+            Database.saveList 'anime',list,dbSaved
 
             #Why?
             event.sender.send 'request-animelist-response',list
 
-        @tools.getAnimelistOfUser user.userName, reqAnimeListCb
+        @tools.getAnimelistOfUser @loggedUser.userName, reqAnimeListCb
       else
         dbReqAnimeListCb = (response) =>
           event.sender.send 'request-animelist-response',response
@@ -148,6 +152,7 @@ class Application
         if response.success
           application.logDebug("Loading...")
           Database.addUser { userName: data.user, password: data.pass }
+          @loggedUser = { userName: data.user, password: data.pass }
 
 
 
@@ -234,6 +239,9 @@ class Application
     args = options.argv
   registerShortcuts: ->
     #To-do
+  getScreenRes: ->
+    {width, height} = electron.screen.getPrimaryDisplay().workAreaSize
+    return { width: width, height: height}
 
   openLoginWindow: ->
     options = {
@@ -256,14 +264,14 @@ class Application
   openWindow: ->
     isBorderless = true
     windowUrl = "file://#{__dirname}/../renderer/index.html#Home"
-    windowWidth = 1400
-    windowHeight = 900
+    screenRes = @getScreenRes()
+    windowWidth = Math.round(screenRes.width * 0.66)
+    windowHeight = Math.round(screenRes.height * 0.75)
+    console.log windowWidth + " " + windowHeight
     htmlURL = windowUrl
     @window = new ApplicationWindow htmlURL,
       width: windowWidth
       height: windowHeight
-      minWidth:900
-      minHeight:600
       title: 'Chiika - Development Mode'
       icon: "./resources/icon.png"
       frame:!isBorderless

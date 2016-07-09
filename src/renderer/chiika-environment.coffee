@@ -108,7 +108,7 @@ class ChiikaEnvironment
     data = []
 
     if @animeList?
-      _.forEach(@animeList[0].anime, (value,k) ->
+      _.forEach(@animeList.anime, (value,k) ->
         animeStatus = value['my_status']
         if parseInt(animeStatus) == status #Watching
           entry = {}
