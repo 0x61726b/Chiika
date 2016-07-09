@@ -1,166 +1,140 @@
 .listCommon {
-    height: 100%;
+  height: 100%;
 }
-
 // List title
 .w2ui-head {
-    color: color($userColor, a700)!important;
-    font-weight: 500;
-    font-size: 1.4em;
-    font-family: roboto;
-    background-image: linear-gradient(#f9f9f9, #f9f9f9)!important;
-    border-right: 0px!important;
-    border-bottom: 0px!important;
-    cursor: default
+  color: color($userColor, a700)!important;
+  font-weight: 500;
+  font-size: 1.4em;
+  background-image: linear-gradient(#f9f9f9, #f9f9f9)!important;
+  border-right: 0px!important;
+  border-bottom: 0px!important;
+  cursor: default;
 }
-
 //List items overriding!
 .w2ui-grid-data {
-    /* I think this is better
+  /* I think this is better
     color: black;
     opacity: 0.90;
     */
-    height: 100%;
-    font-family: roboto;
-    font-size: 1.3em;
-    margin-top: 5px!important;
-    margin-bottom: 5px!important;
-    border-bottom: 1px solid #f5f5f5!important;
-    border-right: 0px!important;
+  height: 100%;
+  font-size: 1.3em;
+  margin-top: 5px !important;
+  margin-bottom: 5px !important;
+  border-bottom: 1px solid #f5f5f5!important;
+  border-right: 0px!important;
 }
-
-
 /***Odd Rows***/
-
-.w2ui-grid .w2ui-grid-body table tr.w2ui-odd td.w2ui-grid-data>div {
-    padding-top: .5em!important;
-    padding-bottom: .5em!important;
+.w2ui-grid .w2ui-grid-body table tr.w2ui-odd td.w2ui-grid-data > div {
+  padding-top: 0.5em !important;
+  padding-bottom: 0.5em !important;
 }
-
 .w2ui-grid .w2ui-grid-body table tr.w2ui-odd {
-    background-color: white!important;
+  background-color: white!important;
 }
-
 .w2ui-grid .w2ui-grid-body table tr.w2ui-odd:hover {
-    background-color: color($grey, 50)!important;
+  background-color: color($grey, 50)!important;
 }
-
 .w2ui-grid .w2ui-grid-body table tr.w2ui-odd:active {
-    background-color: color($grey, 100)!important;
+  background-color: color($grey, 100)!important;
 }
-
-
 /***Even Rows***/
-
-.w2ui-grid .w2ui-grid-body table tr.w2ui-even td.w2ui-grid-data>div {
-    padding-top: .5em!important;
-    padding-bottom: .5em!important;
+.w2ui-grid .w2ui-grid-body table tr.w2ui-even td.w2ui-grid-data > div {
+  padding-top: 0.5em !important;
+  padding-bottom: 0.5em !important;
 }
-
 .w2ui-grid .w2ui-grid-body table tr.w2ui-even {
-    background-color: white!important;
+  background-color: white!important;
 }
-
 .w2ui-grid .w2ui-grid-body table tr.w2ui-even:hover {
-    background-color: color($grey, 50)!important;
+  background-color: color($grey, 50)!important;
 }
-
 .w2ui-grid .w2ui-grid-body table tr.w2ui-even:active {
-    background-color: color($grey, 100)!important;
+  background-color: color($grey, 100)!important;
 }
-
-
 /***All Rows : Selected***/
-
-.w2ui-grid .w2ui-grid-body .w2ui-grid-records table tr.w2ui-selected,
-.w2ui-grid .w2ui-grid-body .w2ui-grid-records table tr td.w2ui-selected {
-    background-color: color($blue-grey, 50)!important;
+.w2ui-grid .w2ui-grid-body .w2ui-grid-records table tr td.w2ui-selected,
+.w2ui-grid .w2ui-grid-body .w2ui-grid-records table tr.w2ui-selected {
+  background-color: color($blue-grey, 50)!important;
 }
-
 .w2ui-grid .w2ui-grid-body .w2ui-grid-records table tr.w2ui-odd:active {}
-
 //Override Tab page border
 .w2ui-grid {
-    border: 0px!important;
-    border-top: 1px solid #e5e5e5!important;
+  border: 0px!important;
+  border-top: 1px solid #e5e5e5!important;
+}
+
+.w2ui-empty-record{
+  display: none;
 }
 
 #gridWatchingList {}
-
 #gridPlantoWatchList {}
-
 #gridDroppedList {}
-
 #gridOnHoldList {}
-
 #gridCompletedList {}
-
-$tabListBackground:#eeeeee;
+$tabListBackground: #eeeeee;
 .react-tabs {
-    background-color: $tabListBackground;
+  background-color: inherit;
 }
-
 .react-tabs [role=tablist] {
-    font-size: 16px;
-    text-align: left;
-    background-color: $tabListBackground;
+  font-size: 16px;
+  text-align: left;
+  margin: 0;
+  background-color: #eee;
+  border-bottom: none;
 }
-
 .react-tabs ul {
-    margin-bottom: 2px;
-    background-color: $tabListBackground;
-    width: inherit;
-    margin: 0;
-    padding: 0;
-    border-top: 1px solid #e2e2e2;
-}
+  margin-bottom: 2px;
+  width: inherit;
+  margin: 0;  background-color: inherit;
 
+  padding: 0;
+  border-top: 1px solid #e2e2e2;
+}
 .react-tabs ul li {
-    text-align: center;
-    margin-left: 25px;
+  text-align: center;
+  margin-left: 25px;
 }
-
 .react-tabs [role=tab] {
-    display: inline-block;
-    cursor: default;
-    background-color: $tabListBackground;
-    padding: 4px;
-    text-align: center;
+  display: inline-block;
+  cursor: default;
+  background-color: inherit;
+  padding: 4px;
+  text-align: center;
 }
-
 .react-tabs [role=tab][aria-selected=true] {
-    color: black;
-    opacity: 0.87;
-    font-weight: 400;
-    background-color: $tabListBackground;
-    border-bottom: 2px solid color($userColor, 600);
-    font-family: roboto;
+  color: black;
+  background-color: inherit;
+  border: none;
+  border-bottom: 3px solid color($userColor, 600);
 }
-
 .react-tabs [role=tab][aria-selected=false] {
-    color: black;
-    opacity: 0.66;
-    font-weight: 300;
-    background-color: $tabListBackground;
-    font-family: roboto;
+  color: black;
+  border: none;
 }
-
 .react-tabs [role=tab][aria-disabled=true] {}
-
-.react-tabs [role=tab]:focus {}
-
-.react-tabs [role=tab][aria-selected=false]:hover {
-    color: black;
-    opacity: 0.87;
-    border-bottom: 2px solid color($userColor, 600);
+.react-tabs [role=tab]:focus,
+.react-tabs [role=tab][aria-disabled=true]:focus,
+.react-tabs [role=tab][aria-selected=false]:focus,
+.react-tabs [role=tab][aria-selected=true],
+{
+  background-color: inherit;
+  outline: none;
+  box-shadow: none;
+  border-bottom: 3px solid color($userColor, 600);
 }
-
+.react-tabs [role=tab][aria-selected=false]:hover {
+  color: black;
+  opacity: 0.87;
+  border-bottom: 2px solid color($userColor, 600);
+}
 .react-tabs [role=tab]:focus:after {
-    content: "";
-    position: absolute;
-    height: 5px;
-    left: -4px;
-    right: -4px;
-    bottom: -5px;
-    background: #fff;
+  content: "";
+  position: absolute;
+  height: 5px;
+  left: -4px;
+  right: -4px;
+  bottom: -5px;
+  background: #fff;
 }

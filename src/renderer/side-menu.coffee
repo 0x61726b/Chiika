@@ -50,11 +50,14 @@ SideMenu = React.createClass
       <div className="navigation">
         <ul>
           <li className="active"><Link to="Home">Home</Link></li>
+          <p className="list-title">Lists</p>
           <li><Link to="AnimeList">Anime List</Link></li>
           <li><Link to="MangaList">Manga List</Link></li>
+          <p className="list-title">Watch</p>
           <li><Link to="Library">Library</Link></li>
           <li><Link to="Calendar">Calendar</Link></li>
           <li><Link to="Seasons">Seasons</Link></li>
+          <p className="list-title">Discover</p>
           <li><Link to="Torrents">Torrents</Link></li>
          </ul>
       </div>

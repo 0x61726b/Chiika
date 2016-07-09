@@ -72,25 +72,38 @@ img.chiikaLogo {
     margin: 0;
     padding: 0;
 }
-.navigation li a {
+.navigation li  {
     display: block;
-    color: white;
-    padding: 8px 0 8px 16px;
+    padding: 6px 0 6px 16px;
     text-decoration: none;
     cursor: default;
 }
+.navigation li a {
+  color: white;
+}
 .navigation li.active {
     border-left: 4px solid color($userColor, 800);
+    padding-left: 12px;
     background-color: #101014;
-    font-weight: 400;
 }
 .navigation li a:hover:not(.active) {
     background-color: #141419;
     color: white;
 }
-.navigation li:not(.active) {
-    opacity: 0.87;
+.navigation li:not(.active) a {
+  color:#eee;
 }
 .navigation li a:focus {
     color: white;
+}
+.navigation .list-title {
+  font-family: Montserrat, 'monospace';
+  color: white;
+  font-weight: normal;
+  opacity: 1;
+  padding-left: 8px;
+  font-size: 12px;
+  margin: 8px 0px 2px 0px;
+  text-transform: uppercase;
+  border-bottom: 1px dashed rgba(255,255,255,0.2);
 }
