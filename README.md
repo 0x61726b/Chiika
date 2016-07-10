@@ -1,7 +1,7 @@
 ![Chiika](https://raw.githubusercontent.com/arkenthera/Chiika/master/resources/icon.png)
 
 [![Dependency Status](https://david-dm.org/arkenthera/chiika.svg)](https://david-dm.org/arkenthera/chiika)
-[![Build Status](https://travis-ci.org/Chiika-Anime/Chiika.svg?branch=master)](https://travis-ci.org/arkenthera/Chiika)
+[![Build Status](https://travis-ci.org/arkenthera/Chiika.svg?branch=master)](https://travis-ci.org/arkenthera/Chiika)
 [![Code Climate](https://codeclimate.com/github/arkenthera/Chiika/badges/gpa.svg)](https://codeclimate.com/github/arkenthera/Chiika)
 [![Test Coverage](https://codeclimate.com/github/arkenthera/Chiika/badges/coverage.svg)](https://codeclimate.com/github/arkenthera/Chiika/coverage)
 [![Issue Count](https://codeclimate.com/github/arkenthera/Chiika/badges/issue_count.svg)](https://codeclimate.com/github/arkenthera/Chiika)
