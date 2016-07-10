@@ -35,9 +35,10 @@ SideMenu = React.createClass
     hoverOut = ->
       $(this).removeClass "rotateLogo"
     $(".chiikaLogo").hover(hoverIn, hoverOut)
-    $("div.navigation ul a").click ->
-      $("div.navigation ul li").removeClass "active"
-      $(this).parent().toggleClass "active"
+    $(".side-menu-link").click ->
+      if !this.classList.contains "active"
+        $(".side-menu-link").removeClass "active"
+        $(this).toggleClass "active"
 
     window.chiika.emitter.on 'download-image',() =>
       @refreshSideMenu()
@@ -70,16 +71,16 @@ SideMenu = React.createClass
       </div>
       <div className="navigation">
         <ul>
-          <li className="active"><Link to="Home">Home</Link></li>
+          <Link className="side-menu-link active" to="Home"><li className="side-menu-li">Home</li></Link>
           <p className="list-title">Lists</p>
-          <li><Link to="AnimeList">Anime List</Link></li>
-          <li><Link to="MangaList">Manga List</Link></li>
+          <Link className="side-menu-link" to="AnimeList"><li className="side-menu-li">Anime List</li></Link>
+          <Link className="side-menu-link" to="MangaList"><li className="side-menu-li">Manga List</li></Link>
           <p className="list-title">Watch</p>
-          <li><Link to="Library">Library</Link></li>
-          <li><Link to="Calendar">Calendar</Link></li>
-          <li><Link to="Seasons">Seasons</Link></li>
+          <Link className="side-menu-link" to="Library"><li className="side-menu-li">Library</li></Link>
+          <Link className="side-menu-link" to="Calendar"><li className="side-menu-li">Calendar</li></Link>
+          <Link className="side-menu-link" to="Seasons"><li className="side-menu-li">Seasons</li></Link>
           <p className="list-title">Discover</p>
-          <li><Link to="Torrents">Torrents</Link></li>
+          <Link className="side-menu-link" to="Torrents"><li className="side-menu-li">Torrents</li></Link>
          </ul>
       </div>
     </div>)
