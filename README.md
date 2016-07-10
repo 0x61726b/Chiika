@@ -6,59 +6,23 @@
 [![Test Coverage](https://codeclimate.com/github/arkenthera/Chiika/badges/coverage.svg)](https://codeclimate.com/github/arkenthera/Chiika/coverage)
 [![Issue Count](https://codeclimate.com/github/arkenthera/Chiika/badges/issue_count.svg)](https://codeclimate.com/github/arkenthera/Chiika)
 
-[Chiika](http://chiika.moe/) is an upcoming cross platform desktop application which helps you manage anything related to your anime/manga.Chiika is written with [Electron](https://github.com/atom/electron) and powers [Chiika-Node](https://github.com/arkenthera/chiika-node) alongside with [Chiika Api](https://github.com/arkenthera/ChiikaApi).
-
-#Building on Windows
-
-To build Chiika you have to first build [Chiika Api](https://github.com/arkenthera/ChiikaApi) then [Chiika-Node](https://github.com/arkenthera/chiika-node).
-
-#Dependencies
-All third party dependencies will be built by CMake but you will need these prerequisities
-
-1. Visual Studio 2013
-2. [Node.js](https://nodejs.org/en/)
-3. [Node-gyp](https://github.com/nodejs/node-gyp)
-4. [CMake](https://cmake.org/)
+[Chiika](http://chiika.moe/) is an upcoming cross platform desktop application which helps you manage anything related to your anime/manga.Chiika is written with [Electron](https://github.com/atom/electron)
 
 
-#Getting Started,
+#Running
+
+Use NPM to build and run Chiika.You will be greeted with login screen,there you can login with your MyAnimeList account.Your user info and lists will be retrieved upon login.
 
 ```
-git clone https://github.com/arkenthera/Chiika
-cd Chiika/Python
-python magic.py
-```
-Magic.py will pull all repositories and submodules required for building.
 
-###Directory structure
-
-It is necessary that you follow the recommended directory structure so you wont run into any problems when building.
-```
-...
-  -Chiika/
-  -Chiika/lib/chiika-node/build
-  -Chiika/ChiikaApi/build
-```
-
-CD to ChiikaApi and create a directory called 'build',run CMake in the build folder.After generating the .SLN file build the solution.
-
-When the building of ChiikaApi is done,
-
-```
-cd chiika-node
 npm install
-npm run rebuild
-```
-
-The final build step is now complete.
-
-```
-cd Chiika
-npm install
+bower install
 gulp serve
+
 ```
 
-If everything is successful the application should launch.
+
+
 
 
 #License

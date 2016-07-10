@@ -24,6 +24,8 @@ CompletedList = require './al-completed'
 OnHoldList = require './al-onhold'
 DroppedList = require './al-dropped'
 
+_ = require 'lodash'
+
 #Views
 
 AnimeList = React.createClass

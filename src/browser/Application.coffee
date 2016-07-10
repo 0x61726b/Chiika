@@ -38,6 +38,7 @@ path = require 'path'
 fs = require 'fs'
 mkdirp = require 'mkdirp'
 _ = require 'lodash'
+_when = require 'when'
 
 ipcHelpers = require '../ipcHelpers'
 
@@ -66,8 +67,6 @@ class Application
     @setupChiikaConfig()
 
     @handleEvents()
-
-    console.log process.env.version
     # Quit when all windows are closed.
 
 
@@ -79,25 +78,37 @@ class Application
     app.on 'will-quit', () ->
       globalShortcut.unregisterAll()
     app.on 'ready', =>
-      getUserCb = (user) =>
-        if _.isUndefined user
-          @firstLaunch = true
-      Database.getUser getUserCb
-      
-      if @firstLaunch
-       @openLoginWindow()
-      else
-       @openWindow()
-
-
       @registerShortcuts()
       @setupLogServer()
 
 
       @logDebug("Initializing...")
 
+      dbReady = =>
+        if @firstLaunch
+         @openLoginWindow()
+        else
+         @openWindow()
+
+         #Here, user exists and the user data is loaded. Do anything concerning user data here
+
+         #Check if user image exists,otherwise make a request to download
+         userImagePath = @tools.checkIfFileExists 'Data/Images/' + @loggedUser.userId + '.jpg'
+
+         if !userImagePath
+           @downloadUserImage @loggedUser.userId
+
       @tools = new Tools()
-      @tools.init( -> )
+      @tools.init( =>
+        getUserCb = (user) =>
+          if _.isUndefined user
+            @firstLaunch = true
+            console.log "User info doesn't exist,forcing login."
+          @loggedUser = user
+          dbReady()
+        Database.getUser getUserCb
+        )
+
 
       globalShortcut.register 'F10', () =>
          if @window.window.isDevToolsOpened()
@@ -165,21 +176,31 @@ class Application
         application.logDebug("Login: " + response.success)
         if response.success
           application.logDebug("Loading...")
-          Database.addUser { userName: data.user, password: data.pass }
-          @loggedUser = { userName: data.user, password: data.pass }
+          Database.addUser { userName: data.user, password: data.pass,userId: response.user.id }
+          @loggedUser = { userName: data.user, password: data.pass,userId: response.user.id }
+
+
 
 
 
           @LoginWindow.close()
           @LoginWindow = null
 
-          @openWindow()
+          @openWindow().then( =>
+            @downloadUserImage response.user.id
+            )
 
 
         else
           application.logDebug("Error: " + response.errorMessage)
           event.sender.send('set-user-login-response',response)
 
+
+  downloadUserImage: (id) ->
+    onFinished = =>
+      @window.window.webContents.send('download-image')
+      application.logDebug "User image download has finished."
+    @tools.downloadUserImage id,onFinished
 
   setupLogServer: ->
     scribe = require 'scribe-js'
@@ -214,6 +235,7 @@ class Application
 
     mkdirp(path.join(@chiikaHome, "Config"), ->)
     mkdirp(path.join(@chiikaHome, "Data"), ->)
+    mkdirp(path.join(@chiikaHome, "Data","Images"), ->)
 
     try
       configFile = fs.statSync configFilePath
@@ -276,6 +298,7 @@ class Application
     @window.window.hide()
 
   openWindow: ->
+    deferred = _when.defer()
     isBorderless = true
     windowUrl = "file://#{__dirname}/../renderer/index.html#Home"
     screenRes = @getScreenRes()
@@ -293,6 +316,8 @@ class Application
 
     @window.window.webContents.on 'did-finish-load', =>
       @window.window.webContents.send('window-reload')
+      deferred.resolve()
+    deferred.promise
 
 
 

@@ -49,6 +49,7 @@ RouterContainer = React.createClass
 ChiikaRouter = React.createClass
   onEnter:(nextState) ->
     path = nextState.location.pathname
+    console.log path
   render: () ->
     (<Router history={BrowserHistory}>
       <Route component={RouterContainer}>

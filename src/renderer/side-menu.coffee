@@ -18,20 +18,41 @@ React = require('react')
 {Router,Route,BrowserHistory,Link} = require('react-router')
 {BrowserWindow, ipcRenderer,remote} = require 'electron'
 
+_ = require 'lodash'
+path = require 'path'
 
 #Views
 
 SideMenu = React.createClass
   componentDidMount: ->
+    window.chiika.ipcListeners.push this
+
+    if !window.chiika.isWaiting
+      @chiikaReady()
+
     hoverIn = ->
       $(this).addClass "rotateLogo"
     hoverOut = ->
       $(this).removeClass "rotateLogo"
     $(".chiikaLogo").hover(hoverIn, hoverOut)
-    $("div.navigation ul li").click ->
+    $("div.navigation ul a").click ->
       $("div.navigation ul li").removeClass "active"
-      $(this).toggleClass "active"
+      $(this).parent().toggleClass "active"
 
+    window.chiika.emitter.on 'download-image',() =>
+      @refreshSideMenu()
+      console.log "Emitter: download-image"
+  componentWillUnmount: ->
+    _.pull window.chiika.ipcListeners,this
+  ipcCall: ->
+    @refreshSideMenu()
+  refreshSideMenu: ->
+    @imagePath = @getUserImage()
+    @forceUpdate()
+  getUserImage: ->
+    @imagePath = window.chiika.configDirPath
+    @imagePath = path.join(@imagePath,'Data','Images',window.chiika.user.userId + '.jpg')
+    @imagePath
   render: () ->
     (<div className="sidebar">
       <div className="topLeft">
@@ -40,7 +61,7 @@ SideMenu = React.createClass
         </div>
         <Link to="User" className="userArea noDecoration">
           <div className="imageContainer">
-            <img id="userAvatar" className="img-circle avatar" src="./../assets/images/avatar.jpg"/>
+            <img id="userAvatar" className="img-circle avatar" src={@imagePath}/>
           </div>
           <div className="userInfo">
             Chiika

@@ -16,8 +16,9 @@
 
 
 request = require 'request';
-
 Parser = require './parser'
+path = require 'path'
+fs = require 'fs'
 
 class RequestAPI
   #Verify user credentials on MyAnimeList
@@ -38,6 +39,11 @@ class RequestAPI
   getMangalist:(userName,callback) ->
     _self = this
     request 'http://myanimelist.net/malappinfo.php?u=' + userName + '&type=manga&status=all', (error,response,body) -> _self.onGetList error,response,body,callback
+
+  downloadImage: (url,fileName,ext,cb) ->
+    downloadPath = path.join(application.chiikaHome,'Data','Images',fileName + '.' + ext)
+    request.head url, (error,response,body) ->
+      request(url).pipe(fs.createWriteStream(downloadPath)).on('close',cb)
 
   #getAnimelist or getMangalist callback, also includes user info
   onGetList: (error,response,body,callback) ->

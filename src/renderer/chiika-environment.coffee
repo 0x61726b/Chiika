@@ -26,10 +26,10 @@ _when = require 'when'
 
 class ChiikaEnvironment
   ipcListeners: [],
-  isWaiting: true
+  isWaiting: true,
+  apiEvents: [ 'downloadImage','downloadUserImage']
   constructor: (params={}) ->
     {@applicationDelegate, @window,@configDirPath} = params
-
 
     scribe = require 'scribe-js'
     express = require 'express'
@@ -48,6 +48,11 @@ class ChiikaEnvironment
 
     ipcRenderer.on 'window-reload', (event,arg) =>
       @logDebug("window-reload")
+
+    ipcRenderer.on 'download-image', (event,arg) =>
+      console.log "????"
+      @logDebug('IPC: download-image')
+      @emitter.emit 'download-image' #This will cause to listeners of this message to react, see side-menu
 
     #When the window is reloaded using Ctrl+R (which will never happen in prod environment),
     #renderer side of the application will request user data and app data such as user info,lists,app options
@@ -82,7 +87,7 @@ class ChiikaEnvironment
 
   ipcGetAnimelist: ->
     deferred = _when.defer()
-    ipcRenderer.send('db-request-animelist',{ userName: 'arkenthera'})
+    ipcRenderer.send('db-request-animelist',{ userName: ''})
     ipcRenderer.on 'request-animelist-response', (event,arg) =>
       @animeList = arg
       deferred.resolve()

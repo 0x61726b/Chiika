@@ -17,10 +17,18 @@
 NoSQL = require('nosql')
 _ = require 'lodash'
 
+_when = require 'when'
+
 class Database
-  init: () ->
+  init: (dbReadyCallback) ->
     _self = this
 
+    Deferreds = []
+
+    userDbDefer = _when.defer()
+    Deferreds.push userDbDefer.promise
+
+    _when.all(Deferreds).then( -> dbReadyCallback() )
     #Load list for caching reasons
     @animelistDb = NoSQL.load(application.chiikaHome + '/Data/anime.nosql')
     @userDb = NoSQL.load(application.chiikaHome + '/Data/user.nosql')
@@ -44,9 +52,8 @@ class Database
       @loadAnimelist getAnimelistCb
 
     @userDb.on 'load', =>
-      getUserCb = (user) ->
-        application.logDebug "User DB loaded - Welcome " + user.userName
-      @getUser getUserCb
+      userDbDefer.resolve()
+
 
 
 
@@ -68,10 +75,12 @@ class Database
   addUser: (user) ->
     @userDb.clear( -> )
 
-    encodePass = new Buffer(user.password).toString('base64')
-    @userDb.insert({ userName: user.userName, password: encodePass })
+    application.logDebug "Adding user " + user.userName + " ( " + user.userId + " )"
 
-    application.logDebug "Adding user " + user.userName
+    encodePass = new Buffer(user.password).toString('base64')
+    @userDb.insert({ userName: user.userName, password: encodePass,userId: user.userId })
+
+
 
   loadAnimelist: (cb) ->
     application.logDebug "Loading anime list..."
@@ -91,6 +100,7 @@ class Database
       user = data
 
       if _.isEmpty user
+        cb undefined
         return
       user.password = new Buffer(user.password,'base64').toString('ascii')
       cb user

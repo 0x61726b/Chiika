@@ -39,9 +39,10 @@ class Tools
 
     _self = this
 
-    Database.init()
+    dbReadyCallback = ->
+      callback()
 
-    _self.readyCallback()
+    Database.init(dbReadyCallback)
 
 
   #Loads list data from %chiikahome%/data , Async
@@ -95,6 +96,10 @@ class Tools
     application.logDebug "Login: " + userName
 
     Request.verifyCredentials {userName: userName, password:password},callback
+  downloadImage: (link,fileName,extension,cb) ->
+    Request.downloadImage link,fileName,extension,cb
+  downloadUserImage: (id,cb) ->
+    @downloadImage "http://cdn.myanimelist.net/images/userimages/"+id+".jpg",id,"jpg",cb
 
 
 module.exports = Tools
