@@ -16,15 +16,6 @@
     -webkit-app-region: no-drag;
 }
 
-.noDecoration,
-a:link,
-a:visited {
-    display: block;
-    color: black;
-    text-decoration: none;
-    cursor: default;
-}
-
 //User Avatar and user name
 .avatar {
     width: 80px;
@@ -32,6 +23,7 @@ a:visited {
     margin-left: auto;
     margin-right: auto;
     display: block;
+    border-radius: 40px;
 }
 
 .userArea {
@@ -72,29 +64,25 @@ img.chiikaLogo {
     margin: 0;
     padding: 0;
 }
-.navigation li  {
-    display: block;
-    padding: 6px 0 6px 16px;
-    text-decoration: none;
-    cursor: default;
+.side-menu-link {
+  text-decoration: none;
+  color: rgb(240,240,240);
+  display:block;
+  padding: 6px 0px 6px 12px;
+  position: relative;
 }
-.navigation li a {
+.side-menu-link.active {
+  padding-left: 7px;
+  border-left: 5px solid pink;
+  background-color: #222;
+}
+.side-menu-link:hover {
+  background-color: #212121;
+}
+.side-menu-link.active .side-menu-li{
   color: white;
 }
-.navigation li.active {
-    border-left: 4px solid color($userColor, 800);
-    padding-left: 12px;
-    background-color: #101014;
-}
-.navigation li a:hover:not(.active) {
-    color: white;
-}
-.navigation li:not(.active) a {
-  color:#eee;
-}
-.navigation li a:focus {
-    color: white;
-}
+
 .navigation .list-title {
   font-family: Montserrat, 'monospace';
   color: white;
