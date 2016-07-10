@@ -66,6 +66,7 @@ class ChiikaDomManager
     localGrid.records = data
     window.chiika.gridManager.addGrid localGrid
     $("#" + name).w2grid(localGrid)
+    localGrid
 
 
 module.exports = ChiikaDomManager

@@ -33,6 +33,7 @@ class GridManager
   grids: []
   prepareGridData: (options) ->
     @animeListColumns = []
+    console.log options.AnimeListColumns
     _.forEach(options.AnimeListColumns, (v,k) =>
       @animeListColumns.push v.column
       )

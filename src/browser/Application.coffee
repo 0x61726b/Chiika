@@ -117,6 +117,10 @@ class Application
            @window.window.openDevTools()
 
 
+    ipcMain.on 'save-options', (event,options) =>
+      console.log options.AnimeListColumns[0].column
+      AppOptions = options
+      @saveOptions()
     ipcMain.on 'get-options', (event) ->
       event.sender.send 'get-options-response', AppOptions
     ipcMain.on 'get-user-info',(event) ->

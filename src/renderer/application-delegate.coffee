@@ -23,6 +23,8 @@ _ = require 'lodash'
 class ApplicationDelegate
   reloadWindow: ->
     ipcRenderer.send("call-window-method", "reload")
+  saveOptions: (options) ->
+    ipcRenderer.send 'save-options',options
   openWindowDevTools: ->
     new Promise (resolve) ->
       process.nextTick ->

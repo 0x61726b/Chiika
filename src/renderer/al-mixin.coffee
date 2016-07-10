@@ -26,10 +26,40 @@ AnimeListMixin =
     @setGrid()
   setGrid: ->
     if @name == "watching"
-      window.chiika.domManager.addNewGrid 'anime',@name,1
+      @grid = chiika.domManager.addNewGrid 'anime',@name,1
+    lastColPos = -1
+    lastCol = {}
+
+    w2ui.watching.on 'columnDragStart',(e) =>
+      lastColPos = e.origColumnNumber
+      lastCol = @grid.columns[lastColPos]
+    w2ui[@grid.name].on 'columnDragEnd',(ex) =>
+      @grid.columns = w2ui[@grid.name].columns
+      newColPos = ex.targetColumnNumber + 1
+      console.log ex
+      if lastColPos == newColPos
+        return
+
+      findObj = {}
+      findObjColumn = {}
+      findObj.column = findObjColumn
+      findObj.column.name = lastCol.field
+
+      match = _.find(chiika.appOptions.AnimeListColumns,findObj)
+      index = _.indexOf chiika.appOptions.AnimeListColumns,_.find(chiika.appOptions.AnimeListColumns,findObj )
+
+      if index == -1
+        chiika.logDebug "There is a problem dragging the column."
+      else
+        match.column.order = newColPos
+        chiika.appOptions.AnimeListColumns.splice(index,1,match)
+        chiika.logDebug lastCol.field + " dragged from " + lastColPos + " to " + newColPos
+        chiika.applicationDelegate.saveOptions chiika.appOptions
+
+        chiika.gridManager.prepareGridData chiika.appOptions
   componentDidMount: ->
-    window.chiika.ipcListeners.push this
+    chiika.ipcListeners.push this
   componentWillUnmount: ->
-    _.pull window.chiika.ipcListeners,this
+    _.pull chiika.ipcListeners,this
 
 module.exports = AnimeListMixin
