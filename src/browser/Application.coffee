@@ -74,27 +74,32 @@ class Application
   handleEvents: ->
     _self = this
     app.on 'window-all-closed', ->
-       app.quit()
-    app.on 'will-quit', () =>
+      app.quit()
+
+    app.on 'will-quit', () ->
       globalShortcut.unregisterAll()
     app.on 'ready', =>
-       if @firstLaunch
-         @openLoginWindow()
-       else
-         @openWindow()
+      getUserCb = (user) =>
+        if _.isUndefined user
+          @firstLaunch = true
+      Database.getUser getUserCb
+      
+      if @firstLaunch
+       @openLoginWindow()
+      else
+       @openWindow()
 
 
+      @registerShortcuts()
+      @setupLogServer()
 
-       @registerShortcuts()
-       @setupLogServer()
 
+      @logDebug("Initializing...")
 
-       @logDebug("Initializing...")
+      @tools = new Tools()
+      @tools.init( -> )
 
-       @tools = new Tools()
-       @tools.init( -> )
-
-       globalShortcut.register 'F10', () =>
+      globalShortcut.register 'F10', () =>
          if @window.window.isDevToolsOpened()
            @window.window.closeDevTools()
          else
@@ -105,7 +110,6 @@ class Application
       event.sender.send 'get-options-response', AppOptions
     ipcMain.on 'get-user-info',(event) ->
       getUserCb = (user) ->
-        application.logDebug "Querying user database..."
         event.sender.send 'get-user-info-response',user
       Database.getUser getUserCb
 

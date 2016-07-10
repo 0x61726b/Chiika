@@ -95,6 +95,9 @@ class Database
       user.password = new Buffer(user.password,'base64').toString('ascii')
       cb user
 
+    if _.isUndefined @userDb
+      cb undefined
+      return
     @userDb.one(map,callback)
 
   QueryDb: (db,query,callback) ->

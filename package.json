@@ -5,7 +5,7 @@
   "main": ".serve/browser/Application.js",
   "scripts": {
     "start": "gulp serve",
-    "test": "coffeelint src"
+    "test": "coffeelint src/browser/tools/options.coffee"
   },
   "keywords": [
     "electron",
