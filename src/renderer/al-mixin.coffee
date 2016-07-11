@@ -19,6 +19,7 @@ React = require('react')
 {ReactTabs,Tab,Tabs,TabList,TabPanel} = require 'react-tabs'
 
 _ = require 'lodash'
+_when = require 'when'
 
 AnimeListMixin =
   name: null
@@ -30,13 +31,19 @@ AnimeListMixin =
     lastColPos = -1
     lastCol = {}
 
+
     w2ui.watching.on 'columnDragStart',(e) =>
       lastColPos = e.origColumnNumber
       lastCol = @grid.columns[lastColPos]
     w2ui[@grid.name].on 'columnDragEnd',(ex) =>
       @grid.columns = w2ui[@grid.name].columns
       newColPos = ex.targetColumnNumber + 1
-      console.log ex
+
+      timeOutFnc = (o) =>
+        @findGridOrderAfterDrag(o)
+      setTimeout(timeOutFnc,500,lastCol)
+      return
+      #console.log ex
       if lastColPos == newColPos
         return
 
@@ -46,7 +53,7 @@ AnimeListMixin =
       findObj.column.name = lastCol.field
 
       match = _.find(chiika.appOptions.AnimeListColumns,findObj)
-      index = _.indexOf chiika.appOptions.AnimeListColumns,_.find(chiika.appOptions.AnimeListColumns,findObj )
+      index = _.indexOf chiika.appOptions.AnimeListColumns,match
 
       if index == -1
         chiika.logDebug "There is a problem dragging the column."
@@ -57,6 +64,43 @@ AnimeListMixin =
         chiika.applicationDelegate.saveOptions chiika.appOptions
 
         chiika.gridManager.prepareGridData chiika.appOptions
+  findGridOrderAfterDrag: (orig)->
+    grid = w2ui[@grid.name]
+
+    newColumn = _.find(grid.columns, { field: orig.field })
+    newIndex = _.indexOf grid.columns, newColumn
+
+    findObj = {}
+    findObjColumn = {}
+    findObj.column = findObjColumn
+    findObj.column.name = orig.field
+
+    match = _.find(chiika.appOptions.AnimeListColumns,findObj)
+    index = _.indexOf chiika.appOptions.AnimeListColumns,match
+
+    if index == -1
+      chiika.logDebug "There is a problem dragging the column."
+    else
+      counter = 0
+      _.forEach grid.columns, (v,k) =>
+        obj1 = {}
+        obj1Column = {}
+        obj1.column = obj1Column
+        obj1.column.name = v.field
+        findCounterpartInOptionsArray = _.find chiika.appOptions.AnimeListColumns, obj1
+        iFindCounterpartInOptionsArray = _.indexOf chiika.appOptions.AnimeListColumns, findCounterpartInOptionsArray
+
+        if iFindCounterpartInOptionsArray != -1
+          findCounterpartInOptionsArray.column.order = counter
+          chiika.appOptions.AnimeListColumns.splice(iFindCounterpartInOptionsArray,1,findCounterpartInOptionsArray)
+        counter = counter + 1
+
+      chiika.logDebug orig.field + " dragged to " + newIndex
+      chiika.applicationDelegate.saveOptions chiika.appOptions
+
+      chiika.gridManager.prepareGridData chiika.appOptions
+
+
   componentDidMount: ->
     chiika.ipcListeners.push this
   componentWillUnmount: ->
