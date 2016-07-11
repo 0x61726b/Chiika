@@ -1,115 +1,106 @@
+@import "chiika-palette";
 body {
-    cursor: default;
-    padding: 0;
-    overflow: hidden;
-    -webkit-user-select: none;
-    font-family: Roboto;
-    font-weight: 300;
-    text-decoration: none;
+  cursor: default;
+  padding: 0;
+  overflow: hidden;
+  -webkit-user-select: none;
+  font-family: Roboto;
+  font-weight: 300;
+  text-decoration: none;
 }
-
 .titlebar {
-    -webkit-user-select: none;
-    -webkit-app-region: drag;
-    height: 45px;
-    left: 160px;
-    background-color: #e0e0e0;
-    border-bottom: 1px solid #cecece;
+  -webkit-user-select: none;
+  -webkit-app-region: drag;
+  min-height: 44px;
+  width: inherit;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 16px;
+  background-color: $grey-1;
+  border-bottom: 1px solid $grey-2;
+  #gridSearch {
+    padding: 6px 8px 6px 12px;
+    background-color: $grey-0;
+    border: 1px solid $grey-2;
+    border-radius: 2px;
+    -webkit-app-region: no-drag;
+    width: 150%;
+  }
+  #gridSearch:hover {
+    background-color: $body-bg;
+  }
+  #gridSearch:active,
+  #gridSearch:focus {
+    background-color: white;
+  }
 }
-
-
-/*
-.box-shadow:after {
-    content: "";
-    width: inherit;
-    height: -1px;
-    display: block;
-    margin-top: -1px;
-    z-index: -100;
-    -webkit-box-shadow: 0px 0px 16px 0px black;
-    box-shadow: 0px 0px 16px 0px black;
-}*/
-
-html,
+.container-fluid,
 body,
-.container-fluid {
-    height: 100%;
+html {
+  height: 100%;
 }
-
 //Global Variables
 $sidebar-width: 160px;
 $sidebar-top-height: 170px;
 $titlebar-height: 46px;
-$navigation-font-size:15px;
-$userInfo-font-size:16px;
-$mainArea-height:calc(100% - #{$titlebar-height});
-$chiika-rot-speed:2s;
-$tabListHeight:35px; //Fix me ?
-$statusBarHeight:30px;
+$navigation-font-size: 15px;
+$userInfo-font-size: 16px;
+$mainArea-height: calc(100% - #{$titlebar-height});
+$chiika-rot-speed: 2s;
+$tabListHeight: 35px; //Fix me ?
+$statusBarHeight: 30px;
 .strecthToMainArea {
-    height: $mainArea-height;
+  height: $mainArea-height;
 }
-
 .ReactTabs__TabPanel {
-    height: calc(100% - #{$tabListHeight});
+  height: calc(100% - #{$tabListHeight});
 }
-
 .content > div {
-    height: 100%;
+  height: 100%;
 }
-
 @-webkit-keyframes spin {
-    100% {
-        -webkit-transform: rotate(360deg);
-    }
+  100% {
+    -webkit-transform: rotate(360deg);
+  }
 }
-
 .rotateLogo {
-    -webkit-animation: spin $chiika-rot-speed linear infinite;
+  -webkit-animation: spin $chiika-rot-speed linear infinite;
 }
-
 .loadingSomething {
-    width: 40px!important;
-    height: 40px!important;
-    position: relative;
-    top: 50%;
-    transform: translateY(-50%);
-    ;
+  width: 40px!important;
+  height: 40px!important;
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
 }
-
 .chiika-button {
-    background-color: color($userColor, 800);
-    color: white;
-    font-family: sans-serif, 'Roboto';
-    box-shadow: 0 1px 4px rgba(0, 0, 0, .6);
-    border-radius: 2px;
-    border: 0px;
-    padding-top: 3px;
-    padding-bottom: 4px;
-    padding-left: 15px;
-    padding-right: 15px;
-    margin-left: 5px;
-    margin-right: 5px;
-    transition: background-color .3s, box-shadow .3s;
-    outline: none;
+  background-color: color($userColor, 800);
+  color: white;
+  font-family: sans-serif, 'Roboto';
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .6);
+  border-radius: 2px;
+  border: 0;
+  padding: 3px 15px 4px;
+  margin-left: 5px;
+  margin-right: 5px;
+  transition: background-color 0.3s, box-shadow 0.3s;
+  outline: none;
 }
-
 .chiika-button:hover {
-    background-color: color($userColor, 900);
-    box-shadow: 0px 1px 4px rgba(0, 0, 0, .6);
+  background-color: color($userColor, 900);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .6);
 }
-
 .chiika-input {
-    background: transparent!important;
-    border: 0px!important;
-    border-bottom: 1px solid color($blue-grey, 700)!important;
-    color: color($blue-grey, 700)!important;
-    margin-bottom: 10px!important;
-    outline: none!important;
-    transition: border-bottom .0s;
+  background: transparent!important;
+  border: 0px!important;
+  border-bottom: 1px solid color($blue-grey, 700)!important;
+  color: color($blue-grey, 700)!important;
+  margin-bottom: 10px !important;
+  outline: none!important;
+  transition: border-bottom 0.0s;
 }
-
 .chiika-input:focus {
-    outline: none!important;
-    border-bottom: 1px solid color($blue, 900)!important;
+  outline: none!important;
+  border-bottom: 1px solid color($blue, 900)!important;
 }

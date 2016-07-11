@@ -18,7 +18,7 @@
         "jQuery-contextMenu": "^2.1.0",
         "tooltipster": "3.3.0",
         "yui-css": "^0.0.1",
-        "arkenthera-w2ui": "git@github.com:arkenthera/w2ui-dist.git#1.4.4"
+        "arkenthera-w2ui": "^1.4.4"
     },
     "overrides": {
       "isotope": {

@@ -1,17 +1,28 @@
 .listCommon {
   height: 100%;
 }
+
+// Header Row
+.w2ui-grid .w2ui-grid-body .w2ui-grid-columns,
+.w2ui-grid .w2ui-grid-body .w2ui-grid-fcolumns{
+  box-shadow: 0px 2px 2px rgba(120,120,120,0.1)!important;
+}
 // List title
 .w2ui-head {
   color: color($userColor, a700)!important;
   font-weight: 500;
   font-size: 1.4em;
-  background-image: linear-gradient(#f9f9f9, #f9f9f9)!important;
+  background-image: linear-gradient(#fafafa, #fafafa)!important;
   border-right: 0px!important;
   border-bottom: 0px!important;
   cursor: default;
 }
-//List items overriding!
+
+// Body
+.w2ui-grid .w2ui-grid-body .w2ui-grid-records, .w2ui-grid .w2ui-grid-body .w2ui-grid-frecords {
+  background-color: $body-bg;
+}
+/** List items overriding! **/
 .w2ui-grid-data {
   /* I think this is better
     color: black;
@@ -31,7 +42,7 @@
 }
 
 .w2ui-grid .w2ui-grid-body table tr.w2ui-odd {
-  background-color: white!important;
+  background-color: $body-bg!important;
 }
 .w2ui-grid .w2ui-grid-body table tr.w2ui-odd:hover {
   background-color: color($grey, 50)!important;
@@ -45,7 +56,7 @@
   padding-bottom: 0.5em ;
 }
 .w2ui-grid .w2ui-grid-body table tr.w2ui-even {
-  background-color: white!important;
+  background-color:$body-bg!important;
 }
 .w2ui-grid .w2ui-grid-body table tr.w2ui-even:hover {
   background-color: color($grey, 50)!important;
@@ -70,7 +81,6 @@
 //Override Tab page border
 .w2ui-grid {
   border: 0px!important;
-  border-top: 1px solid #e5e5e5!important;
 }
 .w2ui-col-header {
   text-transform: uppercase;
@@ -86,7 +96,6 @@
 #gridDroppedList {}
 #gridOnHoldList {}
 #gridCompletedList {}
-$tabListBackground: #eeeeee;
 .react-tabs {
   background-color: inherit;
 }
@@ -94,16 +103,14 @@ $tabListBackground: #eeeeee;
   font-size: 16px;
   text-align: left;
   margin: 0;
-  background-color: #eee;
-  border-bottom: none;
+  background-color: $grey-0;
+  border-bottom: 1px solid #eee;
 }
 .react-tabs ul {
   margin-bottom: 2px;
   width: inherit;
   margin: 0;  background-color: inherit;
-
   padding: 0;
-  border-top: 1px solid #e2e2e2;
 }
 .react-tabs ul li {
   text-align: center;
