@@ -17,7 +17,7 @@
 Request = require('./src/request');
 Parser = require('./src/parser');
 Database = require('./src/database');
-
+MediaDetect = require('./src/media-detect-win32')
 
 
 NoSQL = require 'nosql'
@@ -34,6 +34,9 @@ class Tools
     application.logDebug "Initializing tools"
     @readyCallback = callback
     @chiikaPath = "C:/Users/alperen/AppData/Roaming/Chiika/"
+
+    @mediaDetector = new MediaDetect()
+    @mediaDetector.spawn()
 
     GLOBAL.chiika = this
 

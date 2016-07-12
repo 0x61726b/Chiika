@@ -18,7 +18,7 @@
 #--------------------
 #
 #--------------------
-{BrowserWindow, ipcMain,globalShortcut} = require 'electron'
+{BrowserWindow, ipcMain,globalShortcut,Tray,Menu} = require 'electron'
 app = require "app"
 crashReporter = require 'crash-reporter'
 electron = require 'electron'
@@ -28,7 +28,6 @@ AppOptions = require './tools/options'
 
 ApplicationWindow = require './ApplicationWindow'
 appMenu = require './menu/appMenu'
-Menu = require 'menu'
 Tools = require './tools'
 Database = require './tools/src/database'
 
@@ -45,6 +44,7 @@ ipcHelpers = require '../ipcHelpers'
 {Emitter,Disposable} = require 'event-kit'
 
 keypress = require 'keypress'
+menubar = require 'menubar'
 # ---------------------------
 #
 # ---------------------------
@@ -67,6 +67,20 @@ class Application
     @setupChiikaConfig()
 
     @handleEvents()
+
+    mb = menubar( icon:'./resources/icon.png',tooltip:'hhueheuehu',index:"file://#{__dirname}/../renderer/Menubar.html" )
+    trayCm = Menu.buildFromTemplate([
+      { label:'Hue'},
+      { label:'Hue'},
+      { label:'Hue'},
+      { label:'Hue'}
+      ])
+    mb.on 'after-create-window', ->
+      mb.window.openDevTools()
+
+    mb.on 'ready', ->
+      console.log "Menubar is ready."
+      mb.tray.setContextMenu(trayCm);
     # Quit when all windows are closed.
 
 

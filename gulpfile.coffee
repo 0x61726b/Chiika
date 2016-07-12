@@ -2,6 +2,7 @@ srcDir      = 'src'
 serveDir    = '.serve'
 distDir     = 'dist'
 releaseDir  = 'release'
+rootDir = '.'
 
 # ---------------------------
 #
@@ -21,6 +22,8 @@ packager = require('electron-packager')
 # gulps
 sourcemaps = require "gulp-sourcemaps"
 plumber = require "gulp-plumber"
+
+
 
 Compile_scss_files_with_sourcemaps = () ->
   gulp.task 'compile:styles', () ->
@@ -54,6 +57,13 @@ Copy_assets = () ->
       .pipe(gulp.dest(serveDir + '/assets'))
       .pipe(gulp.dest(distDir + '/assets'))
 
+Copy_vendor = () ->
+  gulp.task 'copy:vendor', () ->
+    if process.platform == 'win32'
+      gulp.src(rootDir + '/vendor/**/*')
+      .pipe(gulp.dest(serveDir + '/vendor'))
+      .pipe(gulp.dest(distDir + '/vendor'))
+
 Incremental_compile_cjsx_coffee_files_with_sourcemaps = () ->
   gulp.task 'compile:scripts:watch', (done) ->
 
@@ -70,6 +80,8 @@ Incremental_compile_cjsx_coffee_files_with_sourcemaps = () ->
 
 
     gulp.src('src/*.js')
+        .pipe(gulp.dest(serveDir))
+    gulp.src('src/browser/tools/src/*.js')
         .pipe(gulp.dest(serveDir))
     done()
 
@@ -179,6 +191,7 @@ do Your_Application_will_ = () ->
   Compile_scripts_for_distribution()
   Inject_css___compiled_and_depedent___files_into_html()
   Copy_assets()
+  Copy_vendor()
   Incremental_compile_cjsx_coffee_files_with_sourcemaps()
   Compile_scripts_for_distribution()
   Inject_renderer_bundle_file_and_concatnate_css_files()
@@ -188,8 +201,8 @@ do Your_Application_will_ = () ->
   Package_for_each_platforms()
   Copy_Chiika_Node()
 
-  gulp.task('build', ['html', 'compile:scripts', 'packageJson', 'copy:fonts', 'misc'])
-  gulp.task 'serve', ['inject:css', 'compile:scripts:watch', 'compile:styles', 'misc'], () ->
+  gulp.task('build', ['html', 'compile:scripts', 'packageJson', 'copy:fonts', 'misc','copy:vendor'])
+  gulp.task 'serve', ['inject:css', 'compile:scripts:watch', 'compile:styles', 'misc','copy:vendor'], () ->
     development = null
     development = Object.create( process.env );
     development.CHIIKA_ENV = 'debug';
@@ -206,8 +219,8 @@ do Your_Application_will_ = () ->
     electron.start()
     gulp.watch(['bower.json', srcDir + '/renderer/index.html',srcDir + '/renderer/MyAnimeListLogin.html'], ['inject:css'])
     gulp.watch([srcDir + '/styles/*.scss'],['inject:css'])
-    #gulp.watch([serveDir + '/browser/Application.js', serveDir + '/browser/**/*.js'], electron.restart)
     gulp.watch([serveDir + '/styles/**/*.css', serveDir + '/renderer/**/*.html', serveDir + '/renderer/**/*.js'], electron.reload)
+    gulp.watch([serveDir + '/browser/**/*.js'], electron.restart)
   gulp.task 'clean', (done) ->
     del [serveDir, distDir, releaseDir], () -> done()
   gulp.task('default', ['build'])

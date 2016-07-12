@@ -22,6 +22,9 @@ class ApplicationWindow
   constructor: (path, options) ->
     @window = new BrowserWindow options
     @window.loadURL(path)
+
+    @window.on 'closed', () =>
+      @window = null
   getWindow: () ->
     @window
 
