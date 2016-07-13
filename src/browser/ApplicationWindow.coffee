@@ -15,6 +15,7 @@
 #----------------------------------------------------------------------------
 BrowserWindow = require 'browser-window'
 
+
 module.exports =
 class ApplicationWindow
   window: null
@@ -32,5 +33,7 @@ class ApplicationWindow
     @window.on(args...)
   openDevTools: () ->
     @window.openDevTools();
+  enableReactDevTools: ->
+    #
   loadURL: (url) ->
     @window.loadURL(url)

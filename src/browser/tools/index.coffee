@@ -17,7 +17,6 @@
 Request = require('./src/request');
 Parser = require('./src/parser');
 Database = require('./src/database');
-MediaDetect = require('./src/media-detect-win32')
 
 
 NoSQL = require 'nosql'
@@ -27,6 +26,8 @@ path = require 'path'
 
 fs = require 'fs'
 
+
+
 class Tools
   chiikaPath: null,
   readyCallback: null
@@ -34,9 +35,6 @@ class Tools
     application.logDebug "Initializing tools"
     @readyCallback = callback
     @chiikaPath = "C:/Users/alperen/AppData/Roaming/Chiika/"
-
-    @mediaDetector = new MediaDetect()
-    @mediaDetector.spawn()
 
     GLOBAL.chiika = this
 
@@ -46,17 +44,6 @@ class Tools
       callback()
 
     Database.init(dbReadyCallback)
-
-
-  #Loads list data from %chiikahome%/data , Async
-  loadList: (listName,callback) ->
-    lisql = NoSQL.load @chiikaPath + listName
-
-    map = (dc) ->
-      return dc
-
-    lisql.on 'load', ->
-      lisql.all map,callback
 
   wipeList: (listName,callback) ->
     lisql = NoSQL.load @chiikaPath + listName
@@ -103,6 +90,10 @@ class Tools
     Request.downloadImage link,fileName,extension,cb
   downloadUserImage: (id,cb) ->
     @downloadImage "http://cdn.myanimelist.net/images/userimages/"+id+".jpg",id,"jpg",cb
+
+  searchAnime: (user,q,cb) ->
+    q = q.replace(' ','+')
+    Request.searchAnime user,q,cb
 
 
 module.exports = Tools

@@ -27,19 +27,26 @@ function runLoop() {
 
       if(_.isNull(videoFile)) {
         //Media Player is running, but no video file is detected
+        var state = { status: 'mp_running_no_video' };
+        process.send(state);
       } else {
         //Recognize the video file...
         //console.log("Current video file: " + videoFile); //videoFile example = 'E:\\Anime\\Akatsuki no Yona\\[FFF] Akatsuki no Yona [TV]\\[FFF] Akatsuki no Yona - 01v2 [2B487C34].mkv'
         var videoFileName = videoFile.substring(string(videoFile).lastIndexOf('\\') + 1);
 
         var AnitomyParse = Anitomy.Parse(videoFileName);
-        console.log(AnitomyParse);
+
+        var state = { status: 'mp_running_video', result: AnitomyParse };
+        process.send(state);
 
       }
 
 
     } else {
       //currentPlayer is closed , continue searching
+      var state = { status: 'mp_closed',player: currentPlayer };
+      process.send(state);
+      
       console.log("Media Player is no long running " + currentPlayer.name + ". Starting to search..");
       var formatted = lastFoundTime.format('YYYY-MM-DD HH:mm:ss Z');
       console.log("Last date " + formatted);
@@ -70,6 +77,9 @@ function findMediaPlayers() {
       lastFoundTime = now;
 
       loopIntervalID = setInterval(runLoop,loopInterval);
+
+      var state = { status: 'mp_found',player: currentPlayer };
+      process.send(state);
     }
   })
 }

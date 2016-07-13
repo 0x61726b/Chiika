@@ -22,12 +22,36 @@ path = require 'path'
 mediaPlayerList = require '../mediaPlayerList' #Temp
 
 class MediaDetect
+  currentPlayer: null,
+  currentVideoFile: { EpisodeNumber: -1 }
+  constructor: ->
+    #@currentVideoFile = { EpisodeNumber: -1 }
   spawn: ->
     str = JSON.stringify(mediaPlayerList)
     child = cp.fork("#{__dirname}/../../../media-detect-win32-process-helper.js",[str])
 
     child.on 'close',(code,signal) ->
       application.logDebug "Media detector process exited.This shouldn't happen."
+
+    child.on 'message', (m) =>
+      if m.status == 'mp_found'
+        application.emitter.emit 'mp-found',m.player
+        @currentPlayer = m.player
+        @currentVideoFile = { EpisodeNumber: -1 }
+
+      if m.status == 'mp_running_video'
+        if @currentVideoFile.AnimeTitle != m.result.AnimeTitle || @currentVideoFile.EpisodeNumber != m.result.EpisodeNumber
+          application.emitter.emit 'mp-video-changed',m.result
+          console.log "Detected Anime Changed: " + @currentVideoFile.AnimeTitle + " Ep: " + @currentVideoFile.EpisodeNumber
+          console.log m.result.AnimeTitle + " Ep: " + m.result.EpisodeNumber
+          @currentVideoFile = m.result
+
+        application.emitter.emit 'mp-running-video',m.result
+      if m.status == 'mp_closed'
+        application.emitter.emit 'mp-closed'
+
+        @currentVideoFile = { EpisodeNumber: -1 }
+        @currentPlayer = null
 
 
 module.exports = MediaDetect

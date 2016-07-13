@@ -29,7 +29,6 @@ SideMenu = React.createClass
 
     if !window.chiika.isWaiting
       @chiikaReady()
-
     hoverIn = ->
       $(this).addClass "rotateLogo"
     hoverOut = ->
@@ -40,7 +39,7 @@ SideMenu = React.createClass
         $(".side-menu-link").removeClass "active"
         $(this).toggleClass "active"
 
-    window.chiika.emitter.on 'download-image',() =>
+    chiika.emitter.on 'download-image',() =>
       @refreshSideMenu()
       console.log "Emitter: download-image"
   componentWillUnmount: ->
@@ -51,9 +50,12 @@ SideMenu = React.createClass
     @imagePath = @getUserImage()
     @forceUpdate()
   getUserImage: ->
-    @imagePath = window.chiika.configDirPath
-    @imagePath = path.join(@imagePath,'Data','Images',window.chiika.user.userId + '.jpg')
-    @imagePath
+    try
+      @imagePath = window.chiika.configDirPath
+      @imagePath = path.join(@imagePath,'Data','Images',chiika.user.userId + '.jpg')
+      @imagePath
+    catch
+      chiika.logInfo "There was an error trying to load user avatar"
   render: () ->
     (<div className="sidebar">
       <div className="topLeft">

@@ -30,7 +30,9 @@ class Database
 
     _when.all(Deferreds).then( -> dbReadyCallback() )
     #Load list for caching reasons
-    @animelistDb = NoSQL.load(application.chiikaHome + '/Data/anime.nosql')
+    @animelistDb = NoSQL.load(application.chiikaHome + '/Data/animeList.nosql')
+    @animeDb = NoSQL.load(application.chiikaHome + '/Data/anime.nosql')
+    #Start from here tomorrow
     @userDb = NoSQL.load(application.chiikaHome + '/Data/user.nosql')
 
     @userDb.stored.create 'saveUserInfoBasic', (nosql,next,params) ->
@@ -43,27 +45,103 @@ class Database
 
 
       this.update( updateP, -> next())
+    @animelistDb.stored.create 'updateAnimeEntry', (nosql,next,params) ->
+      updatePredicate = (doc) ->
+        require('lodash').forEach doc.anime, (v,k) ->
+          if v.series_animedb_id == params.id
+            v.anime_english = params.english
+            v.anime_synonyms = params.synonyms
+            v.anime_synopsis = params.synopsis
+        doc
+      nosql.update( updatePredicate, -> next() )
+
+    # @animeDb.views.create 'db',map,sort, (err,count) =>
+    #   @animeDb.views.all 'db', (err,documents,count) =>
+    #     console.log documents
+
+    @animeDb.stored.create 'saveToAnimeDb', (nosql,next,params) ->
+      _l = require 'lodash'
+      fullMap = (doc) ->
+        doc
+      cb = (err,selected) ->
+        if selected.length == 0
+          newList = { anime: [] }
+          _l.forEach params.list.anime, (v,k) ->
+            animeData = {
+              series_animedb_id : v.series_animedb_id,
+              series_title : v.series_title,
+              series_synonyms : v.series_synonyms,
+              series_episodes : v.series_episodes,
+              series_status : v.series_status,
+              series_start : v.series_start,
+              series_end : v.series_end,
+              series_image : v.series_image,
+              series_type: v.series_type
+            }
+
+            newList.anime.push animeData
+
+          nosql.insert newList, ->
+            next()
+          return
+      nosql.all(fullMap,cb)
+
+    @animelistDb.stored.create 'save', (nosql,next,params) ->
+      _l = require 'lodash'
+      fullMap = (doc) ->
+        doc
+      cb = (err,selected) ->
+        if selected.length == 0
+          newList = { anime: [] }
+          _l.forEach params.list.anime, (v,k) ->
+            animeData = {
+              series_animedb_id : v.series_animedb_id,
+              my_id : v.my_id,
+              my_watched_episodes : v.my_watched_episodes,
+              my_start_date : v.my_start_date,
+              my_finish_date : v.my_finish_date,
+              my_score : v.my_score,
+              my_status : v.my_status,
+              my_rewatching : v.my_rewatching,
+              my_rewatching_ep : v.my_rewatching_ep,
+              my_last_updated : v.my_last_updated,
+              my_tags : v.my_tags,
+            }
+
+            newList.anime.push animeData
+
+          nosql.insert newList, ->
+            next()
+          return
+      nosql.all(fullMap,cb)
 
     @animelistDb.on 'load', =>
       application.logDebug "Anime list Db loaded"
 
-      getAnimelistCb = (data) ->
-        @animelistDb = data
-      @loadAnimelist getAnimelistCb
+      application.emitter.emit 'anime-db-ready'
 
     @userDb.on 'load', =>
       userDbDefer.resolve()
 
-
-
+  updateAnime: (anime) ->
+    console.log "UpdateAnime"
+    @animelistDb.stored.execute( 'updateAnimeEntry', anime )
 
   saveList: (listName,data,done) ->
-    application.logDebug "Saving list " + listName
-    lisql = NoSQL.load(application.chiikaHome + '/Data/' + listName)
+    dfs = []
+    dAnimeDb = _when.defer()
+    dAnimelist = _when.defer()
 
-    lisql.clear ( -> )
-    lisql.insert data, (err,count) -> done err
-    done()
+    dfs.push dAnimeDb.promise
+    dfs.push dAnimelist.promise
+
+    @animeDb.stored.execute 'saveToAnimeDb',{ list: data }, () ->
+      dAnimeDb.resolve()
+
+    @animelistDb.stored.execute 'save',{ list: data }, () ->
+      dAnimelist.resolve()
+
+    _when.all(dfs).then( -> done() )
 
 
   #This function is for updating user info, can only update userName and password
@@ -89,10 +167,21 @@ class Database
 
     cba = (err,data) ->
       if _.isEmpty data
-        console.log "No data"
+        console.log "No data - animelistDb"
         return
       cb data[0]
     @animelistDb.all(map,cba)
+  loadAnimeDb: (cb) ->
+    application.logDebug "Loading anime database..."
+    map = (doc) ->
+      doc
+
+    cba = (err,data) ->
+      if _.isEmpty data
+        console.log "No data - animeDb"
+        return
+      cb data[0]
+    @animeDb.all(map,cba)
   getUser: (cb) ->
     map = (doc) ->
       doc

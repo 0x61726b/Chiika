@@ -18,9 +18,29 @@ React = require('react')
 {Router,Route,BrowserHistory,Link} = require('react-router')
 ReactDOM = require("react-dom")
 
+{BrowserWindow, ipcRenderer,remote} = require 'electron'
+
 #Views
 
 Menubar = React.createClass
+  currentVideoFile:null
+  componentDidMount: ->
+    ipcRenderer.on 'mp-found',(mp,data) ->
+      #Do something
+
+    ipcRenderer.on 'mp-closed', (mp,data) ->
+      @currentVideoFile = null
+
+    ipcRenderer.on 'mp-video-changed', (mp,data) ->
+
+      @currentVideoFile = data
+
+    ipcRenderer.send 'request-current-video'
+
+    ipcRenderer.on 'request-current-video-response', (event,data) =>
+      @currentVideoFile = data
+
+
   render: () ->
     (<div className="menubar-container" id="menubarMain">
   		<div className="menubar-content">

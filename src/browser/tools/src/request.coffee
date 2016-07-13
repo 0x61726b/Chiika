@@ -30,6 +30,13 @@ class RequestAPI
         _self.onVerifyCredentials(error,response,body,callback))
 
 
+  searchAnime: (user,q,callback) ->
+    postObj = {
+      url:"http://" + user.userName + ":" + user.password + "@myanimelist.net/api/anime/search.xml?q=" + q }
+    request postObj.url,(error,response,body) =>
+       @onSearch error,response,body,callback
+  searchManga: (q,callback) ->
+    request 'http://myanimelist.net/api/manga/search.xml?q=' + q, (error,response,body) -> _self.onSearch error,response,body,callback
   #Get animelist of a user
   getAnimelist:(userName,callback) ->
     _self = this
@@ -45,6 +52,11 @@ class RequestAPI
     request.head url, (error,response,body) ->
       request(url).pipe(fs.createWriteStream(downloadPath)).on('close',cb)
 
+  onSearch: (error,response,body,callback) ->
+    if response.statusCode == 200 && !error
+      Parser.ParseSync(body)
+            .then (result) ->
+              callback { success: true, anime: result.anime , statusCode: response.statusCode }
   #getAnimelist or getMangalist callback, also includes user info
   onGetList: (error,response,body,callback) ->
     if response.statusCode == 200 && !error

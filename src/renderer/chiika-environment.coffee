@@ -43,11 +43,14 @@ class ChiikaEnvironment
 
 
     console.addLogger('rendererDebug','red')
-    @logDebug("Renderer initializing...")
+    console.addLogger('rendererInfo','blue')
+    @logInfo("Renderer initializing...")
+
+    @ipcGetAnimeDb()
 
 
     ipcRenderer.on 'window-reload', (event,arg) =>
-      @logDebug("window-reload")
+      @logDebug("IPC: window-reload")
 
     ipcRenderer.on 'download-image', (event,arg) =>
       console.log "????"
@@ -73,6 +76,7 @@ class ChiikaEnvironment
     Dfs.push @ipcGetAnimelist()
     Dfs.push @ipcGetOptions()
 
+
     _when.all Dfs
 
   ipcGetUserInfo: ->
@@ -90,8 +94,19 @@ class ChiikaEnvironment
     ipcRenderer.send('db-request-animelist',{ userName: ''})
     ipcRenderer.on 'request-animelist-response', (event,arg) =>
       @animeList = arg
+      console.log @animeList
       deferred.resolve()
     deferred.promise
+  ipcGetAnimeDb: ->
+    deferred = _when.defer()
+    ipcRenderer.send('db-request-anime')
+    ipcRenderer.on 'request-animedb-response', (event,arg) =>
+      @animeDb = arg
+      console.log @animeDb
+      deferred.resolve()
+    deferred.promise
+  devRequestAnimelist: ->
+    ipcRenderer.send('request-animelist',{ userName: ''})
 
   ipcGetOptions: ->
     deferred = _when.defer()
@@ -107,12 +122,21 @@ class ChiikaEnvironment
 
   logDebug: (text) ->
     process.console.tag("chiika-renderer").rendererDebug(text)
+  logInfo: (text) ->
+    process.console.tag("chiika-renderer").rendererInfo(text)
   getAnimeListByType: (status) ->
     data = []
 
     if @animeList?
-      _.forEach(@animeList.anime, (value,k) ->
+      _.forEach(@animeList.anime, (value,k) =>
         animeStatus = value['my_status']
+
+        animeDbResult = _.find(@animeDb.anime, { series_animedb_id: value.series_animedb_id} )
+
+        if animeDbResult?
+          $.extend(value,animeDbResult)
+        else
+          console.log "There is a problem with anime database."
         if parseInt(animeStatus) == status #Watching
           entry = {}
           animeTitle = value['series_title']

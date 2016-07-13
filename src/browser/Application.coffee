@@ -40,6 +40,7 @@ _ = require 'lodash'
 _when = require 'when'
 
 ipcHelpers = require '../ipcHelpers'
+MediaDetect = require('./tools/src/media-detect-win32')
 
 {Emitter,Disposable} = require 'event-kit'
 
@@ -59,6 +60,9 @@ class Application
     global.application = this
     @emitter = new Emitter
 
+    @mediaDetector = new MediaDetect()
+    @mediaDetector.spawn()
+
 
     # Report crashes to our server.
     require('crash-reporter').start()
@@ -68,24 +72,35 @@ class Application
 
     @handleEvents()
 
-    mb = menubar( icon:'./resources/icon.png',tooltip:'hhueheuehu',index:"file://#{__dirname}/../renderer/Menubar.html" )
+    @mb = menubar( icon:'./resources/icon.png',tooltip:'hhueheuehu',index:"file://#{__dirname}/../renderer/Menubar.html" )
     trayCm = Menu.buildFromTemplate([
       { label:'Hue'},
       { label:'Hue'},
       { label:'Hue'},
       { label:'Hue'}
       ])
-    mb.on 'after-create-window', ->
-      mb.window.openDevTools()
+    @mb.on 'after-create-window', =>
+      @mb.window.openDevTools()
 
-    mb.on 'ready', ->
-      console.log "Menubar is ready."
-      mb.tray.setContextMenu(trayCm);
+
+      @emitter.on 'mp-found',(mp) =>
+        @mb.window.webContents.send 'mp-found',mp
+
+      @emitter.on 'mp-video-changed', (mp) =>
+        @mb.window.webContents.send 'mp-video-changed',mp
+
+      @emitter.on 'mp-closed', (mp) =>
+        @mb.window.webContents.send 'mp-closed',mp
+
+    @mb.on 'ready', =>
+      @mb.tray.setContextMenu(trayCm);
     # Quit when all windows are closed.
 
 
   handleEvents: ->
     _self = this
+    @emitter.on 'anime-db-ready', ->
+      #Do something
     app.on 'window-all-closed', ->
       app.quit()
 
@@ -96,7 +111,7 @@ class Application
       @setupLogServer()
 
 
-      @logDebug("Initializing...")
+      @logInfo("Initializing...")
 
       dbReady = =>
         if @firstLaunch
@@ -117,8 +132,12 @@ class Application
         getUserCb = (user) =>
           if _.isUndefined user
             @firstLaunch = true
-            console.log "User info doesn't exist,forcing login."
+            application.logInfo "User info doesn't exist,forcing login."
           @loggedUser = user
+
+          searchAnimeCb = (r) ->
+            console.log r.anime.entry
+          #@tools.searchAnime @loggedUser,'bleach',searchAnimeCb
           dbReady()
         Database.getUser getUserCb
         )
@@ -131,8 +150,10 @@ class Application
            @window.window.openDevTools()
 
 
+    ipcMain.on 'request-current-video', (event) =>
+      event.sender.send 'request-current-video-response',@mediaDetector.currentVideoFile
+
     ipcMain.on 'save-options', (event,options) =>
-      console.log options.AnimeListColumns[0].column
       AppOptions = options
       @saveOptions()
     ipcMain.on 'get-options', (event) ->
@@ -155,35 +176,49 @@ class Application
         if response.success
           list = response.list.myanimelist
           delete list.myinfo
-          Database.saveList 'anime',list
+          Database.saveList 'animeList',list
 
           event.sender.send 'request-animelist-response',list
 
-      @tools.getAnimelistOfUser user.userName, reqAnimeListCb
+      @tools.getAnimelistOfUser @loggedUser.userName, reqAnimeListCb
+
+    ipcMain.on 'db-request-anime', (event,user,args...) =>
+      application.logDebug("IPC: db-request-anime")
+
+      dbReqAnimeCb = (response) =>
+        event.sender.send 'request-animedb-response',response
+      Database.loadAnimeDb dbReqAnimeCb
+
 
     ipcMain.on 'db-request-animelist', (event,user,args...) =>
       application.logDebug("IPC: db-request-animelist")
 
-      if !@tools.checkIfFileExists 'Data/anime.nosql'
-        application.logDebug "Anime file is requested but it doesn't exist.Fixing that..."
+      if !@tools.checkIfFileExists 'Data/animeList.nosql'
+        application.logInfo "Anime file is requested but it doesn't exist.Fixing that..."
         reqAnimeListCb = (response) =>
 
           dbSaved = ->
-            i = 0
+            application.logInfo "Sending (Main -> Renderer) request-animelist-response"
+            event.sender.send 'request-animelist-response',list
+
+            dbReqAnimeCb = (animeDbResponse) =>
+              event.sender.send 'request-animedb-response',animeDbResponse
+            Database.loadAnimeDb dbReqAnimeCb
 
           #To-do implement error
           if response.success
+            application.logInfo "db-request-animelist getAnimelistOfUser is successful with code " + response.statusCode
             list = response.list.myanimelist
             delete list.myinfo
-            Database.saveList 'anime',list,dbSaved
-
-            #Why?
-            event.sender.send 'request-animelist-response',list
+            Database.saveList 'animeList',list,dbSaved
 
         @tools.getAnimelistOfUser @loggedUser.userName , reqAnimeListCb
       else
         dbReqAnimeListCb = (response) =>
           event.sender.send 'request-animelist-response',response
+
+          #Temporary
+          #Database.saveList 'animeList',response,->
 
         Database.loadAnimelist dbReqAnimeListCb
 
@@ -191,15 +226,10 @@ class Application
       application.logDebug("IPC: set-user-login")
 
       @tools.login data.user,data.pass, (response) =>
-        application.logDebug("Login: " + response.success)
+        application.logInfo("Login: " + response.success)
         if response.success
-          application.logDebug("Loading...")
           Database.addUser { userName: data.user, password: data.pass,userId: response.user.id }
           @loggedUser = { userName: data.user, password: data.pass,userId: response.user.id }
-
-
-
-
 
           @LoginWindow.close()
           @LoginWindow = null
@@ -210,14 +240,14 @@ class Application
 
 
         else
-          application.logDebug("Error: " + response.errorMessage)
+          application.logInfo("Error: " + response.errorMessage)
           event.sender.send('set-user-login-response',response)
 
 
   downloadUserImage: (id) ->
     onFinished = =>
       @window.window.webContents.send('download-image')
-      application.logDebug "User image download has finished."
+      application.logInfo "User image download has finished."
     @tools.downloadUserImage id,onFinished
 
   setupLogServer: ->
@@ -235,6 +265,7 @@ class Application
     eapp.use '/logs',scribe.webPanel()
 
     console.addLogger('debug','red')
+    console.addLogger('info','blue')
 
     port = eapp.get("port")
 
@@ -242,7 +273,8 @@ class Application
       console.time().log('Server listening at port ' + port)
   logDebug:(text) ->
     process.console.tag("chiika-browser").time().debug(text)
-
+  logInfo: (text) ->
+    process.console.tag("chiika-browser").time().info(text)
   setupChiikaConfig: ->
     @chiikaHome = path.join(app.getPath('appData'),"chiika")
     @chiikaLog = path.join(app.getPath('appData'),"Logs")
@@ -322,7 +354,6 @@ class Application
     screenRes = @getScreenRes()
     windowWidth = Math.round(screenRes.width * 0.66)
     windowHeight = Math.round(screenRes.height * 0.75)
-    console.log windowWidth + " " + windowHeight
     htmlURL = windowUrl
     @window = new ApplicationWindow htmlURL,
       width: windowWidth
@@ -334,6 +365,8 @@ class Application
 
     @window.window.webContents.on 'did-finish-load', =>
       @window.window.webContents.send('window-reload')
+
+      @window.enableReactDevTools()
       deferred.resolve()
     deferred.promise
 
