@@ -189,6 +189,27 @@ class Application
         event.sender.send 'request-animedb-response',response
       Database.loadAnimeDb dbReqAnimeCb
 
+    #-------------Note to self-------------
+    #How initialization works for now
+    #Case 1 - First time launch,no data
+    #Login -> downloadUserImage
+    #Renderer asks for db-request-animelist , db-request-anime (chiika-environment.coffee#ipcGetAnimelist)
+    #At this point, database doesn't exist, so we call getAnimelistOfUser
+    #Request returns the list and we save it into 2 different NoSQL databases
+    #After request returns, we save it into db and wait for DB to call back here
+    #Finally we query both DBs to retrieve the data and send it to Renderer
+    #
+    #
+    #Case 2 - Data exists, launch
+    #Renderer asks for db-request-animelist , db-request-anime (chiika-environment.coffee#ipcGetAnimelist)
+    #At this point, database SHOULD exist, if not, there MIGHT be problems
+    #if data exists,we just query the DB and return, easy.
+    #If data doesn't exist and this call isn't from login, things gets hard
+    #We check animeList database speficially to see if it exists, if it doesn't
+    #We try to simulate the login process
+    #It SHOULD work, hopefully.
+    #Might introduce weird bugs in the future, I'm not confident about this.
+
 
     ipcMain.on 'db-request-animelist', (event,user,args...) =>
       application.logDebug("IPC: db-request-animelist")
