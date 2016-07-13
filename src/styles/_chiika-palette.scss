@@ -1,20 +1,41 @@
 // Soon™
 // Light Theme
 // Grey-n bigger n darker grey
+
 $body-bg:#F9F9F9;
+$body-bg-2: #FAFAFA;
 $grey-0: #F5F5F5;
 $grey-1:#F2F2F4;
 $grey-2:#DCDCE2;
 $grey-3:#B0B0BC;
 
-$main-color:#611427;
+$main-text: #111;
+$inverse-text: #F5F5F5;
+
+$accent:#57324F;
 $color-dark:#1D2326;
+//$primary:;
+//$secondary:;
+
 
 // Dark Theme
-/*
+
 $body-bg:#36393E;
+$body-bg-2: #3d4146;
 $grey-0: #424549;
 $grey-1:#2E3136;
 $grey-2:#1E2124;
 $grey-3:#1C1E22;
-*/
+
+$accent: #DDDCC5;
+
+$main-text: #F5F5F5;
+$inverse-text: #111;
+
+
+// classes
+.theme-accent {
+  background-color: $accent;
+  color: $inverse-text;
+  border-color: rgba($accent,0.5);
+}

@@ -65,7 +65,7 @@ AnimeList = React.createClass
     (<Tabs onSelect={this.onSelect}>
         <TabList>
           {this.state.tabs.map((tab, i) =>
-                <Tab key={i}>{tab.label} <span className="label raised pink">{tab.length}</span></Tab>
+                <Tab key={i}>{tab.label} <span className="label raised theme-accent">{tab.length}</span></Tab>
                 )}
         </TabList>
         <TabPanel key={0}>
