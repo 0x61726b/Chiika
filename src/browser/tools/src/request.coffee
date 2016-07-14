@@ -59,11 +59,12 @@ class RequestAPI
               callback { success: true, anime: result.anime , statusCode: response.statusCode }
   #getAnimelist or getMangalist callback, also includes user info
   onGetList: (error,response,body,callback) ->
-    if response.statusCode == 200 && !error
-      Parser.ParseSync(body)
-            .then (result) ->
-              result = (result)
-              callback { success: true,list: result, statusCode: response.statusCode }
+    if !error && response?
+      if response.statusCode == 200
+        Parser.ParseSync(body)
+              .then (result) ->
+                result = (result)
+                callback { success: true,list: result, statusCode: response.statusCode }
 
 
 
@@ -80,12 +81,17 @@ class RequestAPI
     @handleRequestResult(error,response,body,callback)
 
   handleRequestResult: (error,response,body,callback) ->
-    if response.statusCode != 200
+    if !response?
+      @onError error,response,body,callback
+    else if response.statusCode != 200
       @onError error,response,body,callback
     else if error
       @onError error,response,"No connection probably.",callback
   onError: (error,response,body,callback) ->
-    callback { success:false, statusCode: response.statusCode, errorMessage: "Something went wrong. Whoops.." + body}
+    if !response?
+      callback { success:false, statusCode: -1, body: body ,errorMessage: "Something went wrong. Whoops.." + body}
+    else
+      callback { success:false, statusCode: response.statusCode, body: body, errorMessage: "Something went wrong. Whoops.." + body}
 
 
 

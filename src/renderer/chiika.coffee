@@ -21,7 +21,7 @@ React = require('react')
 SideMenu = require './side-menu'
 Titlebar = require './titlebar'
 StatusBar = require './statusbar'
-
+LoadingScreen = require './loading-screen'
 Home = require './home'
 AnimeList = require './anime-list'
 
@@ -42,9 +42,23 @@ Content = React.createClass
     </div>)
 
 RouterContainer = React.createClass
-  render: ->
-    (<div><SideMenu /><Content props={this.props}/></div>)
+  waiting: true
+  componentDidMount: ->
+    chiika.emitter.on 'chiika-ready', () =>
+      @waiting = false
+      $(".main").removeClass("hidden")
+      #$(".main").fadeIn("slow")
+      @forceUpdate()
 
+  render: ->
+    <div>
+    {
+       if !@waiting
+         <div><SideMenu /><Content props={this.props}/></div>
+       else
+         <LoadingScreen />
+    }
+    </div>
 
 ChiikaRouter = React.createClass
   onEnter:(nextState) ->

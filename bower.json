@@ -1,34 +1,34 @@
 {
-    "name": "chiika",
-    "version": "0.0.1",
-    "authors": [
+  "name": "chiika",
+  "version": "0.0.1",
+  "authors": [
     "arkenthera"
   ],
-    "license": "MIT",
-    "ignore": [
+  "license": "MIT",
+  "ignore": [
     "**/.*",
     "node_modules",
     "bower_components",
     "test",
     "tests"
   ],
-    "dependencies": {
+  "dependencies": {
+    "roboto-fontface": "~0.4.3",
+    "components-font-awesome": "~4.5.0",
+    "jQuery-contextMenu": "^2.1.0",
+    "tooltipster": "3.3.0",
+    "yui-css": "^0.0.1",
+    "arkenthera-w2ui": "^1.4.4"
+  },
+  "overrides": {
+    "isotope": {
+      "dependencies": {
         "roboto-fontface": "~0.4.3",
         "components-font-awesome": "~4.5.0",
         "jQuery-contextMenu": "^2.1.0",
         "tooltipster": "3.3.0",
-        "yui-css": "^0.0.1",
-        "arkenthera-w2ui": "^1.4.4"
-    },
-    "overrides": {
-      "isotope": {
-        "dependencies": {
-          "roboto-fontface": "~0.4.3",
-          "components-font-awesome": "~4.5.0",
-          "jQuery-contextMenu": "^2.1.0",
-          "tooltipster": "3.3.0",
-          "yui-css": "^0.0.1"
-        }
+        "yui-css": "^0.0.1"
       }
     }
+  }
 }

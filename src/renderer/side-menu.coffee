@@ -28,7 +28,7 @@ SideMenu = React.createClass
     window.chiika.ipcListeners.push this
 
     if !window.chiika.isWaiting
-      @chiikaReady()
+      @refreshSideMenu()
     hoverIn = ->
       $(this).addClass "rotateLogo"
     hoverOut = ->

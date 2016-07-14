@@ -46,14 +46,15 @@ class ChiikaEnvironment
     console.addLogger('rendererInfo','blue')
     @logInfo("Renderer initializing...")
 
-    @ipcGetAnimeDb()
-
 
     ipcRenderer.on 'window-reload', (event,arg) =>
       @logDebug("IPC: window-reload")
 
+    ipcRenderer.on 'request-search-response', (event,arg) =>
+      @logDebug 'IPC: request-search-response'
+      @logInfo "Search returned " + arg.results.length + " entries"
+
     ipcRenderer.on 'download-image', (event,arg) =>
-      console.log "????"
       @logDebug('IPC: download-image')
       @emitter.emit 'download-image' #This will cause to listeners of this message to react, see side-menu
 
@@ -65,6 +66,8 @@ class ChiikaEnvironment
     #To workaround this we first have to wait for the data to arrive at renderer process, then tell React to fill the table
     @ipcWaitforDeferredCalls().then( =>
       @isWaiting = false
+      @emitter.emit 'chiika-ready'
+      chiika.logInfo "Chiika-Ready"
       _.forEach @ipcListeners, (v,k) =>
         v.ipcCall()
     )
@@ -75,6 +78,7 @@ class ChiikaEnvironment
     Dfs.push @ipcGetUserInfo()
     Dfs.push @ipcGetAnimelist()
     Dfs.push @ipcGetOptions()
+    Dfs.push @ipcGetAnimeDb()
 
 
     _when.all Dfs
@@ -87,26 +91,33 @@ class ChiikaEnvironment
       @user = arg
       @domManager.setUserInfo @user
       deferred.resolve()
+      #@emitter.emit 'download-image' #Little hack, sidebar depends on user ID , so its safe to update it when we have user here
     deferred.promise
 
   ipcGetAnimelist: ->
     deferred = _when.defer()
     ipcRenderer.send('db-request-animelist',{ userName: ''})
     ipcRenderer.on 'request-animelist-response', (event,arg) =>
-      @animeList = arg
-      console.log @animeList
+      if arg.success
+        @animeList = arg.list
+        console.log @animeList
+      else
+        chiika.logInfo "Retrieving animelist resulted with error. " + arg.response.errorMessage + " " + arg.response.body
       deferred.resolve()
     deferred.promise
   ipcGetAnimeDb: ->
     deferred = _when.defer()
     ipcRenderer.send('db-request-anime')
     ipcRenderer.on 'request-animedb-response', (event,arg) =>
-      @animeDb = arg
+      @animeDb = arg.list
       console.log @animeDb
       deferred.resolve()
     deferred.promise
   devRequestAnimelist: ->
     ipcRenderer.send('request-animelist',{ userName: ''})
+
+  devRequestAnimeSearch: (search) ->
+    ipcRenderer.send('request-search-anime', {searchTerms: search })
 
   ipcGetOptions: ->
     deferred = _when.defer()

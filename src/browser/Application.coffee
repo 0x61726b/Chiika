@@ -168,6 +168,46 @@ class Application
       win = BrowserWindow.fromWebContents(event.sender)
       win[method](args...)
 
+
+
+    #------------------------------------------------
+    #
+    #
+    #
+    #            SEARCHING ANIME
+    #
+    #
+    #------------------------------------------------
+    ipcMain.on 'request-search-anime', (event,args) =>
+      application.logDebug("IPC: request-search-anime")
+
+      reqSearchCb = (response) =>
+        if response.success
+          event.sender.send 'request-search-response',{success: true,results: response.anime.entry }
+          application.logInfo "Search returned succesful with " + response.anime.entry.length + " entries "
+
+          #Search data has contributed to the Database
+          #Let the renderer know the new data
+          Database.updateAnimeDbFromSearchData response.anime.entry,->
+            dbAnimeCb = (data) ->
+              event.sender.send 'request-animedb-response',{ success: true, list : data }
+            Database.loadAnimeDb dbAnimeCb
+        else
+          event.sender.send 'request-search-response', { success: false, response: response }
+          @onError response
+
+      @tools.searchAnime @loggedUser, args.searchTerms,reqSearchCb
+
+
+
+    #------------------------------------------------
+    #
+    #
+    #
+    #
+    #
+    #
+    #------------------------------------------------
     ipcMain.on 'request-animelist', (event,user,args...) =>
       application.logDebug("IPC: request-animelist")
 
@@ -176,9 +216,13 @@ class Application
         if response.success
           list = response.list.myanimelist
           delete list.myinfo
-          Database.saveList 'animeList',list
+          Database.saveList 'animeList',list, ->
 
-          event.sender.send 'request-animelist-response',list
+          event.sender.send 'request-animelist-response',{ success: true, list:list  }
+        else
+          @onRequestError response
+
+          event.sender.send 'request-animelist-response',{ success: false, response: response }
 
       @tools.getAnimelistOfUser @loggedUser.userName, reqAnimeListCb
 
@@ -186,7 +230,7 @@ class Application
       application.logDebug("IPC: db-request-anime")
 
       dbReqAnimeCb = (response) =>
-        event.sender.send 'request-animedb-response',response
+        event.sender.send 'request-animedb-response',{ success:true,list: response }
       Database.loadAnimeDb dbReqAnimeCb
 
     #-------------Note to self-------------
@@ -217,13 +261,16 @@ class Application
       if !@tools.checkIfFileExists 'Data/animeList.nosql'
         application.logInfo "Anime file is requested but it doesn't exist.Fixing that..."
         reqAnimeListCb = (response) =>
+          if !response.success
+            @onRequestError response
+            return
 
           dbSaved = ->
             application.logInfo "Sending (Main -> Renderer) request-animelist-response"
-            event.sender.send 'request-animelist-response',list
+            event.sender.send 'request-animelist-response',{ success: true, list: list }
 
             dbReqAnimeCb = (animeDbResponse) =>
-              event.sender.send 'request-animedb-response',animeDbResponse
+              event.sender.send 'request-animedb-response',{success: true,list: animeDbResponse }
             Database.loadAnimeDb dbReqAnimeCb
 
           #To-do implement error
@@ -236,7 +283,7 @@ class Application
         @tools.getAnimelistOfUser @loggedUser.userName , reqAnimeListCb
       else
         dbReqAnimeListCb = (response) =>
-          event.sender.send 'request-animelist-response',response
+          event.sender.send 'request-animelist-response',{ success:true,list: response }
 
           #Temporary
           #Database.saveList 'animeList',response,->
@@ -264,7 +311,8 @@ class Application
           application.logInfo("Error: " + response.errorMessage)
           event.sender.send('set-user-login-response',response)
 
-
+  onRequestError: (callback) ->
+    console.log callback.errorMessage
   downloadUserImage: (id) ->
     onFinished = =>
       @window.window.webContents.send('download-image')
