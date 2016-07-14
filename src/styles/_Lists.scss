@@ -36,27 +36,18 @@
   border-right: 0px!important;
 }
 /***Odd Rows***/
-.w2ui-grid .w2ui-grid-body table tr.w2ui-odd td.w2ui-grid-data > div:not(.progress-bar) {
+.w2ui-grid .w2ui-grid-body table tr.w2ui-odd td.w2ui-grid-data > div:not(.progress-bar),
+.w2ui-grid .w2ui-grid-body table tr.w2ui-even td.w2ui-grid-data > div:not(.progress-bar) {
   padding-top: 0.5em !important;
   padding-bottom: 0.5em !important;
   color: $main-text;
 }
 
-.w2ui-grid .w2ui-grid-body table tr.w2ui-odd {
+.w2ui-grid .w2ui-grid-body table tr.w2ui-odd,
+.w2ui-grid .w2ui-grid-body table tr.w2ui-even {
   background-color: $body-bg!important;
 }
-.w2ui-grid .w2ui-grid-body table tr.w2ui-odd:hover {
-  background-color: $grey-1!important;
-}
-/***Even Rows***/
-.w2ui-grid .w2ui-grid-body table tr.w2ui-even td.w2ui-grid-data > div {
-  padding-top: 0.5em ;
-  padding-bottom: 0.5em ;
-  color: $main-text;
-}
-.w2ui-grid .w2ui-grid-body table tr.w2ui-even {
-  background-color:$body-bg!important;
-}
+.w2ui-grid .w2ui-grid-body table tr.w2ui-odd:hover,
 .w2ui-grid .w2ui-grid-body table tr.w2ui-even:hover {
   background-color: $grey-1!important;
 }
