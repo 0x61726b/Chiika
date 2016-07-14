@@ -1,5 +1,7 @@
 .statusBar {
-    box-shadow: 0px -1px 5px rgba(0, 0, 0, 0.2);
+  background-color: $grey-1;
+  border-top: 1px solid $grey-2;
+  height: $statusBarHeight;
 }
 
 .animelistStatusbar {

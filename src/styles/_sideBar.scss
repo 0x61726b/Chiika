@@ -1,96 +1,100 @@
 .sidebar {
-    width: $sidebar-width;
-    background-color: #fafad2;
-    float: left;
-    height: 100vh;
+  width: $sidebar-width;
+  background-color: $sidebar;
+  float: left;
+  height: 100vh;
 }
-
 //Chiika Logo
 .topLeft {
-    background-color: color($userColor, 800);
-    width: inherit;
-    height: $sidebar-top-height;
-    margin-left: auto;
-    margin-right: auto;
-    background-image: url("./../assets/images/topLeftBack.png");
-    -webkit-app-region: no-drag;
+  //background-color: color($userColor, 800);
+  width: inherit;
+  height: $sidebar-top-height;
+  margin-left: auto;
+  margin-right: auto;
+  //background-image: url("./../assets/images/topLeftBack.png");
+  background-color: $sidebar;
+  -webkit-app-region: no-drag;
 }
-
+.topLeft::after, .topLeft:after {
+  content: '';
+  width: 135px;
+  margin-top: 4px;
+  margin-left:10px;
+  position: absolute;
+  height: 1px;
+  border-bottom: 1px solid rgba($accent,0.5);
+}
 //User Avatar and user name
 .avatar {
-    width: 80px;
-    height: 80px;
-    margin-left: auto;
-    margin-right: auto;
-    display: block;
-    border-radius: 40px;
+  width: 80px;
+  height: 80px;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  border-radius: 40px;
 }
-
 .userArea {
-    height:calc(#{$sidebar-top-height} - #{$titlebar-height}
-}
-
-);
-cursor:default;
-text-decoration: none;
-
+  height: calc(#{$sidebar-top-height} - #{$titlebar-height} } );
+  cursor: default;
+  text-decoration: none;
 }
 .imageContainer {
-    margin-top: 10px;
+  margin-top: 10px;
 }
 .userInfo {
-    color: white;
-    text-align: center;
-    font-size: $userInfo-font-size;
-    margin-top: 5px;
+  color: $sidebar-text;
+  text-align: center;
+  font-size: $userInfo-font-size;
+  margin-top: 5px;
 }
 .logoContainer {
-    height: $titlebar-height;
+  height: $titlebar-height;
+  background-color: $sidebar-hover;
+  border-bottom: 1px solid $sidebar-active;
 }
 img.chiikaLogo {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
 .navigation {
-    background-color: #19181d;
-    width: inherit;
-    position: relative;
-    height: calc(100% - #{$sidebar-top-height});
-    font-size: $navigation-font-size;
+  background-color: $sidebar;
+  width: inherit;
+  position: relative;
+  height: calc(100% - #{$sidebar-top-height});
+  font-size: $navigation-font-size;
 }
 .navigation ul {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
 }
 .side-menu-link {
   text-decoration: none;
-  color: rgb(240,240,240);
-  display:block;
-  padding: 6px 0px 6px 12px;
+  color: $sidebar-text;
+  display: block;
+  padding: 6px 0 6px 12px;
   position: relative;
+}
+.side-menu-link:hover {
+  background-color: $sidebar-hover;
 }
 .side-menu-link.active {
   padding-left: 7px;
-  border-left: 5px solid pink;
-  background-color: #222;
+  border-left: 5px solid $accent;
+  background-color: $sidebar-active;
 }
-.side-menu-link:hover {
-  background-color: #212121;
+.side-menu-link.active .side-menu-li {
+  color: $sidebar-text-active;
 }
-.side-menu-link.active .side-menu-li{
-  color: white;
-}
-
 .navigation .list-title {
   font-family: Montserrat, 'monospace';
-  color: white;
+  color: $sidebar-title;
   font-weight: normal;
   opacity: 1;
   padding-left: 8px;
   font-size: 12px;
-  margin: 8px 0px 2px 0px;
+  margin: 8px 0 2px;
   text-transform: uppercase;
-  border-bottom: 1px dashed rgba(255,255,255,0.2);
+  border-bottom: 1px dashed rgba($sidebar-title,0.2);
 }
