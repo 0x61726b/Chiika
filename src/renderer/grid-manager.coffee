@@ -64,7 +64,7 @@ class GridManager
        resizable: true,
        sortable: true,
        render:(title) ->
-         '<div anime-id="'+title.animeId+'" id="details">'+title.title+'</a>'
+         '<div anime-id="'+title.animeId+'" id="details">'+title.title+'</div>'
     }
   addAiringStatusTextColumn: (grid) ->
     grid.columns.push { field: 'airingStatusText', caption: 'Airing Status', size: '120px',resizable: true, sortable: true},

@@ -23,24 +23,41 @@ anime = require 'animejs'
 
 module.exports = React.createClass
   componentDidMount: () ->
+    # firstAnimComplete = ->
+    #   console.log "????"
+    #   anime({
+    #     targets: '.anime',
+    #     scale: [0.9, 0.6],
+    #     duration: 600,
+    #     # rotate: {
+    #     #   value: 360,
+    #     #   duration: 1500,
+    #     #   delay: 0
+    #     # },
+    #     delay: (el, index) ->
+    #       return index * 250
+    #     ,
+    #     easing: 'easeInQuart',
+    #     loop: false
+    #   })
     anime({
-      targets: '.anime',
-      scale: [0.7, 0.9],
-      duration: 1500,
-      rotate: {
-        value: 360,
-        duration: 1500,
-        delay: 0
-      },
-      delay: 100,
-      direction: 'alternate',
-      easing: 'easeInOutQuad',
-      loop: true
+      targets: '.anime'+name,
+      scale: [0.5,0.7],
+      duration: 800,
+      direction: 'alternate'
+      easing: 'easeInQuart',
+      loop: true,
+      delay: (el,index) ->
+        return index*200
     })
 
   render: () ->
-    (<div>
-      <div className="card raised grey">
-        <img src="./../assets/images/logo.svg" style={{width: 75,height:75}} className="anime" alt="" />
+    (<div className="loading-screen">
+      <div>
+        <img src="./../assets/images/logo.svg" style={{width: 72,height:72}} className="anime" alt="" />
+        <img src="./../assets/images/logo.svg" style={{width: 72,height:72}} className="anime" alt="" />
+        <img src="./../assets/images/logo.svg" style={{width: 72,height:72}} className="anime" alt="" />
+        <img src="./../assets/images/logo.svg" style={{width: 72,height:72}} className="anime" alt="" />
+        <img src="./../assets/images/logo.svg" style={{width: 72,height:72}} className="anime" alt="" />
       </div>
     </div>)

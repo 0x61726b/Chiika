@@ -54,7 +54,8 @@ RouterContainer = React.createClass
     <div>
     {
        if !@waiting
-         <div><SideMenu /><Content props={this.props}/></div>
+         <LoadingScreen />
+         #<div><SideMenu /><Content props={this.props}/></div>
        else
          <LoadingScreen />
     }

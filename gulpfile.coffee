@@ -220,7 +220,7 @@ do Your_Application_will_ = () ->
     gulp.watch(['bower.json', srcDir + '/renderer/index.html',srcDir + '/renderer/MyAnimeListLogin.html'], ['inject:css'])
     gulp.watch([srcDir + '/styles/*.scss'],['inject:css'])
     gulp.watch([serveDir + '/styles/**/*.css', serveDir + '/renderer/**/*.html', serveDir + '/renderer/**/*.js'], electron.reload)
-    gulp.watch([serveDir + '/browser/**/*.js'], electron.restart)
+    #gulp.watch([serveDir + '/browser/**/*.js'], electron.restart)
   gulp.task 'clean', (done) ->
     del [serveDir, distDir, releaseDir], () -> done()
   gulp.task('default', ['build'])

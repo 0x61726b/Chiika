@@ -30,4 +30,22 @@ td {
 .w2ui-overlay table.w2ui-drop-menu .w2ui-icon {
   color: black;
 }
+.loading-screen {
+  -webkit-app-region: drag;
+  background-color: #333;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
+  height: 100vh;
+}
+/*
+.loading-screen > div {
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  flex-direction: column;
+}
+*/
 /*# sourceMappingURL=main.css.map */
