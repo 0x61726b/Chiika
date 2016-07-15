@@ -17,7 +17,7 @@
     "components-font-awesome": "~4.5.0",
     "jQuery-contextMenu": "^2.1.0",
     "tooltipster": "3.3.0",
-    "yui-css": "^0.0.1",
+    "yui-css": "latest",
     "arkenthera-w2ui": "^1.4.4"
   },
   "overrides": {
@@ -27,7 +27,7 @@
         "components-font-awesome": "~4.5.0",
         "jQuery-contextMenu": "^2.1.0",
         "tooltipster": "3.3.0",
-        "yui-css": "^0.0.1"
+        "yui-css": "latest"
       }
     }
   }
