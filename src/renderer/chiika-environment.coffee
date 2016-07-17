@@ -41,6 +41,8 @@ class ChiikaEnvironment
     @domManager       = new ChiikaDomManager
     @gridManager      = new GridManager
 
+    @registerCustomColumnTypes()
+
 
     console.addLogger('rendererDebug','red')
     console.addLogger('rendererInfo','blue')
@@ -72,6 +74,13 @@ class ChiikaEnvironment
         v.ipcCall()
     )
 
+
+  sendNotification: (notf) ->
+    notf = new Notification('Test',{ body: 'Test notification sent by Chiika!', icon: 'D:/Arken/C++/ElectronProjects/Chiika/src/assets/images/chiika.png'})
+  getWorkingDirectory: ->
+    process.cwd()
+  getResourcesPath: ->
+    process.resourcesPath
   ipcWaitforDeferredCalls: ->
     Dfs = []
 
@@ -79,9 +88,19 @@ class ChiikaEnvironment
     Dfs.push @ipcGetAnimelist()
     Dfs.push @ipcGetOptions()
     Dfs.push @ipcGetAnimeDb()
+    Dfs.push @ipcGetLoginStatus()
 
 
     _when.all Dfs
+
+  ipcGetLoginStatus: ->
+    deferred = _when.defer()
+    ipcRenderer.send 'get-login-status'
+
+    ipcRenderer.on 'get-login-status-response', (event,arg) =>
+      console.log "get-login-status-response"
+      deferred.resolve()
+    deferred.promise
 
   ipcGetUserInfo: ->
     deferred = _when.defer()
@@ -135,6 +154,9 @@ class ChiikaEnvironment
     process.console.tag("chiika-renderer").rendererDebug(text)
   logInfo: (text) ->
     process.console.tag("chiika-renderer").rendererInfo(text)
+
+  registerCustomColumnTypes: ->
+
   getAnimeListByType: (status) ->
     data = []
 
@@ -226,9 +248,10 @@ class ChiikaEnvironment
           entry['typeWithText'] = typeText
           entry['icon'] = animeType
           entry['title'] = animeTitle
-          entry['progress'] = progress
+          entry['animeProgress'] = progress
           entry['score'] = score
           entry['season'] = season
+          entry['image'] = value.series_image
           entry['airingStatusText'] = airingStatusText
           entry['airingStatusColor'] = airingStatusColor
           data.push entry

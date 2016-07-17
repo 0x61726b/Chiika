@@ -17,18 +17,9 @@
 React = require('react')
 {Router,Route,BrowserHistory,Link} = require('react-router')
 
-Mixin = require './al-mixin'
-
 
 #Views
 
-OnHoldList = React.createClass
-  mixins: [Mixin],
-  componentDidMount: () ->
-    window.chiika.domManager.addNewGrid 'anime','onhold',3
-  componentWillUnmount: () ->
-    window.chiika.domManager.destroyGrid 'onhold'
+module.exports = React.createClass
   render: () ->
-    (<div id="onhold" className="listCommon"></div>)
-
-module.exports = OnHoldList
+    (<div> Manga List </div>)

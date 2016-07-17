@@ -17,13 +17,35 @@
 React = require('react')
 {Router,Route,BrowserHistory,Link} = require('react-router')
 
-
+_ = require 'lodash'
 #Views
 
 Home = React.createClass
-  componentDidMount: () ->
+  ipcCall: ->
+
+  componentDidMount: ->
+    chiika.ipcListeners.push this
+    console.log "Home: Mount"
+
+    # @mygrid = new dhtmlXGridObject('myGrid')
+    #
+    # @mygrid.setImagePath("./codebase/imgs/")
+    # @mygrid.setHeader("Sales,Book title,Author,Price")
+    # @mygrid.setInitWidths("100,250,150,100")
+    # @mygrid.setColAlign("right,left,left,left")
+    # @mygrid.setColTypes("ro,ed,ed,ed")
+    # @mygrid.setColSorting("int,str,str,int")
+    # @mygrid.init()
+    #
+    # data={ rows:[] }
+    #
+    # for i in [0...1000]
+    #   data.rows.push { id: i , data:[ "Test " + i, "Huhee","HUehue "]}
+    # @mygrid.parse(data,"json")
+  componentWillUnmount: ->
+    _.pull chiika.ipcListeners,this
 
   render: () ->
-    (<div> <a href="#" onclick={this.onButton1}> Button 1 </a> </div>)
+    (<div id="myGrid" />)
 
 module.exports = Home

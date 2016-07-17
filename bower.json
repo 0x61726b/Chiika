@@ -15,20 +15,7 @@
   "dependencies": {
     "roboto-fontface": "~0.4.3",
     "components-font-awesome": "~4.5.0",
-    "jQuery-contextMenu": "^2.1.0",
-    "tooltipster": "3.3.0",
-    "yui-css": "latest",
-    "arkenthera-w2ui": "^1.4.4"
-  },
-  "overrides": {
-    "isotope": {
-      "dependencies": {
-        "roboto-fontface": "~0.4.3",
-        "components-font-awesome": "~4.5.0",
-        "jQuery-contextMenu": "^2.1.0",
-        "tooltipster": "3.3.0",
-        "yui-css": "latest"
-      }
-    }
+    "yui-css": "0.0.5",
+    "dhtmlx": "dhtmlx-arkenthera#*"
   }
 }

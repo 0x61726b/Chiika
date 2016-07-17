@@ -18,6 +18,7 @@ ipcHelpers = require '../ipcHelpers'
 {BrowserWindow, ipcRenderer,remote} = require 'electron'
 
 _ = require 'lodash'
+#THIS CLASS IS NOW OBSOLOTE
 
 class GridManager
   fileFuncMap:[
@@ -39,44 +40,13 @@ class GridManager
       )
   checkIfGridExists: (name) ->
     console.log name
-    if _.isUndefined _.find @grids,_.matchesProperty 'name', 'watching'
+    if _.isUndefined _.find @grids,_.matchesProperty 'name', name
       return false
     else
       return true
-  removeGrid: (name) ->
-    _.remove @grids, (o) ->
-      return o.name == name
-  addGrid: (grid) ->
-    @grids.push grid
-  addTypeWithIconColors: (grid) ->
-    grid.columns.push { field: 'typeWithIconColors',  caption: '',attr: "align=center",size: '40px',render:(icon) ->
-      '<i class="'+icon.icon+'" style="color:'+icon.airingStatusColor+'"></i>' }
-  addTypeWithTextColumn: (grid) ->
-    grid.columns.push { field: 'typeWithText', caption: 'Type', size: '120px',resizable: true, sortable: true  },
-  addTypeWithIconColumn: (grid) ->
-    grid.columns.push { field: 'typeWithIcon', caption: '',attr: "align=center", size: '40px',render:(icon) ->
-      '<i class="'+icon.icon+'"></i>'  }
-  addTitleColumn: (grid) ->
-    grid.columns.push {
-       field: 'title',
-       caption: 'Title',
-       size: '40%',
-       resizable: true,
-       sortable: true,
-       render:(title) ->
-         '<div anime-id="'+title.animeId+'" id="details">'+title.title+'</div>'
-    }
-  addAiringStatusTextColumn: (grid) ->
-    grid.columns.push { field: 'airingStatusText', caption: 'Airing Status', size: '120px',resizable: true, sortable: true},
-  addScoreColumn: (grid) ->
-    grid.columns.push { field: 'score', caption: 'Score', size: '10%',resizable: true, sortable: true }
-  addProgressColumn: (grid) ->
-    grid.columns.push { field: 'progress', caption: 'Progress', size: '40%',resizable: true, sortable: true, render:(progress) ->
-      '<div class="progress-bar thin">
-      <div class="indigo" style="width:'+progress.progress+'%;height: 14px;" />
-      </div>' }
-  addSeasonColumn: (grid) ->
-    grid.columns.push { field: 'season', caption: 'Season', size: '120px',resizable: true, sortable: true  }
+
+  handleColumnDrag: (grid,oldPos,newPos) ->
+    console.log "Column drag " + oldPos + " to " + newPos
 
 
 module.exports = GridManager

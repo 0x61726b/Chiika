@@ -21,6 +21,9 @@ Chiika = require("./chiika")
 Environment = require './chiika-environment'
 ApplicationDelegate = require './application-delegate'
 
+Col = require './custom-column-types'
+
+window.$ = window.jQuery = require('../chiika.js')
 $ ->
   window.chiika = new Environment({
     window,

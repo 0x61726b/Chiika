@@ -15,15 +15,16 @@
 #----------------------------------------------------------------------------
 
 DefaultOptions = {
-  RefreshUponLaunch: true,
+  RefreshUponLaunch: true, #To-do : implement
+  UseAlternateListView : false,
   AnimeListColumns:[
     {column: {
-       name:"typeWithIcon",order:0,toggleable:true,hiddenDefault:false} },
-    {column: { name:"title",order:1,toggleable:false,hiddenDefault:false} },
-    {column: { name:"score",order:2,toggleable:false,hiddenDefault:false} },
-    {column: { name:"season",order:4,toggleable:false,hiddenDefault:false }},
+       name:"typeWithIcon",order:0,toggleable:true,hiddenDefault:false, width: '40', desc: "Type",sort:'na' } },
+    {column: { name:"title",order:1,toggleable:false,hiddenDefault:false, width: '300',desc: "Title", sort: 'str'} },
+    {column: { name:"score",order:2,toggleable:false,hiddenDefault:false, width: '60', desc: "Score", sort: 'int' } },
+    {column: { name:"season",order:4,toggleable:false,hiddenDefault:false, width: '110',desc: "Season", sort: 'date' }},
     {column: {
-       name:"progress",order:3,toggleable:false,hiddenDefault:false }},
+       name:"animeProgress",order:3,toggleable:false,hiddenDefault:false, width: '220', desc: "Progress",sort: 'int' }},
     {column: {
        name:"typeWithIconColors",order:-1,toggleable:true,hiddenDefault:true }},
     {column: {

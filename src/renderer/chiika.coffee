@@ -24,14 +24,15 @@ StatusBar = require './statusbar'
 LoadingScreen = require './loading-screen'
 Home = require './home'
 AnimeList = require './anime-list'
+Mangalist = require './manga-list'
 
 Content = React.createClass
   componentDidMount: ->
-    t = new Titlebar()
-    t.appendTitlebar()
+
   render: () ->
     (<div className="main">
       <div id="titleBar">
+        <Titlebar />
       </div>
       <div className="content">
         {this.props.props.children}
@@ -70,7 +71,7 @@ ChiikaRouter = React.createClass
         #<Route path="/" component={Home} onEnter={@onEnter}/>
         <Route name="Home" path="Home" component={Home} onEnter={@onEnter}/>
         <Route name="AnimeList" path="AnimeList" component={AnimeList} onEnter={@onEnter}/>
-        <Route name="MangaList" path="MangaList" component={Home} onEnter={@onEnter}/>
+        <Route name="MangaList" path="MangaList" component={Mangalist} onEnter={@onEnter}/>
         <Route name="Library" path="Library" component={Home} onEnter={@onEnter}/>
         <Route name="Calendar" path="Calendar" component={Home} onEnter={@onEnter}/>
         <Route name="Seasons" path="Seasons" component={Home} onEnter={@onEnter}/>

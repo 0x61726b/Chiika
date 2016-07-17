@@ -20,6 +20,7 @@
 #--------------------
 {BrowserWindow, ipcMain,globalShortcut,Tray,Menu} = require 'electron'
 app = require "app"
+
 crashReporter = require 'crash-reporter'
 electron = require 'electron'
 localShortcut = require 'electron-localshortcut'
@@ -62,6 +63,8 @@ class Application
 
     @mediaDetector = new MediaDetect()
     @mediaDetector.spawn()
+
+    app.commandLine.appendSwitch 'js-flags','expose_gc'
 
 
     # Report crashes to our server.
@@ -158,10 +161,13 @@ class Application
       @saveOptions()
     ipcMain.on 'get-options', (event) ->
       event.sender.send 'get-options-response', AppOptions
-    ipcMain.on 'get-user-info',(event) ->
+    ipcMain.on 'get-user-info',(event) =>
       getUserCb = (user) ->
         event.sender.send 'get-user-info-response',user
       Database.getUser getUserCb
+
+      if !@firstLaunch
+        @window.window.webContents.send 'get-login-status-response'
 
 
     ipcMain.on 'call-window-method', (event,method,args...) =>
@@ -304,6 +310,11 @@ class Application
 
           @openWindow().then( =>
             @downloadUserImage response.user.id
+
+            delayMainScreen = =>
+              @window.window.webContents.send 'get-login-status-response'
+              @firstLaunch = false
+            setTimeout(delayMainScreen,3000)
             )
 
 
@@ -408,7 +419,7 @@ class Application
 
     @LoginWindow = new BrowserWindow(options);
     @LoginWindow.loadURL("file://#{__dirname}/../renderer/MyAnimeListLogin.html")
-    @LoginWindow.openDevTools()
+    #@LoginWindow.openDevTools()
   showMainWindow: ->
     @window.window.show()
     @window.window.restore()

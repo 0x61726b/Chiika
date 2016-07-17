@@ -17,18 +17,16 @@
 React = require('react')
 {Router,Route,BrowserHistory,Link} = require('react-router')
 
-Mixin = require './al-mixin'
+Mixin = require './al-mixin-compact'
 
 
 #Views
 
-PtwList = React.createClass
+module.exports = React.createClass
   mixins: [Mixin],
-  componentDidMount: () ->
-    window.chiika.domManager.addNewGrid 'anime','ptw',6
-  componentWillUnmount: () ->
-    window.chiika.domManager.destroyGrid 'ptw'
+  componentWillMount: () ->
+    @name = @props.name
+    @animeStatus = @props.listStatus
+    console.log @props
   render: () ->
-    (<div id="ptw" className="listCommon"></div>)
-
-module.exports = PtwList
+    (<div id={this.props.name} className="listCommon"></div>)

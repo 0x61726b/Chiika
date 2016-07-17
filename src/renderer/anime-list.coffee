@@ -18,11 +18,9 @@ React = require('react')
 {Router,Route,BrowserHistory,Link} = require('react-router')
 {ReactTabs,Tab,Tabs,TabList,TabPanel} = require 'react-tabs'
 
-WatchingList = require './al-watching'
-PtwList = require './al-ptw'
-CompletedList = require './al-completed'
-OnHoldList = require './al-onhold'
-DroppedList = require './al-dropped'
+
+AnimeListViewCompact = require './al-list-view-compact'
+AnimeListViewAlternate = require './al-list-view-alternate'
 
 _ = require 'lodash'
 
@@ -38,7 +36,9 @@ AnimeList = React.createClass
         { index:3, label:"On Hold",element:"gridOnHoldList" },
         { index:4, label:"Dropped",element:"gridDroppedList" }
     ]
-  onSelect: ->
+    currentView:0 # 1 for compact, 1 for alternate
+  onSelect: (index,last) ->
+
   setListCounts: ->
     watching = window.chiika.getAnimeListByType(1)
     ptw = window.chiika.getAnimeListByType(6)
@@ -50,17 +50,23 @@ AnimeList = React.createClass
     @state.tabs[2].length = completed.length
     @state.tabs[3].length = onhold.length
     @state.tabs[4].length = dropped.length
+
     @forceUpdate()
   ipcCall: ->
+    @doReady()
+  doReady: ->
     @setListCounts()
-  componentDidMount: ->
+
+    if chiika.appOptions.UseAlternateListView
+      @state.currentView = 1
+
+  componentWillMount: ->
     window.chiika.ipcListeners.push this
 
     if !window.chiika.isWaiting
-      @setListCounts()
+      @doReady()
   componentWillUnmount: ->
     _.pull window.chiika.ipcListeners,this
-
   render: () ->
     (<Tabs onSelect={this.onSelect}>
         <TabList>
@@ -69,19 +75,24 @@ AnimeList = React.createClass
                 )}
         </TabList>
         <TabPanel key={0}>
-          <WatchingList/>
+        {
+          if @state.currentView == 1
+            <AnimeListViewAlternate name='watching' listStatus=1 />
+          else
+            <AnimeListViewCompact name='watching' listStatus=1 />
+        }
         </TabPanel>
         <TabPanel key={1}>
-          <PtwList/>
+          <AnimeListViewCompact name='ptw' listStatus=6 />
         </TabPanel>
         <TabPanel key={2}>
-          <CompletedList/>
+          <AnimeListViewCompact name='completed' listStatus=2 />
         </TabPanel>
         <TabPanel key={3}>
-          <OnHoldList/>
+          <AnimeListViewCompact name='onhold' listStatus=3 />
         </TabPanel>
         <TabPanel key={4}>
-          <DroppedList/>
+          <AnimeListViewCompact name='dropped' listStatus=4 />
         </TabPanel>
       </Tabs>)
 

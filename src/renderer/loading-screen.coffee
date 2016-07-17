@@ -23,23 +23,6 @@ anime = require 'animejs'
 
 module.exports = React.createClass
   componentDidMount: () ->
-    # firstAnimComplete = ->
-    #   console.log "????"
-    #   anime({
-    #     targets: '.anime',
-    #     scale: [0.9, 0.6],
-    #     duration: 600,
-    #     # rotate: {
-    #     #   value: 360,
-    #     #   duration: 1500,
-    #     #   delay: 0
-    #     # },
-    #     delay: (el, index) ->
-    #       return index * 250
-    #     ,
-    #     easing: 'easeInQuart',
-    #     loop: false
-    #   })
     anime({
       targets: '.anime'+name,
       scale: [0.5,0.7],

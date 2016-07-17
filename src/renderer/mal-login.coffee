@@ -25,6 +25,8 @@ ipcHelpers = require '../ipcHelpers'
 
 #Views
 
+window.$ = window.jQuery = require('../chiika.js')
+
 MalLogin = React.createClass
   componentDidMount: ->
     #This callback only gets called if error on login

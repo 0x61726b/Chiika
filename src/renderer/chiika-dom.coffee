@@ -18,55 +18,105 @@ ipcHelpers = require '../ipcHelpers'
 {BrowserWindow, ipcRenderer,remote} = require 'electron'
 
 _ = require 'lodash'
+
+
+
+
 class ChiikaDomManager
   setUserInfo: (user) ->
     $("div.userInfo").html(user.userName)
-  destroyGrid: (name) ->
-    $("#" + name).w2destroy()
-    window.chiika.gridManager.removeGrid name
   setProgress: (progress) ->
     $(".progress-bar").children().css("width",progress + "%");
-  addNewGrid: (type,name,status) ->
-    name = name
-
-    if window.chiika.gridManager.checkIfGridExists name
-      return
-
-    localGrid = {
-      name:name,
-      reorderColumns:true,
-      columns:[],
-      records:[]
-    }
-
+  addNewGridDhtmlX: (type,name,status) ->
+    dhtmlGrid = new dhtmlXGridObject(name)
     columns = []
     if type == 'anime'
-      columns = window.chiika.gridManager.animeListColumns
+      columns = chiika.gridManager.animeListColumns
     if type == 'manga'
-      columns = window.chiika.gridManager.mangaListColumns
+      columns = chiika.gridManager.mangaListColumns
 
-    #Sort by order
     columns = _.sortBy columns, (o) ->
       return o.order
 
+    gridConf = { data: [] }
+    @configureGrid columns,dhtmlGrid
+    requestedListData = chiika.getAnimeListByType(status)
+    _.forEach requestedListData,(v,k) ->
+      obj = { }
+      obj.id = v.recid
+      obj.typeWithIcon = v.icon
+      obj.title = v.title
+      obj.score = v.score
+      obj.animeProgress = v.animeProgress
+      obj.season = v.season
+
+      gridConf.data.push obj
+
+    dhtmlGrid.init()
+    dhtmlGrid.parse gridConf,"js"
+    dhtmlGrid
+
+
+  configureGrid: (columns,grid) ->
+    columnIdsForDhtml = ""
+    columnTextForDhtml = ""
+    columnInitWidths = ""
+    columnSorting = ""
+
     _.forEach columns, (v,k) ->
-      findFunction = (fnc) ->
-        fncMap = window.chiika.gridManager.fileFuncMap
-        _.find fncMap,_.matchesProperty 'column', fnc
       if v.order != -1
-        window.chiika.gridManager[findFunction(v.name).fnc](localGrid)
-    data = window.chiika.getAnimeListByType(status)
+        columnIdsForDhtml += v.name + ","
+        columnTextForDhtml += v.desc + ","
+        columnInitWidths += v.width + ","
+        columnSorting += v.sort + ","
 
-    # if name == "watching"
-    #   _.forEach data, (v,k) ->
-    #     for i in [0...500]
-    #       v.recid = i*100 + v.recid
-    #       data.push v
+    columnIdsForDhtml = columnIdsForDhtml.substring(0,columnIdsForDhtml.length - 1)
+    columnTextForDhtml = columnTextForDhtml.substring(0,columnTextForDhtml.length - 1)
+    columnInitWidths = columnInitWidths.substring(0,columnInitWidths.length - 1)
+    columnSorting = columnSorting.substring(0,columnSorting.length - 1)
+    #To-do implement season to be in format of dd/mm/yy
 
-    localGrid.records = data
-    window.chiika.gridManager.addGrid localGrid
-    $("#" + name).w2grid(localGrid)
-    localGrid
+    #grid.setInitWidths( columnInitWidths )
+    grid.setColumnIds( columnIdsForDhtml )
+    grid.setHeader(columnTextForDhtml,null,["","width: 40%;","width: 10%;","40%;","width: 120px;"])
+    grid.setColTypes(columnIdsForDhtml)
+    grid.setColSorting(columnSorting)
+    grid.enableAutoWidth(true)
+    grid.enableMultiselect(true)
+
+  configureGridAlternate: (grid) ->
+    grid.setInitWidths( "100,200,400,150" )
+    grid.setColumnIds( "cImage,cInfo,cDesc,cButtons" )
+    grid.setHeader("image,info,synopsis,buttons")
+    grid.setColTypes("cImage,cInfo,cDesc,cButtons")
+    grid.enableMultiselect(true)
+    grid.setAwaitedRowHeight(150)
+    grid.enableAutoHeight(false)
+
+  addNewGrid: (type,name,status) ->
+    grid = @addNewGridDhtmlX type,name,status
+    grid
+
+  addGridAlternate: (type,name,status) ->
+    dhtmlGrid = new dhtmlXGridObject(name)
+
+
+    gridConf = { data: [] }
+    @configureGridAlternate dhtmlGrid
+    requestedListData = chiika.getAnimeListByType(status)
+    _.forEach requestedListData,(v,k) ->
+      obj = { }
+      obj.id = v.recid
+      obj.cImage = {image: v.image}
+      obj.cInfo = {info1: 'test',info2:'test2'}
+      obj.synopsis = 'huehue'
+      obj.buttons = ''
+
+      gridConf.data.push obj
+
+    dhtmlGrid.init()
+    dhtmlGrid.parse gridConf,"js"
+    dhtmlGrid
 
 
 module.exports = ChiikaDomManager

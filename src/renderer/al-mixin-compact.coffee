@@ -25,45 +25,49 @@ AnimeListMixin =
   name: null
   ipcCall: ->
     @setGrid()
+  setGridNew: ->
+    @grid = chiika.domManager.addNewGrid 'anime',@name,@animeStatus
   setGrid: ->
-    if @name == "watching"
-      @grid = chiika.domManager.addNewGrid 'anime',@name,1
+    @setGridNew()
+    return
+    chiika.appOptions.reorderColumns = false
+    @grid = chiika.domManager.addNewGrid 'anime',@name,@animeStatus
     lastColPos = -1
     lastCol = {}
 
+    if chiika.appOptions.reorderColumns
+      w2ui[@name].on 'columnDragStart',(e) =>
+        lastColPos = e.origColumnNumber
+        lastCol = @grid.columns[lastColPos]
+      w2ui[@name].on 'columnDragEnd',(ex) =>
+        @grid.columns = w2ui[@grid.name].columns
+        newColPos = ex.targetColumnNumber + 1
 
-    w2ui.watching.on 'columnDragStart',(e) =>
-      lastColPos = e.origColumnNumber
-      lastCol = @grid.columns[lastColPos]
-    w2ui[@grid.name].on 'columnDragEnd',(ex) =>
-      @grid.columns = w2ui[@grid.name].columns
-      newColPos = ex.targetColumnNumber + 1
-
-      timeOutFnc = (o) =>
-        @findGridOrderAfterDrag(o)
-      setTimeout(timeOutFnc,500,lastCol)
-      return
-      #console.log ex
-      if lastColPos == newColPos
+        timeOutFnc = (o) =>
+          @findGridOrderAfterDrag(o)
+        setTimeout(timeOutFnc,500,lastCol)
         return
+        #console.log ex
+        if lastColPos == newColPos
+          return
 
-      findObj = {}
-      findObjColumn = {}
-      findObj.column = findObjColumn
-      findObj.column.name = lastCol.field
+        findObj = {}
+        findObjColumn = {}
+        findObj.column = findObjColumn
+        findObj.column.name = lastCol.field
 
-      match = _.find(chiika.appOptions.AnimeListColumns,findObj)
-      index = _.indexOf chiika.appOptions.AnimeListColumns,match
+        match = _.find(chiika.appOptions.AnimeListColumns,findObj)
+        index = _.indexOf chiika.appOptions.AnimeListColumns,match
 
-      if index == -1
-        chiika.logDebug "There is a problem dragging the column."
-      else
-        match.column.order = newColPos
-        chiika.appOptions.AnimeListColumns.splice(index,1,match)
-        chiika.logDebug lastCol.field + " dragged from " + lastColPos + " to " + newColPos
-        chiika.applicationDelegate.saveOptions chiika.appOptions
+        if index == -1
+          chiika.logDebug "There is a problem dragging the column."
+        else
+          match.column.order = newColPos
+          chiika.appOptions.AnimeListColumns.splice(index,1,match)
+          chiika.logDebug lastCol.field + " dragged from " + lastColPos + " to " + newColPos
+          chiika.applicationDelegate.saveOptions chiika.appOptions
 
-        chiika.gridManager.prepareGridData chiika.appOptions
+          chiika.gridManager.prepareGridData chiika.appOptions
   findGridOrderAfterDrag: (orig)->
     grid = w2ui[@grid.name]
 
@@ -103,7 +107,11 @@ AnimeListMixin =
 
   componentDidMount: ->
     chiika.ipcListeners.push this
+    if !window.chiika.isWaiting
+      @setGrid()
   componentWillUnmount: ->
     _.pull chiika.ipcListeners,this
+    @grid.clearAll()
+    @grid = null
 
 module.exports = AnimeListMixin

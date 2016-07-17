@@ -14,6 +14,7 @@ gulp = require('gulp')
 fs = require('fs')
 del = require('del')
 argv = require('yargs').argv
+path = require 'path'
 mainBowerFiles = require('main-bower-files')
 ep = require('electron-prebuilt')
 
@@ -41,15 +42,26 @@ Inject_css___compiled_and_depedent___files_into_html = () ->
 
     inject = require "gulp-inject"
     concat = require "gulp-concat"
-    files = mainBowerFiles().concat([serveDir + '/styles/MainDefault.css'])
+    gulpif = require "gulp-if"
+    gulpIgnore = require 'gulp-ignore'
+    files = mainBowerFiles('**/*.css').concat([serveDir + '/styles/MainDefault.css'])
     options =
       relative: true
       ignorePath: ['../../.serve', '..']
       addPrefix: '..'
 
+
+    gulp.src(mainBowerFiles('**/*.js'))
+        .pipe(concat('chiika.js'))
+        .pipe(gulp.dest(serveDir))
+
+    files = files.concat([serveDir + '/chiika.js' ])
+
     gulp.src(srcDir + '/**/*.html')
         .pipe(inject(gulp.src(files),options))
         .pipe(gulp.dest(serveDir))
+
+
 
 Copy_assets = () ->
   gulp.task 'misc', () ->
@@ -95,6 +107,13 @@ Compile_scripts_for_distribution = () ->
       .pipe(coffee())
       .pipe(gulp.dest(distDir))
 
+    gulp.src('src/*.js')
+        .pipe(gulp.dest(distDir))
+    gulp.src('src/browser/tools/src/*.js')
+        .pipe(gulp.dest(distDir))
+    gulp.src(serveDir + '/chiika.js')
+        .pipe(gulp.dest(distDir))
+
 Inject_renderer_bundle_file_and_concatnate_css_files = () ->
   gulp.task 'html', ['inject:css'], () ->
 
@@ -126,8 +145,25 @@ Copy_Node_modules = () ->
 
     dependencies = []
 
+    recursiveDepFinder = (moduleName,dependencies) ->
+      modulePath = './node_modules/' + moduleName + '/'
+      existsInFolder = false
+      try
+        pjson = require modulePath + 'package.json'
+        existsInFolder = true
+      catch
+        #console.log "Couldnt find " + modulePath
+
+      if pjson? && existsInFolder
+        for innerModule of pjson.dependencies
+          dependencies.push innerModule
+          recursiveDepFinder innerModule,dependencies
+      return
+
     for name of packageJson.dependencies
       dependencies.push(name)
+      #Find dependencies of this module
+      recursiveDepFinder name,dependencies
 
     gulp.src('node_modules/{' + dependencies.join(',') + '}/**/*')
       .pipe(gulp.dest(distDir + '/node_modules'))
@@ -141,25 +177,6 @@ Write_a_package_json_for_distribution = () ->
     json.main = './browser/Application.js'
     fs.writeFile(distDir + '/package.json', JSON.stringify(json), () -> done())
 
-Copy_Chiika_Node = () ->
-  gulp.task 'copyChiikaNode', (done) ->
-    chiikaNodePath = "lib/chiika-node"
-
-    debugExists = false
-    releaseExists = false
-    try
-      fs.accessSync(chiikaNodePath + "/build/Debug")
-      chiikaNodePath = chiikaNodePath + "/build/Debug"
-      debugExists = true
-
-    catch error
-      console.log error
-      debugExists = false
-      return;
-
-    gulp.src(chiikaNodePath + "/**/*")
-        .pipe(gulp.dest(distDir + "/" + chiikaNodePath))
-
 Package_for_each_platforms = () ->
 
   gulp.task 'package', ['win32'].map (platform) ->
@@ -167,22 +184,23 @@ Package_for_each_platforms = () ->
     taskName = 'package:' + platform
 
     gulp.task taskName, ['build'], (done) ->
-
+      arch = 'x64'
       packager options =
         dir: distDir
         name: 'Chiika'
-        arch: 'ia32'
+        arch: arch
         platform: platform
-        out: releaseDir + '/' + platform
-        version: '0.36.3'
-      , (err) -> done()
+        out: releaseDir + '/' + platform + '-' + arch
+        version: '0.36.7'
+        asar: true
+      , (err) -> console.log err
 
     return taskName
 
 gulp.task 'ci', () ->
   createInstaller = require('electron-installer-squirrel-windows')
   createInstaller( {
-    path: './release/win32/Chiika-win32',
+    path: './release/win32-x64/Chiika-win32',
     "authors": 'arkenthera'
     } )
 
@@ -199,7 +217,7 @@ do Your_Application_will_ = () ->
   Copy_Node_modules()
   Write_a_package_json_for_distribution()
   Package_for_each_platforms()
-  Copy_Chiika_Node()
+
 
   gulp.task('build', ['html', 'compile:scripts', 'packageJson', 'copy:fonts', 'misc','copy:vendor'])
   gulp.task 'serve', ['inject:css', 'compile:scripts:watch', 'compile:styles', 'misc','copy:vendor'], () ->
@@ -209,6 +227,11 @@ do Your_Application_will_ = () ->
     if argv.pls
       development.Show_CA_Debug_Tools = 'yeah'
     development.version = packageJson.version
+
+    if argv.clean
+      rimraf = require 'rimraf'
+      rimraf path.join(process.env.APPDATA,'chiika','Data'), { }, ->
+        console.log "Removed Chiika data folder"
 
     electron = require('arkenthera-electron-connect').server.create({
         electron:ep,

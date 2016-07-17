@@ -16,19 +16,25 @@
 
 React = require('react')
 {Router,Route,BrowserHistory,Link} = require('react-router')
+{ReactTabs,Tab,Tabs,TabList,TabPanel} = require 'react-tabs'
 
-Mixin = require './al-mixin'
+_ = require 'lodash'
+_when = require 'when'
 
+AnimeListMixin =
+  name: null
+  ipcCall: ->
+    @setGrid()
+  setGrid: ->
+    @grid = chiika.domManager.addGridAlternate 'anime',@name,@animeStatus
 
-#Views
+  componentDidMount: ->
+    chiika.ipcListeners.push this
+    if !window.chiika.isWaiting
+      @setGrid()
+  componentWillUnmount: ->
+    _.pull chiika.ipcListeners,this
+    @grid.clearAll()
+    @grid = null
 
-CompletedList = React.createClass
-  mixins: [Mixin],
-  componentDidMount: () ->
-    window.chiika.domManager.addNewGrid 'anime','completed',2
-  componentWillUnmount: () ->
-    window.chiika.domManager.destroyGrid 'completed'
-  render: () ->
-    (<div id="completed" className="listCommon"></div>)
-
-module.exports = CompletedList
+module.exports = AnimeListMixin

@@ -17,22 +17,16 @@
 React = require('react')
 {Router,Route,BrowserHistory,Link} = require('react-router')
 
-Mixin = require './al-mixin'
-{Table,Tr,Td} = require 'reactable'
+Mixin = require './al-mixin-alternate'
 
 
 #Views
 
-WatchingList = React.createClass
+module.exports = React.createClass
   mixins: [Mixin],
-  componentWillMount: ->
-    @name = "watching"
-  componentDidMount: ->
-    if !window.chiika.isWaiting
-      @setGrid()
-  componentWillUnmount: () ->
-    window.chiika.domManager.destroyGrid 'watching'
+  componentWillMount: () ->
+    @name = @props.name
+    @animeStatus = @props.listStatus
+    console.log @props
   render: () ->
-    (<div id="watching" className="listCommon"></div>)
-
-module.exports = WatchingList
+    (<div id={this.props.name} className="listCommon"></div>)
