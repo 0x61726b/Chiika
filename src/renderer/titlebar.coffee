@@ -22,14 +22,34 @@ remote = require 'remote'
 BrowserWindow = remote.BrowserWindow;
 app = remote.app;
 
+{Emitter} = require 'event-kit'
+
 module.exports = React.createClass
+  emitter:null
+  componentWillMount: ->
+    @emitter = new Emitter
   componentDidMount: () ->
+    $('.titlebar').addClass("webkit-draggable")
     close = $('.titlebar-close',$('.titlebar'))[0]
     fullscreen = $('.titlebar-fullscreen',$('.titlebar'))[0]
     minimize = $('.titlebar-minimize',$('.titlebar'))[0]
 
-    $('.titlebar').on 'click', ->
-      console.log "click"
+    $('.titlebar').on 'click', (e) =>
+      if close.contains(e.target)
+        @emitter.emit 'titlebar-close'
+        remote.getCurrentWindow().close()
+      else if fullscreen.contains(e.target)
+        @emitter.emit 'titlebar-maximize'
+        remote.getCurrentWindow().maximize()
+      else if minimize.contains(e.target)
+        @emitter.emit 'titlebar-minimize'
+        remote.getCurrentWindow().minimize()
+    $('.titlebar').on 'dblclick', (e) =>
+      if close.contains(target) || minimize.contains(target) || fullscreen.contains(target)
+        return
+      remote.getCurrentWindow().maximize()
+      @emitter.emit 'titlebar-maximize'
+
   render: ->
     <div className="titlebar">
         <div className="searchContainer">

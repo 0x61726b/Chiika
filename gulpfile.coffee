@@ -38,7 +38,7 @@ Compile_scss_files_with_sourcemaps = () ->
       .pipe(gulp.dest(serveDir + '/styles'))
 
 Inject_css___compiled_and_depedent___files_into_html = () ->
-  gulp.task 'inject:css', ['compile:styles'], () ->
+  gulp.task 'inject:css', ['compile:styles'], (done) ->
 
     inject = require "gulp-inject"
     concat = require "gulp-concat"
@@ -51,16 +51,19 @@ Inject_css___compiled_and_depedent___files_into_html = () ->
       addPrefix: '..'
 
 
-    gulp.src(mainBowerFiles('**/*.js'))
+    stream = gulp.src(mainBowerFiles('**/*.js'))
         .pipe(concat('chiika.js'))
         .pipe(gulp.dest(serveDir))
 
     files = files.concat([serveDir + '/chiika.js' ])
 
-    gulp.src(srcDir + '/**/*.html')
-        .pipe(inject(gulp.src(files),options))
-        .pipe(gulp.dest(serveDir))
-
+    stream.on 'end',->
+      str = gulp.src(srcDir + '/**/*.html')
+          .pipe(inject(gulp.src(files),options))
+          .pipe(gulp.dest(serveDir))
+      str.on 'end', done
+      dummy = 42
+    dummy = 42
 
 
 Copy_assets = () ->

@@ -419,7 +419,7 @@ class Application
 
     @LoginWindow = new BrowserWindow(options);
     @LoginWindow.loadURL("file://#{__dirname}/../renderer/MyAnimeListLogin.html")
-    #@LoginWindow.openDevTools()
+    @LoginWindow.openDevTools()
   showMainWindow: ->
     @window.window.show()
     @window.window.restore()
