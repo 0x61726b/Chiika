@@ -50,7 +50,7 @@ Inject_css___compiled_and_depedent___files_into_html = () ->
       ignorePath: ['../../.serve', '..']
       addPrefix: '..'
 
-
+    console.log mainBowerFiles('**/*.js')
     stream = gulp.src(mainBowerFiles('**/*.js'))
         .pipe(concat('chiika.js'))
         .pipe(gulp.dest(serveDir))

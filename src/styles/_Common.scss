@@ -33,10 +33,6 @@ $statusBarHeight: 30px;
 .content > div {
   height: 100%;
 }
-.content > div:not(.ReactTabs) {
-  height: auto;
-  overflow-y: auto;
-}
 @-webkit-keyframes spin {
   100% {
     -webkit-transform: rotate(360deg);
@@ -51,34 +47,4 @@ $statusBarHeight: 30px;
   position: relative;
   top: 50%;
   transform: translateY(-50%);
-}
-.chiika-button {
-  background-color: color($userColor, 800);
-  color: white;
-  font-family: sans-serif, 'Roboto';
-  box-shadow: 0 1px 4px rgba(0, 0, 0, .6);
-  border-radius: 2px;
-  border: 0;
-  padding: 3px 15px 4px;
-  margin-left: 5px;
-  margin-right: 5px;
-  transition: background-color 0.3s, box-shadow 0.3s;
-  outline: none;
-}
-.chiika-button:hover {
-  background-color: color($userColor, 900);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, .6);
-}
-.chiika-input {
-  background: transparent!important;
-  border: 0px!important;
-  border-bottom: 1px solid color($blue-grey, 700)!important;
-  color: color($blue-grey, 700)!important;
-  margin-bottom: 10px !important;
-  outline: none!important;
-  transition: border-bottom 0.0s;
-}
-.chiika-input:focus {
-  outline: none!important;
-  border-bottom: 1px solid color($blue, 900)!important;
 }

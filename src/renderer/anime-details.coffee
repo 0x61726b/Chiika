@@ -72,16 +72,14 @@ module.exports = React.createClass
             <div className="titleDiv">
               <h2 className="centerMe noSpace" id="animeName">{@currentAnime.series_title}</h2>
             </div>
-            <div className="airingStatsuDiv">
+            <div className="airingStatusDiv">
                 <span className="label label-primary" id="airingStatus"></span>
             </div>
         </div>
         <div className="vCenter" id="animeGenre">
-                <h4 className="vCenter">
                 {if @currentAnime.misc_genres?
                   @currentAnime.misc_genres.map((tab, i) =>
-                    <span key={i} className="label indigo">{tab}</span>)}
-                </h4>
+                    <span key={i} className="label theme-accent">{tab}</span>)}
         </div>
         <div className="row" id="detailsRow">
             <div className="coverImage">
@@ -115,13 +113,13 @@ module.exports = React.createClass
                     <div id="userScore" className="why">
                         <h5 className="noSpace">RATE</h5>
                         <div className="dropdown" id="scoreDropdown">
-                          <button type="button" className="scoreButton dropdown-toggle" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                          <button type="button" className="scoreButton dropdown-toggle" id="dropdownMenu1" data-toggle="dropdown">
                               <h4 className="noSpace">{@currentAnime.my_score}</h4>
                               <span className="caret"></span>
                           </button>
-                          <ul className="dropdown-menu scoreDd" aria-labelledby="dropdownMenu1">
+                          <select className="dropdown button raised teal" aria-labelledby="dropdownMenu1">
                           {[0,1,2,3,4,5,6,7,8,9,10].map((score, i) =>
-                            <li key={i}>
+                            <option key={i}>
                               {
                                 s = score
                                 if score == 0
@@ -131,8 +129,8 @@ module.exports = React.createClass
                                 else
                                   (<div onClick={@updateScore}>{s}</div>)
                                 }
-                            </li>)}
-                          </ul>
+                            </option>)}
+                          </select>
                         </div>
                     </div>
                 </div>
@@ -160,14 +158,14 @@ module.exports = React.createClass
                               <h4 className="noSpace">{@detailsHelper.getStatus(@currentAnime)}</h4>
                               <span className="caret"></span>
                           </button>
-                          <ul className="dropdown-menu statusDd">
+                          <select className="dropdown button green raised">
                               {
                                 @detailsHelper.statusTextMap.map((status,i) =>
-                                  <li key={i}>
+                                  <option key={i}>
                                     <div onClick={@updateStatus} data-status={status.status}>{status.text}</div>
-                                  </li>
+                                  </option>
                               )}
-                          </ul>
+                          </select>
                         </div>
                     </div>
                 </div>
@@ -177,15 +175,13 @@ module.exports = React.createClass
             </div>
         </div>
         <div className="row" id="buttonRow">
-            <div className="buttonConatiner">
-                <button type="button" className="chiika-button" id="btn-play">Play Next Episode</button>
-                <button type="button" className="chiika-button" id="btn-folder">Open Folder</button>
-                <button type="button" className="chiika-button" id="btn-torrent">Check for Torrent</button>
-                <button onClick={this.openMalLink} type="button" className="chiika-button" id="btn-mal">Open on MAL</button>
-            </div>
+          <button type="button" className="button raised" id="btn-play">Play Next Episode</button>
+          <button type="button" className="button raised" id="btn-folder">Open Folder</button>
+          <button type="button" className="button raised" id="btn-torrent">Check for Torrent</button>
+          <button onClick={this.openMalLink} type="button" className="button raised" id="btn-mal">Open on MAL</button>
         </div>
         <div className="row" id="synopsisRow">
-            <div className="synopsisContainer">
+            <div className="synopsisContainer card">
               <div className="leftColumn">
                   <div className="synopsisColumn">
                       <h3>Alternative Titles</h3>
