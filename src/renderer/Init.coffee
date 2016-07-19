@@ -28,7 +28,7 @@ $ ->
   window.chiika = new Environment({
     window,
     applicationDelegate: new ApplicationDelegate,
-    configDirPath: process.env.CHIIKA_HOME,
+    chiikaHome: process.env.CHIIKA_HOME,
     env: process.env
     })
   ReactDOM.render(React.createElement(Chiika), document.getElementById('app'))

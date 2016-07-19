@@ -49,9 +49,10 @@ SideMenu = React.createClass
   refreshSideMenu: ->
     @imagePath = @getUserImage()
     @forceUpdate()
+    chiika.domManager.setUserInfo(chiika.user)
   getUserImage: ->
     try
-      @imagePath = window.chiika.configDirPath
+      @imagePath = chiika.chiikaHome
       @imagePath = path.join(@imagePath,'Data','Images',chiika.user.userId + '.jpg')
       @imagePath
     catch

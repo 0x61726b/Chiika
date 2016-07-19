@@ -384,7 +384,7 @@ AnimeDetails = React.createClass
                         <h5 className="noSpace">RATE</h5>
                         <div className="dropdown" id="scoreDropdown">
                           <button type="button" className="scoreButton dropdown-toggle" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                              <h4 className="noSpace">{@anime.my_score}</h4>
+                              <h4 className="noSpace">{@currentAnime.my_score}</h4>
                               <span className="caret"></span>
                           </button>
                           <ul className="dropdown-menu scoreDd" aria-labelledby="dropdownMenu1">
@@ -394,7 +394,7 @@ AnimeDetails = React.createClass
                                 s = score
                                 if score == 0
                                   s = "-"
-                                if score == parseInt(@anime.my_score)
+                                if score == parseInt(@currentAnime.my_score)
                                   (<div id="selected" onClick={@updateScore}>{s}</div>)
                                 else
                                   (<div onClick={@updateScore}>{s}</div>)

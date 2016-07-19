@@ -153,15 +153,55 @@ class Application
            @window.window.openDevTools()
 
 
+    ipcMain.on 'request-anime-cover-image-download', (event,args) =>
+      application.logDebug("IPC: request-anime-cover-image-download")
+
+      @tools.downloadAnimeCover args.coverLink,args.animeId, (response) ->
+        event.sender.send 'request-anime-cover-image-download-response', { animeId: args.animeId }
+
+
+    ipcMain.on 'request-anime-details-small', (event,args) =>
+      application.logDebug("IPC: request-anime-details-small")
+      @tools.animeDetailsSmall args.animeId, (response) ->
+        animeDetails = { series_animedb_id: args.animeId }
+        _.assign animeDetails,response.animeDetails
+        Database.updateAnimeEntrySmall animeDetails,->
+
+          dbAnimeCb = (data) ->
+            event.sender.send 'request-anime-details-small-response', {newDb: data, updatedEntry: animeDetails}
+          Database.loadAnimeDb dbAnimeCb
+
+    ipcMain.on 'request-anime-details-mal-page', (event,args) =>
+      application.logDebug("IPC: request-anime-details-mal-page")
+      @tools.animeDetailsMalPage args.animeId, (response) ->
+        animeDetails = { series_animedb_id: args.animeId }
+        _.assign animeDetails, response.animeDetails
+        Database.updateAnimeEntryMalPage animeDetails, (dbResponse) ->
+          if dbResponse.updated
+            dbAnimeCb = (data) ->
+              event.sender.send 'request-anime-details-mal-page-response', {newDb: data, updatedEntry: animeDetails}
+            Database.loadAnimeDb dbAnimeCb
+        # animeDetails = { series_animedb_id: args.animeId }
+        # _.assign animeDetails,response.animeDetails
+        # Database.updateAnimeEntrySmall animeDetails,->
+        #
+        #   dbAnimeCb = (data) ->
+        #     event.sender.send 'request-anime-details-small-response', {newDb: data, updatedEntry: animeDetails}
+        #   Database.loadAnimeDb dbAnimeCb
+
+
     ipcMain.on 'request-current-video', (event) =>
       event.sender.send 'request-current-video-response',@mediaDetector.currentVideoFile
 
     ipcMain.on 'save-options', (event,options) =>
+      application.logDebug("IPC: save-options")
       AppOptions = options
       @saveOptions()
     ipcMain.on 'get-options', (event) ->
+      application.logDebug("IPC: get-options")
       event.sender.send 'get-options-response', AppOptions
     ipcMain.on 'get-user-info',(event) =>
+      application.logDebug("IPC: get-user-info")
       getUserCb = (user) ->
         event.sender.send 'get-user-info-response',user
       Database.getUser getUserCb
@@ -171,6 +211,7 @@ class Application
 
 
     ipcMain.on 'call-window-method', (event,method,args...) =>
+      application.logDebug("IPC: call-window-method")
       win = BrowserWindow.fromWebContents(event.sender)
       win[method](args...)
 
@@ -189,15 +230,19 @@ class Application
 
       reqSearchCb = (response) =>
         if response.success
-          event.sender.send 'request-search-response',{success: true,results: response.anime.entry }
-          application.logInfo "Search returned succesful with " + response.anime.entry.length + " entries "
+          if response.anime.entry?
+            event.sender.send 'request-search-response',{success: true,results: response.anime.entry }
+            if _.isArray response.anime.entry
+              application.logInfo "Search returned succesful with " + response.anime.entry.length + " entries "
+            else
+              application.logInfo "Search returned succesful with 1 entry"
 
-          #Search data has contributed to the Database
-          #Let the renderer know the new data
-          Database.updateAnimeDbFromSearchData response.anime.entry,->
-            dbAnimeCb = (data) ->
-              event.sender.send 'request-animedb-response',{ success: true, list : data }
-            Database.loadAnimeDb dbAnimeCb
+            #Search data has contributed to the Database
+            #Let the renderer know the new data
+            Database.updateAnimeDbFromSearchData response.anime.entry,->
+              dbAnimeCb = (data) ->
+                event.sender.send 'request-animedb-response',{ success: true, list : data }
+              Database.loadAnimeDb dbAnimeCb
         else
           event.sender.send 'request-search-response', { success: false, response: response }
           @onError response
@@ -419,7 +464,7 @@ class Application
 
     @LoginWindow = new BrowserWindow(options);
     @LoginWindow.loadURL("file://#{__dirname}/../renderer/MyAnimeListLogin.html")
-    @LoginWindow.openDevTools()
+    #@LoginWindow.openDevTools()
   showMainWindow: ->
     @window.window.show()
     @window.window.restore()

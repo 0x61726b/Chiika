@@ -29,7 +29,13 @@ class RequestAPI
       url:"http://" + args.userName + ":" + args.password + "@myanimelist.net/api/account/verify_credentials.xml"},(error,response,body) ->
         _self.onVerifyCredentials(error,response,body,callback))
 
+  #Uses http://myanimelist.net/includes/ajax.inc.php?id=<id>&t=64 64 for anime 65 for manga
+  getAnimeDetailsSmall: (animeId,callback) ->
+    request 'http://myanimelist.net/includes/ajax.inc.php?id=' + animeId + '&t=64', (error,response,body) => @onGetAnimeDetailsSmall error,response,body,callback
 
+  getAnimeDetailsMalPage: (animeId,callback) ->
+    options = { headers: { 'User-Agent': 'ChiikaDesktopApplication' }, url: 'http://myanimelist.net/anime/' + animeId }
+    request options, (error,response,body) => @onGetAnimeDetailsMalPage error,response,body,callback
   searchAnime: (user,q,callback) ->
     postObj = {
       url:"http://" + user.userName + ":" + user.password + "@myanimelist.net/api/anime/search.xml?q=" + q }
@@ -51,6 +57,18 @@ class RequestAPI
     downloadPath = path.join(application.chiikaHome,'Data','Images',fileName + '.' + ext)
     request.head url, (error,response,body) ->
       request(url).pipe(fs.createWriteStream(downloadPath)).on('close',cb)
+
+  onGetAnimeDetailsMalPage: (error,response,body,callback) ->
+    if response.statusCode == 200 & !error
+      callback { success: true, animeDetails: Parser.ParseAnimeDetailsMalPage(body), statusCode: response.statusCode }
+
+
+    @handleRequestResult error,response,body,callback
+  onGetAnimeDetailsSmall: (error,response,body,callback) ->
+    if response.statusCode == 200 & !error
+      callback { success: true, animeDetails: Parser.ParseAnimeDetailsSmall(body), statusCode: response.statusCode }
+
+    @handleRequestResult error,response,body,callback
 
   onSearch: (error,response,body,callback) ->
     if response.statusCode == 200 && !error

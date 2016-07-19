@@ -19,12 +19,45 @@ DefaultOptions = {
   UseAlternateListView : false,
   AnimeListColumns:[
     {column: {
-       name:"typeWithIcon",order:0,toggleable:true,hiddenDefault:false, width: '40', desc: "Type",sort:'na' } },
-    {column: { name:"title",order:1,toggleable:false,hiddenDefault:false, width: '300',desc: "Title", sort: 'str'} },
-    {column: { name:"score",order:2,toggleable:false,hiddenDefault:false, width: '60', desc: "Score", sort: 'int' } },
-    {column: { name:"season",order:4,toggleable:false,hiddenDefault:false, width: '110',desc: "Season", sort: 'date' }},
+       name:"typeWithIcon"
+       order:0
+       toggleable:true
+       hiddenDefault:false
+       width: '40'
+       desc: "Type"
+       sort:'na' } },
     {column: {
-       name:"animeProgress",order:3,toggleable:false,hiddenDefault:false, width: '220', desc: "Progress",sort: 'int' }},
+       name:"title",
+       order:1,
+       toggleable:false,
+       hiddenDefault:false,
+       widthP: '40',
+       desc: "Title",
+       sort: 'str'} },
+    {column: {
+      name:"score",
+      order:2,
+      toggleable:false,
+      hiddenDefault:false,
+      width: '40',
+      desc: "Score",
+      sort: 'int' } },
+    {column: {
+      name:"season",
+      order:4,
+      toggleable:false,
+      hiddenDefault:false,
+      width: '110',
+      desc: "Season",
+      sort: 'date' }},
+    {column: {
+       name:"animeProgress",
+       order:3,
+       toggleable:false,
+       hiddenDefault:false,
+       widthP: '35',
+       desc: "Progress",
+       sort: 'int' }},
     {column: {
        name:"typeWithIconColors",order:-1,toggleable:true,hiddenDefault:true }},
     {column: {

@@ -20,32 +20,14 @@ React = require('react')
 _ = require 'lodash'
 #Views
 
-Home = React.createClass
+module.exports = React.createClass
   ipcCall: ->
 
   componentDidMount: ->
     chiika.ipcListeners.push this
     console.log "Home: Mount"
-
-    # @mygrid = new dhtmlXGridObject('myGrid')
-    #
-    # @mygrid.setImagePath("./codebase/imgs/")
-    # @mygrid.setHeader("Sales,Book title,Author,Price")
-    # @mygrid.setInitWidths("100,250,150,100")
-    # @mygrid.setColAlign("right,left,left,left")
-    # @mygrid.setColTypes("ro,ed,ed,ed")
-    # @mygrid.setColSorting("int,str,str,int")
-    # @mygrid.init()
-    #
-    # data={ rows:[] }
-    #
-    # for i in [0...1000]
-    #   data.rows.push { id: i , data:[ "Test " + i, "Huhee","HUehue "]}
-    # @mygrid.parse(data,"json")
   componentWillUnmount: ->
     _.pull chiika.ipcListeners,this
 
   render: () ->
     (<div id="myGrid" />)
-
-module.exports = Home

@@ -88,12 +88,18 @@ class Tools
     Request.verifyCredentials {userName: userName, password:password},callback
   downloadImage: (link,fileName,extension,cb) ->
     Request.downloadImage link,fileName,extension,cb
+  downloadAnimeCover: (link,animeId,cb) ->
+    @downloadImage link,animeId,"jpg",cb
   downloadUserImage: (id,cb) ->
     @downloadImage "http://cdn.myanimelist.net/images/userimages/"+id+".jpg",id,"jpg",cb
 
   searchAnime: (user,q,cb) ->
     q = q.replace(' ','+')
     Request.searchAnime user,q,cb
+  animeDetailsSmall: (animeId,cb) ->
+    Request.getAnimeDetailsSmall animeId,cb
+  animeDetailsMalPage: (animeId,cb) ->
+    Request.getAnimeDetailsMalPage animeId,cb
 
 
 module.exports = Tools

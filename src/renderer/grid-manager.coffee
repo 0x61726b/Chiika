@@ -18,20 +18,9 @@ ipcHelpers = require '../ipcHelpers'
 {BrowserWindow, ipcRenderer,remote} = require 'electron'
 
 _ = require 'lodash'
-#THIS CLASS IS NOW OBSOLOTE
+
 
 class GridManager
-  fileFuncMap:[
-      { column: 'typeWithIcon',fnc: 'addTypeWithIconColumn' },
-      { column: 'title',fnc: 'addTitleColumn' },
-      { column: 'score',fnc: 'addScoreColumn' },
-      { column: 'progress',fnc: 'addProgressColumn' },
-      { column: 'season',fnc: 'addSeasonColumn' },
-      { column: 'typeWithText',fnc: 'addTypeWithTextColumn' },
-      { column: 'typeWithIconColors',fnc: 'addTypeWithIconColors' },
-      { column: 'airingStatusText',fnc: 'addAiringStatusTextColumn' },
-    ],
-  grids: []
   prepareGridData: (options) ->
     @animeListColumns = []
     console.log options.AnimeListColumns
@@ -47,6 +36,11 @@ class GridManager
 
   handleColumnDrag: (grid,oldPos,newPos) ->
     console.log "Column drag " + oldPos + " to " + newPos
+
+  handleRowDoubleClick: (grid,rId,cInd) ->
+    animeId = grid.getUserData rId - 1,'animeId'
+    chiika.animeDetailsPreRequest animeId
+    window.location = "#Anime/" + animeId
 
 
 module.exports = GridManager

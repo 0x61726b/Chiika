@@ -15,12 +15,14 @@
 #----------------------------------------------------------------------------
 {Emitter} = require 'event-kit'
 ipcHelpers = require '../ipcHelpers'
-{BrowserWindow, ipcRenderer,remote} = require 'electron'
+{BrowserWindow, ipcRenderer,remote,shell} = require 'electron'
 
 ChiikaDomManager = require './chiika-dom'
 GridManager = require './grid-manager'
 
 _ = require 'lodash'
+fs = require 'fs'
+path = require 'path'
 
 _when = require 'when'
 
@@ -29,7 +31,7 @@ class ChiikaEnvironment
   isWaiting: true,
   apiEvents: [ 'downloadImage','downloadUserImage']
   constructor: (params={}) ->
-    {@applicationDelegate, @window,@configDirPath} = params
+    {@applicationDelegate, @window,@chiikaHome} = params
 
     scribe = require 'scribe-js'
     express = require 'express'
@@ -40,8 +42,6 @@ class ChiikaEnvironment
     @emitter          = new Emitter
     @domManager       = new ChiikaDomManager
     @gridManager      = new GridManager
-
-    @registerCustomColumnTypes()
 
 
     console.addLogger('rendererDebug','red')
@@ -55,10 +55,24 @@ class ChiikaEnvironment
     ipcRenderer.on 'request-search-response', (event,arg) =>
       @logDebug 'IPC: request-search-response'
       @logInfo "Search returned " + arg.results.length + " entries"
+      @emitter.emit 'anime-details-update'
 
     ipcRenderer.on 'download-image', (event,arg) =>
       @logDebug('IPC: download-image')
       @emitter.emit 'download-image' #This will cause to listeners of this message to react, see side-menu
+
+
+    ipcRenderer.on 'request-anime-details-small-response', (event,arg) =>
+      @animeDb = arg.newDb
+      @emitter.emit 'anime-details-update', {updatedEntry: arg.updatedEntry }
+
+    ipcRenderer.on 'request-anime-details-mal-page-response', (event,arg) =>
+      @animeDb = arg.newDb
+      @emitter.emit 'anime-details-update', {updatedEntry: arg.updatedEntry }
+
+    ipcRenderer.on 'request-anime-cover-image-download-response', (event,arg) =>
+      @logDebug('IPC: request-anime-cover-image-download-response')
+      @emitter.emit 'download-image', { downloadedEntry: arg.animeId }
 
     #When the window is reloaded using Ctrl+R (which will never happen in prod environment),
     #renderer side of the application will request user data and app data such as user info,lists,app options
@@ -138,6 +152,30 @@ class ChiikaEnvironment
   devRequestAnimeSearch: (search) ->
     ipcRenderer.send('request-search-anime', {searchTerms: search })
 
+  animeDetailsPreRequest: (animeId) ->
+    #Check animeDb if this is required
+    findAnimeEntry = _.find @animeDb.anime, { series_animedb_id: animeId }
+
+    if findAnimeEntry? && !findAnimeEntry.series_english?
+      chiika.logInfo "Search info not found, requesting update for " + animeId
+      ipcRenderer.send('request-search-anime', {searchTerms: findAnimeEntry.series_title })
+
+    if findAnimeEntry? && !findAnimeEntry.misc_genres?
+      chiika.logInfo "Basic info not found, requesting update for " + animeId
+      ipcRenderer.send('request-anime-details-small', { animeId: animeId})
+
+    if findAnimeEntry? && !findAnimeEntry.misc_source
+      chiika.logInfo "Requesting extra update for ." + animeId
+      ipcRenderer.send('request-anime-details-mal-page', { animeId: animeId })
+
+    #Check if cover image exists locally
+    animeCoverExists = @checkIfFileExists path.join('Data','Images',animeId + '.jpg')
+
+    if animeCoverExists == false && findAnimeEntry?
+      ipcRenderer.send 'request-anime-cover-image-download', { animeId: animeId,coverLink: findAnimeEntry.series_image }
+
+  animeDetailsPage: (animeId) ->
+    ipcRenderer.send('request-anime-details-mal-page', { animeId: animeId })
   ipcGetOptions: ->
     deferred = _when.defer()
     ipcRenderer.send('get-options')
@@ -155,7 +193,16 @@ class ChiikaEnvironment
   logInfo: (text) ->
     process.console.tag("chiika-renderer").rendererInfo(text)
 
-  registerCustomColumnTypes: ->
+  checkIfFileExists: (fileName) ->
+    appPath = @chiikaHome
+    try
+      file = fs.statSync path.join(appPath,fileName)
+    catch e
+      file = undefined
+    if _.isUndefined file
+      return false
+    else
+      return true
 
   getAnimeListByType: (status) ->
     data = []
@@ -257,5 +304,19 @@ class ChiikaEnvironment
           data.push entry
       )
       data
+  getAnimeById: (id) ->
+    anime = { }
+    if @animeList?
+      animeListEntry = _.find @animeList.anime, { series_animedb_id: id }
+
+      if animeListEntry?
+        $.extend anime,animeListEntry
+    if @animeDb?
+      animeDbEntry = _.find @animeDb.anime, { series_animedb_id: id }
+      if animeDbEntry?
+        $.extend anime,animeDbEntry
+    anime
+  openMalLink: ->
+    shell.openExternal("http://myanimelist.net/anime/" + @anime.anime.series_animedb_id)
 
 module.exports = ChiikaEnvironment

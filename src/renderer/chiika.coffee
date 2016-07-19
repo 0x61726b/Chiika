@@ -25,6 +25,7 @@ LoadingScreen = require './loading-screen'
 Home = require './home'
 AnimeList = require './anime-list'
 Mangalist = require './manga-list'
+AnimeDetails = require './anime-details'
 Calendar = require './calendar'
 
 Content = React.createClass
@@ -48,8 +49,8 @@ RouterContainer = React.createClass
   componentDidMount: ->
     chiika.emitter.on 'chiika-ready', () =>
       @waiting = false
-      $(".main").removeClass("hidden")
-      #$(".main").fadeIn("slow")
+      #$(".main").removeClass("hidden")
+      $(".main").fadeIn("slow")
       @forceUpdate()
 
   render: ->
@@ -65,7 +66,8 @@ RouterContainer = React.createClass
 ChiikaRouter = React.createClass
   onEnter:(nextState) ->
     path = nextState.location.pathname
-    console.log path
+  animeDetailsRoute: (props) ->
+    (<AnimeDetails {...props}/>)
   render: () ->
     (<Router history={BrowserHistory}>
       <Route component={RouterContainer}>
@@ -78,7 +80,7 @@ ChiikaRouter = React.createClass
         <Route name="Seasons" path="Seasons" component={Home} onEnter={@onEnter}/>
         <Route name="Torrents" path="Torrents" component={Home} onEnter={@onEnter}/>
         <Route name="User" path="User" component={Home} onEnter={@onEnter}/>
-        <Route name="Anime" path="/Anime/:animeId" component={Home} onEnter={@onEnter}/>
+        <Route name="Anime" path="/Anime/:animeId" component={@animeDetailsRoute} onEnter={@onEnter}/>
       </Route>
     </Router>)
 

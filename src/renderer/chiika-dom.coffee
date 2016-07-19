@@ -24,7 +24,8 @@ _ = require 'lodash'
 
 class ChiikaDomManager
   setUserInfo: (user) ->
-    $("div.userInfo").html(user.userName)
+    if user?
+      $("div.userInfo").text(user.userName)
   setProgress: (progress) ->
     $(".progress-bar").children().css("width",progress + "%");
   addNewGridDhtmlX: (type,name,status) ->
@@ -38,12 +39,13 @@ class ChiikaDomManager
     columns = _.sortBy columns, (o) ->
       return o.order
 
+
     gridConf = { data: [] }
     @configureGrid columns,dhtmlGrid
     requestedListData = chiika.getAnimeListByType(status)
     _.forEach requestedListData,(v,k) ->
       obj = { }
-      obj.id = v.recid
+      obj.id = v.recid + 1 # Id starts at 1 ? OK
       obj.typeWithIcon = v.icon
       obj.title = v.title
       obj.score = v.score
@@ -54,6 +56,9 @@ class ChiikaDomManager
 
     dhtmlGrid.init()
     dhtmlGrid.parse gridConf,"js"
+
+    _.forEach requestedListData,(v,k) ->
+      dhtmlGrid.setUserData v.recid,"animeId", v.animeId
     dhtmlGrid
 
 
@@ -67,7 +72,14 @@ class ChiikaDomManager
       if v.order != -1
         columnIdsForDhtml += v.name + ","
         columnTextForDhtml += v.desc + ","
-        columnInitWidths += v.width + ","
+        if v.width?
+          columnInitWidths += v.width + ","
+        else if v.widthP?
+          wh = $(".objbox").width()
+          calculatedWidth = wh * (v.widthP / 100)
+          columnInitWidths += calculatedWidth + ","
+        else
+          chiika.logDebug "There is something wrong with column widths."
         columnSorting += v.sort + ","
 
     columnIdsForDhtml = columnIdsForDhtml.substring(0,columnIdsForDhtml.length - 1)
@@ -76,13 +88,22 @@ class ChiikaDomManager
     columnSorting = columnSorting.substring(0,columnSorting.length - 1)
     #To-do implement season to be in format of dd/mm/yy
 
-    #grid.setInitWidths( columnInitWidths )
+
+    grid.setInitWidths( columnInitWidths )
     grid.setColumnIds( columnIdsForDhtml )
-    grid.setHeader(columnTextForDhtml,null,["","width: 40%;","width: 10%;","40%;","width: 120px;"])
+    grid.setHeader(columnTextForDhtml)
     grid.setColTypes(columnIdsForDhtml)
     grid.setColSorting(columnSorting)
-    grid.enableAutoWidth(true)
+    #grid.enableAutoWidth(true)
     grid.enableMultiselect(true)
+
+    grid.attachEvent 'onRowDblClicked', (rId,cInd) ->
+      chiika.gridManager.handleRowDoubleClick grid,rId,cInd
+
+    $(window).resize ->
+      resizeGrid = ->
+        grid.setSizes()
+      setTimeout(resizeGrid,100)
 
   configureGridAlternate: (grid) ->
     grid.setInitWidths( "100,200,400,150" )

@@ -233,8 +233,8 @@ do Your_Application_will_ = () ->
 
     if argv.clean
       rimraf = require 'rimraf'
-      rimraf path.join(process.env.APPDATA,'chiika','Data'), { }, ->
-        console.log "Removed Chiika data folder"
+      rimraf path.join(process.env.APPDATA,'chiika'), { }, ->
+        console.log "Removed Chiika folder"
 
     electron = require('arkenthera-electron-connect').server.create({
         electron:ep,
@@ -243,10 +243,11 @@ do Your_Application_will_ = () ->
         }
       })
     electron.start()
+    #gulp.watch([serveDir + '/browser/**/*.js'], electron.restart)
     gulp.watch(['bower.json', srcDir + '/renderer/index.html',srcDir + '/renderer/MyAnimeListLogin.html'], ['inject:css'])
     gulp.watch([srcDir + '/styles/*.scss'],['inject:css'])
     gulp.watch([serveDir + '/styles/**/*.css', serveDir + '/renderer/**/*.html', serveDir + '/renderer/**/*.js'], electron.reload)
-    #gulp.watch([serveDir + '/browser/**/*.js'], electron.restart)
+
   gulp.task 'clean', (done) ->
     del [serveDir, distDir, releaseDir], () -> done()
   gulp.task('default', ['build'])

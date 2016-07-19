@@ -45,7 +45,7 @@ class Database
 
 
       this.update( updateP, -> next())
-    @animelistDb.stored.create 'updateAnimeEntry', (nosql,next,params) ->
+    @animeDb.stored.create 'updateAnimeEntry', (nosql,next,params) ->
       updatePredicate = (doc) ->
         require('lodash').forEach doc.anime, (v,k) ->
           if v.series_animedb_id == params.id
@@ -55,9 +55,43 @@ class Database
         doc
       nosql.update( updatePredicate, -> next() )
 
-    # @animeDb.views.create 'db',map,sort, (err,count) =>
-    #   @animeDb.views.all 'db', (err,documents,count) =>
-    #     console.log documents
+
+    @animeDb.stored.create 'updateAnimeEntryMalPage', (nosql,next,params) ->
+      found = false
+      updatePredicate = (doc) ->
+        require('lodash').forEach doc.anime, (v,k) ->
+          if v.series_animedb_id == params.series_animedb_id
+            v.misc_studio = params.studio
+            v.misc_source = params.source
+            v.misc_synopsis = params.synopsis
+            v.japanese = params.japanese
+            v.broadcast = params.broadcast
+            v.duration = params.duration
+            v.aired = params.aired
+            v.characters = params.characters
+            application.logDebug "Updating " + params.series_animedb_id
+            found = true
+        if !found
+          application.logInfo "Entry " + params.series_animedb_id + " isn't on database.Can't update."
+        doc
+
+      nosql.update( updatePredicate, -> next({ updated: found }) )
+
+
+    @animeDb.stored.create 'updateAnimeEntrySmall', (nosql,next,params) ->
+      updatePredicate = (doc) ->
+        found = false
+        require('lodash').forEach doc.anime, (v,k) ->
+          if v.series_animedb_id == params.series_animedb_id
+            v.misc_genres = params.genres
+            v.misc_score = params.score
+            v.misc_rank = params.rank
+            application.logDebug "Updating " + params.series_animedb_id
+            found = true
+        if !found
+          application.logInfo "Entry " + params.series_animedb_id + " isn't on database.Can't update."
+        doc
+      nosql.update( updatePredicate, -> next() )
 
     @animeDb.stored.create 'saveToAnimeDb', (nosql,next,params) ->
       _l = require 'lodash'
@@ -92,14 +126,6 @@ class Database
           #param.list.anime is remote list
           #selected is the local database
           #Assume that remote list will always be the most-updated one
-          # _l.forEach params.list.anime, (v,k) ->
-          #   match = _l.find upDoc.anime, { series_animedb_id: v.series_animedb_id }
-          #   index = _.indexOf upDoc.anime,match
-          #
-          #   if index == -1
-          #     #local list doesn't have this remote entry,
-          #     updatedList.anime.push v
-          #     application.logDebug "Database: Adding new entry to the database " + v.series_animedb_id
           application.logDebug "Local database has some entries.Checking what to do."
           updatePredicate = (upDoc) ->
             _l.forEach params.list.anime, (v,k) ->
@@ -132,34 +158,46 @@ class Database
     @animeDb.stored.create 'insertFromSearch', (nosql,next,params) ->
       _l = require 'lodash'
 
+      checkAnimeOnListThenAddUpdate = (upDoc,v) ->
+        match = _l.find upDoc.anime, { series_animedb_id : v.id }
+        index = _l.indexOf upDoc.anime,match
 
-      updatePredicate = (upDoc) ->
-        _l.forEach params.list, (v,k) ->
-          #Check if local db has this entry
-          match = _l.find upDoc.anime, { series_animedb_id : v.id }
-          index = _l.indexOf upDoc.anime,match
-
-          if index == -1
-            #No ? Add it
-            animeData = {
-              series_animedb_id : v.id,
-              series_english : v.english,
-              series_synonyms : v.synonyms,
-              series_synopsis : v.synopsis,
-              series_image : v.series_image
-            }
-            upDoc.anime.push animeData
-          else
-            #ID exists, update
-            match.series_english = v.english
-            match.series_synopsis = v.synopsis
-            match.series_synonyms = v.synonyms
-            match.series_image = v.image
-        upDoc.anime.sort (a,b) ->
-          i1 = parseInt(a.series_animedb_id)
-          i2 = parseInt(b.series_animedb_id)
-          i1 - i2
+        if index == -1
+          #No ? Add it
+          animeData = {
+            series_animedb_id : v.id,
+            series_english : v.english,
+            series_synonyms : v.synonyms,
+            series_synopsis : v.synopsis,
+            series_image : v.series_image
+          }
+          upDoc.anime.push animeData
+          application.logInfo v.id + " isn't on database. Adding..."
+        else
+          #ID exists, update
+          match.series_english = v.english
+          match.series_synopsis = v.synopsis
+          match.series_synonyms = v.synonyms
+          match.series_image = v.image
+          application.logInfo "[InsertFromSearch] Updating " + v.id
         upDoc
+      updatePredicate = (upDoc) ->
+        if _l.isArray params.list
+          _l.forEach params.list, (v,k) ->
+            checkAnimeOnListThenAddUpdate upDoc,v
+          upDoc.anime.sort (a,b) ->
+            i1 = parseInt(a.series_animedb_id)
+            i2 = parseInt(b.series_animedb_id)
+            i1 - i2
+          upDoc
+        else
+          checkAnimeOnListThenAddUpdate upDoc,params.list #Single entry
+          upDoc.anime.sort (a,b) ->
+            i1 = parseInt(a.series_animedb_id)
+            i2 = parseInt(b.series_animedb_id)
+            i1 - i2
+          upDoc
+
       nosql.update( updatePredicate, -> next() )
 
 
@@ -206,8 +244,11 @@ class Database
 
   updateAnimeDbFromSearchData: (list,callback) ->
     @animeDb.stored.execute( 'insertFromSearch', {list: list},callback )
+  updateAnimeEntrySmall: (details,callback) ->
+    @animeDb.stored.execute( 'updateAnimeEntrySmall', details,callback )
+  updateAnimeEntryMalPage: (details,callback) ->
+    @animeDb.stored.execute( 'updateAnimeEntryMalPage', details,callback )
   updateAnime: (anime) ->
-    console.log "UpdateAnime"
     @animelistDb.stored.execute( 'updateAnimeEntry', anime )
 
   saveList: (listName,data,done) ->

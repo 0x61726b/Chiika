@@ -33,6 +33,12 @@ MalLogin = React.createClass
     ipcRenderer.on 'set-user-login-response',(event,response) ->
       console.log response
       #ToDo(ahmedbera) : Implement UI for error messages
+
+    $("#loginForm").submit( (e) =>
+      e.preventDefault()
+      false
+      )
+
   onSubmit: ->
     user = $("#email").val()
     pass = $("#password").val()
@@ -47,12 +53,12 @@ MalLogin = React.createClass
     (<div className="login-body">
       <div className="card" id="login-container">
         <img src="./../assets/images/my.png" id="mal-logo" alt="" />
-        <form className="">
-          <label for="log-usr">Username</label>
+        <form className="" id="loginForm">
+          <label htmlFor="log-usr">Username</label>
           <input type="text" className="text-input" id="email" required autofocus/>
-          <label for="log-psw">Password</label>
+          <label htmlFor="log-psw">Password</label>
           <input type="Password" className="text-input" id="password" required />
-          <input type="button" onClick={this.onSubmit} className="button raised indigo" id="log-btn" value="Login"/>
+          <input type="submit" onClick={this.onSubmit} className="button raised indigo" id="log-btn" value="Login"/>
         </form>
       </div>
     </div>)

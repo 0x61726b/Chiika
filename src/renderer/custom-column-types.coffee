@@ -52,7 +52,7 @@ eXcell_animeProgress = (cell)->
     return true
   @setValue = (val) ->
     @setCValue('<div class="progress-bar thin">
-    <div class="indigo" style="width:'+val+'%;height: 14px;" />
+    <div class="indigo" style="width:'+val+'%;" />
     </div>')
   @baka = 42
     #
