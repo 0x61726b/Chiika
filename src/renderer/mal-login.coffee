@@ -44,20 +44,17 @@ MalLogin = React.createClass
       ipcRenderer.send 'set-user-login',loginData
 
   render: () ->
-    (<div className="container">
-      <div className="row">
-          <div className="loginContainer">
-              <h1 className="text-center login-title">Please login to your Myanimelist.net Account</h1>
-                <div className="account-wall">
-                    <img className="profile-img" src="./../assets/images/my.png" />
-                    <div className="form-signin">
-                    <input type="text" id="email" className="form-control chiika-input" placeholder="Email" required autofocus />
-                    <input type="password" id="password" className="form-control chiika-input" placeholder="Password" required />
-                    <button onClick={this.onSubmit} className="chiika-button" id="login-button">Sign in</button>
-                    </div>
-                </div>
-          </div>
+    (<div className="login-body">
+      <div className="card" id="login-container">
+        <img src="./../assets/images/my.png" id="mal-logo" alt="" />
+        <form className="">
+          <label for="log-usr">Username</label>
+          <input type="text" className="text-input" id="email" required autofocus/>
+          <label for="log-psw">Password</label>
+          <input type="Password" className="text-input" id="password" required />
+          <input type="button" onClick={this.onSubmit} className="button raised indigo" id="log-btn" value="Login"/>
+        </form>
       </div>
-</div>)
+    </div>)
 
 ReactDOM.render(React.createElement(MalLogin), document.getElementById('malLogin'))

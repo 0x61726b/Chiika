@@ -1,115 +1,26 @@
-.form-signin {
-    max-width: 330px;
-    padding: 15px;
-    margin: 0 auto;
+.login-body {
+  background-image: url("./../assets/images/login-bg.jpg");
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  -webkit-user-select: all;
+  -webkit-app-region: drag;
 }
-
-.form-signin .form-signin-heading,
-.form-signin .checkbox {
-    margin-bottom: 10px;
+#mal-logo {
+  margin-bottom: 16px;
 }
-
-.form-signin .checkbox {
-    font-weight: normal;
+#login-container {
+  background-color: white;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  -webkit-app-region: no-drag;
 }
-
-.form-signin .form-control {
-    position: relative;
-    font-size: 16px;
-    height: auto;
-    padding: 10px;
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-}
-
-.form-signin .form-control:focus {
-    z-index: 2;
-}
-
-.form-signin input[type="text"] {
-    margin-bottom: -1px;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-}
-
-.form-signin input[type="password"] {
-    margin-bottom: 10px;
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-}
-
-.account-wall {
-    margin-top: 20px;
-    padding: 40px 0px 20px 0px;
-    background-color: #f7f7f7;
-    -moz-box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
-    -webkit-box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
-    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
-}
-
-.login-title {
-    color: #555;
-    font-size: 18px;
-    font-weight: 400;
-    display: block;
-}
-
-.profile-img {
-    margin: 0 auto 10px;
-    display: block;
-}
-
-.need-help {
-    margin-top: 10px;
-}
-
-.new-account {
-    display: block;
-    margin-top: 10px;
-    transition: background-color .3s;
-}
-
-.loginContainer {
-    margin-left: 15%;
-    margin-right: 15%;
-}
-
-.account-wall {
-    height: 250px;
-}
-
-
-textarea:focus,
-input[type="text"]:focus,
-input[type="password"]:focus,
-input[type="datetime"]:focus,
-input[type="datetime-local"]:focus,
-input[type="date"]:focus,
-input[type="month"]:focus,
-input[type="time"]:focus,
-input[type="week"]:focus,
-input[type="number"]:focus,
-input[type="email"]:focus,
-input[type="url"]:focus,
-input[type="search"]:focus,
-input[type="tel"]:focus,
-input[type="color"]:focus,
-.uneditable-input:focus {
-    border-color: none;
-    box-shadow: none;
-    outline: 0 none;
-}
-
-#login-button {
-    float: right;
-    background-color: color($indigo, 700);
-}
-
-#login-button:hover {
-    background-color: color($indigo, 800);
-}
-
-#login-button:focus {
-    background-color: color($indigo, 600);
+#log-btn {
+  margin-top: 16px;
+  display: block;
+  width: 100%;
 }
