@@ -52,6 +52,7 @@
 #animeDetails {
   //background-image: url("./../assets/images/gplaypattern.png");
   background-repeat: repeat;
+  overflow: auto;
 }
 #animeTitle {
   height: 51px;
@@ -59,6 +60,9 @@
   border-bottom: 1px solid silver;
   display: flex;
   flex-direction: row;
+  position: fixed;
+  width: 100%;
+  z-index: 2;
 }
 .backButtonDiv {
   padding-left: 15px;
@@ -79,7 +83,6 @@
   display: inline-block;
   height: inherit;
   float: left;
-  font-family: 'Roboto', sans-serif;
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
@@ -134,6 +137,11 @@
   background-color: #f9f9f9;
   box-shadow: 0 3px 5px rgba(0, 0, 0, 0.25);
   height: 41px;
+  left: 160px;
+  right: 0;
+  margin-top: 52px;
+  position: fixed;
+  z-index: 2;
 }
 #animeGenre > .label {
   text-transform: uppercase;
@@ -141,13 +149,12 @@
 #detailsRow {
   margin-left: auto;
   margin-right: auto;
-  margin-top: 10px;
   display: flex;
   flex-direction: row;
-  align-content: center;
   align-items: center;
   justify-content: center;
   text-align: center;
+  margin-top: 103px;
 }
 .coverImage {
   /*
@@ -325,6 +332,7 @@
   text-align: left;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   overflow: hidden;
   padding-left: 2px;
 }
@@ -332,16 +340,15 @@
   font-family: 'Roboto';
   color: white;
   margin-left: 5px;
-  margin-bottom: 3px;
 }
 .cardInfo h4 {
   font-family: 'Roboto';
   color: white;
   margin-left: 5px;
-  margin-bottom: 3px;
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
+  font-size: 18px;
 }
 .cardInfo h5 {
   font-family: 'Roboto';
@@ -350,7 +357,7 @@
   color: white;
   padding-top: 10px;
   margin-left: 5px;
-  margin-bottom: 3px;
+  font-size: 14px;
 }
 /********StatusCard********/
 #statusCard {
