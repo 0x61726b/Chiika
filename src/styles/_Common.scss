@@ -33,6 +33,10 @@ $statusBarHeight: 30px;
 .content > div {
   height: 100%;
 }
+.content > div:not(.ReactTabs) {
+  height: auto;
+  overflow-y: auto;
+}
 @-webkit-keyframes spin {
   100% {
     -webkit-transform: rotate(360deg);
