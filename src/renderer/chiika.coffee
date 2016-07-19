@@ -25,6 +25,7 @@ LoadingScreen = require './loading-screen'
 Home = require './home'
 AnimeList = require './anime-list'
 Mangalist = require './manga-list'
+Calendar = require './calendar'
 
 Content = React.createClass
   componentDidMount: ->
@@ -73,7 +74,7 @@ ChiikaRouter = React.createClass
         <Route name="AnimeList" path="AnimeList" component={AnimeList} onEnter={@onEnter}/>
         <Route name="MangaList" path="MangaList" component={Mangalist} onEnter={@onEnter}/>
         <Route name="Library" path="Library" component={Home} onEnter={@onEnter}/>
-        <Route name="Calendar" path="Calendar" component={Home} onEnter={@onEnter}/>
+        <Route name="Calendar" path="Calendar" component={Calendar} onEnter={@onEnter}/>
         <Route name="Seasons" path="Seasons" component={Home} onEnter={@onEnter}/>
         <Route name="Torrents" path="Torrents" component={Home} onEnter={@onEnter}/>
         <Route name="User" path="User" component={Home} onEnter={@onEnter}/>

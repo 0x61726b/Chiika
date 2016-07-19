@@ -1,84 +1,143 @@
 .listCommon {
   height: 100%;
 }
-
-// Header Row
-.w2ui-grid .w2ui-grid-body .w2ui-grid-columns,
-.w2ui-grid .w2ui-grid-body .w2ui-grid-fcolumns{
-  box-shadow: 0px 2px 2px rgba($grey-3,0.2)!important;
+/****************************************/
+div.gridbox_material.gridbox .xhdr {
+  background-color: $body-bg;
+  border: none;
 }
-// List title
-.w2ui-head {
-  color: color($userColor, a700)!important;
-  font-weight: 500;
-  font-size: 1.4em;
-  background-image: linear-gradient($body-bg-2, $body-bg-2)!important;
-  border-right: 0px!important;
-  border-bottom: 0px!important;
-  cursor: default;
-}
-
-// Body
-.w2ui-grid .w2ui-grid-body .w2ui-grid-records, .w2ui-grid .w2ui-grid-body .w2ui-grid-frecords {
+div.gridbox_material.gridbox table.hdr tr {
   background-color: $body-bg;
 }
-/** List items overriding! **/
-.w2ui-grid-data {
-  /* I think this is better
-    color: black;
-    opacity: 0.90;
-    */
-  height: 100%;
-  font-size: 1.3em;
-  margin-top: 5px !important;
-  margin-bottom: 5px !important;
-  border-bottom: 1px solid $grey-0!important;
-  border-right: 0px!important;
+div.gridbox_material.gridbox table.obj tr td {
+  padding-right: 4px;
+  padding-left: 4px;
+  overflow: hidden;
 }
-/***Odd Rows***/
-.w2ui-grid .w2ui-grid-body table tr.w2ui-odd td.w2ui-grid-data > div:not(.progress-bar),
-.w2ui-grid .w2ui-grid-body table tr.w2ui-even td.w2ui-grid-data > div:not(.progress-bar) {
-  padding-top: 0.5em !important;
-  padding-bottom: 0.5em !important;
+div.gridbox_material.gridbox table.hdr td div.hdrcell {
+  overflow: hidden;
+  width: auto;
+  padding-left: 4px;
+}
+div.gridbox_material.gridbox table.hdr td {
+  border-bottom: 1px solid $grey-0;
+  border-right: 1px solid $grey-1;
+  border-left: none;
+  overflow: hidden;
+  empty-cells: show;
+  white-space: normal;
+  -webkit-user-select: none;
+  user-select: none;
+  padding: 9px 0 8px;
+  background-color: $body-bg-2;
+  color: $main-text;
+  vertical-align: top;
+  text-align: left;
+  text-transform: uppercase;
+  position: relative;
+}
+div.gridbox_material.gridbox table.hdr tr:nth-child(2) td {
+  border-top: 1px solid $grey-0;
+}
+div.gridbox_material.gridbox {
+  border: none;
+}
+div.gridbox_material.gridbox table.obj tr td {
+  padding-top: 3px;
+  padding-bottom: 4px;
+  background-color: $body-bg;
   color: $main-text;
 }
-
-.w2ui-grid .w2ui-grid-body table tr.w2ui-odd,
-.w2ui-grid .w2ui-grid-body table tr.w2ui-even {
-  background-color: $body-bg!important;
+div.gridbox_material.gridbox table.obj.row20px tr td {
+  padding-top: 0;
+  padding-bottom: 0;
+  height: 32px;
+  line-height: 32px;
+  border-bottom: 1px solid $grey-0;
+  border-right: none;
 }
-.w2ui-grid .w2ui-grid-body table tr.w2ui-odd:hover,
-.w2ui-grid .w2ui-grid-body table tr.w2ui-even:hover {
-  background-color: $grey-1!important;
+div.gridbox_material.gridbox table.obj.row20px tr td:last-child {
+  border-right: none;
 }
-/***All Rows : Selected***/
-.w2ui-grid .w2ui-grid-body .w2ui-grid-records table tr td.w2ui-selected,
-.w2ui-grid .w2ui-grid-body .w2ui-grid-records table tr.w2ui-selected {
-  background-color: $grey-3!important;
+div.gridbox_material.gridbox table.obj tr td.editable .dhx_combo_edit {
+  margin-left: -3px;
 }
-.w2ui-grid .w2ui-grid-body .w2ui-grid-records table tr.w2ui-odd:active {}
-
-/*** All rows progress-bar ***/
-.w2ui-grid .w2ui-grid-body table tr.w2ui-odd td.w2ui-grid-data > .progress-bar,
-.w2ui-grid .w2ui-grid-body table tr.w2ui-even td.w2ui-grid-data > .progress-bar {
-  padding: 0;
-  margin: 0;
+div.gridbox_material.gridbox table.obj tr td.editable .dhxcombo_in_grid_parent {
+  margin-left: -3px !important;
 }
-
-//Override Tab page border
-.w2ui-grid {
-  border: 0px!important;
+div.gridbox_material.gridbox table.obj tr td.editable:first-child {
+  border: 0 solid white!important;
+  padding-left: 4px !important;
 }
-.w2ui-col-header {
-  text-transform: uppercase;
-  font-family: Montserrat;
-  color: $accent;
+div.gridbox_material.gridbox table.obj tr td.editable div.treegrid_cell {
+  padding: 1px 4px;
 }
-
-.w2ui-empty-record{
-  display: none;
+div.gridbox_material.gridbox table.obj tr.rowselected {
+  background-color: $body-bg;
 }
-
+div.gridbox_material.gridbox table.obj tr.rowselected td {
+  background-color: $body-bg;
+}
+div.gridbox_material.gridbox table.obj tr td:first-child {
+  padding-left: 10px;
+}
+div.gridbox_material.gridbox table.obj tr.rowselected td:first-child {
+  border-left: 2px solid $accent;
+  padding-left: 8px;
+}
+div.gridbox_material.gridbox table.obj.row20px tr.rowselected td {
+  border-right-color: #eee;
+  background-color: $grey-2;
+  color: $main-text;
+}
+div.gridbox_material.gridbox table.obj tr td.cellselected {
+  background-color: $grey-2;
+  color: $main-text;
+}
+div.gridbox_material.gridbox .odd_material {
+  background-color: $body-bg;
+  color: $main-text;
+}
+div.gridbox_material.gridbox .ev_material {
+  background-color: $body-bg;
+  color: $main-text;
+}
+.gridbox_material.gridbox .dhx_combo_edit {
+  padding: 1px 0 0 4px;
+}
+.gridbox_material.gridbox .dhx_sub_row {
+  background-color: transparent;
+}
+.dhxgrid_sort_asc,
+.dhxgrid_sort_desc {
+  width: 0;
+  height: 0;
+}
+div.gridbox_material.gridbox table.hdr td.dhxgrid_sort_asc_col,
+div.gridbox_material.gridbox table.hdr td.dhxgrid_sort_desc_col {
+  //background-image: url("imgs/dhxgrid_material/sort_desc.gif");
+  background-position: 3px 7px;
+  background-repeat: no-repeat;
+}
+div.gridbox_material.gridbox table.hdr td.dhxgrid_sort_asc_col div,
+div.gridbox_material.gridbox table.hdr td.dhxgrid_sort_desc_col div {
+  padding-left: 18px;
+  padding-right: 14px;
+}
+div.gridbox_material.gridbox table.hdr td.dhxgrid_sort_asc_col {
+  //background-image: url("imgs/dhxgrid_material/sort_asc.gif");
+}
+div.gridbox_material.gridbox table.obj.row20px tr td img {
+  display: block;
+}
+div.gridbox_material.gridbox table.obj.row20px tr td .treegrid_cell img,
+div.gridbox_material.gridbox table.obj.row20px tr td.group_row img {
+  display: inline;
+}
+div.gridbox_material.gridbox table.obj tr:hover td {
+  background-color: $grey-1;
+}
+/*****************************************************/
 #gridWatchingList {}
 #gridPlantoWatchList {}
 #gridDroppedList {}
@@ -97,7 +156,8 @@
 .react-tabs ul {
   margin-bottom: 2px;
   width: inherit;
-  margin: 0;  background-color: inherit;
+  margin: 0;
+  background-color: inherit;
   padding: 0;
 }
 .react-tabs ul li {
@@ -122,11 +182,11 @@
   border: none;
 }
 .react-tabs [role=tab][aria-disabled=true] {}
+,
 .react-tabs [role=tab]:focus,
 .react-tabs [role=tab][aria-disabled=true]:focus,
 .react-tabs [role=tab][aria-selected=false]:focus,
-.react-tabs [role=tab][aria-selected=true],
-{
+.react-tabs [role=tab][aria-selected=true] {
   background-color: inherit;
   outline: none;
   box-shadow: none;
@@ -140,8 +200,8 @@
   content: "";
   position: absolute;
   height: 5px;
-  left: 0px;
-  right: 0px;
+  left: 0;
+  right: 0;
   bottom: -5px;
   background: $accent;
 }

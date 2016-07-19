@@ -1,250 +1,85 @@
-body {
-    background: #FAFAFA;
-    display: flex;
-    flex-direction: column;
+#calendar-card {
+  margin-top:100px;
+  background-color: $body-bg-2;
+}
+.calendar-image {
+  height: 180px;
+  max-width: 100px;
+}
+.cal-upnext {
+  margin-top: -100px;
+  display: flex;
+  color: $main-text;
+}
+.upnext-anime {
+  padding: 0px 16px;
+  flex-grow: 2;
+  display: flex;
+}
+.upnext-info {
+  padding: 10px 16px 0px 16px;
+  display: flex;
+  flex-direction: column;
+}
+.upnext-info h2 {
+  margin-bottom: 0;
+}
+.upnext-info h3 {
+  font-weight: 400;
+}
+.upnext-info > span {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+}
+.upnext-info > p {
+  max-height: 55px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+}
+.day-row {
+  width: 100%;
+  height: auto;
+  display: flex;
+  min-height: 60px;
+}
+.day-title {
+  width: 100px;
+  height: auto;
+  display: flex;
+  justify-content: center;
+}
+.day-series {
+  width: 100%;
+  border-bottom: 1px solid $grey-1;
+  padding: 6px;
 }
 
-.calendarContainer {
-    display: flex;
-    flex-direction: column;
+.timeline {
+  position: relative;
+  width: 5px;
+  background-color: #F2F2F4;
+  display: flex;
+  justify-content: center;
 }
-
-.dayRow {
-    display: flex;
-    align-self: center;
-    width: 95%;
-    background-color: #EEEEEE;
-    margin-bottom: 8px;
-    z-index: 1;
-    box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.2);
-    border-radius: 2px;
+.timeline-circle {
+  position: absolute;
+  border-radius: 50px;
+  width: 50px;
+  height: 50px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: $grey-3;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  text-transform: uppercase;
 }
-
-.dayRow:first-child {
-    margin-top: 61px;
-}
-
-.row-active {
-    box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.3);
-    z-index: 2;
-    position: relative;
-}
-
-.day-name {
-    background-color: #455A64;
-    padding: 1em;
-    color: white;
-    width: 4em;
-    display: flex;
-    justify-content: center;
-    align-content: center;
-    align-items: center;
-    border-top-left-radius: 2px;
-    border-bottom-left-radius: 2px;
-}
-
-.currentDay {
-    background-color: color($accentColor, 700);
-    padding-right: 5px;
-    border-right: 5px solid color($accentColor, 900);
-}
-
-.day-text {
-    -webkit-transform: rotate(-90deg);
-    text-transform: uppercase;
-}
-
-.chipContainer {
-    padding: 5px;
-    line-height: 2;
-}
-
-.tooltip {}
-
-.animeChip {
-    height: 1.8em;
-    border: 0px;
-    display: inline-flex;
-    padding: .3em .72em .4em;
-    margin: 2px;
-    font-size: 1em;
-    font-weight: 300;
-    line-height: 1;
-    color: white;
-    text-align: center;
-    white-space: nowrap;
-    vertical-align: baseline;
-    border-radius: .25em;
-    transition: box-shadow .3s;
-    outline: none;
-}
-
-.animeChip:hover {
-    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.33);
-}
-
-.animeChip:focus {}
-
-.chip-aired {
-    background-color: color($userColor, 800);
-    transition: background .3s, color .3s;
-}
-
-.chip-aired:hover {
-    background: color($userColor, 700);
-}
-
-.chip-aired:active {
-    background: color($userColor, 600);
-}
-
-.chip-notAired {
-    background-color: color($grey, 800);
-    transition: background .3s, color .3s;
-}
-
-.chip-notAired:hover {
-    background-color: color($grey, 700);
-}
-
-.chip-notAired:active {
-    background-color: color($grey, 600);
-}
-
-
-/*****/
-
-.calendar-titleSpan {
-    display: flex;
-    height: inherit;
-    float: left;
-    font-family: 'Roboto', sans-serif;
-    justify-content: center;
-    flex-direction: column;
-    padding-left: 2em;
-}
-
-#calendar-titleBar {
-    background-color: pink;
-    display: block;
-    height: 48px;
-    background-color: #e0e0e0;
-}
-
-.calendar-titleBar {
-    position: fixed;
-    width: 100%;
-    height: 51px;
-    background-color: #eeeeee;
-    display: block;
-    box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.33);
-    z-index: 50;
-}
-
-#anime-soon {
-    font-weight: 300;
-    opacity: 0.93;
-    padding-bottom: 1px;
-}
-
-.noSpace {
-    padding-top: 0px;
-    margin-top: 0px;
-    margin-bottom: 0px;
-    padding-bottom: 0px;
-}
-
-
-/******tooltip****/
-
-.tooltip-content {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.tooltip-animeTitle {
-    display: flex;
-    justify-content: center;
-}
-
-.tooltip-littleInfo {
-    display: flex;
-    justify-content: center;
-}
-
-.tooltip-buttons {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-}
-
-.tooltipButton {
-    height: 1.8em;
-    border: 0px;
-    display: inline-flex;
-    padding: .3em .72em .4em;
-    font-size: 1em;
-    font-weight: 300;
-    line-height: 1;
-    color: white;
-    text-align: center;
-    white-space: nowrap;
-    vertical-align: baseline;
-    border-radius: .25em;
-    transition: box-shadow .3s;
-    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.23);
-    outline: none;
-    margin: 2px;
-    background: color($grey, 700);
-    transition: background .3s, color .3s;
-}
-
-.tooltipButton:hover {
-    background: color($grey, 600);
-}
-
-.tooltipButton:active {
-    background: color($grey, 500);
-}
-
-.tooltipButton:hover {
-    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.33);
-}
-
-.buttonActive {
-    background-color: color($accentColor, 700);
-}
-
-.buttonActive:hover {
-    background: color($accentColor, 600);
-}
-
-.buttonActive:active {
-    background: color($accentColor, 500);
-}
-
-.tooltipster-light {
-    border-radius: 5px;
-    border: 1px solid #cccccc;
-    background: #ededed;
-    color: #666666;
-}
-
-.tooltipster-light .tooltipster-content {
-    font-size: 14px;
-    line-height: 20px;
-    padding: 8px 10px;
-}
-
-.tooltipster-light h4 {
-    font-weight: 400;
-    margin-top: 2px;
-    margin-bottom: 5px;
-}
-
-.tooltipster-light h5 {
-    font-weight: 300;
-    margin-top: 2px;
-    margin-bottom: 5px;
+.currentDay .timeline-circle {
+  background-color: $accent;
+  color: $inverse-text;
 }
