@@ -130,6 +130,7 @@ class Application
          if !userImagePath
            @downloadUserImage @loggedUser.userId
 
+
       @tools = new Tools()
       @tools.init( =>
         getUserCb = (user) =>
@@ -153,6 +154,11 @@ class Application
            @window.window.openDevTools()
 
 
+    ipcMain.on 'request-calendar-data', (event,args) =>
+      application.logDebug("IPC: request-calendar-data")
+      Database.loadSenpaiData((data) ->
+        event.sender.send 'request-calendar-data-response', { calendarData: data }
+        )
     ipcMain.on 'request-anime-cover-image-download', (event,args) =>
       application.logDebug("IPC: request-anime-cover-image-download")
 

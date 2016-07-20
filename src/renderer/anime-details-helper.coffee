@@ -36,22 +36,16 @@ module.exports = class AnimeDetailsHelper
       animeType = "Unknown"
     if type == "1"
       animeType = "TV"
-      bgImage = "./../assets/images/detailsCards/type/alt-tv.png"
     if type == "2"
       animeType = "OVA"
-      bgImage = "./../assets/images/detailsCards/type/alt-ova.png"
     if type == "3"
       animeType = "Movie"
-      bgImage = "./../assets/images/detailsCards/type/alt-movie.png"
     if type == "4"
       animeType = "Special"
-      bgImage = "./../assets/images/detailsCards/type/alt-special.png"
     if type == "5"
       animeType = "ONA"
-      bgImage = "./../assets/images/detailsCards/type/alt-ona.png"
     if type == "6"
       animeType = "Music"
-      bgImage = "./../assets/images/detailsCards/type/alt-music.png"
     animeType
   getTypeImage: (anime) ->
     type = anime.series_type

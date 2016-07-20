@@ -19,6 +19,9 @@ _ = require 'lodash'
 
 _when = require 'when'
 
+fs = require 'fs'
+path = require 'path'
+
 class Database
   init: (dbReadyCallback) ->
     _self = this
@@ -285,6 +288,12 @@ class Database
 
 
 
+  loadSenpaiData: (cb) ->
+    fs.readFile "#{__dirname}/../../../assets/prettifiedSenpai.json", 'utf-8', (err,data) =>
+      if err
+        application.logDebug "SENPAI.MOE data can't be loaded.Calendar won't function properly."
+      else
+        cb JSON.parse(data)
   loadAnimelist: (cb) ->
     application.logDebug "Loading anime list..."
     map = (doc) ->

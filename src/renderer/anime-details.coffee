@@ -26,7 +26,7 @@ AnimeDetailsHelper = require './anime-details-helper'
 module.exports = React.createClass
   mixins: [History]
   updateCover: ->
-    coverImage = @detailsHelper.checkCoverImage @props.params.animeId
+    coverImage = chiika.getAnimeCoverById @props.params.animeId
     if !_.isUndefined coverImage
       $("#coverImg").attr("src",coverImage)
   componentDidMount: ->
@@ -113,22 +113,10 @@ module.exports = React.createClass
                     <div id="userScore" className="why">
                         <h5 className="noSpace">RATE</h5>
                         <div className="dropdown" id="scoreDropdown">
-                          <button type="button" className="scoreButton dropdown-toggle" id="dropdownMenu1" data-toggle="dropdown">
-                              <h4 className="noSpace">{@currentAnime.my_score}</h4>
-                              <span className="caret"></span>
-                          </button>
                           <select className="dropdown button raised teal" aria-labelledby="dropdownMenu1">
                           {[0,1,2,3,4,5,6,7,8,9,10].map((score, i) =>
                             <option key={i}>
-                              {
-                                s = score
-                                if score == 0
-                                  s = "-"
-                                if score == parseInt(@currentAnime.my_score)
-                                  (<div id="selected" onClick={@updateScore}>{s}</div>)
-                                else
-                                  (<div onClick={@updateScore}>{s}</div>)
-                                }
+                              {score}
                             </option>)}
                           </select>
                         </div>
@@ -154,15 +142,11 @@ module.exports = React.createClass
                     <div id="userScore" className="why">
                         <h5 className="noSpace">STATUS</h5>
                         <div className="dropdown" id="statusDropdown">
-                          <button type="button" className="statusButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                              <h4 className="noSpace">{@detailsHelper.getStatus(@currentAnime)}</h4>
-                              <span className="caret"></span>
-                          </button>
                           <select className="dropdown button green raised">
                               {
                                 @detailsHelper.statusTextMap.map((status,i) =>
                                   <option key={i}>
-                                    <div onClick={@updateStatus} data-status={status.status}>{status.text}</div>
+                                    {status.text}
                                   </option>
                               )}
                           </select>

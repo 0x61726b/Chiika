@@ -19,6 +19,7 @@ ipcHelpers = require '../ipcHelpers'
 
 ChiikaDomManager = require './chiika-dom'
 GridManager = require './grid-manager'
+AnimeDetailsHelper = require './anime-details-helper'
 
 _ = require 'lodash'
 fs = require 'fs'
@@ -33,19 +34,20 @@ class ChiikaEnvironment
   constructor: (params={}) ->
     {@applicationDelegate, @window,@chiikaHome} = params
 
-    scribe = require 'scribe-js'
-    express = require 'express'
-
-    scribe = scribe()
-    console = process.console
+    # scribe = require 'scribe-js'
+    # express = require 'express'
+    #
+    # scribe = scribe()
+    # console = process.console
 
     @emitter          = new Emitter
     @domManager       = new ChiikaDomManager
     @gridManager      = new GridManager
+    @animeHelper      = new AnimeDetailsHelper
 
 
-    console.addLogger('rendererDebug','red')
-    console.addLogger('rendererInfo','blue')
+    #console.addLogger('rendererDebug','red')
+    #console.addLogger('rendererInfo','blue')
     @logInfo("Renderer initializing...")
 
 
@@ -54,7 +56,10 @@ class ChiikaEnvironment
 
     ipcRenderer.on 'request-search-response', (event,arg) =>
       @logDebug 'IPC: request-search-response'
-      @logInfo "Search returned " + arg.results.length + " entries"
+      if _.isArray arg.results
+        @logInfo "Search returned " + arg.results.length + " entries"
+      else
+        @logInfo "Search returned 1 entry"
       @emitter.emit 'anime-details-update'
 
     ipcRenderer.on 'download-image', (event,arg) =>
@@ -74,6 +79,11 @@ class ChiikaEnvironment
       @logDebug('IPC: request-anime-cover-image-download-response')
       @emitter.emit 'download-image', { downloadedEntry: arg.animeId }
 
+    ipcRenderer.on 'request-calendar-data-response', (event,arg) =>
+      @logDebug('IPC: request-calendar-data-response')
+      @calendarData = arg.calendarData
+      @emitter.emit 'calendar-ready'
+
     #When the window is reloaded using Ctrl+R (which will never happen in prod environment),
     #renderer side of the application will request user data and app data such as user info,lists,app options
     #when reloading occurs,if the current route is one of the lists (anime,manga list), tables will be ready even before the data arrives at renderer process
@@ -87,6 +97,7 @@ class ChiikaEnvironment
       _.forEach @ipcListeners, (v,k) =>
         v.ipcCall()
     )
+    ipcRenderer.send 'request-calendar-data'
 
 
   sendNotification: (notf) ->
@@ -95,62 +106,31 @@ class ChiikaEnvironment
     process.cwd()
   getResourcesPath: ->
     process.resourcesPath
-  ipcWaitforDeferredCalls: ->
-    Dfs = []
+  getUserTimezone: ->
+    moment = require 'moment-timezone'
+    userTimezone = moment.tz(moment.tz.guess())
+    utcOffset = moment.parseZone(userTimezone).utcOffset() * 60# In seconds
+    return { timezone: userTimezone , offset: utcOffset }
+  getAnimeCoverById: (animeId) ->
+    #This function will try to download the image if it doesn't exist locally
+    coverPath = path.join(@chiikaHome,'Data','Images',animeId + '.jpg')
+    coverExists = @checkIfFileExists coverPath
 
-    Dfs.push @ipcGetUserInfo()
-    Dfs.push @ipcGetAnimelist()
-    Dfs.push @ipcGetOptions()
-    Dfs.push @ipcGetAnimeDb()
-    Dfs.push @ipcGetLoginStatus()
 
 
-    _when.all Dfs
+    if coverExists
+      return coverPath
 
-  ipcGetLoginStatus: ->
-    deferred = _when.defer()
-    ipcRenderer.send 'get-login-status'
-
-    ipcRenderer.on 'get-login-status-response', (event,arg) =>
-      console.log "get-login-status-response"
-      deferred.resolve()
-    deferred.promise
-
-  ipcGetUserInfo: ->
-    deferred = _when.defer()
-    ipcRenderer.send('get-user-info')
-
-    ipcRenderer.on 'get-user-info-response', (event,arg) =>
-      @user = arg
-      @domManager.setUserInfo @user
-      deferred.resolve()
-      #@emitter.emit 'download-image' #Little hack, sidebar depends on user ID , so its safe to update it when we have user here
-    deferred.promise
-
-  ipcGetAnimelist: ->
-    deferred = _when.defer()
-    ipcRenderer.send('db-request-animelist',{ userName: ''})
-    ipcRenderer.on 'request-animelist-response', (event,arg) =>
-      if arg.success
-        @animeList = arg.list
-        console.log @animeList
-      else
-        chiika.logInfo "Retrieving animelist resulted with error. " + arg.response.errorMessage + " " + arg.response.body
-      deferred.resolve()
-    deferred.promise
-  ipcGetAnimeDb: ->
-    deferred = _when.defer()
-    ipcRenderer.send('db-request-anime')
-    ipcRenderer.on 'request-animedb-response', (event,arg) =>
-      @animeDb = arg.list
-      console.log @animeDb
-      deferred.resolve()
-    deferred.promise
-  devRequestAnimelist: ->
-    ipcRenderer.send('request-animelist',{ userName: ''})
-
-  devRequestAnimeSearch: (search) ->
-    ipcRenderer.send('request-search-anime', {searchTerms: search })
+    chiika.logDebug("Cover for " + animeId + " doesn't exist.Requesting download..")
+    #It doesn't exist at this point, let's download it.
+    findAnimeEntry = _.find @animeDb.anime, { series_animedb_id: animeId }
+    if findAnimeEntry && !coverExists
+      ipcRenderer.send 'request-anime-cover-image-download', { animeId: animeId,coverLink: findAnimeEntry.series_image }
+      return './../assets/images/avatar.jpg'
+    if findAnimeEntry && coverExists
+      return coverPath
+    else
+      chiika.logDebug("Image cover can't be retrieved. It doesn't exist in our database.")
 
   animeDetailsPreRequest: (animeId) ->
     #Check animeDb if this is required
@@ -168,41 +148,8 @@ class ChiikaEnvironment
       chiika.logInfo "Requesting extra update for ." + animeId
       ipcRenderer.send('request-anime-details-mal-page', { animeId: animeId })
 
-    #Check if cover image exists locally
-    animeCoverExists = @checkIfFileExists path.join('Data','Images',animeId + '.jpg')
-
-    if animeCoverExists == false && findAnimeEntry?
-      ipcRenderer.send 'request-anime-cover-image-download', { animeId: animeId,coverLink: findAnimeEntry.series_image }
-
-  animeDetailsPage: (animeId) ->
-    ipcRenderer.send('request-anime-details-mal-page', { animeId: animeId })
-  ipcGetOptions: ->
-    deferred = _when.defer()
-    ipcRenderer.send('get-options')
-
-    ipcRenderer.on 'get-options-response', (event,arg) =>
-      @appOptions = arg
-      @gridManager.prepareGridData @appOptions
-      deferred.resolve()
-
-    deferred.promise
 
 
-  logDebug: (text) ->
-    process.console.tag("chiika-renderer").rendererDebug(text)
-  logInfo: (text) ->
-    process.console.tag("chiika-renderer").rendererInfo(text)
-
-  checkIfFileExists: (fileName) ->
-    appPath = @chiikaHome
-    try
-      file = fs.statSync path.join(appPath,fileName)
-    catch e
-      file = undefined
-    if _.isUndefined file
-      return false
-    else
-      return true
 
   getAnimeListByType: (status) ->
     data = []
@@ -318,5 +265,91 @@ class ChiikaEnvironment
     anime
   openMalLink: ->
     shell.openExternal("http://myanimelist.net/anime/" + @anime.anime.series_animedb_id)
+
+
+  ipcGetOptions: ->
+    deferred = _when.defer()
+    ipcRenderer.send('get-options')
+
+    ipcRenderer.on 'get-options-response', (event,arg) =>
+      @appOptions = arg
+      @gridManager.prepareGridData @appOptions
+      deferred.resolve()
+
+    deferred.promise
+
+
+  logDebug: (text) ->
+    #process.console.tag("chiika-renderer").rendererDebug(text)
+    console.log text
+  logInfo: (text) ->
+    #process.console.tag("chiika-renderer").rendererInfo(text)
+    console.log text
+
+  checkIfFileExists: (fileName) ->
+    try
+      file = fs.statSync fileName
+    catch e
+      file = undefined
+    if _.isUndefined file
+      return false
+    else
+      return true
+  ipcWaitforDeferredCalls: ->
+    Dfs = []
+
+    Dfs.push @ipcGetUserInfo()
+    Dfs.push @ipcGetAnimelist()
+    Dfs.push @ipcGetOptions()
+    Dfs.push @ipcGetAnimeDb()
+    Dfs.push @ipcGetLoginStatus()
+
+
+    _when.all Dfs
+
+  ipcGetLoginStatus: ->
+    deferred = _when.defer()
+    ipcRenderer.send 'get-login-status'
+
+    ipcRenderer.on 'get-login-status-response', (event,arg) =>
+      console.log "get-login-status-response"
+      deferred.resolve()
+    deferred.promise
+
+  ipcGetUserInfo: ->
+    deferred = _when.defer()
+    ipcRenderer.send('get-user-info')
+
+    ipcRenderer.on 'get-user-info-response', (event,arg) =>
+      @user = arg
+      @domManager.setUserInfo @user
+      deferred.resolve()
+      #@emitter.emit 'download-image' #Little hack, sidebar depends on user ID , so its safe to update it when we have user here
+    deferred.promise
+
+  ipcGetAnimelist: ->
+    deferred = _when.defer()
+    ipcRenderer.send('db-request-animelist',{ userName: ''})
+    ipcRenderer.on 'request-animelist-response', (event,arg) =>
+      if arg.success
+        @animeList = arg.list
+        console.log @animeList
+      else
+        chiika.logInfo "Retrieving animelist resulted with error. " + arg.response.errorMessage + " " + arg.response.body
+      deferred.resolve()
+    deferred.promise
+  ipcGetAnimeDb: ->
+    deferred = _when.defer()
+    ipcRenderer.send('db-request-anime')
+    ipcRenderer.on 'request-animedb-response', (event,arg) =>
+      @animeDb = arg.list
+      console.log @animeDb
+      deferred.resolve()
+    deferred.promise
+  devRequestAnimelist: ->
+    ipcRenderer.send('request-animelist',{ userName: ''})
+
+  devRequestAnimeSearch: (search) ->
+    ipcRenderer.send('request-search-anime', {searchTerms: search })
 
 module.exports = ChiikaEnvironment
