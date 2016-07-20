@@ -17,6 +17,7 @@
 DefaultOptions = {
   RefreshUponLaunch: true, #To-do : implement
   UseAlternateListView : false,
+  RememberWindowSizeAndPosition: true
   AnimeListColumns:[
     {column: {
        name:"typeWithIcon"

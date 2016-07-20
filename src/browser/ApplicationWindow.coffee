@@ -37,3 +37,7 @@ class ApplicationWindow
     #
   loadURL: (url) ->
     @window.loadURL(url)
+  getPosition: ->
+    @window.getPosition()
+  getSize: ->
+    @window.getSize()

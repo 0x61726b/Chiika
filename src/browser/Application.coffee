@@ -107,6 +107,8 @@ class Application
     app.on 'window-all-closed', ->
       app.quit()
 
+
+
     app.on 'will-quit', () ->
       globalShortcut.unregisterAll()
     app.on 'ready', =>
@@ -115,6 +117,8 @@ class Application
 
 
       @logInfo("Initializing...")
+
+      @checkRememberWindowProperties()
 
       dbReady = =>
         if @firstLaunch
@@ -201,11 +205,11 @@ class Application
 
     ipcMain.on 'save-options', (event,options) =>
       application.logDebug("IPC: save-options")
-      AppOptions = options
+      @appOptions = options
       @saveOptions()
-    ipcMain.on 'get-options', (event) ->
+    ipcMain.on 'get-options', (event) =>
       application.logDebug("IPC: get-options")
-      event.sender.send 'get-options-response', AppOptions
+      event.sender.send 'get-options-response', @appOptions
     ipcMain.on 'get-user-info',(event) =>
       application.logDebug("IPC: get-user-info")
       getUserCb = (user) ->
@@ -426,31 +430,56 @@ class Application
     if _.isUndefined configFile
       fs.openSync configFilePath, 'w'
 
-      AppOptions.Version = process.env.version
+      @appOptions = AppOptions
 
-      fs.writeFileSync configFilePath,JSON.stringify(AppOptions),'utf-8'
+      @appOptions.Version = process.env.version
+
+      fs.writeFileSync configFilePath,JSON.stringify(@appOptions),'utf-8'
 
       @firstLaunch = true
     else
       configFile = fs.readFileSync configFilePath, 'utf-8'
       @firstLaunch = false
 
-      AppOptions = JSON.parse(configFile)
+      @appOptions = JSON.parse(configFile)
 
       packageVersion = process.env.version
-      appVersion = AppOptions.Version
+      appVersion = @appOptions.Version
 
       if appVersion? && packageVersion != appVersion
         @firstLaunch = true
-        AppOptions.Version = packageVersion
+        @appOptions.Version = packageVersion
         @saveOptions()
 
 
+  checkRememberWindowProperties: ->
+    if @appOptions.RememberWindowSizeAndPosition
+      if @appOptions.WindowProperties? && @appOptions.WindowProperties.size?
+        @mainWindowSize = @appOptions.WindowProperties.size
+      else
+        @mainWindowSize = @calculateWindowSize()
 
+        if !@appOptions.WindowProperties?
+          @appOptions.WindowProperties = {}
+        @appOptions.WindowProperties.size = @mainWindowSize
+      if @appOptions.WindowProperties? && @appOptions.WindowProperties.position?
+        @mainWindowPosition = @appOptions.WindowProperties.position
+      else
+        screenRes = @getScreenRes()
+        @mainWindowPosition = { x: screenRes.width / 2 - @mainWindowSize.width/2, y: screenRes.height / 2 - @mainWindowSize.height/2  }
+        if !@appOptions.WindowProperties?
+          @appOptions.WindowProperties = {}
+        @appOptions.WindowProperties.position = @mainWindowPosition
+
+      @saveOptions()
+    else
+      @mainWindowSize = @calculateWindowSize()
+      screenRes = @getScreenRes()
+      @mainWindowPosition = { x: screenRes.width / 2 - @mainWindowSize.width/2, y: screenRes.height / 2 - @mainWindowSize.height/2  }
 
   saveOptions: ->
     configFilePath = path.join(path.join(@chiikaHome, "Config"),"Chiika.json");
-    fs.writeFileSync configFilePath,JSON.stringify(AppOptions),'utf-8'
+    fs.writeFileSync configFilePath,JSON.stringify(@appOptions),'utf-8'
   parseCommandLine: ->
     options = yargs(process.argv[1..]).wrap(100)
     args = options.argv
@@ -477,21 +506,26 @@ class Application
   hideMainWindow: ->
     @window.window.minimize()
     @window.window.hide()
+  calculateWindowSize: ->
+    screenRes = @getScreenRes()
+    windowWidth = Math.round(screenRes.width * 0.66)
+    windowHeight = Math.round(screenRes.height * 0.75)
+    return { width: windowWidth, height: windowHeight }
 
   openWindow: ->
     deferred = _when.defer()
     isBorderless = true
     windowUrl = "file://#{__dirname}/../renderer/index.html#Home"
-    screenRes = @getScreenRes()
-    windowWidth = Math.round(screenRes.width * 0.66)
-    windowHeight = Math.round(screenRes.height * 0.75)
     htmlURL = windowUrl
     @window = new ApplicationWindow htmlURL,
-      width: windowWidth
-      height: windowHeight
+      width: @mainWindowSize.width
+      height: @mainWindowSize.height
       title: 'Chiika - Development Mode'
       icon: "./resources/icon.png"
       frame:!isBorderless
+      x: @mainWindowPosition.x
+      y: @mainWindowPosition.y
+    console.log @mainWindowSize + " " + @mainWindowPosition
     @window.openDevTools()
 
     @window.window.webContents.on 'did-finish-load', =>
@@ -499,7 +533,18 @@ class Application
 
       @window.enableReactDevTools()
       deferred.resolve()
+    @window.window.on 'close', =>
+      winPosX = @window.getPosition()[0]
+      winPosY = @window.getPosition()[1]
+      width = @window.getSize()[0]
+      height = @window.getSize()[1]
+
+      if @appOptions.RememberWindowSizeAndPosition
+        application.appOptions.WindowProperties.size = { width: width, height: height }
+        application.appOptions.WindowProperties.position = { x: winPosX, y: winPosY }
+        @saveOptions()
     deferred.promise
+
 
 
 
