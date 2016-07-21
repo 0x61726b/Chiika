@@ -33,23 +33,12 @@ class Tools
   readyCallback: null
   init: (callback) ->
     application.logDebug "Initializing tools"
-    @readyCallback = callback
-    @chiikaPath = "C:/Users/alperen/AppData/Roaming/Chiika/"
-
-    GLOBAL.chiika = this
-
-    _self = this
 
     dbReadyCallback = ->
       callback()
 
     Database.init(dbReadyCallback)
-
-  wipeList: (listName,callback) ->
-    lisql = NoSQL.load @chiikaPath + listName
-
-    lisql.clear ( ->)
-
+  
   getAnimelistOfUser: (userName,callback) ->
     if _.isEmpty(userName)
       application.logDebug "Empty user name."

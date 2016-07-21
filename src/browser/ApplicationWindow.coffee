@@ -41,3 +41,5 @@ class ApplicationWindow
     @window.getPosition()
   getSize: ->
     @window.getSize()
+  showWindow: ->
+    @window.show()

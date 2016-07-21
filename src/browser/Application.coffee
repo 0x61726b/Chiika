@@ -56,7 +56,8 @@ module.exports =
 class Application
   window: null,
   loginWindow: null,
-  tools: null
+  tools: null,
+  mbReady: false
   constructor: (options) ->
     global.application = this
     @emitter = new Emitter
@@ -75,7 +76,13 @@ class Application
 
     @handleEvents()
 
-    @mb = menubar( icon:'./resources/icon.png',tooltip:'hhueheuehu',index:"file://#{__dirname}/../renderer/Menubar.html" )
+    @mb = menubar( icon:'./resources/icon.png',
+    tooltip:'hhueheuehu',
+    index:"file://#{__dirname}/../renderer/Menubar.html",
+    preloadWindow: true,
+    width: 800
+    height: 800
+     )
     trayCm = Menu.buildFromTemplate([
       { label:'Hue'},
       { label:'Hue'},
@@ -84,26 +91,19 @@ class Application
       ])
     @mb.on 'after-create-window', =>
       @mb.window.openDevTools()
-
-
-      @emitter.on 'mp-found',(mp) =>
-        @mb.window.webContents.send 'mp-found',mp
-
-      @emitter.on 'mp-video-changed', (mp) =>
-        @mb.window.webContents.send 'mp-video-changed',mp
-
-      @emitter.on 'mp-closed', (mp) =>
-        @mb.window.webContents.send 'mp-closed',mp
+      @mbReady = true
 
     @mb.on 'ready', =>
       @mb.tray.setContextMenu(trayCm);
+
+      @mb.tray.on 'double-click',(event,bounds) =>
+        @window.showWindow()
+
     # Quit when all windows are closed.
 
 
   handleEvents: ->
     _self = this
-    @emitter.on 'anime-db-ready', ->
-      #Do something
     app.on 'window-all-closed', ->
       app.quit()
 
@@ -201,6 +201,7 @@ class Application
 
 
     ipcMain.on 'request-current-video', (event) =>
+      application.logDebug("IPC: request-current-video")
       event.sender.send 'request-current-video-response',@mediaDetector.currentVideoFile
 
     ipcMain.on 'save-options', (event,options) =>
@@ -377,6 +378,25 @@ class Application
           application.logInfo("Error: " + response.errorMessage)
           event.sender.send('set-user-login-response',response)
 
+    @emitter.on 'mp-found',(mp) =>
+      if @mbReady
+        @mb.window.webContents.send 'mp-found',mp
+
+    @emitter.on 'mp-video-changed', (mp) =>
+      if @mbReady
+        @mb.window.webContents.send 'mp-video-changed',mp
+
+      if !Database.isReady 'animelistDb'
+        @emitter.on 'animelist-ready', ->
+          Database.searchAnimeListDbByTitle mp.AnimeTitle
+      else
+        Database.searchAnimeListDbByTitle mp.AnimeTitle
+
+    @emitter.on 'mp-closed', (mp) =>
+      if @mbReady
+        @mb.window.webContents.send 'mp-closed',mp
+
+
   onRequestError: (callback) ->
     console.log callback.errorMessage
   downloadUserImage: (id) ->
@@ -525,7 +545,6 @@ class Application
       frame:!isBorderless
       x: @mainWindowPosition.x
       y: @mainWindowPosition.y
-    console.log @mainWindowSize + " " + @mainWindowPosition
     @window.openDevTools()
 
     @window.window.webContents.on 'did-finish-load', =>

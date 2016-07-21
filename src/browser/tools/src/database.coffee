@@ -172,7 +172,9 @@ class Database
             series_english : v.english,
             series_synonyms : v.synonyms,
             series_synopsis : v.synopsis,
-            series_image : v.series_image
+            series_image : v.image,
+            series_title: v.title,
+            misc_score: v.score
           }
           upDoc.anime.push animeData
           application.logInfo v.id + " isn't on database. Adding..."
@@ -206,6 +208,31 @@ class Database
 
       #params.list is a array of entries from AnimeSearch
 
+    @animeDb.stored.create 'searchByTitle', (nosql,next,params) => #Params {title,animeList}
+      _l = require 'lodash'
+      fullMap = (doc) ->
+        doc
+
+      cb = (err,selected) =>
+        found = false
+        result = {}
+        _l.forEach selected[0].anime,(v,k) ->
+          if v.series_title == params.title
+            findInAnimeList = _l.find params.animeList.anime, { series_animedb_id: v.series_animedb_id }
+
+            if findInAnimeList?
+              #On list,
+              _l.assign result, { list: true, db: true,listEntry: findInAnimeList }
+            else
+              _l.assign result, { list: false, db: true }
+            return false
+          else
+            #Not on DB either
+            _l.assign result, { list: false,db: false }
+        next(result)
+
+
+      nosql.all(fullMap,cb)
 
 
     @animelistDb.stored.create 'save', (nosql,next,params) ->
@@ -240,17 +267,26 @@ class Database
     @animelistDb.on 'load', =>
       application.logDebug "Anime list Db loaded"
 
-      application.emitter.emit 'anime-db-ready'
+      application.emitter.emit 'animelist-ready'
 
     @userDb.on 'load', =>
       userDbDefer.resolve()
 
+  searchAnimeListDbByTitle: (title,callback) ->
+    onAnimeListLoad = (data) =>
+      onSearchByTitle = (anime) ->
+        console.log anime
+      @animeDb.stored.execute 'searchByTitle', {title:title, animeList: data },onSearchByTitle
+    @loadAnimelist onAnimeListLoad
   updateAnimeDbFromSearchData: (list,callback) ->
     @animeDb.stored.execute( 'insertFromSearch', {list: list},callback )
+
   updateAnimeEntrySmall: (details,callback) ->
     @animeDb.stored.execute( 'updateAnimeEntrySmall', details,callback )
+
   updateAnimeEntryMalPage: (details,callback) ->
     @animeDb.stored.execute( 'updateAnimeEntryMalPage', details,callback )
+
   updateAnime: (anime) ->
     @animelistDb.stored.execute( 'updateAnimeEntry', anime )
 
@@ -332,6 +368,8 @@ class Database
       cb undefined
       return
     @userDb.one(map,callback)
+  isReady: (db) ->
+    this[db].isReady
 
   QueryDb: (db,query,callback) ->
     Filter: (doc) ->

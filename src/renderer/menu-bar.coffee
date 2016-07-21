@@ -26,19 +26,21 @@ Menubar = React.createClass
   currentVideoFile:null
   componentDidMount: ->
     ipcRenderer.on 'mp-found',(mp,data) ->
-      #Do something
+      console.log "mp-found"
 
     ipcRenderer.on 'mp-closed', (mp,data) ->
       @currentVideoFile = null
-
+      console.log "mp-closed"
     ipcRenderer.on 'mp-video-changed', (mp,data) ->
-
+      console.log "mp-video-changed"
       @currentVideoFile = data
+      console.log @currentVideoFile
 
     ipcRenderer.send 'request-current-video'
 
     ipcRenderer.on 'request-current-video-response', (event,data) =>
       @currentVideoFile = data
+      console.log @currentVideoFile
 
 
   render: () ->
