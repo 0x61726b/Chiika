@@ -8,6 +8,7 @@
 
 [Chiika](http://chiika.moe/) is an upcoming cross platform desktop application which helps you manage anything related to your anime/manga.Chiika is written with [Electron](https://github.com/atom/electron)
 
+![Screenshot - Anime List](http://i.imgur.com/lK4llMI.png)
 
 #Running
 
