@@ -29,5 +29,5 @@ module.exports = React.createClass
   componentWillUnmount: ->
     _.pull chiika.ipcListeners,this
 
-  render: () ->
+  render: ->
     (<div id="myGrid" />)

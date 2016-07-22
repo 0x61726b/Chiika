@@ -179,6 +179,7 @@ module.exports = React.createClass
          }
       </p>
     </div>
+    
   render: () ->
     (<section className="calendar-container">
       <select style={{float:'right' }} className="button red raised" onChange={this.onCalendarViewChange} value={@state.calendarShowType}>

@@ -38,7 +38,7 @@ AnimeList = React.createClass
     ]
     currentView:0 # 1 for compact, 1 for alternate
   onSelect: (index,last) ->
-
+    chiika.emitter.emit 'animelist-stab-changed', { index: index, last: last }
   setListCounts: ->
     watching = window.chiika.getAnimeListByType(1)
     ptw = window.chiika.getAnimeListByType(6)

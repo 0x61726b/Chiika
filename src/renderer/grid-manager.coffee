@@ -21,6 +21,10 @@ _ = require 'lodash'
 
 
 class GridManager
+  grids: []
+  constructor: (chiika) ->
+    chiika.emitter.on 'animelist-stab-changed', (args) =>
+      @currentAnimeTab = args.index
   prepareGridData: (options) ->
     @animeListColumns = []
     console.log options.AnimeListColumns
@@ -41,6 +45,30 @@ class GridManager
     animeId = grid.getUserData rId - 1,'animeId'
     chiika.animeDetailsPreRequest animeId
     window.location = "#Anime/" + animeId
+  addGrid: (name,grid) ->
+    @grids[name] = grid
+    console.log @getSearchInput()
+    grid.filterBy(1,@getSearchInput())
+  getGridByName: (name) ->
+    @grids[name]
+  getSearchInput: ->
+    $(".form-control").val()
+  filterGrid: (filter) ->
+    #Find out which grid to filter
+    if _.isUndefined @currentAnimeTab
+      @currentAnimeTab = 0
+    if @currentAnimeTab == 0 #watching
+      @getGridByName('watching').filterBy(1,filter)
+    if @currentAnimeTab == 1 #PlanToWatch
+      @getGridByName('ptw').filterBy(1,filter)
+    if @currentAnimeTab == 2 #watching
+      @getGridByName('completed').filterBy(1,filter)
+    if @currentAnimeTab == 3 #watching
+      @getGridByName('onhold').filterBy(1,filter)
+    if @currentAnimeTab == 4 #watching
+      @getGridByName('dropped').filterBy(1,filter)
+
+
 
 
 module.exports = GridManager

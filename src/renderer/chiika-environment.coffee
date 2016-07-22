@@ -42,7 +42,7 @@ class ChiikaEnvironment
 
     @emitter          = new Emitter
     @domManager       = new ChiikaDomManager
-    @gridManager      = new GridManager
+    @gridManager      = new GridManager(this)
     @animeHelper      = new AnimeDetailsHelper
 
 

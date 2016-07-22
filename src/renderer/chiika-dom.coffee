@@ -59,6 +59,7 @@ class ChiikaDomManager
 
     _.forEach requestedListData,(v,k) ->
       dhtmlGrid.setUserData v.recid,"animeId", v.animeId
+    chiika.gridManager.addGrid name,dhtmlGrid
     dhtmlGrid
 
 
