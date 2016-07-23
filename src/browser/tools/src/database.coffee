@@ -174,7 +174,8 @@ class Database
             series_synopsis : v.synopsis,
             series_image : v.image,
             series_title: v.title,
-            misc_score: v.score
+            misc_score: v.score,
+            series_episodes: v.episodes
           }
           upDoc.anime.push animeData
           application.logInfo v.id + " isn't on database. Adding..."
@@ -184,6 +185,8 @@ class Database
           match.series_synopsis = v.synopsis
           match.series_synonyms = v.synonyms
           match.series_image = v.image
+          match.series_episodes = v.episodes
+          match.misc_score = v.score
           application.logInfo "[InsertFromSearch] Updating " + v.id
         upDoc
       updatePredicate = (upDoc) ->
@@ -210,25 +213,114 @@ class Database
 
     @animeDb.stored.create 'searchByTitle', (nosql,next,params) => #Params {title,animeList}
       _l = require 'lodash'
+      stringjs = require 'string'
+      application.logDebug "Starting searching AnimeDB by title " + params.title
       fullMap = (doc) ->
         doc
+      manipulateString = (str) ->
+        str = stringjs(str).trimLeft().s
+        str = stringjs(str).trimRight().s
+
+        if str.substring(str.length - 1) == '.'
+          str = stringjs(str).left(str.length - 1).s
+        str
+
 
       cb = (err,selected) =>
         found = false
         result = {}
-        _l.forEach selected[0].anime,(v,k) ->
-          if v.series_title == params.title
-            findInAnimeList = _l.find params.animeList.anime, { series_animedb_id: v.series_animedb_id }
 
-            if findInAnimeList?
-              #On list,
-              _l.assign result, { list: true, db: true,listEntry: findInAnimeList }
-            else
-              _l.assign result, { list: false, db: true }
+        positiveMatch = (v) =>
+          findInAnimeList = _l.find params.animeList.anime, { series_animedb_id: v.series_animedb_id }
+
+          if findInAnimeList?
+            #On list,
+            _l.assign findInAnimeList,v
+            _l.assign result, { list: true, db: true,listEntry: findInAnimeList }
+          else
+            _l.assign result, { list: false, db: true }
+          result
+
+        _l.forEach selected[0].anime,(v,k) ->
+          #Try direct match first
+          if v.series_title == params.title || (v.series_english? && v.series_english == params.title)
+            # findInAnimeList = _l.find params.animeList.anime, { series_animedb_id: v.series_animedb_id }
+            #
+            # if findInAnimeList?
+            #   #On list,
+            #   _l.assign findInAnimeList,v
+            #   _l.assign result, { list: true, db: true,listEntry: findInAnimeList }
+            # else
+            #   _l.assign result, { list: false, db: true }
+            positiveMatch(v)
+            found = true
             return false
           else
-            #Not on DB either
-            _l.assign result, { list: false,db: false }
+            #Try manipulating strings
+            title = v.series_title
+            title = manipulateString(title)
+
+            if v.series_english?
+              english = v.series_english
+              english = manipulateString(english)
+
+            if params.title?
+              recognizedTitle = params.title
+              recognizedTitle = manipulateString(recognizedTitle)
+
+              if title == recognizedTitle || english == recognizedTitle
+                positiveMatch(v)
+                found = true
+                return false
+
+            #Try synonyms
+            if v.series_synonyms?
+              synonyms = v.series_synonyms.split(';')
+              _l.forEach synonyms, (vs,vk) ->
+                if vs == params.title
+                  positiveMatch(v)
+                  found = true
+                  return false
+        if !found
+          #Try generating entries that are close to this title
+          _l.assign result, { list: false,db: false }
+          if _l.isUndefined params.title
+            return
+          words = params.title.split(' ')
+          stringjs = require 'string'
+          suggestions = []
+          _l.forEach selected[0].anime, (v,k) ->
+            weight = 0
+            if v.series_title?
+              if stringjs(v.series_title).toLowerCase().contains(params.title.toLowerCase())
+                weight++
+            if v.series_english?
+              if stringjs(v.series_english).toLowerCase().contains(params.title.toLowerCase())
+                weight++
+
+            synonyms = v.series_synonyms.split(';')
+            _l.forEach synonyms, (vs,vk) ->
+              if vs? && vs.length > 0
+                if stringjs(vs).toLowerCase().contains(params.title.toLowerCase())
+                  weight++
+            #Try hard mode
+            _l.forEach words, (wv,wk) =>
+              if stringjs(v.series_title).toLowerCase().contains(wv.toLowerCase())
+                weight++
+
+              _l.forEach synonyms, (vs,vk) ->
+                if stringjs(vs).toLowerCase().contains(wv.toLowerCase())
+                  weight++
+
+
+            if weight > 0
+              suggestions.push { entry: v, weight: weight }
+
+          sortDescending = (a,b) ->
+            b.weight - a.weight
+          suggestions.sort(sortDescending)
+          _l.assign result, { suggestions: suggestions }
+
         next(result)
 
 
@@ -275,7 +367,7 @@ class Database
   searchAnimeListDbByTitle: (title,callback) ->
     onAnimeListLoad = (data) =>
       onSearchByTitle = (anime) ->
-        console.log anime
+        callback anime
       @animeDb.stored.execute 'searchByTitle', {title:title, animeList: data },onSearchByTitle
     @loadAnimelist onAnimeListLoad
   updateAnimeDbFromSearchData: (list,callback) ->

@@ -137,13 +137,39 @@ class Parser
     popularityExp = /Popularity:<\/span>\s#(.*)<br \/>/
     synopsisExp = /margin-bottom: 10px;">(.*)<a href=/
 
-    genre = (body.match genreRegexp)[2]
-    score = (body.match scoreExp)[1]
-    rank = (body.match rankExp)[1]
-    popularity = (body.match popularityExp)[1]
-    synopsis = (body.match synopsisExp)[1]
+    genreMatch = body.match genreRegexp
+    if genreMatch?
+      genre = (body.match genreRegexp)[2]
+    else
+      genre = "Unknown"
+    #application.logDebug "Genre: " + genre
+    scoreMatch = body.match scoreExp
+    if scoreMatch?
+      score = (body.match scoreExp)[1]
+    else
+      score = "-"
+    #application.logDebug "Score: " + score
+    rankMatch = body.match rankExp
+    if rankMatch?
+      rank = rankMatch[1]
+    else
+      rank = "Unknown"
+    #application.logDebug "Rank: " + rank
+    popularityMatch = body.match popularityExp
+    if popularityMatch?
+      popularity = popularityMatch[1]
+    else
+      popularity = "Unknown"
+    #application.logDebug "Popularity: " + popularity
+    synopsisMatch = body.match synopsisExp
+    if synopsisMatch?
+      synopsis = synopsisMatch[1]
+    else
+      synopsis = "-"
+    #application.logDebug "Syn: " + synopsis
 
     animeDetails = { genres: genre.split(',').map((str) => S(str).trimLeft().s), score: score, rank: rank , popularity: popularity , synopsis: synopsis }
+
     animeDetails
 
 

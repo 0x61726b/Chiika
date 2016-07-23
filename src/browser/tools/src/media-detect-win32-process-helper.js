@@ -46,7 +46,7 @@ function runLoop() {
       //currentPlayer is closed , continue searching
       var state = { status: 'mp_closed',player: currentPlayer };
       process.send(state);
-      
+
       console.log("Media Player is no long running " + currentPlayer.name + ". Starting to search..");
       var formatted = lastFoundTime.format('YYYY-MM-DD HH:mm:ss Z');
       console.log("Last date " + formatted);
@@ -73,7 +73,6 @@ function findMediaPlayers() {
       var formatted = now.format('YYYY-MM-DD HH:mm:ss Z');
       console.log("Current Player is " + currentPlayer.name + " Date:" + formatted);
       currentPlayer.PID = match.PID;
-      console.log(currentPlayer);
       lastFoundTime = now;
 
       loopIntervalID = setInterval(runLoop,loopInterval);

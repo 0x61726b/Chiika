@@ -38,7 +38,7 @@ class Tools
       callback()
 
     Database.init(dbReadyCallback)
-  
+
   getAnimelistOfUser: (userName,callback) ->
     if _.isEmpty(userName)
       application.logDebug "Empty user name."

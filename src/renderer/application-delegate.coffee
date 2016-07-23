@@ -25,6 +25,11 @@ class ApplicationDelegate
     ipcRenderer.send("call-window-method", "reload")
   saveOptions: (options) ->
     ipcRenderer.send 'save-options',options
+  hideWindow: ->
+    ipcRenderer.send("call-window-method","hide")
+  navigateToRoute: (route) -> # /Calendar or /Anime/25012
+    chiika.emitter.emit 'navigate-route', route
+    remote.getCurrentWindow().webContents.focus()
   openWindowDevTools: ->
     new Promise (resolve) ->
       process.nextTick ->

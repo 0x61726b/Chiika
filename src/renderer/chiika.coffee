@@ -52,6 +52,8 @@ RouterContainer = React.createClass
       #$(".main").removeClass("hidden")
       $(".main").fadeIn("slow")
       @forceUpdate()
+    chiika.emitter.on 'navigate-route',(args) =>
+      @props.history.push args
 
   render: ->
     <div>
@@ -64,6 +66,8 @@ RouterContainer = React.createClass
     </div>
 
 ChiikaRouter = React.createClass
+  componentDidMount: ->
+
   onEnter:(nextState) ->
     path = nextState.location.pathname
   animeDetailsRoute: (props) ->

@@ -17,6 +17,7 @@ React = require("react")
 ReactDOM = require("react-dom")
 
 path = require 'path'
+shell = require 'shell'
 
 
 module.exports = class AnimeDetailsHelper
@@ -27,26 +28,55 @@ module.exports = class AnimeDetailsHelper
     { status:3,text:"On Hold" },
     { status:4,text:"Dropped" }
   ],
-  getType: (anime) ->
-    type = anime.series_type
-    animeType = ""
-    bgImage = ""
+  getTitle: (anime) ->
+    if anime? && anime.series_title?
+      anime.series_title
+    else
+      return 'Chiika'
 
-    if type == "0"
-      animeType = "Unknown"
-    if type == "1"
-      animeType = "TV"
-    if type == "2"
-      animeType = "OVA"
-    if type == "3"
-      animeType = "Movie"
-    if type == "4"
-      animeType = "Special"
-    if type == "5"
-      animeType = "ONA"
-    if type == "6"
-      animeType = "Music"
-    animeType
+  getScore: (anime) ->
+    if anime? && anime.misc_score?
+      anime.misc_score
+    else
+      return 'Unknown'
+  getStudioName: (anime) ->
+    if anime? && anime.misc_studio?
+      anime.misc_studio.name
+    else
+      return 'Unknown'
+  getStudioLink: (anime) ->
+    if anime? && anime.misc_studio?
+      "<a href='http://myanimelist.net/anime/producer/" + anime.misc_studio.id + ">"+ anime.misc_studio.name + "</a>"
+    else
+      return 'Unknown'
+  getType: (anime) ->
+    if anime? && anime.series_type?
+      type = anime.series_type
+      animeType = ""
+      bgImage = ""
+
+      if type == "0"
+        animeType = "Unknown"
+      if type == "1"
+        animeType = "TV"
+      if type == "2"
+        animeType = "OVA"
+      if type == "3"
+        animeType = "Movie"
+      if type == "4"
+        animeType = "Special"
+      if type == "5"
+        animeType = "ONA"
+      if type == "6"
+        animeType = "Music"
+      animeType
+    else
+      'Unknown'
+  getSeriesEpisodes: (anime) ->
+    if anime? && anime.series_episodes?
+      anime.series_episodes
+    else
+      '??'
   getTypeImage: (anime) ->
     type = anime.series_type
     bgImage = ""
@@ -78,29 +108,30 @@ module.exports = class AnimeDetailsHelper
       status = "Plan to Watch"
     status
   getSeason: (anime) ->
-    startDate = anime.series_start
+    if anime? && anime.series_start?
+      startDate = anime.series_start
 
-    parts = startDate.split("-");
-    year = parts[0];
-    month = parts[1];
+      parts = startDate.split("-");
+      year = parts[0];
+      month = parts[1];
 
-    iMonth = parseInt(month);
+      iMonth = parseInt(month);
 
-    season = ""
-    sClass = ""
-    if iMonth > 0 && iMonth < 4
-      season =  "Winter " + year
-      sClass = "season-winter"
-    if iMonth > 3 && iMonth < 7
-      season =  "Spring " + year
-      sClass = "season-spring"
-    if iMonth > 6 && iMonth < 10
-      season =  "Summer " + year
-      sClass = "season-summer"
-    if iMonth > 9 && iMonth <= 12
-      season = "Fall " + year
-      sClass = "season-fall"
-    season
+      season = ""
+      sClass = ""
+      if iMonth > 0 && iMonth < 4
+        season =  "Winter " + year
+        sClass = "season-winter"
+      if iMonth > 3 && iMonth < 7
+        season =  "Spring " + year
+        sClass = "season-spring"
+      if iMonth > 6 && iMonth < 10
+        season =  "Summer " + year
+        sClass = "season-summer"
+      if iMonth > 9 && iMonth <= 12
+        season = "Fall " + year
+        sClass = "season-fall"
+      season
   getSeasonClass: (anime) ->
     startDate = anime.series_start
 
@@ -136,6 +167,11 @@ module.exports = class AnimeDetailsHelper
     synopsis = synopsis.replace(/&quot;/g,"'")
 
     synopsis
+  getSource: (anime) ->
+    if anime? && anime.misc_source?
+      anime.misc_source
+    else
+      'Unknown'
   getSourceImage: (anime) ->
     source = anime.misc_source
 
@@ -155,6 +191,12 @@ module.exports = class AnimeDetailsHelper
     id = $(e.target).attr("data-ch-id")
     url = "http://myanimelist.net/character/" + id
     shell.openExternal(url)
+  openAnimeOnMal: (anime) ->
+    if anime? && anime.series_animedb_id?
+      url = 'http://myanimelist.net/anime/' + anime.series_animedb_id
+      shell.openExternal(url)
+    else
+      console.log "There is a problem launching outside link"
   checkCoverImage: (id) ->
     coverPath = path.join('Data','Images',id + '.jpg')
     if chiika.checkIfFileExists coverPath

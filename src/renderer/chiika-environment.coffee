@@ -54,13 +54,30 @@ class ChiikaEnvironment
     ipcRenderer.on 'window-reload', (event,arg) =>
       @logDebug("IPC: window-reload")
 
-    ipcRenderer.on 'request-search-response', (event,arg) =>
-      @logDebug 'IPC: request-search-response'
-      if _.isArray arg.results
-        @logInfo "Search returned " + arg.results.length + " entries"
-      else
-        @logInfo "Search returned 1 entry"
+    ipcRenderer.on 'request-navigate-route', (event,arg) =>
+      @applicationDelegate.navigateToRoute arg
+
+    ipcRenderer.on 'mp-set-video-info', (event,arg) =>
+      chiika.logDebug "mp-set-video-info"
+      chiika.logDebug arg
+      if arg.listEntry? && arg.parseInfo?
+        currentEpisode = arg.parseInfo.EpisodeNumber
+        totalEpisodes = arg.listEntry.series_episodes
+
+
+
+        cover = @getAnimeCoverById arg.listEntry.series_animedb_id
+
+        if cover == './../assets/images/avatar.jpg'
+          cover = './../assets/images/chiika.png'
+        @sendNotification('Playing...',currentEpisode + '/' + totalEpisodes + '\n' + arg.listEntry.series_title,cover)
+
+
+    ipcRenderer.on 'request-search-anime-response', (event,arg) =>
+      @logDebug 'IPC: request-search-anime-response'
+      @animeDb = arg.list
       @emitter.emit 'anime-details-update'
+
 
     ipcRenderer.on 'download-image', (event,arg) =>
       @logDebug('IPC: download-image')
@@ -68,10 +85,12 @@ class ChiikaEnvironment
 
 
     ipcRenderer.on 'request-anime-details-small-response', (event,arg) =>
+      @logDebug('IPC: request-anime-details-small-response')
       @animeDb = arg.newDb
       @emitter.emit 'anime-details-update', {updatedEntry: arg.updatedEntry }
 
     ipcRenderer.on 'request-anime-details-mal-page-response', (event,arg) =>
+      @logDebug('IPC: request-anime-details-mal-page-response')
       @animeDb = arg.newDb
       @emitter.emit 'anime-details-update', {updatedEntry: arg.updatedEntry }
 
@@ -100,8 +119,10 @@ class ChiikaEnvironment
     ipcRenderer.send 'request-calendar-data'
 
 
-  sendNotification: (notf) ->
-    notf = new Notification('Test',{ body: 'Test notification sent by Chiika!', icon: 'D:/Arken/C++/ElectronProjects/Chiika/src/assets/images/chiika.png'})
+  sendNotification: (title,body,icon) ->
+    if !icon?
+      icon = __dirname + "/../assets/images/chiika.png"
+    notf = new Notification(title,{ body: body, icon: icon})
   getWorkingDirectory: ->
     process.cwd()
   getResourcesPath: ->
@@ -157,6 +178,9 @@ class ChiikaEnvironment
     if @animeList?
       _.forEach(@animeList.anime, (value,k) =>
         animeStatus = value['my_status']
+
+        if !animeStatus?
+          return
 
         animeDbResult = _.find(@animeDb.anime, { series_animedb_id: value.series_animedb_id} )
 

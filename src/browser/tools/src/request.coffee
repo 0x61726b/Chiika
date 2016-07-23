@@ -75,6 +75,7 @@ class RequestAPI
       Parser.ParseSync(body)
             .then (result) ->
               callback { success: true, anime: result.anime , statusCode: response.statusCode }
+    @handleRequestResult error,response,body,callback
   #getAnimelist or getMangalist callback, also includes user info
   onGetList: (error,response,body,callback) ->
     if !error && response?

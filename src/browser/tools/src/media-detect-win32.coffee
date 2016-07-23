@@ -42,8 +42,8 @@ class MediaDetect
       if m.status == 'mp_running_video'
         if @currentVideoFile.AnimeTitle != m.result.AnimeTitle || @currentVideoFile.EpisodeNumber != m.result.EpisodeNumber
           application.emitter.emit 'mp-video-changed',m.result
-          console.log "Detected Anime Changed: " + @currentVideoFile.AnimeTitle + " Ep: " + @currentVideoFile.EpisodeNumber
-          console.log m.result.AnimeTitle + " Ep: " + m.result.EpisodeNumber
+          application.logInfo "Detected Anime Changed: " + @currentVideoFile.AnimeTitle + " Ep: " + @currentVideoFile.EpisodeNumber
+          application.logInfo m.result.AnimeTitle + " Ep: " + m.result.EpisodeNumber
           @currentVideoFile = m.result
 
         application.emitter.emit 'mp-running-video',m.result
