@@ -12,7 +12,7 @@
 ![Screenshot - Anime List](http://i.imgur.com/lK4llMI.png)
 ![Details](http://i.imgur.com/r6KHf7T.png)
 ![Kalender](http://i.imgur.com/6GKaOBn.png)
-![Scrobbler](http://i.imgur.com/KNHMLQR.png)
+![Scrobbler](http://i.imgur.com/YTQRMtt.png)
 
 #Running
 
