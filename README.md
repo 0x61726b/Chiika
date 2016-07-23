@@ -11,7 +11,7 @@
 ![Login](http://i.imgur.com/56cRNUx.png)
 ![Screenshot - Anime List](http://i.imgur.com/lK4llMI.png)
 ![Details](http://i.imgur.com/r6KHf7T.png)
-![Scrobbler](http://i.imgur.com/YTQRMtt.png)
+![Scrobbler](http://i.imgur.com/gsAtn1L.png)
 
 #Running
 
