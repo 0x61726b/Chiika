@@ -30,7 +30,7 @@ gulp serve
 - Full MyAnimelist integration (Anime/Manga list)
 - Local database using NoSQL
 - Anime video files/media player recognition *Win32*
-- Calendar using [Senpai](senpai.moe) season data
+- Calendar using [Senpai](http://senpai.moe) season data
 - Searching & scraping off anime data from MyAnimelist
 - Rich list/grid features (sorting,filtering etc.)
 
