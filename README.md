@@ -11,7 +11,7 @@
 ![Login](http://i.imgur.com/56cRNUx.png)
 ![Screenshot - Anime List](http://i.imgur.com/lK4llMI.png)
 ![Details](http://i.imgur.com/r6KHf7T.png)
-![Scrobbler](http://i.imgur.com/YTQRMtt.png)
+![Scrobbler](http://i.imgur.com/gsAtn1L.png)
 
 #Running
 
@@ -30,7 +30,7 @@ gulp serve
 - Full MyAnimelist integration (Anime/Manga list)
 - Local database using NoSQL
 - Anime video files/media player recognition *Win32*
-- Calendar using [Senpai](senpai.moe) season data
+- Calendar using [Senpai](http://senpai.moe) season data
 - Searching & scraping off anime data from MyAnimelist
 - Rich list/grid features (sorting,filtering etc.)
 
