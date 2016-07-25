@@ -19,6 +19,7 @@ DefaultOptions = {
   UseAlternateListView : false,
   RememberWindowSizeAndPosition: true,
   DisableBubbleNotifications: false,
+  EnableBrowserDetection: false,
   AnimeListColumns:[
     {column: {
        name:"typeWithIcon"

@@ -32,7 +32,7 @@ class MediaDetect
     @anitomy = new AnitomyNode()
   spawn: ->
     str = JSON.stringify(mediaPlayerList)
-    child = cp.fork("#{__dirname}/../../../media-detect-win32-process-helper.js",[str,true])
+    child = cp.fork("#{__dirname}/../../../media-detect-win32-process-helper.js",[str,!application.appOptions.EnableBrowserDetection])
 
     child.on 'close',(code,signal) ->
       application.logDebug "Media detector process exited.This shouldn't happen."
@@ -58,15 +58,26 @@ class MediaDetect
                 parseResult = @anitomy.Parse(recognizedTitle);
                 m.result = parseResult
 
+                @currentPlayer = { browser: true }
+            else
+              if @currentPlayer != null
+                application.emitter.emit 'mp-closed'
+                @currentPlayer = null
+
+                application.logInfo "Detected Stream Media is closed or inactive."
+
         if @currentVideoFile.AnimeTitle != m.result.AnimeTitle || @currentVideoFile.EpisodeNumber != m.result.EpisodeNumber
           application.emitter.emit 'mp-video-changed',m.result
-          application.logInfo "Detected Anime Changed: " + @currentVideoFile.AnimeTitle + " Ep: " + @currentVideoFile.EpisodeNumber
-          application.logInfo m.result.AnimeTitle + " Ep: " + m.result.EpisodeNumber
+          if !_.isUndefined m.result.AnimeTitle
+            application.logInfo "Detected Anime Changed from : " + @currentVideoFile.AnimeTitle + " Ep: " + @currentVideoFile.EpisodeNumber
+            application.logInfo m.result.AnimeTitle + " Ep: " + m.result.EpisodeNumber
           @currentVideoFile = m.result
 
         application.emitter.emit 'mp-running-video',m.result
       if m.status == 'mp_closed'
         application.emitter.emit 'mp-closed'
+
+        application.logInfo "Detected Media has been closed."
 
         @currentVideoFile = { EpisodeNumber: -1 }
         @currentPlayer = null

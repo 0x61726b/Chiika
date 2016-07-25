@@ -62,9 +62,6 @@ class Application
     global.application = this
     @emitter = new Emitter
 
-    @mediaDetector = new MediaDetect()
-    @mediaDetector.spawn()
-
     app.commandLine.appendSwitch 'js-flags','expose_gc'
 
 
@@ -78,6 +75,9 @@ class Application
     @setupChiikaConfig()
 
     @handleEvents()
+
+    @mediaDetector = new MediaDetect()
+    @mediaDetector.spawn()
 
     Menubar = new menubar()
 
@@ -386,20 +386,20 @@ class Application
         else
           application.logInfo("Error: " + response.errorMessage)
           event.sender.send('set-user-login-response',response)
-    ipcMain.on 'request-video-info', (event) =>
-      application.logDebug("IPC: request-video-info")
-
-      if @mediaDetector.currentPlayer?
-        dbQueryResultCb = (result) =>
-          application.logDebug "Sending (Browser->Renderer) mp-set-video-info"
-          _.assign result, { parseInfo: @mediaDetector.currentVideoFile }
-          event.sender.send 'mp-set-video-info', result
-
-        if !Database.isReady 'animelistDb'
-          @emitter.on 'animelist-ready', ->
-            Database.searchAnimeListDbByTitle @mediaDetector.currentVideoFile.AnimeTitle,dbQueryResultCb
-        else
-          Database.searchAnimeListDbByTitle @mediaDetector.currentVideoFile.AnimeTitle,dbQueryResultCb
+    # ipcMain.on 'request-video-info', (event) =>
+    #   application.logDebug("IPC: request-video-info")
+    #
+    #   if @mediaDetector.currentPlayer?
+    #     dbQueryResultCb = (result) =>
+    #       application.logDebug "Sending (Browser->Renderer) mp-set-video-info"
+    #       _.assign result, { parseInfo: @mediaDetector.currentVideoFile }
+    #       event.sender.send 'mp-set-video-info', result
+    #
+    #     if !Database.isReady 'animelistDb'
+    #       @emitter.on 'animelist-ready', ->
+    #         Database.searchAnimeListDbByTitle @mediaDetector.currentVideoFile.AnimeTitle,dbQueryResultCb
+    #     else
+    #       Database.searchAnimeListDbByTitle @mediaDetector.currentVideoFile.AnimeTitle,dbQueryResultCb
 
     ipcMain.on 'request-navigate-route', (event,route) =>
       @window.window.webContents.send 'request-navigate-route',route
@@ -410,6 +410,9 @@ class Application
         @mb.window.webContents.send 'mp-found',mp
 
     @emitter.on 'mp-video-changed', (mp) =>
+      if !mp.AnimeTitle?
+        return
+      
       if @mbReady
         @mb.window.webContents.send 'mp-video-changed',mp
         recognition = { tries: 0 }
