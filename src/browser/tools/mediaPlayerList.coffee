@@ -16,7 +16,9 @@
 
 MediaPlayerList = [
   { name: "MPC" , class: "MediaPlayerClassicW", executables: ['mpc-hc', 'mpc-hc64'] },
-  { name: "BSPlayer" , class: "BSPlayer", executables: ['bsplayer'] }
+  { name: "BSPlayer" , class: "BSPlayer", executables: ['bsplayer'] },
+  { name: "Google Chrome" , class: "Chrome_WidgetWin_1", browser:0, executables: ['chrome'] },
+  { name: "Mozilla Firefox" , class: "MozillaWindowClass", browser: 1, executables: ['firefox'] }
 ]
 
 module.exports = MediaPlayerList

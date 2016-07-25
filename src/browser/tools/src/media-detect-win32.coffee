@@ -20,15 +20,19 @@ cp = require 'child_process'
 psnode = require 'ps-node'
 path = require 'path'
 mediaPlayerList = require '../mediaPlayerList' #Temp
+StreamServices = require './stream-services'
+AnitomyNode = require(process.cwd() + '/vendor/anitomy-node/AnitomyNode.node').Root
 
 class MediaDetect
   currentPlayer: null,
   currentVideoFile: { EpisodeNumber: -1 }
   constructor: ->
     #@currentVideoFile = { EpisodeNumber: -1 }
+    @streamServices = new StreamServices
+    @anitomy = new AnitomyNode()
   spawn: ->
     str = JSON.stringify(mediaPlayerList)
-    child = cp.fork("#{__dirname}/../../../media-detect-win32-process-helper.js",[str])
+    child = cp.fork("#{__dirname}/../../../media-detect-win32-process-helper.js",[str,true])
 
     child.on 'close',(code,signal) ->
       application.logDebug "Media detector process exited.This shouldn't happen."
@@ -40,6 +44,20 @@ class MediaDetect
         @currentVideoFile = { EpisodeNumber: -1 }
 
       if m.status == 'mp_running_video'
+        if m.browser
+          browserTitle = m.result.title
+          browserLink = m.result.link
+
+          if browserLink?
+            streamService = @streamServices.getStreamServiceFromUrl browserLink
+
+            if streamService?
+              recognizedTitle = @streamServices.cleanStreamServiceTitle streamService,browserTitle
+
+              if recognizedTitle?
+                parseResult = @anitomy.Parse(recognizedTitle);
+                m.result = parseResult
+
         if @currentVideoFile.AnimeTitle != m.result.AnimeTitle || @currentVideoFile.EpisodeNumber != m.result.EpisodeNumber
           application.emitter.emit 'mp-video-changed',m.result
           application.logInfo "Detected Anime Changed: " + @currentVideoFile.AnimeTitle + " Ep: " + @currentVideoFile.EpisodeNumber

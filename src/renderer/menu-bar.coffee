@@ -115,6 +115,13 @@ Menubar = React.createClass
     if @animeData.listEntry.series_animedb_id?
       ipcRenderer.send 'request-navigate-route','/Anime/' + @animeData.listEntry.series_animedb_id
       remote.BrowserWindow.hide()
+  getTitle: () ->
+    if @animeData.listEntry? && @animeData.listEntry.series_title?
+      @animeData.listEntry.series_title
+    else if @animeData.parseInfo? && @animeData.parseInfo.AnimeTitle?
+      @animeData.parseInfo.AnimeTitle
+    else
+      'Not Recognized Title'
   render: () ->
     (<div className="menubar-container" id="menubarMain">
   		<div className="menubar-content">
@@ -131,7 +138,7 @@ Menubar = React.createClass
   				</div>
   				<div className="menubar-infoColumn">
   					<div className="menubar-animeTitle">
-  						<h4>{ @animeHelper.getTitle(@animeData.listEntry) }</h4>
+  						<h4>{ @getTitle() }</h4>
   					</div>
   					<div className="menubar-info">
   						<div className="menubar-info-text">

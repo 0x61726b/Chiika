@@ -53,11 +53,23 @@ class RequestAPI
     _self = this
     request 'http://myanimelist.net/malappinfo.php?u=' + userName + '&type=manga&status=all', (error,response,body) -> _self.onGetList error,response,body,callback
 
+  #Download an image on URL
   downloadImage: (url,fileName,ext,cb) ->
     downloadPath = path.join(application.chiikaHome,'Data','Images',fileName + '.' + ext)
     request.head url, (error,response,body) ->
       request(url).pipe(fs.createWriteStream(downloadPath)).on('close',cb)
 
+  #Get RSS feed from Nyaa
+  nyaa: (url,callback) ->
+    request url, (error,response,body) => @onNyaa error,response,body,callback
+
+  onNyaa: (error,response,body,callback) ->
+    if response.statusCode == 200 && !error
+      Parser.ParseSync(body)
+            .then (result) ->
+              callback { success: true, rssFeed: result , statusCode: response.statusCode }
+
+    @handleRequestResult error,response,body,callback
   onGetAnimeDetailsMalPage: (error,response,body,callback) ->
     if response.statusCode == 200 & !error
       callback { success: true, animeDetails: Parser.ParseAnimeDetailsMalPage(body), statusCode: response.statusCode }

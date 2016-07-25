@@ -167,6 +167,9 @@ class Application
     ipcMain.on 'request-anime-cover-image-download', (event,args) =>
       application.logDebug("IPC: request-anime-cover-image-download")
 
+      if _.isUndefined args.coverLink
+        console.log event.sender
+
       @tools.downloadAnimeCover args.coverLink,args.animeId, (response) ->
         event.sender.send 'request-anime-cover-image-download-response', { animeId: args.animeId }
 
@@ -414,9 +417,12 @@ class Application
         _.assign result, { parseInfo: mp }
         recognition.tries++
 
-        console.log "Try:"+ recognition.tries
+        application.logDebug "Recognition attempt #"+ recognition.tries
 
-        if recognition.tries >= 8
+        if recognition.tries >= 3
+          @sendIPC @window.window.webContents, 'mp-set-video-info',result
+          @sendIPC @mb.window.webContents, 'mp-set-video-info',result
+          application.logDebug "Recognition failed."
           return
 
         if result.list && result.db
@@ -429,7 +435,7 @@ class Application
 
         if !result.list || !result.db
           title = result.parseInfo.AnimeTitle
-          application.logDebug "Title not recognized " + title + ". Try : " + recognition.tries + "."
+          application.logDebug "Title not recognized " + title + ". Attempt #" + recognition.tries + "."
 
 
           @requestAnimeSearch title, (completed) =>
