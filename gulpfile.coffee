@@ -247,6 +247,13 @@ do Your_Application_will_ = () ->
     gulp.watch([srcDir + '/styles/*.scss'],['inject:css'])
     gulp.watch([serveDir + '/styles/**/*.css', serveDir + '/renderer/**/*.html', serveDir + '/renderer/**/*.js'], electron.reload)
     gulp.watch([serveDir + '/browser/Application.js'], electron.restart)
+    gulp.watch([serveDir + '/browser/api-manager.js'], electron.restart)
+    gulp.watch([serveDir + '/browser/ipc-manager.js'], electron.restart)
+    gulp.watch([serveDir + '/browser/chiika-public.js'], electron.restart)
+    gulp.watch([serveDir + '/browser/database-manager.js'], electron.restart)
+    gulp.watch([serveDir + '/browser/db-users.js'], electron.restart)
+    gulp.watch([serveDir + '/browser/db-custom.js'], electron.restart)
+    gulp.watch([serveDir + '/browser/db-interface.js'], electron.restart)
   gulp.task 'clean', (done) ->
     del [serveDir, distDir, releaseDir], () -> done()
   gulp.task('default', ['build'])
