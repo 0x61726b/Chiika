@@ -254,6 +254,12 @@ do Your_Application_will_ = () ->
     gulp.watch([serveDir + '/browser/db-users.js'], electron.restart)
     gulp.watch([serveDir + '/browser/db-custom.js'], electron.restart)
     gulp.watch([serveDir + '/browser/db-interface.js'], electron.restart)
+    gulp.watch([serveDir + '/browser/db-ui.js'], electron.restart)
+    gulp.watch([serveDir + '/browser/db-view.js'], electron.restart)
+    gulp.watch([serveDir + '/browser/request-manager.js'], electron.restart)
+    gulp.watch([serveDir + '/browser/ui-manager.js'], electron.restart)
+    gulp.watch([serveDir + '/browser/ui-item.js'], electron.restart)
+    gulp.watch([serveDir + '/browser/ui-tabView.js'], electron.restart)
   gulp.task 'clean', (done) ->
     del [serveDir, distDir, releaseDir], () -> done()
   gulp.task('default', ['build'])

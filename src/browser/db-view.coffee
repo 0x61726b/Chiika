@@ -20,21 +20,24 @@ _when         = require('when')
 
 {InvalidParameterException} = require './exceptions'
 
-module.exports = class DbUsers extends IDb
+module.exports = class DbView extends IDb
   constructor: (params={}) ->
-    @name = 'Users'
+    @name = 'View_' + params.viewName
     defer = _when.defer()
+    @promise = defer.promise
 
-    params.promises.push defer.promise
-    super { dbName: @name, promises:params.promises }
+    super { dbName: @name,params}
 
     onAll = (data) =>
-      @users = data
-      chiika.logger.debug("[yellow](Database) #{@name} loaded. Data Count #{@users.length} ")
+      @views = data
+      chiika.logger.debug("[yellow](Database) #{@name} loaded. Data Count #{@views.length} ")
       chiika.logger.info("[yellow](Database) #{@name} has been succesfully loaded.")
 
+      defer.resolve()
+
     loadDatabase = =>
-      @all(onAll).then(-> defer.resolve())
+      @all(onAll)
+
 
     if @isReady()
       loadDatabase()
@@ -43,13 +46,7 @@ module.exports = class DbUsers extends IDb
         loadDatabase()
 
 
-  getUser: (userName) ->
-    match = _.find @users,{ userName: userName }
-    if _.isUndefined match
-      chiika.logger.warn("The user #{userName} you are trying to access doesn't exist.")
-    else
-      match
-    #console.log data
+
 
   #
   # Adds user into the database.
@@ -60,11 +57,16 @@ module.exports = class DbUsers extends IDb
   # @option user [String] password Password of the user
   # @option user [Boolean] isPrimary When set, this user will be primary.
   # @todo Add parameter validation
-  addUser: (user,callback) ->
-    @insertRecord user,=>
-      if !_.isUndefined callback
-        callback user
-
+  save: (data,callback) ->
+    if !@isReady()
+      @on 'load', =>
+        @insertRecord data,=>
+          if !_.isUndefined callback
+            callback user
+    else
+      @insertRecord data,=>
+        if !_.isUndefined callback
+          callback user
     #@insertRecordWithKey user,callback
 
   #

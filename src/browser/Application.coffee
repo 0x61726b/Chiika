@@ -47,7 +47,7 @@ MediaDetect = require('./tools/src/media-detect-win32')
 
 keypress = require 'keypress'
 menubar = require './menubar'
-
+colors = require 'colors'
 Logger = require './logger'
 # ---------------------------
 #
@@ -55,6 +55,9 @@ Logger = require './logger'
 
 APIManager = require './api-manager'
 DbManager = require './database-manager'
+RequestManager = require './request-manager'
+Parser = require './parser'
+UIManager = require './ui-manager'
 
 process.on('uncaughtException',(err) -> console.log err)
 
@@ -70,8 +73,6 @@ class Application
 
     @logger = new Logger("verbose").logger
 
-
-
     @parseCommandLine()
     @setupChiikaConfig()
 
@@ -80,8 +81,16 @@ class Application
     @emitter            = new Emitter
     @apiManager         = new APIManager()
     @dbManager          = new DbManager()
+    @requestManager     = new RequestManager()
+    @parser             = new Parser()
+    @uiManager          = new UIManager()
 
-    @dbManager.onLoad( => @apiManager.compileUserScripts() )
+    @dbManager.onLoad =>
+      @uiManager.preloadUIItems()
+      @apiManager.compileUserScripts()
+
+    @apiManager.on 'script-compiled', =>
+      @apiManager.chiikaApi.emit 'auth'
 
 
   handleEvents: ->
@@ -89,8 +98,11 @@ class Application
     app.on 'window-all-closed', ->
       app.quit()
 
-    app.on 'will-quit', () ->
+    app.on 'will-quit', () =>
       globalShortcut.unregisterAll()
+
+      @apiManager.clearCache()
+
     app.on 'ready', =>
       @registerShortcuts()
       @logInfo("Initializing...")

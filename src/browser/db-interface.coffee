@@ -17,6 +17,7 @@ NoSQL     = require 'NoSQL'
 path      = require 'path'
 _         = require 'lodash'
 _when     = require 'when'
+colors    = require 'colors'
 {Emitter} = require 'event-kit'
 {InvalidParameterException} = require './exceptions'
 
@@ -31,16 +32,19 @@ module.exports = class IDb
   # @return
   constructor: (params={}) ->
     { @dbName, promises } = params
-    defer = _when.defer()
-    @promise = defer.promise
-    promises.push @promise
+    if promises?
+      defer = _when.defer()
+      @promise = defer.promise
+      promises.push @promise
 
     @dbPhysicalPath = path.join(application.getAppHome(),"Data","dbs",@dbName + ".nosql")
     @nosql = NoSQL.load(path.join(application.getAppHome(),"Data","dbs",@dbName + ".nosql"))
     chiika.logger.debug "IDb::constructor {dbName:#{@dbName}}"
     chiika.logger.debug "Idb::constructor {dbPhysicalPath:#{@dbPhysicalPath}}"
 
-    @on 'load', -> defer.resolve()
+    @on 'load', ->
+      if promises?
+        defer.resolve()
 
 
   ##
@@ -48,90 +52,58 @@ module.exports = class IDb
   # @param {callback} callback callback that will receive the database object
   # @return
   all: (callback) ->
-    chiika.logger.debug("IDb::all")
-    map = (doc) ->
-      doc
+    new Promise (resolve) =>
+      chiika.logger.debug("IDb::all")
+      map = (doc) ->
+        doc
 
-    icall = (err,selected) ->
-      if err
-        throw err
-      callback selected
-    @nosql.all map,icall
+      icall = (err,selected) ->
+        if err
+          throw err
+        callback selected
+        resolve selected
+      @nosql.all map,icall
 
-
+  ##
+  # Returns one row of database where key == value
+  # @param {String} key Key
+  # @param {String} value Value
+  # @param {Object} callback Callback
+  # @return
   one: (key,value,callback) ->
-    chiika.logger.debug("IDb::one")
+    new Promise (resolve) =>
+      chiika.logger.debug("IDb::one")
 
-    map = (doc) ->
-      if doc[key] == value
-        return doc
-    onOne = (err,doc) ->
-      if err
-        throw err
-      chiika.logger.debug("Idb::onOne")
-      callback doc
-    @nosql.one(map,onOne)
+      map = (doc) ->
+        if doc[key] == value
+          return doc
+      onOne = (err,doc) ->
+        if err
+          throw err
+        chiika.logger.debug("Idb::onOne")
+        resolve(doc)
+        #callback doc
+      @nosql.one(map,onOne)
 
   ##
   # Internal insert record method
-  _insertRecord: (record,callback) ->
+  internalInsertRecord: (record,callback) ->
     onInsert = (err,count) ->
       if err
         throw err
       chiika.logger.debug("Idb::onInsertComplete #{count}")
       callback(err,count)
-    @nosql.insert record, callback,'IDb::insertRecord'
+    @nosql.insert record, onInsert,'IDb::insertRecord'
 
-    chiika.logger.debug("IDb::_insertRecord")
+    chiika.logger.debug("IDb::internalInsertRecord")
 
-  # Insert a single record
-  # No duplicate check
-  # beware using this
-  insertRecord: (record,callback) ->
-    chiika.logger.debug("IDb::insertRecord")
-
-    @_insertRecord record,callback
-
-  #When inserting this method checks for if one of the recrods contains 'key' with the same value from record.key , it will cancel the insert op.
+  #When inserting this method checks for if one of the recrods contains 'key=value'
   # @param {Object} record
-  # @option record [String] userName
-  # @option record [String] password
-  # @option record [Boolean] isPrimary
-  # @option key [String] key String must be a property of record
+  # @param {Object} callback Callback
+  # @todo Test array insert
   # @return
-  insertRecordWithKey: (record,callback) ->
-    chiika.logger.debug("IDb::insertRecordWithKey")
-
-    if _.isArray record
-      _.forEach record, (v,k) =>
-        keys = Object.keys(v)
-        key = keys[0]
-
-        onKeyExistsCheck = (exists) =>
-          if !exists.exists
-            @_insertRecord v,callback
-          else
-            chiika.logger.verbose("Key already exists '#{key}' . No need to insert, if you meant to update, use update method.")
-        @checkIfKeyExists v,onKeyExistsCheck
-
-
-    else
-      keys = Object.keys(record)
-      key = keys[0]
-
-      onKeyExistsCheck = (exists) =>
-        if !exists.exists
-          @_insertRecord record,callback
-        else
-          chiika.logger.verbose("Key already exists '#{key}' . No need to insert, if you meant to update, use update method.")
-      @checkIfKeyExists record,onKeyExistsCheck
-
-
-
-
-
-  insertRecordWithoutKey: (record,callback) ->
-    chiika.logger.debug("Idb::insertRecordWithoutKey")
+  insertRecord: (record,callback) ->
+    chiika.logger.debug("Idb::insertRecord")
 
     if _.isArray record
       _.forEach record, (v,k) =>
@@ -141,9 +113,10 @@ module.exports = class IDb
         #Check if the value exists
         onKeyExistsCheck = (exists) =>
           if !exists.exists
-            console.log "Doesnt exists"
+            @internalInsertRecord v,callback
+            chiika.logger.verbose("[magenta](#{@name}) - Added new record #{key}:#{record[key]}")
           else
-            console.log "Exists"
+            chiika.logger.verbose("[magenta](#{@name}) - Key-value already exists #{key}:#{v[key]}. No need to insert, if you meant to update, use update method.")
         @checkIfKeyValueExists(v,onKeyExistsCheck)
     else
       keys = Object.keys(record)
@@ -152,10 +125,11 @@ module.exports = class IDb
       #Check if the value exists
       onKeyExistsCheck = (exists) =>
         if !exists.exists
-          @_insertRecord record,callback
-          chiika.logger.verbose("Added new record #{key}:#{record[key]}")
+          @internalInsertRecord record,callback
+          chiika.logger.verbose("[magenta](#{@name}) - Added new record #{key}:#{record[key]}")
         else
-          chiika.logger.verbose("Key-value already exists #{key}:#{record[key]}. No need to insert, if you meant to update, use update method.")
+          chiika.logger.verbose("[magenta](#{@name}) - Key-value already exists #{key}:#{record[key]}. No need to insert, if you meant to update, use update method.")
+          callback null,0
       @checkIfKeyValueExists(record,onKeyExistsCheck)
 
 
@@ -172,7 +146,7 @@ module.exports = class IDb
     chiika.logger.debug("IDb::updateRecord")
     affectedRows = 0
     #This function runs for every row in database !!
-    updateFnc = (doc) ->
+    updateFnc = (doc) =>
       key = Object.keys(doc)[0]
       if _.isArray record
         #Find this 'doc' if its on the record array
@@ -183,18 +157,18 @@ module.exports = class IDb
         if !_.isUndefined match
           doc = match
           affectedRows++
-          chiika.logger.verbose("Updated record with #{key}:#{doc[key]}")
+          chiika.logger.verbose("[magenta](#{@name}) - Updated record with #{key}:#{doc[key]}")
       else
         if key == Object.keys(record)[0] && record[key] == doc[key]
           doc = record
-          chiika.logger.verbose("Updated record with #{key}:#{doc[key]}")
+          chiika.logger.verbose("[magenta](#{@name}) - Updated record with #{key}:#{doc[key]}")
       return doc
 
     updateCallback = =>
       if _.isArray record
         keyExistsCallback = (result) ->
           if !result.exists
-            chiika.logger.warn("You are trying to update a key <#{result.key}> that's not in the database.")
+            chiika.logger.warn("[magenta](#{@name}) - You are trying to update a key <#{result.key}> that's not in the database.")
         record.map( (key,i) => @checkIfKeyValueExists(key,keyExistsCallback) )
 
       callback { rows: affectedRows }
@@ -204,6 +178,15 @@ module.exports = class IDb
     @nosql.update()
     #@nosql.update( updateCallback, callback, 'IDb::updateRecord')
     chiika.logger.debug("IDb::updateRecord")
+
+
+  #
+  # Remove records. Removes rows where key=value and record = [values]
+  # Example Usage:
+  #   @example removeRecords [ { userName: 'arkenthera' }]
+  #   @example revemoRecords [ { name: 'mykey' }]
+  # @param record
+  # @return
   removeRecords: (record,callback) ->
     chiika.logger.debug("IDb::removeRecord")
 
@@ -222,21 +205,16 @@ module.exports = class IDb
       removeThisRecord
 
     removeCallback = (err,count) ->
-      chiika.logger.verbose("Removed keys - #{count}")
+      chiika.logger.verbose("[magenta](#{@name}) - Removed keys - #{count}")
 
     @nosql.remove removeFnc,removeCallback,"Remove records"
-  checkIfKeyExists: (key,callback) ->
-    onAll = (data) =>
-      exists = false
-      _.forEach data, (v,k) =>
-        #Assume the first property is the key
-        if Object.keys(v)[0] == Object.keys(key)[0]
-          exists = true
-          return false
-      callback { exists: exists, key: Object.keys(key)[0] }
-    @all(onAll)
 
 
+  #
+  # Does a where operation ( where key==value ) then returns the selected rows
+  # @param {Object} key The object which holds the key and value
+  # @param {Object} callback Callback
+  # @return
   checkIfKeyValueExists: (key,callback) ->
     onAll = (data) =>
       exists = false

@@ -16,6 +16,7 @@
 
 moment = require 'moment'
 winston = require 'winston'
+stringjs = require 'string'
 
 module.exports = class Logger
   logger: null
@@ -28,19 +29,43 @@ module.exports = class Logger
     @logger = new (winston.Logger)({
       transports: [transport]
     })
+    winston.addColors( { hue: 'green' })
 
 
   #Formats the log string
   # @param options {Object} Options object passed by winston.
   format: (options) ->
     string = moment().format('DD/MM HH:mm:ss') + ' '+  winston.config.colorize(options.level) + ' '
-    if options.message != undefined
-      string += options.message
-    else
-      string += ''
 
-    if options.meta && Object.keys(options.meta).length
-      string += '\n\t\t\t' + JSON.stringify(options.meta)
+    regex = /\[(red|green|blue|yellow|cyan|magenta|)\]\((.*?)\)/g
+    appendToStr = ''
+    fullMatch = ''
+    while chMatch = regex.exec options.message
+      fullMatch = chMatch[0]
+      color = chMatch[1]
+      text = chMatch[2]
+
+      colorObj = {}
+      colorObj[text] = color
+      winston.addColors( colorObj )
+      appendToStr += winston.config.colorize(text)
+    string += appendToStr
+
+    if fullMatch != ''
+      msg = options.message
+      msg = stringjs(msg).replace(fullMatch,'').s
+      string += msg
     else
-      string += ''
+      string += options.message
+
+
+
+
+
+
+
+    # if options.meta && Object.keys(options.meta).length
+    #   string += '\n\t\t\t' + JSON.stringify(options.meta)
+    # else
+    #   string += ''
     return string

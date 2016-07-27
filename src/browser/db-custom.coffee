@@ -39,10 +39,13 @@ module.exports = class DbCustom extends IDb
   # Adds a key into the database.
   # Will check if the parameter use already exists in the database
   # If it exists it will cancel the operation.
+  # Example Usage
+  #   @example addKey { name: 'mykey', value: { myvalue:'15', myArray:[1,2,3]}}
   # @param [Object] user Object
-  # @option user [String] Key
-  # @option user [String] Value
+  # @option object [String] name
+  # @option object [String] value
   # @param [Object] callback Function which will be called upon insert
+  # @todo Add parameter validation
   addKey: (object,callback) ->
     entries    = [] # Object to be added
 
@@ -50,8 +53,19 @@ module.exports = class DbCustom extends IDb
       chiika.logger.verbose "Key added"
       callback()
 
-    @insertRecordWithoutKey object,onInsertComplete
+    @insertRecord object,onInsertComplete
 
+  #
+  # Updates a row or rows where key==value
+  # The 'name' value is the key and it must match in database
+  # Example Usage
+  #   @example updateKeys { name: 'mykey', value: { myvalue:'15', myArray:[1,2,3]}}
+  #
+  # @param [Object] user Object
+  # @option object [String] name
+  # @option object [String] value
+  # @param [Object] callback Function which will be called upon insert
+  # @todo Add parameter validation
   updateKeys: (object,callback) ->
     @updateRecords object,callback
 
@@ -60,5 +74,6 @@ module.exports = class DbCustom extends IDb
   # @param [Object] object The object which will get inserted to the database
   # @options object [String] Key
   # @param [Object] callback Function which will be called upon update
+  # @todo Add parameter validation
   removeKey: (object,callback) ->
     @removeRecords object,callback

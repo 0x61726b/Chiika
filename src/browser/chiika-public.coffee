@@ -14,15 +14,32 @@
 #Description:
 #----------------------------------------------------------------------------
 {Emitter} = require 'event-kit'
+{InvalidParameterException} = require './exceptions'
+_ = require 'lodash'
 
 module.exports = class ChiikaPublicApi
   emitter: null
   constructor: (params={})->
     @emitter             = new Emitter
-    {@logger, @db}       = params
+    {@logger, @db,@parser,@ui} = params
     @users               = @db.usersDb
     @custom              = @db.customDb
+    @uiDb                = @db.uiDb
+
+
+  makeGetRequestAuth:(url,user,headers,callback) ->
+    if _.isUndefined callback
+      throw new InvalidParameterException("You have to supply a callback to 'makeGetRequestAuth' method.")
+    chiika.requestManager.makeGetRequestAuth(url,user,headers,callback)
+
+
+  makePostRequestAuth:(url,user,headers,callback) ->
+    if _.isUndefined callback
+      throw new InvalidParameterException("You have to supply a callback to 'makePostRequestAuth' method.")
+    chiika.requestManager.makePostRequestAuth(url,user,headers,callback)
+
+
   on: (message,args...) ->
     @emitter.on message,args...
-  emit: (message) ->
-    @emitter.emit message
+  emit: (message,args...) ->
+    @emitter.emit message,args...

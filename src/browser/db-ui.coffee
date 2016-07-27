@@ -20,17 +20,17 @@ _when         = require('when')
 
 {InvalidParameterException} = require './exceptions'
 
-module.exports = class DbUsers extends IDb
+module.exports = class DbUI extends IDb
   constructor: (params={}) ->
-    @name = 'Users'
+    @name = 'UI'
     defer = _when.defer()
 
     params.promises.push defer.promise
     super { dbName: @name, promises:params.promises }
 
     onAll = (data) =>
-      @users = data
-      chiika.logger.debug("[yellow](Database) #{@name} loaded. Data Count #{@users.length} ")
+      @uiData = data
+      chiika.logger.debug("[yellow](Database) #{@name} loaded. Data Count #{@uiData.length} ")
       chiika.logger.info("[yellow](Database) #{@name} has been succesfully loaded.")
 
     loadDatabase = =>
@@ -43,14 +43,6 @@ module.exports = class DbUsers extends IDb
         loadDatabase()
 
 
-  getUser: (userName) ->
-    match = _.find @users,{ userName: userName }
-    if _.isUndefined match
-      chiika.logger.warn("The user #{userName} you are trying to access doesn't exist.")
-    else
-      match
-    #console.log data
-
   #
   # Adds user into the database.
   # Will check if the parameter use already exists in the database
@@ -60,43 +52,43 @@ module.exports = class DbUsers extends IDb
   # @option user [String] password Password of the user
   # @option user [Boolean] isPrimary When set, this user will be primary.
   # @todo Add parameter validation
-  addUser: (user,callback) ->
-    @insertRecord user,=>
-      if !_.isUndefined callback
-        callback user
+  addUIItem: (menuItem,callback) ->
+    #menuItem structure
+    # { name: 'animeList', displayName: 'Anime List',displayType: 'tabView',tabList: [ 'watching','ptw','dropped','onhold','completed'] }
+    @insertRecord menuItem, callback
 
     #@insertRecordWithKey user,callback
 
+  # #
+  # # Updates the user
+  # # @param [Object] user User object
+  # # @param [Object] user User object
+  # # @option user [String] userName Name of the user
+  # # @option user [String] password Password of the user
+  # # @option user [Boolean] isPrimary When set, this user will be primary.
+  # # @param [Object] callback Function which will be called upon update
+  # # @todo Add parameter validation
+  # updateUser: (user,callback) ->
+  #   #Callback of update operation
+  #   onUpdateComplete = (result) ->
+  #     if !_.isUndefined callback
+  #       callback()
   #
-  # Updates the user
-  # @param [Object] user User object
-  # @param [Object] user User object
-  # @option user [String] userName Name of the user
-  # @option user [String] password Password of the user
-  # @option user [Boolean] isPrimary When set, this user will be primary.
-  # @param [Object] callback Function which will be called upon update
-  # @todo Add parameter validation
-  updateUser: (user,callback) ->
-    #Callback of update operation
-    onUpdateComplete = (result) ->
-      if !_.isUndefined callback
-        callback()
-
-
-    #Call the base class's update method, which will talk to the actual db object
-    @updateRecords user,onUpdateComplete,1
-
   #
-  # Removes user
-  # @param [Object] user
-  # @options object [String] userName
-  # @param [Object] callback Function which will be called upon update
-  # @todo Add parameter validation
-  removeUser: (user,callback) ->
-    onUpdateComplete = (result) ->
-      if !_.isUndefined callback
-        callback()
-
-
-
-    @removeRecords user,onUpdateComplete,1
+  #   #Call the base class's update method, which will talk to the actual db object
+  #   @updateRecords user,onUpdateComplete,1
+  #
+  # #
+  # # Removes user
+  # # @param [Object] user
+  # # @options object [String] userName
+  # # @param [Object] callback Function which will be called upon update
+  # # @todo Add parameter validation
+  # removeUser: (user,callback) ->
+  #   onUpdateComplete = (result) ->
+  #     if !_.isUndefined callback
+  #       callback()
+  #
+  #
+  #
+  #   @removeRecords user,onUpdateComplete,1

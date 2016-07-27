@@ -22,12 +22,14 @@ string                  = require 'string'
 {Emitter}               = require 'event-kit'
 ChiikaPublicApi         = require './chiika-public'
 moment                  = require 'moment'
-
+rimraf                  = require 'rimraf'
 
 module.exports = class APIManager
   compiledUserScripts: []
+  emitter: null
   constructor: ->
     global.api = this
+    @emitter = new Emitter
 
     @scriptsDir = path.join(application.getAppHome(),"Scripts")
     @scriptsCacheDir = path.join(application.getAppHome(),"Cache","Scripts")
@@ -42,34 +44,38 @@ module.exports = class APIManager
   onScriptCompiled: (script) ->
     rScript = require(script)
 
-    @chiikaApi = new ChiikaPublicApi( { logger: chiika.logger, db: dbManager })
+    @chiikaApi = new ChiikaPublicApi( { logger: chiika.logger, db: dbManager, parser: chiika.parser, ui: chiika.uiManager })
     rScript(@chiikaApi)
 
-
+    @emitter.emit 'script-compiled', script
 
   #
   # Compile user scripts
   # @return
   compileUserScripts: ->
-    chiika.logger.info "Compiling user scripts..."
+    chiika.logger.info "[magenta](Api-Manager) Compiling user scripts..."
     #Look for coffee files
     fs.readdir @scriptsDir,(err,files) =>
       _.forEach files, (v,k) =>
-        chiika.logger.info "Compiling " + v
         stripExtension = string(v).chompRight('.coffee').s
+
+        if stripExtension[0] == "_"
+          chiika.logger.info "[magenta](Api-Manager) Skipping disabled script " + stripExtension.substring(1,stripExtension.length)
+          return
+        chiika.logger.info "[magenta](Api-Manager) Compiling " + v
         fs.readFile path.join(@scriptsDir,v),'utf-8', (err,data) =>
           try
             compiledString = coffee.compile(data)
-            chiika.logger.info "Compiled " + v
+            chiika.logger.info "[magenta](Api-Manager)Compiled " + v
           catch
-            chiika.logger.error("Error compiling user-script " + v)
+            chiika.logger.error("[magenta](Api-Manager)Error compiling user-script " + v)
             throw console.error "Error compiling user-script"
           cachedScriptPath = path.join(@scriptsCacheDir,stripExtension + moment().valueOf() + '.chiikaJS')
           fs.writeFile cachedScriptPath,compiledString, (err) =>
             if err
-              chiika.error "Error occured while writing compiled script to the file."
+              chiika.error "[magenta](Api-Manager) Error occured while writing compiled script to the file."
               throw err
-            chiika.logger.verbose("Cached " + v + " " + moment().format('DD/MM/YYYY HH:mm'))
+            chiika.logger.verbose("[magenta](Api-Manager) Cached " + v + " " + moment().format('DD/MM/YYYY HH:mm'))
             @compiledUserScripts.push cachedScriptPath
             @onScriptCompiled cachedScriptPath
 
@@ -80,7 +86,16 @@ module.exports = class APIManager
     fs.readdir @scriptsDir,(err,files) =>
       _.forEach files, (v,k) =>
         fs.watchFile path.join(@scriptsDir,v), (eventType,filename) =>
-          chiika.logger.info "----------------------------------------------"
-          chiika.logger.info "Recompiling..."
+          chiika.logger.info "[magenta](Api-Manager) Recompiling..."
           @compiledUserScripts = []
           @compileUserScripts()
+
+  clearCache: ->
+    rimraf = require 'rimraf'
+    rimraf @scriptsCacheDir,{ }, ->
+      chiika.logger.info("[magenta](Api-Manager) Cleared scripts cache.")
+
+  on: (message,callback) ->
+    @emitter.on(message,callback)
+  emit: (message,args...) ->
+    @emitter.emit(message,args...)

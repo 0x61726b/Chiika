@@ -19,6 +19,9 @@ path            = require 'path'
 
 DbUsers         = require './db-users'
 DbCustom        = require './db-custom'
+DbUI            = require './db-ui'
+DbView          = require './db-view'
+
 {Emitter}       = require 'event-kit'
 
 _               = require 'lodash'
@@ -33,13 +36,23 @@ module.exports = class DatabaseManager
     global.dbManager = this
 
 
+
     #Preload databases
     @usersDb      = new DbUsers { @promises }
-    @customDb     = new DbCustom { @promises}
+    @customDb     = new DbCustom { @promises }
+    @uiDb         = new DbUI { @promises }
 
   onLoad: (callback) ->
     _when.all(@promises).then () => callback()
+
+  # @todo Make it so that this returns same instance with same view name
+  createViewDb: (viewName) ->
+    chiika.logger.info("[magenta](Database-Manager) Loading new database instance for view #{viewName}")
+    return new DbView { viewName: viewName }
+
   emit: (message) ->
     @emitter.emit message
+
+
   on: (message,args...) ->
     @emitter.on message,args...
