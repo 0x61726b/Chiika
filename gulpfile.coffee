@@ -50,7 +50,6 @@ Inject_css___compiled_and_depedent___files_into_html = () ->
       ignorePath: ['../../.serve', '..']
       addPrefix: '..'
 
-    console.log mainBowerFiles('**/*.js')
     stream = gulp.src(mainBowerFiles('**/*.js'))
         .pipe(concat('chiika.js'))
         .pipe(gulp.dest(serveDir))
@@ -86,6 +85,14 @@ Incremental_compile_cjsx_coffee_files_with_sourcemaps = () ->
     coffee = require "gulp-coffee-react"
 
     gulp.src('src/**/*.{cjsx,coffee}')
+      #.pipe(watch('src/**/*.{cjsx,coffee}', {verbose: true}))
+      .pipe(plumber())
+      .pipe(sourcemaps.init())
+      .pipe(coffee())
+      .pipe(sourcemaps.write('.'))
+      .pipe(gulp.dest(serveDir))
+      .on('end',done)
+    gulp.src('src/**/*.{cjsx,coffee}')
       .pipe(watch('src/**/*.{cjsx,coffee}', {verbose: true}))
       .pipe(plumber())
       .pipe(sourcemaps.init())
@@ -94,11 +101,15 @@ Incremental_compile_cjsx_coffee_files_with_sourcemaps = () ->
       .pipe(gulp.dest(serveDir))
 
 
+
     gulp.src('src/*.js')
         .pipe(gulp.dest(serveDir))
     gulp.src('src/browser/tools/src/*.js')
         .pipe(gulp.dest(serveDir))
-    done()
+
+    test = 42
+
+
 
 Compile_scripts_for_distribution = () ->
   gulp.task 'compile:scripts', () ->
@@ -110,12 +121,12 @@ Compile_scripts_for_distribution = () ->
       .pipe(coffee())
       .pipe(gulp.dest(distDir))
 
-    gulp.src('src/*.js')
-        .pipe(gulp.dest(distDir))
-    gulp.src('src/browser/tools/src/*.js')
-        .pipe(gulp.dest(distDir))
-    gulp.src(serveDir + '/chiika.js')
-        .pipe(gulp.dest(distDir))
+    # gulp.src('src/*.js')
+    #     .pipe(gulp.dest(distDir))
+    # gulp.src('src/browser/tools/src/*.js')
+    #     .pipe(gulp.dest(distDir))
+    # gulp.src(serveDir + '/chiika.js')
+    #     .pipe(gulp.dest(distDir))
 
 Inject_renderer_bundle_file_and_concatnate_css_files = () ->
   gulp.task 'html', ['inject:css'], () ->
@@ -177,7 +188,7 @@ Write_a_package_json_for_distribution = () ->
     _ = require('lodash')
 
     json = _.cloneDeep(packageJson)
-    json.main = './browser/Application.js'
+    json.main = './main_process/Application.js'
     fs.writeFile(distDir + '/package.json', JSON.stringify(json), () -> done())
 
 Package_for_each_platforms = () ->
@@ -246,20 +257,22 @@ do Your_Application_will_ = () ->
     gulp.watch(['bower.json', srcDir + '/renderer/index.html',srcDir + '/renderer/MyAnimeListLogin.html'], ['inject:css'])
     gulp.watch([srcDir + '/styles/*.scss'],['inject:css'])
     gulp.watch([serveDir + '/styles/**/*.css', serveDir + '/renderer/**/*.html', serveDir + '/renderer/**/*.js'], electron.reload)
-    gulp.watch([serveDir + '/browser/Application.js'], electron.restart)
-    gulp.watch([serveDir + '/browser/api-manager.js'], electron.restart)
-    gulp.watch([serveDir + '/browser/ipc-manager.js'], electron.restart)
-    gulp.watch([serveDir + '/browser/chiika-public.js'], electron.restart)
-    gulp.watch([serveDir + '/browser/database-manager.js'], electron.restart)
-    gulp.watch([serveDir + '/browser/db-users.js'], electron.restart)
-    gulp.watch([serveDir + '/browser/db-custom.js'], electron.restart)
-    gulp.watch([serveDir + '/browser/db-interface.js'], electron.restart)
-    gulp.watch([serveDir + '/browser/db-ui.js'], electron.restart)
-    gulp.watch([serveDir + '/browser/db-view.js'], electron.restart)
-    gulp.watch([serveDir + '/browser/request-manager.js'], electron.restart)
-    gulp.watch([serveDir + '/browser/ui-manager.js'], electron.restart)
-    gulp.watch([serveDir + '/browser/ui-item.js'], electron.restart)
-    gulp.watch([serveDir + '/browser/ui-tabView.js'], electron.restart)
+    gulp.watch([serveDir + '/main_process/chiika.js'], electron.restart)
+    gulp.watch([serveDir + '/main_process/api-manager.js'], electron.restart)
+    gulp.watch([serveDir + '/main_process/ipc-manager.js'], electron.restart)
+    gulp.watch([serveDir + '/main_process/chiika-public.js'], electron.restart)
+    gulp.watch([serveDir + '/main_process/database-manager.js'], electron.restart)
+    gulp.watch([serveDir + '/main_process/db-users.js'], electron.restart)
+    gulp.watch([serveDir + '/main_process/db-custom.js'], electron.restart)
+    gulp.watch([serveDir + '/main_process/db-interface.js'], electron.restart)
+    gulp.watch([serveDir + '/main_process/db-ui.js'], electron.restart)
+    gulp.watch([serveDir + '/main_process/db-view.js'], electron.restart)
+    gulp.watch([serveDir + '/main_process/request-manager.js'], electron.restart)
+    gulp.watch([serveDir + '/main_process/ui-manager.js'], electron.restart)
+    gulp.watch([serveDir + '/main_process/ui-item.js'], electron.restart)
+    gulp.watch([serveDir + '/main_process/ui-tabView.js'], electron.restart)
+    gulp.watch([serveDir + '/main_process/settings-manager.js'], electron.restart)
+    gulp.watch([serveDir + '/main_process/utility.js'], electron.restart)
   gulp.task 'clean', (done) ->
     del [serveDir, distDir, releaseDir], () -> done()
   gulp.task('default', ['build'])

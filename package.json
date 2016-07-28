@@ -2,7 +2,7 @@
   "name": "chiika",
   "version": "0.0.3",
   "description": "Electron boilerplate project with React-coffee",
-  "main": ".serve/browser/Application.js",
+  "main": ".serve/main_process/chiika.js",
   "productName": "Chiika",
   "scripts": {
     "start": "gulp serve",
@@ -40,6 +40,7 @@
     "mkdirp": "^0.5.1",
     "moment": "^2.11.2",
     "moment-timezone": "^0.5.4",
+    "ncp": "^2.0.0",
     "nosql": "^3.1.0",
     "ps-node": "^0.1.2",
     "qs": "^6.2.0",

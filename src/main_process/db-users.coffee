@@ -47,6 +47,7 @@ module.exports = class DbUsers extends IDb
     match = _.find @users,{ userName: userName }
     if _.isUndefined match
       chiika.logger.warn("The user #{userName} you are trying to access doesn't exist.")
+      match
     else
       match
     #console.log data

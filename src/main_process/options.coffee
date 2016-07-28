@@ -14,31 +14,10 @@
 #Description:
 #----------------------------------------------------------------------------
 
-_         = require 'lodash'
-
-module.exports = class UIItem
-  name: null
-  displayName: null
-  dataSource: null
-  db: null
-  displayType: null
-  children: []
-  constructor: (params={}) ->
-    { @name, @displayName,@displayType } = params
-
-  addChild: (child) ->
-    if child?
-      @children.push child
-
-  setDatabaseInterface: (db) ->
-    @db = db
-
-  setDataSource: (data) ->
-    if _.isUndefined data
-      chiika.logger.warn("[magenta](#{@name}) - Undefined data source!")
-    if !_.isArray data
-      chiika.logger.error("[magenta](#{@name}) - Non-array data source!")
-      return
-
-    chiika.logger.verbose("Setting data source for UI item #{@name}. Data Array Length: #{data.length}")
-    @dataSource = data
+module.exports = {
+  RefreshUponLaunch: true, #To-do : implement
+  UseAlternateListView : false,
+  RememberWindowSizeAndPosition: true,
+  DisableBubbleNotifications: false,
+  EnableBrowserDetection: false
+}

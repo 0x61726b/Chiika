@@ -28,11 +28,20 @@ module.exports = class TabView extends UIItem
     super params
 
   loadTabData: ->
-    onAll = (data) =>
-      _.forEach data, (v,k) =>
-        @setTabData(v.name,v.data)
+    new Promise (resolve) =>
+      onAll = (data) =>
+        L = data.length
 
-    @db.all(onAll)
+        if L == 0
+          @needUpdate = true
+        else
+          @setDataSource(data)
+        
+        _.forEach data, (v,k) =>
+          @setTabData(v.name,v.data)
+
+        resolve()
+      @db.all(onAll)
 
   getTabData: (tabName) ->
     findUIItem = _.find @children, { name: tabName + @gridSuffix }
@@ -46,6 +55,38 @@ module.exports = class TabView extends UIItem
       @db.save { name: v.name, data: v.dataSource }
 
 
+
+  #
+  # Set multiple tabs at once
+  # Example
+  #   @example
+  #    [
+  #     {name: 'watching', data: [] }
+  #     {name: 'ptw', data: [] }
+  #     {name: 'dropped', data: [] }
+  #     {name: 'onhold', data: [] }
+  #     {name: 'completed', data: [] }
+  #    ]
+  # @param {Array} data
+  # @return
+  setData: (data) ->
+    if _.isUndefined data
+      throw new InvalidParameterException("You didn't specify data to be added.")
+
+    if !_.isArray data
+      throw new InvalidParameterException("Specified data has to be type of array.")
+
+    chiika.logger.info("Setting data source for #{@name}")
+
+    @dataSource = data
+
+
+    _.forEach @dataSource, (v,k) =>
+      @setTabData(v.name,v.data)
+
+    @save()
+
+
   #
   # A Tab view consists of tabs
   # Each tab has a child UIItem which holds the grid data
@@ -54,7 +95,9 @@ module.exports = class TabView extends UIItem
   # @param {Array} data Array of records to be added to the grid. The number of properties in each record must match the grid configuration.
   # @return
   setTabData: (tabName,data) ->
-    tabName += @gridSuffix
+    checkName = tabName.indexOf @gridSuffix
+    if checkName == -1
+      tabName += @gridSuffix
     uiItem = new UIItem({name: tabName, displayName: tabName, displayType: 'grid' })
 
     if _.isUndefined data

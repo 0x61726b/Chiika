@@ -31,6 +31,7 @@ module.exports = class DatabaseManager
   usersDb: null
   emitter: null
   promises: []
+  instances: []
   constructor: ->
     @emitter = new Emitter
     global.dbManager = this
@@ -47,8 +48,15 @@ module.exports = class DatabaseManager
 
   # @todo Make it so that this returns same instance with same view name
   createViewDb: (viewName) ->
-    chiika.logger.info("[magenta](Database-Manager) Loading new database instance for view #{viewName}")
-    return new DbView { viewName: viewName }
+    instance = _.find @instances, { viewName: viewName }
+    if instance?
+      chiika.logger.info("[magenta](Database-Manager) Returning existing database instance for view #{viewName}")
+      return instance
+    else
+      chiika.logger.info("[magenta](Database-Manager) Loading new database instance for view #{viewName}")
+      dbView = new DbView { viewName: viewName }
+      @instances.push { viewName: viewName,instance: dbView }
+      return dbView
 
   emit: (message) ->
     @emitter.emit message

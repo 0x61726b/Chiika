@@ -37,8 +37,8 @@ module.exports = class IDb
       @promise = defer.promise
       promises.push @promise
 
-    @dbPhysicalPath = path.join(application.getAppHome(),"Data","dbs",@dbName + ".nosql")
-    @nosql = NoSQL.load(path.join(application.getAppHome(),"Data","dbs",@dbName + ".nosql"))
+    @dbPhysicalPath = path.join(chiika.getAppHome(),"Data","dbs",@dbName + ".nosql")
+    @nosql = NoSQL.load(path.join(chiika.getAppHome(),"Data","dbs",@dbName + ".nosql"))
     chiika.logger.debug "IDb::constructor {dbName:#{@dbName}}"
     chiika.logger.debug "Idb::constructor {dbPhysicalPath:#{@dbPhysicalPath}}"
 

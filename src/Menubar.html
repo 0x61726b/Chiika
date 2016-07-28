@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<!-- build:css ../styles/app.css -->
+<!-- inject:css -->
+<!-- endinject -->
+<!-- endbuild -->
+<title>Chiika</title>
+</head>
+<body>
+<div id="app"></div>
+<!-- build:remove-->
+<script>require('electron-connect').client.create()</script>
+<!-- endbuild -->
+<script>window.$ = window.jQuery = require('./../../bower_components/jquery/dist/jquery.min.js')</script>
+<script src="menu-bar.js"></script>
+<!-- inject:js -->
+<!-- endinject -->
+
+</body>
+</html>

@@ -17,10 +17,10 @@
 path                    = require 'path'
 fs                      = require 'fs'
 _                       = require 'lodash'
+_when                   = require 'when'
 coffee                  = require 'coffee-script'
 string                  = require 'string'
 {Emitter}               = require 'event-kit'
-ChiikaPublicApi         = require './chiika-public'
 moment                  = require 'moment'
 rimraf                  = require 'rimraf'
 
@@ -31,8 +31,8 @@ module.exports = class APIManager
     global.api = this
     @emitter = new Emitter
 
-    @scriptsDir = path.join(application.getAppHome(),"Scripts")
-    @scriptsCacheDir = path.join(application.getAppHome(),"Cache","Scripts")
+    @scriptsDir = path.join(chiika.getAppHome(),"Scripts")
+    @scriptsCacheDir = path.join(chiika.getAppHome(),"Cache","Scripts")
 
     @watchScripts()
 
@@ -44,10 +44,11 @@ module.exports = class APIManager
   onScriptCompiled: (script) ->
     rScript = require(script)
 
-    @chiikaApi = new ChiikaPublicApi( { logger: chiika.logger, db: dbManager, parser: chiika.parser, ui: chiika.uiManager })
-    rScript(@chiikaApi)
 
-    @emitter.emit 'script-compiled', script
+    rScript(chiika.chiikaApi)
+
+  initializeScripts: ->
+    chiika.chiikaApi.emit 'initialize'
 
   #
   # Compile user scripts
@@ -55,29 +56,50 @@ module.exports = class APIManager
   compileUserScripts: ->
     chiika.logger.info "[magenta](Api-Manager) Compiling user scripts..."
     #Look for coffee files
+    @promises = []
+    sanityCheck = _when.defer()
+    sanityPromise = sanityCheck.promise
+    @promises.push sanityPromise
+
+    processedFileCount = 0
+    scriptCount = 1
+
     fs.readdir @scriptsDir,(err,files) =>
       _.forEach files, (v,k) =>
+        processedFileCount++
         stripExtension = string(v).chompRight('.coffee').s
 
         if stripExtension[0] == "_"
           chiika.logger.info "[magenta](Api-Manager) Skipping disabled script " + stripExtension.substring(1,stripExtension.length)
           return
         chiika.logger.info "[magenta](Api-Manager) Compiling " + v
+
+        defer = _when.defer()
+        @promises.push defer.promise
+
+
         fs.readFile path.join(@scriptsDir,v),'utf-8', (err,data) =>
           try
             compiledString = coffee.compile(data)
-            chiika.logger.info "[magenta](Api-Manager)Compiled " + v
+            chiika.logger.info "[magenta](Api-Manager) Compiled " + v
           catch
-            chiika.logger.error("[magenta](Api-Manager)Error compiling user-script " + v)
+            chiika.logger.error("[magenta](Api-Manager) Error compiling user-script " + v)
             throw console.error "Error compiling user-script"
           cachedScriptPath = path.join(@scriptsCacheDir,stripExtension + moment().valueOf() + '.chiikaJS')
+
           fs.writeFile cachedScriptPath,compiledString, (err) =>
             if err
               chiika.error "[magenta](Api-Manager) Error occured while writing compiled script to the file."
               throw err
             chiika.logger.verbose("[magenta](Api-Manager) Cached " + v + " " + moment().format('DD/MM/YYYY HH:mm'))
+
             @compiledUserScripts.push cachedScriptPath
             @onScriptCompiled cachedScriptPath
+            defer.resolve()
+
+            if processedFileCount >= scriptCount
+              sanityCheck.resolve()
+    _when.all(@promises)
 
   #
   # Watch the changes of the scripts and recompile
