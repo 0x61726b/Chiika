@@ -17,7 +17,7 @@
 IDb     = require './db-interface'
 {InvalidParameterException} = require './exceptions'
 _       = require 'lodash'
-
+_when   = require 'when'
 
 
 #
@@ -26,14 +26,34 @@ _       = require 'lodash'
 module.exports = class DbCustom extends IDb
   constructor: (params={}) ->
     @name = 'Custom'
+    defer = _when.defer()
+
+    params.promises.push defer.promise
     super { dbName: @name, promises:params.promises }
 
+    onAll = (data) =>
+      @keys = data
+      chiika.logger.debug("[yellow](Database) #{@name} loaded. Data Count #{@keys.length} ")
+      chiika.logger.info("[yellow](Database) #{@name} has been succesfully loaded.")
+
+    loadDatabase = =>
+      @all(onAll).then(-> defer.resolve())
+
+    if @isReady()
+      loadDatabase()
+    else
+      @on 'load', =>
+        loadDatabase()
 
 
-  getKey: (value,callback) ->
-    onOne = (data) ->
-      callback data.value
-    @one 'name',value,onOne
+
+  getKey: (name) ->
+    match = _.find @keys,{ name: name }
+    if _.isUndefined match
+      chiika.logger.warn("The key #{name} you are trying to access doesn't exist.")
+      match
+    else
+      match
 
   #
   # Adds a key into the database.
@@ -49,9 +69,11 @@ module.exports = class DbCustom extends IDb
   addKey: (object,callback) ->
     entries    = [] # Object to be added
 
-    onInsertComplete = (err,count)->
+    onInsertComplete = (err,count) =>
       chiika.logger.verbose "Key added"
-      callback()
+      @keys.push object
+      if !_.isUndefined callback
+        callback()
 
     @insertRecord object,onInsertComplete
 
@@ -67,7 +89,10 @@ module.exports = class DbCustom extends IDb
   # @param [Object] callback Function which will be called upon insert
   # @todo Add parameter validation
   updateKeys: (object,callback) ->
-    @updateRecords object,callback
+    if !_.isUndefined callback
+      @updateRecords object,callback
+    else
+      @updateRecords object,->
 
   #
   # Removes a key

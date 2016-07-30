@@ -31,10 +31,12 @@ module.exports = class UIManager
   # @return
   preloadUIItems: () ->
     chiika.logger.verbose("[magenta](UI-Manager) Preloading UI items..")
+    defer = _when.defer()
 
     if chiika.dbManager.uiDb.uiData.length == 0
       chiika.logger.warn("[magenta](UI-Manager) There are no UI items...Calling reconstruct event")
-      chiika.chiikaApi.emit 'reconstruct-ui'
+      chiika.chiikaApi.emit 'reconstruct-ui',defer
+      return defer.promise
     else
       _.forEach(chiika.dbManager.uiDb.uiData, (v,k) => @preloadPromises.push @addUIItem(v,->) )
       return _when.all(@preloadPromises)
@@ -66,11 +68,12 @@ module.exports = class UIManager
   # Adds a tab view, creates its associated DB interface and tries to load its data from DB
   #
   addTabView: (item) ->
-    tabView = new TabView({ name: item.name, displayName: item.displayName, tabView: item.tabView })
+    tabView = new TabView({ name: item.name, displayName: item.displayName, tabView: item.tabView, owner: item.owner })
     dbView = chiika.dbManager.createViewDb(item.name)
     tabView.setDatabaseInterface(dbView)
     tabView.loadTabData()
     tabView
+
 
   #
   # Adds a UI item respective to their type, then creates a DB view for its data source
@@ -104,12 +107,16 @@ module.exports = class UIManager
       instance
     else
       chiika.logger.error("Request UI item not found #{itemName}")
+      return null
 
   #
-  # Returns the total number of UI items
+  # Returns the total number of UI items stored on DB
   # @returm {Integer}
   getUIItemsCount: ->
     chiika.dbManager.uiDb.uiData.length
+
+  getUIItems: ->
+    @uiItems
 
 
 

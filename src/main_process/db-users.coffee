@@ -42,7 +42,13 @@ module.exports = class DbUsers extends IDb
       @on 'load', =>
         loadDatabase()
 
+  getDefaultUser: (owner) ->
+    match = _.find @users,{ owner: owner }
 
+    if _.isUndefined match
+      chiika.logger.warn("Default user for #{owner} does not exist.")
+    else
+      match
   getUser: (userName) ->
     match = _.find @users,{ userName: userName }
     if _.isUndefined match
@@ -63,6 +69,7 @@ module.exports = class DbUsers extends IDb
   # @todo Add parameter validation
   addUser: (user,callback) ->
     @insertRecord user,=>
+      @users.push user
       if !_.isUndefined callback
         callback user
 

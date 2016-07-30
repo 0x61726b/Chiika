@@ -52,16 +52,19 @@ APIManager                        = require './api-manager'
 DbManager                         = require './database-manager'
 RequestManager                    = require './request-manager'
 SettingsManager                   = require './settings-manager'
+WindowManager                     = require './window-manager'
+IpcManager                        = require './ipc-manager'
 Parser                            = require './parser'
 UIManager                         = require './ui-manager'
 ChiikaPublicApi                   = require './chiika-public'
 Utility                           = require './utility'
 AppOptions                        = require './options'
+AppDelegate                       = require './app-delegate'
 
 
 process.on 'uncaughtException',(err) ->
   # Show a somewhat easily readable text error
-  if err?
+  if err && err.stack?
     error = err.stack.split("\n")
     for i in [0...5]
       line = error[i]
@@ -75,6 +78,7 @@ process.on 'uncaughtException',(err) ->
         chiika.logger.error line
   else
     chiika.logger.error("Hmm....")
+    chiika.logger.error(err)
 
 module.exports =
 class Application
@@ -92,11 +96,6 @@ class Application
 
     @logger             = new Logger("verbose").logger
 
-    #@parseCommandLine()
-    #@setupChiikaConfig()
-
-    #@handleEvents()
-
 
     @emitter            = new Emitter
     @utility            = new Utility()
@@ -107,6 +106,14 @@ class Application
     @parser             = new Parser()
     @uiManager          = new UIManager()
     @chiikaApi          = new ChiikaPublicApi( { logger: @logger, db: @dbManager, parser: @parser, ui: @uiManager })
+    @windowManager      = new WindowManager()
+    @appDelegate        = new AppDelegate()
+    @ipcManager         = new IpcManager()
+
+    @appDelegate.run()
+    @ipcManager.handleEvents()
+
+
 
     @dbManager.onLoad =>
       # If there are no UI items
@@ -120,43 +127,20 @@ class Application
                   .then =>
                     chiika.logger.verbose("Preloading UI complete!")
                     @apiManager.compileUserScripts().then =>
-                      @apiManager.initializeScripts()
                       @uiManager.checkUIData()
+                      @windowManager.closeLoadingWindow()
+                      @windowManager.showMainWindow()
       else
         #This will probably fail if more than one script is being executed...
         #This means when all scripts are compiled,preload UI items
         @apiManager.compileUserScripts().then =>
-          @apiManager.initializeScripts()
           @uiManager.preloadUIItems()
+                    .then =>
+                      chiika.logger.verbose("Preloading UI complete!")
+                      @windowManager.closeLoadingWindow()
+                      @windowManager.showMainWindow()
 
 
-
-        # _when.all(@apiManager.promises).then =>
-        #   @uiManager.preloadUIItems()
-                     #
-
-    # # @todo Make this called once
-    # @apiManager.on 'script-compiled', =>
-    #   @apiManager.chiikaApi.emit 'auth'
-    #
-    #   # if @uiManager.getUIItemsCount() == 0
-    #   #   @uiManager.preloadUIItems()
-
-  handleEvents: ->
-    _self = this
-    app.on 'window-all-closed', ->
-      app.quit()
-
-    app.on 'will-quit', () =>
-      globalShortcut.unregisterAll()
-
-      @apiManager.clearCache()
-
-    app.on 'ready', =>
-      @registerShortcuts()
-      @logInfo("Initializing...")
-
-      @checkRememberWindowProperties()
 
   animePrePrequest: (anime,receiver,sendToMainWindow,defer,defCallback) ->
     if defer
@@ -269,56 +253,6 @@ class Application
     @tools.downloadUserImage id,onFinished
   getAppHome: ->
     @chiikaHome
-  logInfo: (text) ->
-    @logger.info(text)
-  logDebug: (text) ->
-    @logger.debug(text)
-  setupChiikaConfig: ->
-    @chiikaHome = path.join(app.getPath('appData'),"chiika")
-    @chiikaLog = path.join(app.getPath('appData'),"Logs")
-    process.env.CHIIKA_HOME = @chiikaHome
-    process.env.CHIIKA_LOG_HOME ?= @chiikaLog
-
-    configFilePath = path.join(path.join(@chiikaHome, "Config"),"Chiika.json")
-
-    mkdirp(path.join(@chiikaHome, "Config"), ->)
-    mkdirp(path.join(@chiikaHome, "Data"), ->)
-    mkdirp(path.join(@chiikaHome, "Scripts"), ->)
-    mkdirp(path.join(@chiikaHome, "Cache"), ->)
-    mkdirp(path.join(@chiikaHome, "Cache","Scripts"), ->)
-    mkdirp(path.join(@chiikaHome, "Data","Images"), ->)
-    mkdirp(path.join(@chiikaHome, "Data","dbs"), ->)
-
-    try
-      configFile = fs.statSync configFilePath
-    catch e
-      configFile = undefined
-
-    if _.isUndefined configFile
-      fs.openSync configFilePath, 'w'
-
-      @appOptions = AppOptions
-
-      @appOptions.Version = process.env.version
-
-      fs.writeFileSync configFilePath,JSON.stringify(@appOptions),'utf-8'
-
-      @firstLaunch = true
-    else
-      configFile = fs.readFileSync configFilePath, 'utf-8'
-      @firstLaunch = false
-
-      @appOptions = JSON.parse(configFile)
-
-      packageVersion = process.env.version
-      appVersion = @appOptions.Version
-
-      if appVersion? && packageVersion != appVersion
-        @firstLaunch = true
-        @appOptions.Version = packageVersion
-        @saveOptions()
-
-
   checkRememberWindowProperties: ->
     if @appOptions.RememberWindowSizeAndPosition
       if @appOptions.WindowProperties? && @appOptions.WindowProperties.size?
@@ -344,74 +278,18 @@ class Application
       screenRes = @getScreenRes()
       @mainWindowPosition = { x: screenRes.width / 2 - @mainWindowSize.width/2, y: screenRes.height / 2 - @mainWindowSize.height/2  }
 
-  saveOptions: ->
-    configFilePath = path.join(path.join(@chiikaHome, "Config"),"Chiika.json");
-    fs.writeFileSync configFilePath,JSON.stringify(@appOptions),'utf-8'
-  parseCommandLine: ->
-    options = yargs(process.argv[1..]).wrap(100)
-    args = options.argv
-  registerShortcuts: ->
-    #To-do
-  getScreenRes: ->
-    {width, height} = electron.screen.getPrimaryDisplay().workAreaSize
-    return { width: width, height: height}
-
-  openLoginWindow: ->
-    options = {
-       frame:false,
-       width:800,
-       height:600,
-       icon:'./resources/icon.png'
-    }
-
-
-    @LoginWindow = new BrowserWindow(options);
-    @LoginWindow.loadURL("file://#{__dirname}/../renderer/MyAnimeListLogin.html")
-    #@LoginWindow.openDevTools()
-  showMainWindow: ->
-    @window.window.show()
-
-  hideMainWindow: ->
-    @window.window.minimize()
-    @window.window.hide()
-  calculateWindowSize: ->
-    screenRes = @getScreenRes()
-    windowWidth = Math.round(screenRes.width * 0.66)
-    windowHeight = Math.round(screenRes.height * 0.75)
-    return { width: windowWidth, height: windowHeight }
-
-  openWindow: ->
-    deferred = _when.defer()
-    isBorderless = true
-    windowUrl = "file://#{__dirname}/../renderer/index.html#Home"
-    htmlURL = windowUrl
-    @window = new ApplicationWindow htmlURL,
-      width: @mainWindowSize.width
-      height: @mainWindowSize.height
-      title: 'Chiika - Development Mode'
-      icon: "./resources/icon.png"
-      frame:!isBorderless
-      x: @mainWindowPosition.x
-      y: @mainWindowPosition.y
-    @window.openDevTools()
-
-    @window.window.webContents.on 'did-finish-load', =>
-      @window.window.webContents.send('window-reload')
-
-      @window.enableReactDevTools()
-      deferred.resolve()
-    @window.window.on 'close', =>
-      winPosX = @window.getPosition()[0]
-      winPosY = @window.getPosition()[1]
-      width = @window.getSize()[0]
-      height = @window.getSize()[1]
-
-      if @appOptions.RememberWindowSizeAndPosition
-        application.appOptions.WindowProperties.size = { width: width, height: height }
-        application.appOptions.WindowProperties.position = { x: winPosX, y: winPosY }
-        @saveOptions()
-    deferred.promise
-
+  # openLoginWindow: ->
+  #   options = {
+  #      frame:false,
+  #      width:800,
+  #      height:600,
+  #      icon:'./resources/icon.png'
+  #   }
+  #
+  #
+  #   @LoginWindow = new BrowserWindow(options);
+  #   @LoginWindow.loadURL("file://#{__dirname}/../renderer/MyAnimeListLogin.html")
+  #   #@LoginWindow.openDevTools()
 
 
 

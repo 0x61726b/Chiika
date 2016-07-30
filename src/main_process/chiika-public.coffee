@@ -19,6 +19,8 @@ _ = require 'lodash'
 
 module.exports = class ChiikaPublicApi
   emitter: null
+  subscriptions: []
+
   constructor: (params={})->
     @emitter             = new Emitter
     {@logger, @db,@parser,@ui} = params
@@ -26,6 +28,10 @@ module.exports = class ChiikaPublicApi
     @custom              = @db.customDb
     @uiDb                = @db.uiDb
 
+  makeGetRequest:(url,headers,callback) ->
+    if _.isUndefined callback
+      throw new InvalidParameterException("You have to supply a callback to 'makeGetRequest' method.")
+    chiika.requestManager.makeGetRequest(url,headers,callback)
 
   makeGetRequestAuth:(url,user,headers,callback) ->
     if _.isUndefined callback
@@ -39,7 +45,31 @@ module.exports = class ChiikaPublicApi
     chiika.requestManager.makePostRequestAuth(url,user,headers,callback)
 
 
-  on: (message,args...) ->
-    @emitter.on message,args...
+  requestViewUpdate: (viewName,owner) ->
+    view = chiika.uiManager.getUIItem(viewName)
+    if view?
+      @emitTo owner,'view-update',view
+    else
+      chiika.logger.error("Can't update a non-existent view.")
+
+
+  on: (receiver,message,args...) ->
+    sub = @emitter.on message,args...
+    @subscriptions.push { receiver: receiver , message: message, sub: sub }
+    sub
   emit: (message,args...) ->
     @emitter.emit message,args...
+
+  dispatch: (handler,args...)->
+    @emitter.constructor.dispatch handler,args...
+
+
+  emitTo: (receiver,message,args...) ->
+    listeners = @emitter.handlersByEventName[message]
+    scripts = chiika.apiManager.getScripts()
+    index = _.indexOf scripts, _.find(scripts,{ name: receiver })
+
+    if index == -1
+      chiika.logger.error("[magenta](Chiika-API) There was a problem when sending #{message} to #{receiver}.")
+    else
+      @dispatch listeners[index],args...

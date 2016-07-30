@@ -14,6 +14,8 @@
 #Description:
 #----------------------------------------------------------------------------
 
+
+
 path                    = require 'path'
 fs                      = require 'fs'
 _                       = require 'lodash'
@@ -26,7 +28,10 @@ rimraf                  = require 'rimraf'
 
 module.exports = class APIManager
   compiledUserScripts: []
+  scriptInstances: []
   emitter: null
+
+
   constructor: ->
     global.api = this
     @emitter = new Emitter
@@ -43,12 +48,52 @@ module.exports = class APIManager
   # @return
   onScriptCompiled: (script) ->
     rScript = require(script)
+    instance = new rScript(chiika.chiikaApi)
+
+    subs = _.where(chiika.chiikaApi.subscriptions,{ receiver: instance.name })
+
+    for sub in subs
+      sub.sub.dispose()
+      _.remove(chiika.chiikaApi.subscriptions, sub)
+
+    instance.run(chiika.chiikaApi)
+
+    scriptName = instance.name
+    scriptDesc = instance.displayDescription
+    logo       = instance.logo
+
+    localInstance = { name: scriptName, description: scriptDesc, logo: logo, instance: instance}
+
+    if !_.isUndefined @getScriptByName(scriptName)
+      #Script with the same name was compiled before, update it
+      match = _.find(@scriptInstances,localInstance)
+
+      index = _.indexOf @scriptInstances, _.find(@scriptInstances,localInstance)
+      @scriptInstances.splice(index,1,localInstance)
 
 
-    rScript(chiika.chiikaApi)
+      chiika.logger.info("[magenta](Api-Manager) Updating script instance #{rScript.name}")
+    else
+      chiika.logger.info("[magenta](Api-Manager) Adding new script instance #{rScript.name}")
+      @scriptInstances.push localInstance
 
-  initializeScripts: ->
-    chiika.chiikaApi.emit 'initialize'
+    @initializeScript(scriptName)
+
+
+  getScriptByName: (name) ->
+    instance = _.find @scriptInstances, { name: name }
+    if !_.isUndefined instance
+      return instance
+    else
+      chiika.logger.error("You are trying to access #{name} but it doesnt exist!")
+      return undefined
+
+  getScripts: ->
+    @scriptInstances
+
+
+  initializeScript: (name) ->
+    chiika.chiikaApi.emitTo name, 'initialize'
 
   #
   # Compile user scripts
@@ -62,11 +107,11 @@ module.exports = class APIManager
     @promises.push sanityPromise
 
     processedFileCount = 0
-    scriptCount = 1
+    scriptCount = 2
+
 
     fs.readdir @scriptsDir,(err,files) =>
       _.forEach files, (v,k) =>
-        processedFileCount++
         stripExtension = string(v).chompRight('.coffee').s
 
         if stripExtension[0] == "_"
@@ -79,27 +124,42 @@ module.exports = class APIManager
 
 
         fs.readFile path.join(@scriptsDir,v),'utf-8', (err,data) =>
-          try
-            compiledString = coffee.compile(data)
-            chiika.logger.info "[magenta](Api-Manager) Compiled " + v
-          catch
-            chiika.logger.error("[magenta](Api-Manager) Error compiling user-script " + v)
-            throw console.error "Error compiling user-script"
-          cachedScriptPath = path.join(@scriptsCacheDir,stripExtension + moment().valueOf() + '.chiikaJS')
+          jsCode = data
 
-          fs.writeFile cachedScriptPath,compiledString, (err) =>
-            if err
-              chiika.error "[magenta](Api-Manager) Error occured while writing compiled script to the file."
-              throw err
-            chiika.logger.verbose("[magenta](Api-Manager) Cached " + v + " " + moment().format('DD/MM/YYYY HH:mm'))
-
-            @compiledUserScripts.push cachedScriptPath
-            @onScriptCompiled cachedScriptPath
+          @compileScript jsCode,v,true, =>
             defer.resolve()
+            processedFileCount++
 
-            if processedFileCount >= scriptCount
+            if processedFileCount == scriptCount
               sanityCheck.resolve()
     _when.all(@promises)
+
+
+
+
+
+  #
+  # Compiles javascript code
+  #
+  compileScript: (js,file,cache,callback) ->
+    stripExtension = string(file).chompRight('.coffee').s
+    try
+      compiledString = coffee.compile(js)
+      chiika.logger.info "[magenta](Api-Manager) Compiled " + file
+    catch
+      chiika.logger.error("[magenta](Api-Manager) Error compiling user-script " + file)
+      throw "Can't continue."
+
+    cachedScriptPath = path.join(@scriptsCacheDir,stripExtension + moment().valueOf() + '.chiikaJS')
+    if cache
+      fs.writeFile cachedScriptPath,compiledString, (err) =>
+        if err
+          chiika.error "[magenta](Api-Manager) Error occured while writing compiled script to the file."
+          throw err
+        chiika.logger.verbose("[magenta](Api-Manager) Cached " + file + " " + moment().format('DD/MM/YYYY HH:mm'))
+
+        @onScriptCompiled cachedScriptPath
+        callback()
 
   #
   # Watch the changes of the scripts and recompile
@@ -109,13 +169,20 @@ module.exports = class APIManager
       _.forEach files, (v,k) =>
         fs.watchFile path.join(@scriptsDir,v), (eventType,filename) =>
           chiika.logger.info "[magenta](Api-Manager) Recompiling..."
-          @compiledUserScripts = []
-          @compileUserScripts()
+
+          #Move this to utility
+          stripExtension = string(v).chompRight('.coffee').s
+
+          fs.readFile path.join(@scriptsDir,v),'utf-8', (err,data) =>
+            jsCode = data
+            @compileScript(jsCode,v,true, -> )
 
   clearCache: ->
     rimraf = require 'rimraf'
     rimraf @scriptsCacheDir,{ }, ->
       chiika.logger.info("[magenta](Api-Manager) Cleared scripts cache.")
+
+
 
   on: (message,callback) ->
     @emitter.on(message,callback)

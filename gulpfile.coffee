@@ -51,10 +51,10 @@ Inject_css___compiled_and_depedent___files_into_html = () ->
       addPrefix: '..'
 
     stream = gulp.src(mainBowerFiles('**/*.js'))
-        .pipe(concat('chiika.js'))
+        .pipe(concat('bundleJs.js'))
         .pipe(gulp.dest(serveDir))
 
-    files = files.concat([serveDir + '/chiika.js' ])
+    files = files.concat([serveDir + '/bundleJs.js' ])
 
     stream.on 'end',->
       str = gulp.src(srcDir + '/**/*.html')
@@ -137,12 +137,12 @@ Inject_renderer_bundle_file_and_concatnate_css_files = () ->
 
     assets = useref.assets({searchPath: ['bower_components', serveDir + '/styles']});
 
-    gulp.src(serveDir + '/renderer/**/*.html')
+    gulp.src(serveDir + '/**/*.html')
     .pipe(assets)
     .pipe(gulpif('*.css', minify()))
     .pipe(assets.restore())
     .pipe(useref())
-    .pipe(gulp.dest(distDir + '/renderer'))
+    .pipe(gulp.dest(distDir))
 
 Copy_fonts_file = () ->
 
@@ -254,9 +254,9 @@ do Your_Application_will_ = () ->
         }
       })
     electron.start([], () => {})
-    gulp.watch(['bower.json', srcDir + '/renderer/index.html',srcDir + '/renderer/MyAnimeListLogin.html'], ['inject:css'])
+    gulp.watch(['bower.json', srcDir + '/index.html',srcDir + '/MyAnimeListLogin.html'], ['inject:css'])
     gulp.watch([srcDir + '/styles/*.scss'],['inject:css'])
-    gulp.watch([serveDir + '/styles/**/*.css', serveDir + '/renderer/**/*.html', serveDir + '/renderer/**/*.js'], electron.reload)
+    gulp.watch([serveDir + '/styles/**/*.css', serveDir + '/**/*.html', serveDir + '/**/*.js'], electron.reload)
     gulp.watch([serveDir + '/main_process/chiika.js'], electron.restart)
     gulp.watch([serveDir + '/main_process/api-manager.js'], electron.restart)
     gulp.watch([serveDir + '/main_process/ipc-manager.js'], electron.restart)
@@ -268,10 +268,11 @@ do Your_Application_will_ = () ->
     gulp.watch([serveDir + '/main_process/db-ui.js'], electron.restart)
     gulp.watch([serveDir + '/main_process/db-view.js'], electron.restart)
     gulp.watch([serveDir + '/main_process/request-manager.js'], electron.restart)
+    gulp.watch([serveDir + '/main_process/settings-manager.js'], electron.restart)
+    gulp.watch([serveDir + '/main_process/window-manager.js'], electron.restart)
     gulp.watch([serveDir + '/main_process/ui-manager.js'], electron.restart)
     gulp.watch([serveDir + '/main_process/ui-item.js'], electron.restart)
     gulp.watch([serveDir + '/main_process/ui-tabView.js'], electron.restart)
-    gulp.watch([serveDir + '/main_process/settings-manager.js'], electron.restart)
     gulp.watch([serveDir + '/main_process/utility.js'], electron.restart)
   gulp.task 'clean', (done) ->
     del [serveDir, distDir, releaseDir], () -> done()

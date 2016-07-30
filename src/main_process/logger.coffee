@@ -27,9 +27,28 @@ module.exports = class Logger
     formatter: (options) => @format(options)
     })
     @logger = new (winston.Logger)({
-      transports: [transport]
+      transports: [transport],
+      levels: {
+        error: 0,
+        warn: 1,
+        info: 2,
+        verbose: 3,
+        script: 2,
+        renderer: 2,
+        debug: 4,
+        silly: 5
+      }
     })
-    winston.addColors( { hue: 'green' })
+    winston.addColors( {
+      error: 'red',
+      warn: 'yellow',
+      info: 'green',
+      verbose: 'cyan',
+      script: 'cyan',
+      renderer: 'cyan',
+      debug: 'blue',
+      silly: 'magenta'
+      })
 
 
   #Formats the log string

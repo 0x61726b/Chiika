@@ -37,20 +37,20 @@ module.exports = class SettingsManager
     #Copy default scripts
 
 
-    configFilePath = path.join("Config","Chiika.json")
-    configExists = chiika.utility.fileExistsSmart configFilePath
+    @configFilePath = path.join("Config","Chiika.json")
+    configExists = chiika.utility.fileExistsSmart @configFilePath
 
     #Check if config file exists
     #It does
     if configExists
-      configFile = chiika.utility.readFileSmart(configFilePath)
+      configFile = chiika.utility.readFileSmart(@configFilePath)
       @appOptions = JSON.parse(configFile)
     else #It doesnt
       #Open the file for writing
-      cf = chiika.utility.openFileWSmart configFilePath
+      cf = chiika.utility.openFileWSmart @configFilePath
 
       #Write the default options
-      chiika.utility.writeFileSmart configFilePath, JSON.stringify(DefaultOptions)
+      chiika.utility.writeFileSmart @configFilePath, JSON.stringify(DefaultOptions)
 
       chiika.utility.closeFileSync(cf)
 
@@ -59,7 +59,21 @@ module.exports = class SettingsManager
 
       @firstLaunch = true
 
+
     chiika.logger.info "[cyan](Settings-Manager) Settings initialized"
+
+  applySettings: ->
+    #Remember window properties
+    if @getOption('RememberWindowSizeAndPosition') == true
+      chiika.windowManager.rememberWindowProperties()
+
+
+  save: ->
+    cf = chiika.utility.openFileWSmart @configFilePath
+    chiika.utility.writeFileSmart @configFilePath, JSON.stringify(@appOptions)
+    chiika.utility.closeFileSync(cf)
+
+    chiika.logger.info("Saving settings...")
 
 
   #
@@ -81,3 +95,33 @@ module.exports = class SettingsManager
     _.forEach folders, (v,k) ->
       promises.push chiika.utility.createFolderSmart(v)
     _when.all(promises)
+
+
+
+  #
+  #
+  #
+  getOption: (name) ->
+    if _.isUndefined @appOptions[name]
+      chiika.logger.warn("The requested option #{@appOptions[name]} is not defined!")
+      return undefined
+    else
+      @appOptions[name]
+
+  #
+  #
+  #
+  setOption: (name,value) ->
+    if !_.isUndefined name && !_.isUndefined value
+      @appOptions[name] = value
+    else
+      chiika.logger.warn("You have supplied incorrect paramters.")
+
+    @save()
+
+
+  #
+  #
+  #
+  setWindowProperties: (windowOptions) ->
+    @setOption('WindowProperties',windowOptions)

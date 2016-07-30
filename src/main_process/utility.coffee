@@ -13,6 +13,8 @@
 #authors: arkenthera
 #Description:
 #----------------------------------------------------------------------------
+{BrowserWindow,ipcMain,globalShortcut,Tray,Menu} = require 'electron'
+
 
 _                   = require 'lodash'
 path                = require 'path'
@@ -120,14 +122,28 @@ module.exports = class Utility
   createFolderSmart: (relativePath) ->
     @createFolder path.join(chiika.getAppHome(),relativePath)
 
-
+  #
+  # Copy files
+  #
   copyFileToDestination: (fileAbsolute,destinationAbsolute) ->
     fs.createReadStream(fileAbsolute)
       .pipe(fs.createWriteStream(destinationAbsolute))
 
-
+  #
+  # Copy directory
+  #
   copyDirectoryToDestination: (dirAbsolute,destinationAbsolute) ->
     ncp dirAbsolute,destinationAbsolute, (err) =>
       if err
         chiika.logger.error "Error copying directory! #{err}"
         throw err
+
+  getScreenResolution: ->
+    {width, height} = electron.screen.getPrimaryDisplay().workAreaSize
+    return { width: width, height: height}
+
+  calculateWindowSize: ->
+    screenRes = @getScreenResolution()
+    windowWidth = Math.round(screenRes.width * 0.66)
+    windowHeight = Math.round(screenRes.height * 0.75)
+    return { width: windowWidth, height: windowHeight }

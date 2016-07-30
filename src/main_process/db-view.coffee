@@ -58,47 +58,18 @@ module.exports = class DbView extends IDb
   # @option user [Boolean] isPrimary When set, this user will be primary.
   # @todo Add parameter validation
   save: (data,callback) ->
+    #
+    saveData = (data) =>
+      @insertRecord data, (result) =>
+        if result.exists
+          @updateRecords data,=>
+            if !_.isUndefined callback
+              callback user
+
+
     if !@isReady()
       @on 'load', =>
-        @insertRecord data,=>
-          if !_.isUndefined callback
-            callback user
+        saveData(data)
     else
-      @insertRecord data,=>
-        if !_.isUndefined callback
-          callback user
+      saveData(data)
     #@insertRecordWithKey user,callback
-
-  #
-  # Updates the user
-  # @param [Object] user User object
-  # @param [Object] user User object
-  # @option user [String] userName Name of the user
-  # @option user [String] password Password of the user
-  # @option user [Boolean] isPrimary When set, this user will be primary.
-  # @param [Object] callback Function which will be called upon update
-  # @todo Add parameter validation
-  updateUser: (user,callback) ->
-    #Callback of update operation
-    onUpdateComplete = (result) ->
-      if !_.isUndefined callback
-        callback()
-
-
-    #Call the base class's update method, which will talk to the actual db object
-    @updateRecords user,onUpdateComplete,1
-
-  #
-  # Removes user
-  # @param [Object] user
-  # @options object [String] userName
-  # @param [Object] callback Function which will be called upon update
-  # @todo Add parameter validation
-  removeUser: (user,callback) ->
-    onUpdateComplete = (result) ->
-      if !_.isUndefined callback
-        callback()
-
-
-
-    @removeRecords user,onUpdateComplete,1

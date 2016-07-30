@@ -16,6 +16,78 @@
 
 {BrowserWindow,ipcMain,globalShortcut,Tray,Menu} = require 'electron'
 
+_ = require 'lodash'
+
 module.exports = class IpcManager
-  registerEvents: ->
-    
+  #
+  # Answer to a message coming from renderer process.
+  #
+  answer: (receiver,message,args...) ->
+    chiika.logger.verbose("[yellow](IPC-Manager) Sending answer #{message}-response")
+    receiver.send message + '-response',args...
+
+  #
+  # Receiver is a window
+  # Send message to a renderer process
+  #
+  send: (receiver,message,args...) ->
+    chiika.logger.verbose("[yellow](IPC-Manager) Sending message #{message} to #{receiver.name} ")
+    receiver.webContents.send message,args...
+
+  #
+  # Receive message on the main process
+  #
+  receiveAnswer: (message,callback) ->
+    ipcMain.on message,(event,args) =>
+      chiika.logger.info("[yellow](IPC-Manager) Received message #{message}")
+      @answer event.sender,message,callback(event,args)
+
+  receive: (message,callback) ->
+    ipcMain.on message,(event,args) =>
+      chiika.logger.info("[yellow](IPC-Manager) Received message #{message}")
+      callback(event,args)
+
+  handleEvents: ->
+    @getUIData()
+    @login()
+    @getServices()
+
+    @refreshViewByName()
+
+
+
+  refreshViewByName: ->
+    @receive 'refresh-view-by-name', (event,args) =>
+      view = chiika.uiManager.getUIItem(args.viewName)
+      if view?
+        chiika.chiikaApi.emitTo args.owner,'view-update',view
+
+
+  #
+  # We receive a user pass here, redirect it to the user script and let them process it
+  #
+  login: ->
+    @receive 'set-user-login', (event,args) =>
+      returnFromLogin = (result) =>
+        _.assign result,args
+        @send(chiika.windowManager.getLoginWindow(), 'login-response', result)
+
+      chiika.chiikaApi.emitTo args.service,'set-user-login',{ user: args.login.user, pass: args.login.pass, return: returnFromLogin}
+  #
+  # When the main window loads , it will request UI data.
+  # We send it here..
+  #
+  getUIData: ->
+    @receiveAnswer 'get-ui-data', (event,args) =>
+      uiItems = chiika.uiManager.getUIItems()
+
+      if uiItems.length > 0
+        uiItems
+
+
+  getServices: ->
+    @receiveAnswer 'get-services', (event,args) =>
+      scripts = chiika.apiManager.getScripts()
+
+      if scripts.length > 0
+        scripts

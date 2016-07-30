@@ -27,7 +27,24 @@ module.exports = class RequestManager
       }
     else
       _.assign headers, { 'User-Agent': 'ChiikaDesktopApplication' }
-    request { url: url, headers: headers }
+
+    onRequestReturn = (error,response,body) ->
+      if error
+        chiika.logger.warn("Request has failed with status code: #{response.statusCode}")
+      else
+        if !_.isUndefined response
+          if response.statusCode != 200
+            chiika.logger.warn("Request returned successful but the status code is #{response.statusCode}")
+          else
+            chiika.logger.info("Request complete! Return code: #{response.statusCode}")
+        else
+          chiika.logger.error("Somehow response is null. WTF ?")
+          chiika.logger.error(body)
+
+      callback(error,response,body)
+    request { url: url, headers: headers },onRequestReturn
+
+
   makeGetRequestAuth: (url,user,headers,callback) ->
     form = { username: user.userName, password: user.password }
     auth = { user: user.userName, password: user.password }
@@ -44,17 +61,21 @@ module.exports = class RequestManager
       if error
         chiika.logger.warn("Request has failed with status code: #{response.statusCode}")
       else
-        if response.statusCode != 200
-          chiika.logger.warn("Request returned successful but the status code is #{response.statusCode}")
+        if !_.isUndefined response
+          if response.statusCode != 200
+            chiika.logger.warn("Request returned successful but the status code is #{response.statusCode}")
+          else
+            chiika.logger.info("Request complete! Return code: #{response.statusCode}")
         else
-          chiika.logger.info("Request complete! Return code: #{response.statusCode}")
+          chiika.logger.error("Somehow response is null. WTF ?")
+          chiika.logger.error(body)
 
       callback(error,response,body)
 
     request { url: url, form: form, headers:headers, auth: auth }, onRequestReturn
 
 
-  
+
   makePostRequestAuth: (url,user,headers,callback) ->
     form = { username: user.userName, password: user.password }
     auth = { user: user.userName, password: user.password }

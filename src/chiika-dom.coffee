@@ -14,7 +14,6 @@
 #Description:
 #----------------------------------------------------------------------------
 {Emitter} = require 'event-kit'
-ipcHelpers = require '../ipcHelpers'
 {BrowserWindow, ipcRenderer,remote} = require 'electron'
 
 _ = require 'lodash'

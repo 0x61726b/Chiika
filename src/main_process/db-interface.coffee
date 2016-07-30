@@ -92,7 +92,6 @@ module.exports = class IDb
       if err
         throw err
       chiika.logger.debug("Idb::onInsertComplete #{count}")
-      callback(err,count)
     @nosql.insert record, onInsert,'IDb::insertRecord'
 
     chiika.logger.debug("IDb::internalInsertRecord")
@@ -110,13 +109,16 @@ module.exports = class IDb
         keys = Object.keys(v)
         key = keys[0]
 
+
         #Check if the value exists
         onKeyExistsCheck = (exists) =>
           if !exists.exists
             @internalInsertRecord v,callback
             chiika.logger.verbose("[magenta](#{@name}) - Added new record #{key}:#{record[key]}")
+            callback { exists: exists.exists }
           else
             chiika.logger.verbose("[magenta](#{@name}) - Key-value already exists #{key}:#{v[key]}. No need to insert, if you meant to update, use update method.")
+            callback { exists: exists.exists }
         @checkIfKeyValueExists(v,onKeyExistsCheck)
     else
       keys = Object.keys(record)
@@ -127,10 +129,12 @@ module.exports = class IDb
         if !exists.exists
           @internalInsertRecord record,callback
           chiika.logger.verbose("[magenta](#{@name}) - Added new record #{key}:#{record[key]}")
+          callback { exists: exists.exists }
         else
           chiika.logger.verbose("[magenta](#{@name}) - Key-value already exists #{key}:#{record[key]}. No need to insert, if you meant to update, use update method.")
-          callback null,0
+          callback { exists: exists.exists }
       @checkIfKeyValueExists(record,onKeyExistsCheck)
+      
 
 
 
@@ -162,9 +166,10 @@ module.exports = class IDb
         if key == Object.keys(record)[0] && record[key] == doc[key]
           doc = record
           chiika.logger.verbose("[magenta](#{@name}) - Updated record with #{key}:#{doc[key]}")
+          affectedRows++
       return doc
 
-    updateCallback = =>
+    updateCallback = (err,count) =>
       if _.isArray record
         keyExistsCallback = (result) ->
           if !result.exists

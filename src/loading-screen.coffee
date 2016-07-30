@@ -37,10 +37,10 @@ module.exports = React.createClass
   render: () ->
     (<div className="loading-screen">
       <div>
-        <img src="./../assets/images/logo.svg" style={{width: 72,height:72}} className="anime" alt="" />
-        <img src="./../assets/images/logo.svg" style={{width: 72,height:72}} className="anime" alt="" />
-        <img src="./../assets/images/logo.svg" style={{width: 72,height:72}} className="anime" alt="" />
-        <img src="./../assets/images/logo.svg" style={{width: 72,height:72}} className="anime" alt="" />
-        <img src="./../assets/images/logo.svg" style={{width: 72,height:72}} className="anime" alt="" />
+        <img src="../assets/images/logo.svg" style={{width: 72,height:72}} className="anime" alt="" />
+        <img src="../assets/images/logo.svg" style={{width: 72,height:72}} className="anime" alt="" />
+        <img src="../assets/images/logo.svg" style={{width: 72,height:72}} className="anime" alt="" />
+        <img src="../assets/images/logo.svg" style={{width: 72,height:72}} className="anime" alt="" />
+        <img src="../assets/images/logo.svg" style={{width: 72,height:72}} className="anime" alt="" />
       </div>
     </div>)
