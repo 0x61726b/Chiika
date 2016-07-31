@@ -14,7 +14,7 @@
 #Description:
 #----------------------------------------------------------------------------
 {Emitter} = require 'event-kit'
-{BrowserWindow, ipcRenderer,remote,shell} = require 'electron'
+{BrowserWindow, ipcRenderer,remote} = require 'electron'
 
 
 _                     = require 'lodash'
@@ -30,6 +30,8 @@ class ChiikaEnvironment
   constructor: (params={}) ->
     {@applicationDelegate, @window,@chiikaHome} = params
 
+    window.chiika = this
+
     # scribe = require 'scribe-js'
     # express = require 'express'
     #
@@ -37,13 +39,14 @@ class ChiikaEnvironment
     # console = process.console
 
     @emitter          = new Emitter
-    @logger           = new Logger("verbose").logger
+    @logger           = remote.getGlobal('logger')
+
     @ipc              = new ChiikaIPC()
 
 
-
-
-
+    @ipc.getUIData()
+    @ipc.getUsers()
+    @ipc.preload()
 
 
 

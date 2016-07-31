@@ -46,12 +46,11 @@ module.exports = class DbCustom extends IDb
         loadDatabase()
 
 
-
   getKey: (name) ->
     match = _.find @keys,{ name: name }
     if _.isUndefined match
       chiika.logger.warn("The key #{name} you are trying to access doesn't exist.")
-      match
+      undefined
     else
       match
 

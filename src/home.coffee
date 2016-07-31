@@ -21,13 +21,9 @@ _ = require 'lodash'
 #Views
 
 module.exports = React.createClass
-  ipcCall: ->
-
   componentDidMount: ->
-    chiika.ipcListeners.push this
-    console.log "Home: Mount"
+
   componentWillUnmount: ->
-    _.pull chiika.ipcListeners,this
 
   render: ->
     (<div id="myGrid" />)

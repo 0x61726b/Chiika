@@ -14,7 +14,7 @@
 #Description:
 #----------------------------------------------------------------------------
 {Emitter} = require 'event-kit'
-{BrowserWindow, ipcRenderer,remote,shell} = require 'electron'
+{BrowserWindow, ipcRenderer,remote} = require 'electron'
 
 
 _                     = require 'lodash'
@@ -36,13 +36,41 @@ module.exports = class ChiikaIPC
     #   console.log "All done m8"
 
 
+  preload: ->
+    _when.all(@preloadPromises).then =>
+      @sendMessage('ui-init-complete')
+
+
+
+  getUIData: ->
+    @preloadPromises.push @sendReceiveIPC 'get-ui-data',{}, (event,defer,args) =>
+      defer.resolve()
+      console.log args
+
+  getUsers: ->
+    @preloadPromises.push @sendReceiveIPC 'get-user-data',{}, (event,defer,args) =>
+      defer.resolve()
+      console.log args
+
+
   refreshViewByName: (name) ->
     @sendReceiveIPC 'refresh-view-by-name',name, (event,args,defer) =>
       console.log "refresh-view-by-name hello"
 
+
+  reconstructUI: () ->
+    @sendMessage 'reconstruct-ui'
+
+
+  sendMessage: (message,args...) ->
+    ipcRenderer.send message,args...
+
+
   sendReceiveIPC: (message,params,callback) ->
     defer = _when.defer()
+    chiika.logger.info("[blue](RENDERER) Sending #{message}")
     ipcRenderer.send message,params
     ipcRenderer.on message + "-response", (event,args...) =>
-      callback(event,args...,defer)
+      chiika.logger.info("[blue](RENDERER) Receiving #{message}-response")
+      callback(event,defer,args...)
     defer.promise

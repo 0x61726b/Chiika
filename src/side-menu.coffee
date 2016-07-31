@@ -25,47 +25,18 @@ path = require 'path'
 
 SideMenu = React.createClass
   componentDidMount: ->
-    window.chiika.ipcListeners.push this
 
-    if !window.chiika.isWaiting
-      @refreshSideMenu()
-    hoverIn = ->
-      $(this).addClass "rotateLogo"
-    hoverOut = ->
-      $(this).removeClass "rotateLogo"
-    $(".chiikaLogo").hover(hoverIn, hoverOut)
-    $(".side-menu-link").click ->
-      if !this.classList.contains "active"
-        $(".side-menu-link").removeClass "active"
-        $(this).toggleClass "active"
-
-    chiika.emitter.on 'download-image',() =>
-      @refreshSideMenu()
-      console.log "Emitter: download-image"
   componentWillUnmount: ->
-    _.pull window.chiika.ipcListeners,this
-  ipcCall: ->
-    @refreshSideMenu()
-  refreshSideMenu: ->
-    @imagePath = @getUserImage()
-    @forceUpdate()
-    chiika.domManager.setUserInfo(chiika.user)
-  getUserImage: ->
-    try
-      @imagePath = chiika.chiikaHome
-      @imagePath = path.join(@imagePath,'Data','Images',chiika.user.userId + '.jpg')
-      @imagePath
-    catch
-      chiika.logInfo "There was an error trying to load user avatar"
+
   render: () ->
     (<div className="sidebar">
       <div className="topLeft">
         <div className="logoContainer">
-          <img className="chiikaLogo" src="./../assets/images/topLeftLogo.png"/>
+          <img className="chiikaLogo" src="assets/images/topLeftLogo.png"/>
         </div>
         <Link to="User" className="userArea noDecoration">
           <div className="imageContainer">
-            <img id="userAvatar" className="img-circle avatar" src={@imagePath}/>
+            <img id="userAvatar" className="img-circle avatar" src="assets/images/avatar.jpg"/>
           </div>
           <div className="userInfo">
             Chiika

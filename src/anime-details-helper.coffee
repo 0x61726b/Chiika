@@ -17,7 +17,6 @@ React = require("react")
 ReactDOM = require("react-dom")
 
 path = require 'path'
-shell = require 'shell'
 
 
 module.exports = class AnimeDetailsHelper

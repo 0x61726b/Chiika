@@ -22,11 +22,9 @@ module.exports = class AppDelegate
     @windowsClosed()
     @willQuit()
 
-
-
   onReady: ->
     app.on 'ready', =>
-      hue = true
+      hue = false
       if hue
         loginWindow = chiika.windowManager.createWindowAndOpen(false,false,{
           name: 'login',
@@ -60,10 +58,8 @@ module.exports = class AppDelegate
           })
 
         chiika.windowManager.openDevTools(mainWindow)
-        chiika.windowManager.openDevTools(loadingWindow)
 
       chiika.settingsManager.applySettings()
-
 
   windowsClosed: ->
     app.on 'window-all-closed', ->

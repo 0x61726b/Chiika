@@ -17,11 +17,6 @@
 React = require('react')
 
 
-
-remote = require 'remote'
-BrowserWindow = remote.BrowserWindow;
-app = remote.app;
-
 {Emitter} = require 'event-kit'
 
 module.exports = React.createClass

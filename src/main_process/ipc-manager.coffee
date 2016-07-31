@@ -16,7 +16,10 @@
 
 {BrowserWindow,ipcMain,globalShortcut,Tray,Menu} = require 'electron'
 
-_ = require 'lodash'
+_           = require 'lodash'
+_when       = require 'when'
+string      = require 'string'
+
 
 module.exports = class IpcManager
   #
@@ -49,13 +52,41 @@ module.exports = class IpcManager
 
   handleEvents: ->
     @getUIData()
+    @getUserData()
     @login()
+    @loginCustom()
     @getServices()
-
     @refreshViewByName()
+    @modalWindowJsEval()
+    @reconstructUI()
+
+  reconstructUI: ->
+    @receive 'reconstruct-ui', (event,args) =>
+      #
+      defer = _when.defer()
+      chiika.chiikaApi.emit 'reconstruct-ui',defer
 
 
 
+
+
+  modalWindowJsEval: ->
+    @receive 'modal-window-message', (event,args) =>
+      #Args must have the 'windowName' property or the script will never receive the callback
+      owner = string(args.windowName).chompRight('modal').s
+
+      chiika.chiikaApi.emitTo owner, 'ui-modal-message',args
+      # if args.status
+      #   console.log "Auth pin " + args.html
+      #   chiika.windowManager.getWindowByName(args.windowName).close()
+      # else
+      #   #Denied
+      #   chiika.windowManager.getWindowByName(args.windowName).close()
+
+
+  #
+  # Calls script event 'view-update' to give the script a chance to update data
+  #
   refreshViewByName: ->
     @receive 'refresh-view-by-name', (event,args) =>
       view = chiika.uiManager.getUIItem(args.viewName)
@@ -71,8 +102,17 @@ module.exports = class IpcManager
       returnFromLogin = (result) =>
         _.assign result,args
         @send(chiika.windowManager.getLoginWindow(), 'login-response', result)
+      if args.login?
+        chiika.chiikaApi.emitTo args.service,'set-user-login',{ user: args.login.user, pass: args.login.pass, return: returnFromLogin}
+      else
+        params = { return: returnFromLogin }
+        _.assign params,args
+        chiika.chiikaApi.emitTo args.service,'set-user-login',params
 
-      chiika.chiikaApi.emitTo args.service,'set-user-login',{ user: args.login.user, pass: args.login.pass, return: returnFromLogin}
+
+  loginCustom: ->
+    @receive 'set-user-auth-pin', (event,args) =>
+      chiika.chiikaApi.emitTo args.service,'set-user-auth-pin',{}
   #
   # When the main window loads , it will request UI data.
   # We send it here..
@@ -84,10 +124,26 @@ module.exports = class IpcManager
       if uiItems.length > 0
         uiItems
 
+  #
+  #
+  #
+  getUserData: ->
+    @receiveAnswer 'get-user-data', (event,args) =>
+      users = chiika.dbManager.usersDb.users
+
+      if users.length > 0
+        users
+
 
   getServices: ->
     @receiveAnswer 'get-services', (event,args) =>
       scripts = chiika.apiManager.getScripts()
 
-      if scripts.length > 0
-        scripts
+      services = []
+      for script in scripts
+        if script.isService
+          services.push script
+      if services.length > 0
+        return services
+      else
+        return undefined

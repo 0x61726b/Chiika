@@ -21,6 +21,7 @@ module.exports = class ChiikaPublicApi
   emitter: null
   subscriptions: []
 
+
   constructor: (params={})->
     @emitter             = new Emitter
     {@logger, @db,@parser,@ui} = params
@@ -28,10 +29,22 @@ module.exports = class ChiikaPublicApi
     @custom              = @db.customDb
     @uiDb                = @db.uiDb
 
+
+
+
   makeGetRequest:(url,headers,callback) ->
     if _.isUndefined callback
       throw new InvalidParameterException("You have to supply a callback to 'makeGetRequest' method.")
     chiika.requestManager.makeGetRequest(url,headers,callback)
+
+
+
+  makePostRequest:(url,headers,callback) ->
+    if _.isUndefined callback
+      throw new InvalidParameterException("You have to supply a callback to 'makePostRequest' method.")
+    chiika.requestManager.makePostRequest(url,headers,callback)
+
+
 
   makeGetRequestAuth:(url,user,headers,callback) ->
     if _.isUndefined callback
@@ -45,12 +58,33 @@ module.exports = class ChiikaPublicApi
     chiika.requestManager.makePostRequestAuth(url,user,headers,callback)
 
 
+  sendMessageToWindow: (windowName,message,args) ->
+    wnd = chiika.windowManager.getWindowByName(windowName)
+
+    if !_.isUndefined wnd
+      wnd.webContents.send message,args
+
+
   requestViewUpdate: (viewName,owner) ->
     view = chiika.uiManager.getUIItem(viewName)
     if view?
       @emitTo owner,'view-update',view
     else
       chiika.logger.error("Can't update a non-existent view.")
+
+  createWindow: (options,returnCall) ->
+    options.name += 'modal' # service/owner name + modal , anilistmodal etc.
+    chiika.windowManager.createModalWindow(options,returnCall)
+
+  closeWindow: (windowName) ->
+    wnd = chiika.windowManager.getWindowByName(windowName)
+    if !_.isUndefined wnd
+      wnd.close()
+
+  executeJavaScript: (windowName,javascript) ->
+    wnd = chiika.windowManager.getWindowByName(windowName)
+    if !_.isUndefined wnd
+      wnd.webContents.executeJavaScript(javascript)
 
 
   on: (receiver,message,args...) ->
@@ -68,6 +102,7 @@ module.exports = class ChiikaPublicApi
     listeners = @emitter.handlersByEventName[message]
     scripts = chiika.apiManager.getScripts()
     index = _.indexOf scripts, _.find(scripts,{ name: receiver })
+
 
     if index == -1
       chiika.logger.error("[magenta](Chiika-API) There was a problem when sending #{message} to #{receiver}.")

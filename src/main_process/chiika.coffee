@@ -18,12 +18,8 @@
 #--------------------
 #
 #--------------------
-{BrowserWindow, ipcMain,globalShortcut,Tray,Menu} = require 'electron'
-app                               = require "app"
+{BrowserWindow, ipcMain,globalShortcut,Tray,Menu,app} = require 'electron'
 
-crashReporter                     = require 'crash-reporter'
-electron                          = require 'electron'
-localShortcut                     = require 'electron-localshortcut'
 
 
 yargs                             = require 'yargs'
@@ -39,6 +35,7 @@ string                            = require 'string'
 # ---------------------------
 #
 # ---------------------------
+
 
 #ipcHelpers = require '../ipcHelpers'
 #MediaDetect = require('./tools/src/media-detect-win32')
@@ -95,6 +92,7 @@ class Application
     @chiikaHome         = path.join(app.getPath('appData'),"chiika")
 
     @logger             = new Logger("verbose").logger
+    global.logger       = @logger #Share with renderer
 
 
     @emitter            = new Emitter
@@ -112,6 +110,7 @@ class Application
 
     @appDelegate.run()
     @ipcManager.handleEvents()
+
 
 
 

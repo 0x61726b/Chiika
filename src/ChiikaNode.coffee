@@ -15,9 +15,7 @@
 #----------------------------------------------------------------------------
 path = require('path')
 fs = require('fs')
-remote = require('remote')
 electron = require 'electron'
-app = remote.app
 ipcRenderer = electron.ipcRenderer
 RouteManager = require './components/RouteManager'
 BrowserWindow = electron.remote.BrowserWindow

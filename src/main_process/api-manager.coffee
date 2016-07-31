@@ -14,8 +14,6 @@
 #Description:
 #----------------------------------------------------------------------------
 
-
-
 path                    = require 'path'
 fs                      = require 'fs'
 _                       = require 'lodash'
@@ -61,8 +59,10 @@ module.exports = class APIManager
     scriptName = instance.name
     scriptDesc = instance.displayDescription
     logo       = instance.logo
+    loginType  = instance.loginType
+    isService  = instance.isService
 
-    localInstance = { name: scriptName, description: scriptDesc, logo: logo, instance: instance}
+    localInstance = { name: scriptName, description: scriptDesc, logo: logo, instance: instance, loginType: loginType, isService: isService }
 
     if !_.isUndefined @getScriptByName(scriptName)
       #Script with the same name was compiled before, update it

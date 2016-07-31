@@ -21,7 +21,10 @@ _                 = require 'lodash'
 
 module.exports = class WindowManager
   mainWindow: null
+
   loginWindow: null
+  loginWindowInstance: null
+
   emitter: null
 
   windows: []
@@ -59,7 +62,7 @@ module.exports = class WindowManager
     window = new BrowserWindow(windowOptions)
     @handleWindowEvents(window)
 
-    _.assign window, { name: options.name }
+    _.assign window, { name: options.name,rawWindowInstance: window }
     @windows.push window
 
     if isMain
@@ -73,12 +76,41 @@ module.exports = class WindowManager
     window.loadURL(options.url)
     window
 
+  createModalWindow: (options,returnCallback) ->
+    if options.parent == 'main'
+      parent = @getMainWindow()
+    if options.parent == 'login'
+      parent = @getLoginWindow()
+
+    chiika.logger.info("Adding new modal window.. #{parent.name}")
+
+    if parent?
+      window = new BrowserWindow({ webPreferences: { nodeIntegration: false, preload: __dirname + "/preload.js" }, parent: parent, modal:true, show: false, frame: false })
+      @handleWindowEvents(window)
+
+      _.assign window, { name: options.name }
+      @windows.push window
+
+      window.once 'ready-to-show', =>
+        window.show()
+
+      window.loadURL(options.url)
+
+      window.on 'closed', =>
+        chiika.logger.info("Modal window is closed")
+
+        returnCallback()
+
+      window.webContents.on 'dom-ready', =>
+        @emitter.emit 'ui-dom-ready',window
+        chiika.chiikaApi.emitTo chiika.utility.chompRight(window.name,'modal'),'ui-dom-ready', window
+
   removeWindow: (window) ->
     match = _.find @windows,window
 
     if match?
+      chiika.logger.info("Removed window. #{match.name}")
       _.remove @windows,window
-      chiika.logger.info("Removed window.")
 
   rememberWindowProperties: ->
     window = @getMainWindow()
@@ -98,16 +130,16 @@ module.exports = class WindowManager
     window.on 'closed', =>
       @emitter.emit 'closed',window
       window = null
-      @removeWindow(window)
 
     window.on 'close', =>
       @emitter.emit 'close',window
+      @removeWindow(window)
 
-    window.on 'did-finish-load', =>
+    window.webContents.on 'did-finish-load', =>
       @emitter.emit 'did-finish-load'
       chiika.logger.info("[magenta](Window-Manager) Window has finished loading.")
 
-    window.on 'ready-to-show', =>
+    window.webContents.on 'ready-to-show', =>
       @emitter.emit 'ready-to-show'
       chiika.logger.info("[magenta](Window-Manager) Window has finished loading.")
 

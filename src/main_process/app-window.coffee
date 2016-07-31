@@ -13,7 +13,6 @@
 #authors: arkenthera
 #Description:
 #----------------------------------------------------------------------------
-BrowserWindow = require 'browser-window'
 
 
 module.exports =

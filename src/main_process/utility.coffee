@@ -21,6 +21,7 @@ path                = require 'path'
 fs                  = require 'fs'
 mkdirp              = require 'mkdirp'
 ncp                 = require 'ncp'
+string              = require 'string'
 
 
 module.exports = class Utility
@@ -147,3 +148,9 @@ module.exports = class Utility
     windowWidth = Math.round(screenRes.width * 0.66)
     windowHeight = Math.round(screenRes.height * 0.75)
     return { width: windowWidth, height: windowHeight }
+
+  chompLeft: (orig,str) ->
+    string(orig).chompLeft(str).s
+
+  chompRight: (orig,str) ->
+    string(orig).chompRight(str).s
