@@ -30,17 +30,28 @@
       <table class='box'>
         <tr>
           <td>Defined in:</td>
-          <td>src\browser\db-interface.coffee</td>
+          <td>src\main_process\db-interface.coffee</td>
         </tr>
       </table>
       <h2>Direct Known Subclasses</h2>
       <p class='children'>
+        <a href='../class/DbCustom.html'>DbCustom</a>
+        <a href='../class/DbUI.html'>DbUI</a>
         <a href='../class/DbUsers.html'>DbUsers</a>
+        <a href='../class/DbView.html'>DbView</a>
       </p>
       <h2>Variables Summary</h2>
       <dl class='constants'>
   <dt id='nosql-variable'>
     nosql
+    =
+  </dt>
+  <dd>
+    <pre><code class='coffeescript'>null</code></pre>
+    
+  </dd>
+  <dt id='promise-variable'>
+    promise
     =
   </dt>
   <dd>
@@ -66,25 +77,80 @@
   </li>
   <li>
     <span class='signature'>
-      <a href='#insertRecord-dynamic'>
+      <a href='#one-dynamic'>
         #
 (void)
-<b>insertRecord</b><span>(record)</span>
+<b>one</b><span>(key, value, callback)</span>
       </a>
     </span>
     <span class='desc'>
+      # Returns one row of database where key == value
+@return
+
     </span>
   </li>
   <li>
     <span class='signature'>
-      <a href='#insertRecordWithKey-dynamic'>
+      <a href='#internalInsertRecord-dynamic'>
         #
 (void)
-<b>insertRecordWithKey</b><span>(record, key)</span>
+<b>internalInsertRecord</b><span>(record, callback)</span>
       </a>
     </span>
     <span class='desc'>
-      When inserting this method checks for if one of the recrods contains &#39;key&#39; with the same value from record.key , it will cancel the insert op. 
+      # Internal insert record method
+
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#insertRecord-dynamic'>
+        #
+(void)
+<b>insertRecord</b><span>(record, callback)</span>
+      </a>
+    </span>
+    <span class='desc'>
+      When inserting this method checks for if one of the recrods contains &#39;key=value&#39; @return
+
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#updateRecords-dynamic'>
+        #
+(void)
+<b>updateRecords</b><span>(record, callback)</span>
+      </a>
+    </span>
+    <span class='desc'>
+      Updates record/records @return
+
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#removeRecords-dynamic'>
+        #
+(void)
+<b>removeRecords</b><span>(record, callback)</span>
+      </a>
+    </span>
+    <span class='desc'>
+      Remove records. 
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#checkIfKeyValueExists-dynamic'>
+        #
+(void)
+<b>checkIfKeyValueExists</b><span>(key, callback)</span>
+      </a>
+    </span>
+    <span class='desc'>
+      Does a where operation ( where key==value ) then returns the selected rows @return
+
     </span>
   </li>
   <li>
@@ -152,6 +218,16 @@
       &mdash;
       <span class='desc'>name of the database </span>
     </li>
+    <li>
+      <span class='name'>promises</span>
+      <span class='type'>
+        (
+          <tt>Object</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>The promise array. The purpose of this is each db will call a resolve when they&#39;re loaded, thus usable. </span>
+    </li>
   </ul>
 </div>
   </div>
@@ -187,23 +263,80 @@ Returns the whole database
 </div>
   </div>
   <div class='method_details'>
-    <p class='signature' id='insertRecord-dynamic'>
+    <p class='signature' id='one-dynamic'>
       #
 (void)
-<b>insertRecord</b><span>(record)</span>
-      <br>
-    </p>
-    
-  </div>
-  <div class='method_details'>
-    <p class='signature' id='insertRecordWithKey-dynamic'>
-      #
-(void)
-<b>insertRecordWithKey</b><span>(record, key)</span>
+<b>one</b><span>(key, value, callback)</span>
       <br>
     </p>
     <div class='docstring'>
-  <p>When inserting this method checks for if one of the recrods contains &#39;key&#39; with the same value from record.key , it will cancel the insert op.
+  <p>#
+Returns one row of database where key == value
+@return</p>
+</div>
+<div class='tags'>
+  <h3>Parameters:</h3>
+  <ul class='param'>
+    <li>
+      <span class='name'>key</span>
+      <span class='type'>
+        (
+          <tt>String</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>Key </span>
+    </li>
+    <li>
+      <span class='name'>value</span>
+      <span class='type'>
+        (
+          <tt>String</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>Value </span>
+    </li>
+    <li>
+      <span class='name'>callback</span>
+      <span class='type'>
+        (
+          <tt>Object</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>Callback </span>
+    </li>
+  </ul>
+</div>
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='internalInsertRecord-dynamic'>
+      #
+(void)
+<b>internalInsertRecord</b><span>(record, callback)</span>
+      <br>
+    </p>
+    <div class='docstring'>
+  <p>#
+Internal insert record method</p>
+</div>
+<div class='tags'>
+</div>
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='insertRecord-dynamic'>
+      #
+(void)
+<b>insertRecord</b><span>(record, callback)</span>
+      <br>
+    </p>
+    <div class='docstring'>
+  <div class='note todo'>
+    <strong>TODO:</strong>
+    Test array insert 
+  </div>
+  <p>When inserting this method checks for if one of the recrods contains &#39;key=value&#39;
 @return</p>
 </div>
 <div class='tags'>
@@ -217,42 +350,43 @@ Returns the whole database
         )
       </span>
     </li>
-  </ul>
-  <h3>
-    Options Hash:
-    (record):
-  </h3>
-  <ul class='options'>
     <li>
-      <span class='name'>userName</span>
+      <span class='name'>callback</span>
       <span class='type'>
         (
-          <tt>String</tt>
+          <tt>Object</tt>
         )
       </span>
-    </li>
-    <li>
-      <span class='name'>password</span>
-      <span class='type'>
-        (
-          <tt>String</tt>
-        )
-      </span>
-    </li>
-    <li>
-      <span class='name'>isPrimary</span>
-      <span class='type'>
-        (
-          <tt>Boolean</tt>
-        )
-      </span>
+      &mdash;
+      <span class='desc'>Callback </span>
     </li>
   </ul>
-  <h3>
-    Options Hash:
-    (key):
-  </h3>
-  <ul class='options'>
+</div>
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='updateRecords-dynamic'>
+      #
+(void)
+<b>updateRecords</b><span>(record, callback)</span>
+      <br>
+    </p>
+    <div class='docstring'>
+  <p>Updates record/records
+@return</p>
+</div>
+<div class='tags'>
+  <h3>Parameters:</h3>
+  <ul class='param'>
+    <li>
+      <span class='name'>record</span>
+      <span class='type'>
+        (
+          <tt>Object</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>Record Object </span>
+    </li>
     <li>
       <span class='name'>key</span>
       <span class='type'>
@@ -261,7 +395,80 @@ Returns the whole database
         )
       </span>
       &mdash;
-      <span class='desc'>String must be a property of record </span>
+      <span class='desc'>String that is a property that is significant to the object </span>
+    </li>
+    <li>
+      <span class='name'>callback</span>
+      <span class='type'>
+        (
+          <tt>Object</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>Function that will be called when the update completes </span>
+    </li>
+    <li>
+      <span class='name'>mode</span>
+      <span class='type'>
+        (
+          <tt>Integeer</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>There are 2 modes in the database structure. if the mode is 0 , all methods look for a structure like this key: { prop:propvalue },otherwise it will look for { key: value, prop: propvalue } </span>
+    </li>
+  </ul>
+</div>
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='removeRecords-dynamic'>
+      #
+(void)
+<b>removeRecords</b><span>(record, callback)</span>
+      <br>
+    </p>
+    <div class='docstring'>
+  <p>Remove records. Removes rows where key=value and record = [values]
+Example Usage: @example removeRecords [ { userName: &#39;arkenthera&#39; }] @example revemoRecords [ { name: &#39;mykey&#39; }]
+@param record
+@return</p>
+</div>
+<div class='tags'>
+</div>
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='checkIfKeyValueExists-dynamic'>
+      #
+(void)
+<b>checkIfKeyValueExists</b><span>(key, callback)</span>
+      <br>
+    </p>
+    <div class='docstring'>
+  <p>Does a where operation ( where key==value ) then returns the selected rows
+@return</p>
+</div>
+<div class='tags'>
+  <h3>Parameters:</h3>
+  <ul class='param'>
+    <li>
+      <span class='name'>key</span>
+      <span class='type'>
+        (
+          <tt>Object</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>The object which holds the key and value </span>
+    </li>
+    <li>
+      <span class='name'>callback</span>
+      <span class='type'>
+        (
+          <tt>Object</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>Callback </span>
     </li>
   </ul>
 </div>

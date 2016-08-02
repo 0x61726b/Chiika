@@ -19,32 +19,40 @@
       Index
     </a>
     &raquo;
-    <span class='title'>Menubar</span>
+    <span class='title'>UISetup</span>
   </div>
 </div>
     <div id='content'>
       <h1>
         Class:
-        Menubar
+        UISetup
       </h1>
       <table class='box'>
         <tr>
           <td>Defined in:</td>
-          <td>src\main_process\menubar.coffee</td>
+          <td>scripts\ui.coffee</td>
         </tr>
       </table>
       <h2>Variables Summary</h2>
       <dl class='constants'>
-  <dt id='clickCount-variable'>
-    clickCount
+  <dt id='name-variable'>
+    name
     =
   </dt>
   <dd>
-    <pre><code class='coffeescript'>0</code></pre>
+    <pre><code class='coffeescript'>&quot;uiSetup&quot;</code></pre>
     
   </dd>
-  <dt id='isPlayingVideo-variable'>
-    isPlayingVideo
+  <dt id='displayDescription-variable'>
+    displayDescription
+    =
+  </dt>
+  <dd>
+    <pre><code class='coffeescript'>&quot;UI Setup&quot;</code></pre>
+    
+  </dd>
+  <dt id='isService-variable'>
+    isService
     =
   </dt>
   <dd>
@@ -56,10 +64,38 @@
       <ul class='summary'>
   <li>
     <span class='signature'>
-      <a href='#handleClick-dynamic'>
+      <a href='#on-dynamic'>
         #
 (void)
-<b>handleClick</b><span>(e, bounds)</span>
+<b>on</b><span>(event, args...)</span>
+      </a>
+    </span>
+    <span class='desc'>
+      This method is controls the communication between app and script If you change this method things will break
+
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#crateImageView-dynamic'>
+        #
+(void)
+<b>crateImageView</b><span>(promise)</span>
+      </a>
+    </span>
+    <span class='desc'>
+      Creates a &#39;view&#39; A view is something which will appear at the side menu which you can navigate to
+See the documentation for view types
+This is a &#39;tabView&#39;, the most traditional thing in this app
+
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#createViewAnimelist-dynamic'>
+        #
+(void)
+<b>createViewAnimelist</b><span>(promise)</span>
       </a>
     </span>
     <span class='desc'>
@@ -67,10 +103,10 @@
   </li>
   <li>
     <span class='signature'>
-      <a href='#clicked-dynamic'>
+      <a href='#createViewMangalist-dynamic'>
         #
 (void)
-<b>clicked</b><span>(e, bounds)</span>
+<b>createViewMangalist</b><span>(promise)</span>
       </a>
     </span>
     <span class='desc'>
@@ -78,10 +114,10 @@
   </li>
   <li>
     <span class='signature'>
-      <a href='#create-dynamic'>
+      <a href='#createHome-dynamic'>
         #
 (void)
-<b>create</b><span>(opts)</span>
+<b>createHome</b><span>(promise)</span>
       </a>
     </span>
     <span class='desc'>
@@ -89,68 +125,14 @@
   </li>
   <li>
     <span class='signature'>
-      <a href='#appReady-dynamic'>
+      <a href='#run-dynamic'>
         #
 (void)
-<b>appReady</b><span>()</span>
+<b>run</b><span>(chiika)</span>
       </a>
     </span>
     <span class='desc'>
-    </span>
-  </li>
-  <li>
-    <span class='signature'>
-      <a href='#showWindow-dynamic'>
-        #
-(void)
-<b>showWindow</b><span>(trayPos)</span>
-      </a>
-    </span>
-    <span class='desc'>
-    </span>
-  </li>
-  <li>
-    <span class='signature'>
-      <a href='#hideWindow-dynamic'>
-        #
-(void)
-<b>hideWindow</b><span>()</span>
-      </a>
-    </span>
-    <span class='desc'>
-    </span>
-  </li>
-  <li>
-    <span class='signature'>
-      <a href='#windowClear-dynamic'>
-        #
-(void)
-<b>windowClear</b><span>()</span>
-      </a>
-    </span>
-    <span class='desc'>
-    </span>
-  </li>
-  <li>
-    <span class='signature'>
-      <a href='#emitBlur-dynamic'>
-        #
-(void)
-<b>emitBlur</b><span>()</span>
-      </a>
-    </span>
-    <span class='desc'>
-    </span>
-  </li>
-  <li>
-    <span class='signature'>
-      <a href='#createWindow-dynamic'>
-        #
-(void)
-<b>createWindow</b><span>()</span>
-      </a>
-    </span>
-    <span class='desc'>
+      After the constructor run() method will be called immediately after. 
     </span>
   </li>
 </ul>
@@ -160,94 +142,90 @@
     <p class='signature' id='constructor-dynamic'>
       #
 (void)
-<b>constructor</b><span>()</span>
+<b>constructor</b><span>(chiika)</span>
       <br>
     </p>
-    
+    <div class='docstring'>
+  <p>Will be called by Chiika with the API object
+you can do whatever you want with this object
+See the documentation for this object&#39;s methods,properties etc.</p>
+</div>
+<div class='tags'>
+</div>
   </div>
 </div>
       <h2>Instance Method Details</h2>
       <div class='methods'>
   <div class='method_details'>
-    <p class='signature' id='handleClick-dynamic'>
+    <p class='signature' id='on-dynamic'>
       #
 (void)
-<b>handleClick</b><span>(e, bounds)</span>
+<b>on</b><span>(event, args...)</span>
+      <br>
+    </p>
+    <div class='docstring'>
+  <p>This method is controls the communication between app and script
+If you change this method things will break</p>
+</div>
+<div class='tags'>
+</div>
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='crateImageView-dynamic'>
+      #
+(void)
+<b>crateImageView</b><span>(promise)</span>
+      <br>
+    </p>
+    <div class='docstring'>
+  <p>Creates a &#39;view&#39;
+A view is something which will appear at the side menu which you can navigate to
+See the documentation for view types
+This is a &#39;tabView&#39;, the most traditional thing in this app</p>
+</div>
+<div class='tags'>
+</div>
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='createViewAnimelist-dynamic'>
+      #
+(void)
+<b>createViewAnimelist</b><span>(promise)</span>
       <br>
     </p>
     
   </div>
   <div class='method_details'>
-    <p class='signature' id='clicked-dynamic'>
+    <p class='signature' id='createViewMangalist-dynamic'>
       #
 (void)
-<b>clicked</b><span>(e, bounds)</span>
+<b>createViewMangalist</b><span>(promise)</span>
       <br>
     </p>
     
   </div>
   <div class='method_details'>
-    <p class='signature' id='create-dynamic'>
+    <p class='signature' id='createHome-dynamic'>
       #
 (void)
-<b>create</b><span>(opts)</span>
+<b>createHome</b><span>(promise)</span>
       <br>
     </p>
     
   </div>
   <div class='method_details'>
-    <p class='signature' id='appReady-dynamic'>
+    <p class='signature' id='run-dynamic'>
       #
 (void)
-<b>appReady</b><span>()</span>
+<b>run</b><span>(chiika)</span>
       <br>
     </p>
-    
-  </div>
-  <div class='method_details'>
-    <p class='signature' id='showWindow-dynamic'>
-      #
-(void)
-<b>showWindow</b><span>(trayPos)</span>
-      <br>
-    </p>
-    
-  </div>
-  <div class='method_details'>
-    <p class='signature' id='hideWindow-dynamic'>
-      #
-(void)
-<b>hideWindow</b><span>()</span>
-      <br>
-    </p>
-    
-  </div>
-  <div class='method_details'>
-    <p class='signature' id='windowClear-dynamic'>
-      #
-(void)
-<b>windowClear</b><span>()</span>
-      <br>
-    </p>
-    
-  </div>
-  <div class='method_details'>
-    <p class='signature' id='emitBlur-dynamic'>
-      #
-(void)
-<b>emitBlur</b><span>()</span>
-      <br>
-    </p>
-    
-  </div>
-  <div class='method_details'>
-    <p class='signature' id='createWindow-dynamic'>
-      #
-(void)
-<b>createWindow</b><span>()</span>
-      <br>
-    </p>
-    
+    <div class='docstring'>
+  <p>After the constructor run() method will be called immediately after.
+Use this method to do what you will</p>
+</div>
+<div class='tags'>
+</div>
   </div>
 </div>
     </div>

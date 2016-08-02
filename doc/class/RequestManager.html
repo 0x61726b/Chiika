@@ -19,63 +19,28 @@
       Index
     </a>
     &raquo;
-    <span class='title'>DatabaseManager</span>
+    <span class='title'>RequestManager</span>
   </div>
 </div>
     <div id='content'>
       <h1>
         Class:
-        DatabaseManager
+        RequestManager
       </h1>
       <table class='box'>
         <tr>
           <td>Defined in:</td>
-          <td>src\main_process\database-manager.coffee</td>
+          <td>src\main_process\request-manager.coffee</td>
         </tr>
       </table>
-      <h2>Variables Summary</h2>
-      <dl class='constants'>
-  <dt id='usersDb-variable'>
-    usersDb
-    =
-  </dt>
-  <dd>
-    <pre><code class='coffeescript'>null</code></pre>
-    
-  </dd>
-  <dt id='emitter-variable'>
-    emitter
-    =
-  </dt>
-  <dd>
-    <pre><code class='coffeescript'>null</code></pre>
-    
-  </dd>
-  <dt id='promises-variable'>
-    promises
-    =
-  </dt>
-  <dd>
-    <pre><code class='coffeescript'>[]</code></pre>
-    
-  </dd>
-  <dt id='instances-variable'>
-    instances
-    =
-  </dt>
-  <dd>
-    <pre><code class='coffeescript'>[]</code></pre>
-    
-  </dd>
-</dl>
       <h2>Instance Method Summary</h2>
       <ul class='summary'>
   <li>
     <span class='signature'>
-      <a href='#onLoad-dynamic'>
+      <a href='#makeGetRequest-dynamic'>
         #
 (void)
-<b>onLoad</b><span>(callback)</span>
+<b>makeGetRequest</b><span>(url, headers, callback)</span>
       </a>
     </span>
     <span class='desc'>
@@ -83,10 +48,10 @@
   </li>
   <li>
     <span class='signature'>
-      <a href='#createViewDb-dynamic'>
+      <a href='#makePostRequest-dynamic'>
         #
 (void)
-<b>createViewDb</b><span>(viewName)</span>
+<b>makePostRequest</b><span>(url, headers, callback)</span>
       </a>
     </span>
     <span class='desc'>
@@ -94,10 +59,10 @@
   </li>
   <li>
     <span class='signature'>
-      <a href='#emit-dynamic'>
+      <a href='#makeGetRequestAuth-dynamic'>
         #
 (void)
-<b>emit</b><span>(message)</span>
+<b>makeGetRequestAuth</b><span>(url, user, headers, callback)</span>
       </a>
     </span>
     <span class='desc'>
@@ -105,70 +70,50 @@
   </li>
   <li>
     <span class='signature'>
-      <a href='#on-dynamic'>
+      <a href='#makePostRequestAuth-dynamic'>
         #
 (void)
-<b>on</b><span>(message, args...)</span>
+<b>makePostRequestAuth</b><span>(url, user, headers, callback)</span>
       </a>
     </span>
     <span class='desc'>
     </span>
   </li>
 </ul>
-      <h2>Constructor Details</h2>
-      <div class='methods'>
-  <div class='method_details'>
-    <p class='signature' id='constructor-dynamic'>
-      #
-(void)
-<b>constructor</b><span>()</span>
-      <br>
-    </p>
-    
-  </div>
-</div>
       <h2>Instance Method Details</h2>
       <div class='methods'>
   <div class='method_details'>
-    <p class='signature' id='onLoad-dynamic'>
+    <p class='signature' id='makeGetRequest-dynamic'>
       #
 (void)
-<b>onLoad</b><span>(callback)</span>
+<b>makeGetRequest</b><span>(url, headers, callback)</span>
       <br>
     </p>
     
   </div>
   <div class='method_details'>
-    <p class='signature' id='createViewDb-dynamic'>
+    <p class='signature' id='makePostRequest-dynamic'>
       #
 (void)
-<b>createViewDb</b><span>(viewName)</span>
-      <br>
-    </p>
-    <div class='docstring'>
-  <div class='note todo'>
-    <strong>TODO:</strong>
-    Make it so that this returns same instance with same view name 
-  </div>
-  
-</div>
-<div class='tags'>
-</div>
-  </div>
-  <div class='method_details'>
-    <p class='signature' id='emit-dynamic'>
-      #
-(void)
-<b>emit</b><span>(message)</span>
+<b>makePostRequest</b><span>(url, headers, callback)</span>
       <br>
     </p>
     
   </div>
   <div class='method_details'>
-    <p class='signature' id='on-dynamic'>
+    <p class='signature' id='makeGetRequestAuth-dynamic'>
       #
 (void)
-<b>on</b><span>(message, args...)</span>
+<b>makeGetRequestAuth</b><span>(url, user, headers, callback)</span>
+      <br>
+    </p>
+    
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='makePostRequestAuth-dynamic'>
+      #
+(void)
+<b>makePostRequestAuth</b><span>(url, user, headers, callback)</span>
       <br>
     </p>
     

@@ -19,36 +19,28 @@
       Index
     </a>
     &raquo;
-    <span class='title'>Menubar</span>
+    <span class='title'>AppDelegate</span>
   </div>
 </div>
     <div id='content'>
       <h1>
         Class:
-        Menubar
+        AppDelegate
       </h1>
       <table class='box'>
         <tr>
           <td>Defined in:</td>
-          <td>src\main_process\menubar.coffee</td>
+          <td>src\main_process\app-delegate.coffee</td>
         </tr>
       </table>
       <h2>Variables Summary</h2>
       <dl class='constants'>
-  <dt id='clickCount-variable'>
-    clickCount
+  <dt id='readyPromise-variable'>
+    readyPromise
     =
   </dt>
   <dd>
-    <pre><code class='coffeescript'>0</code></pre>
-    
-  </dd>
-  <dt id='isPlayingVideo-variable'>
-    isPlayingVideo
-    =
-  </dt>
-  <dd>
-    <pre><code class='coffeescript'>false</code></pre>
+    <pre><code class='coffeescript'>[]</code></pre>
     
   </dd>
 </dl>
@@ -56,10 +48,10 @@
       <ul class='summary'>
   <li>
     <span class='signature'>
-      <a href='#handleClick-dynamic'>
+      <a href='#run-dynamic'>
         #
 (void)
-<b>handleClick</b><span>(e, bounds)</span>
+<b>run</b><span>()</span>
       </a>
     </span>
     <span class='desc'>
@@ -67,10 +59,10 @@
   </li>
   <li>
     <span class='signature'>
-      <a href='#clicked-dynamic'>
+      <a href='#ready-dynamic'>
         #
 (void)
-<b>clicked</b><span>(e, bounds)</span>
+<b>ready</b><span>(callback)</span>
       </a>
     </span>
     <span class='desc'>
@@ -78,10 +70,10 @@
   </li>
   <li>
     <span class='signature'>
-      <a href='#create-dynamic'>
+      <a href='#onReady-dynamic'>
         #
 (void)
-<b>create</b><span>(opts)</span>
+<b>onReady</b><span>()</span>
       </a>
     </span>
     <span class='desc'>
@@ -89,10 +81,10 @@
   </li>
   <li>
     <span class='signature'>
-      <a href='#appReady-dynamic'>
+      <a href='#windowsClosed-dynamic'>
         #
 (void)
-<b>appReady</b><span>()</span>
+<b>windowsClosed</b><span>()</span>
       </a>
     </span>
     <span class='desc'>
@@ -100,151 +92,59 @@
   </li>
   <li>
     <span class='signature'>
-      <a href='#showWindow-dynamic'>
+      <a href='#willQuit-dynamic'>
         #
 (void)
-<b>showWindow</b><span>(trayPos)</span>
-      </a>
-    </span>
-    <span class='desc'>
-    </span>
-  </li>
-  <li>
-    <span class='signature'>
-      <a href='#hideWindow-dynamic'>
-        #
-(void)
-<b>hideWindow</b><span>()</span>
-      </a>
-    </span>
-    <span class='desc'>
-    </span>
-  </li>
-  <li>
-    <span class='signature'>
-      <a href='#windowClear-dynamic'>
-        #
-(void)
-<b>windowClear</b><span>()</span>
-      </a>
-    </span>
-    <span class='desc'>
-    </span>
-  </li>
-  <li>
-    <span class='signature'>
-      <a href='#emitBlur-dynamic'>
-        #
-(void)
-<b>emitBlur</b><span>()</span>
-      </a>
-    </span>
-    <span class='desc'>
-    </span>
-  </li>
-  <li>
-    <span class='signature'>
-      <a href='#createWindow-dynamic'>
-        #
-(void)
-<b>createWindow</b><span>()</span>
+<b>willQuit</b><span>()</span>
       </a>
     </span>
     <span class='desc'>
     </span>
   </li>
 </ul>
-      <h2>Constructor Details</h2>
-      <div class='methods'>
-  <div class='method_details'>
-    <p class='signature' id='constructor-dynamic'>
-      #
-(void)
-<b>constructor</b><span>()</span>
-      <br>
-    </p>
-    
-  </div>
-</div>
       <h2>Instance Method Details</h2>
       <div class='methods'>
   <div class='method_details'>
-    <p class='signature' id='handleClick-dynamic'>
+    <p class='signature' id='run-dynamic'>
       #
 (void)
-<b>handleClick</b><span>(e, bounds)</span>
+<b>run</b><span>()</span>
       <br>
     </p>
     
   </div>
   <div class='method_details'>
-    <p class='signature' id='clicked-dynamic'>
+    <p class='signature' id='ready-dynamic'>
       #
 (void)
-<b>clicked</b><span>(e, bounds)</span>
+<b>ready</b><span>(callback)</span>
       <br>
     </p>
     
   </div>
   <div class='method_details'>
-    <p class='signature' id='create-dynamic'>
+    <p class='signature' id='onReady-dynamic'>
       #
 (void)
-<b>create</b><span>(opts)</span>
+<b>onReady</b><span>()</span>
       <br>
     </p>
     
   </div>
   <div class='method_details'>
-    <p class='signature' id='appReady-dynamic'>
+    <p class='signature' id='windowsClosed-dynamic'>
       #
 (void)
-<b>appReady</b><span>()</span>
+<b>windowsClosed</b><span>()</span>
       <br>
     </p>
     
   </div>
   <div class='method_details'>
-    <p class='signature' id='showWindow-dynamic'>
+    <p class='signature' id='willQuit-dynamic'>
       #
 (void)
-<b>showWindow</b><span>(trayPos)</span>
-      <br>
-    </p>
-    
-  </div>
-  <div class='method_details'>
-    <p class='signature' id='hideWindow-dynamic'>
-      #
-(void)
-<b>hideWindow</b><span>()</span>
-      <br>
-    </p>
-    
-  </div>
-  <div class='method_details'>
-    <p class='signature' id='windowClear-dynamic'>
-      #
-(void)
-<b>windowClear</b><span>()</span>
-      <br>
-    </p>
-    
-  </div>
-  <div class='method_details'>
-    <p class='signature' id='emitBlur-dynamic'>
-      #
-(void)
-<b>emitBlur</b><span>()</span>
-      <br>
-    </p>
-    
-  </div>
-  <div class='method_details'>
-    <p class='signature' id='createWindow-dynamic'>
-      #
-(void)
-<b>createWindow</b><span>()</span>
+<b>willQuit</b><span>()</span>
       <br>
     </p>
     

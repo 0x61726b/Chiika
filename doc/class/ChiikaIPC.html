@@ -19,32 +19,24 @@
       Index
     </a>
     &raquo;
-    <span class='title'>ChiikaPublicApi</span>
+    <span class='title'>ChiikaIPC</span>
   </div>
 </div>
     <div id='content'>
       <h1>
         Class:
-        ChiikaPublicApi
+        ChiikaIPC
       </h1>
       <table class='box'>
         <tr>
           <td>Defined in:</td>
-          <td>src\main_process\chiika-public.coffee</td>
+          <td>src\chiika-ipc.coffee</td>
         </tr>
       </table>
       <h2>Variables Summary</h2>
       <dl class='constants'>
-  <dt id='emitter-variable'>
-    emitter
-    =
-  </dt>
-  <dd>
-    <pre><code class='coffeescript'>null</code></pre>
-    
-  </dd>
-  <dt id='subscriptions-variable'>
-    subscriptions
+  <dt id='preloadPromises-variable'>
+    preloadPromises
     =
   </dt>
   <dd>
@@ -56,10 +48,10 @@
       <ul class='summary'>
   <li>
     <span class='signature'>
-      <a href='#makeGetRequest-dynamic'>
+      <a href='#preload-dynamic'>
         #
 (void)
-<b>makeGetRequest</b><span>(url, headers, callback)</span>
+<b>preload</b><span>()</span>
       </a>
     </span>
     <span class='desc'>
@@ -67,10 +59,10 @@
   </li>
   <li>
     <span class='signature'>
-      <a href='#makePostRequest-dynamic'>
+      <a href='#refreshUIData-dynamic'>
         #
 (void)
-<b>makePostRequest</b><span>(url, headers, callback)</span>
+<b>refreshUIData</b><span>(callback)</span>
       </a>
     </span>
     <span class='desc'>
@@ -78,10 +70,10 @@
   </li>
   <li>
     <span class='signature'>
-      <a href='#makeGetRequestAuth-dynamic'>
+      <a href='#getUIData-dynamic'>
         #
 (void)
-<b>makeGetRequestAuth</b><span>(url, user, headers, callback)</span>
+<b>getUIData</b><span>()</span>
       </a>
     </span>
     <span class='desc'>
@@ -89,10 +81,10 @@
   </li>
   <li>
     <span class='signature'>
-      <a href='#makePostRequestAuth-dynamic'>
+      <a href='#getUsers-dynamic'>
         #
 (void)
-<b>makePostRequestAuth</b><span>(url, user, headers, callback)</span>
+<b>getUsers</b><span>()</span>
       </a>
     </span>
     <span class='desc'>
@@ -100,10 +92,10 @@
   </li>
   <li>
     <span class='signature'>
-      <a href='#sendMessageToWindow-dynamic'>
+      <a href='#refreshViewByName-dynamic'>
         #
 (void)
-<b>sendMessageToWindow</b><span>(windowName, message, args)</span>
+<b>refreshViewByName</b><span>(name)</span>
       </a>
     </span>
     <span class='desc'>
@@ -111,10 +103,10 @@
   </li>
   <li>
     <span class='signature'>
-      <a href='#requestViewUpdate-dynamic'>
+      <a href='#reconstructUI-dynamic'>
         #
 (void)
-<b>requestViewUpdate</b><span>(viewName, owner)</span>
+<b>reconstructUI</b><span>()</span>
       </a>
     </span>
     <span class='desc'>
@@ -122,10 +114,10 @@
   </li>
   <li>
     <span class='signature'>
-      <a href='#createWindow-dynamic'>
+      <a href='#sendMessage-dynamic'>
         #
 (void)
-<b>createWindow</b><span>(options, returnCall)</span>
+<b>sendMessage</b><span>(message, args...)</span>
       </a>
     </span>
     <span class='desc'>
@@ -133,10 +125,10 @@
   </li>
   <li>
     <span class='signature'>
-      <a href='#closeWindow-dynamic'>
+      <a href='#receive-dynamic'>
         #
 (void)
-<b>closeWindow</b><span>(windowName)</span>
+<b>receive</b><span>(message, callback)</span>
       </a>
     </span>
     <span class='desc'>
@@ -144,54 +136,10 @@
   </li>
   <li>
     <span class='signature'>
-      <a href='#executeJavaScript-dynamic'>
+      <a href='#sendReceiveIPC-dynamic'>
         #
 (void)
-<b>executeJavaScript</b><span>(windowName, javascript)</span>
-      </a>
-    </span>
-    <span class='desc'>
-    </span>
-  </li>
-  <li>
-    <span class='signature'>
-      <a href='#on-dynamic'>
-        #
-(void)
-<b>on</b><span>(receiver, message, callback)</span>
-      </a>
-    </span>
-    <span class='desc'>
-    </span>
-  </li>
-  <li>
-    <span class='signature'>
-      <a href='#emit-dynamic'>
-        #
-(void)
-<b>emit</b><span>(message, args...)</span>
-      </a>
-    </span>
-    <span class='desc'>
-    </span>
-  </li>
-  <li>
-    <span class='signature'>
-      <a href='#dispatch-dynamic'>
-        #
-(void)
-<b>dispatch</b><span>(handler, args...)</span>
-      </a>
-    </span>
-    <span class='desc'>
-    </span>
-  </li>
-  <li>
-    <span class='signature'>
-      <a href='#emitTo-dynamic'>
-        #
-(void)
-<b>emitTo</b><span>(receiver, message, args...)</span>
+<b>sendReceiveIPC</b><span>(message, params, callback)</span>
       </a>
     </span>
     <span class='desc'>
@@ -204,7 +152,7 @@
     <p class='signature' id='constructor-dynamic'>
       #
 (void)
-<b>constructor</b><span>(params = {})</span>
+<b>constructor</b><span>()</span>
       <br>
     </p>
     
@@ -213,118 +161,82 @@
       <h2>Instance Method Details</h2>
       <div class='methods'>
   <div class='method_details'>
-    <p class='signature' id='makeGetRequest-dynamic'>
+    <p class='signature' id='preload-dynamic'>
       #
 (void)
-<b>makeGetRequest</b><span>(url, headers, callback)</span>
+<b>preload</b><span>()</span>
       <br>
     </p>
     
   </div>
   <div class='method_details'>
-    <p class='signature' id='makePostRequest-dynamic'>
+    <p class='signature' id='refreshUIData-dynamic'>
       #
 (void)
-<b>makePostRequest</b><span>(url, headers, callback)</span>
+<b>refreshUIData</b><span>(callback)</span>
       <br>
     </p>
     
   </div>
   <div class='method_details'>
-    <p class='signature' id='makeGetRequestAuth-dynamic'>
+    <p class='signature' id='getUIData-dynamic'>
       #
 (void)
-<b>makeGetRequestAuth</b><span>(url, user, headers, callback)</span>
+<b>getUIData</b><span>()</span>
       <br>
     </p>
     
   </div>
   <div class='method_details'>
-    <p class='signature' id='makePostRequestAuth-dynamic'>
+    <p class='signature' id='getUsers-dynamic'>
       #
 (void)
-<b>makePostRequestAuth</b><span>(url, user, headers, callback)</span>
+<b>getUsers</b><span>()</span>
       <br>
     </p>
     
   </div>
   <div class='method_details'>
-    <p class='signature' id='sendMessageToWindow-dynamic'>
+    <p class='signature' id='refreshViewByName-dynamic'>
       #
 (void)
-<b>sendMessageToWindow</b><span>(windowName, message, args)</span>
+<b>refreshViewByName</b><span>(name)</span>
       <br>
     </p>
     
   </div>
   <div class='method_details'>
-    <p class='signature' id='requestViewUpdate-dynamic'>
+    <p class='signature' id='reconstructUI-dynamic'>
       #
 (void)
-<b>requestViewUpdate</b><span>(viewName, owner)</span>
+<b>reconstructUI</b><span>()</span>
       <br>
     </p>
     
   </div>
   <div class='method_details'>
-    <p class='signature' id='createWindow-dynamic'>
+    <p class='signature' id='sendMessage-dynamic'>
       #
 (void)
-<b>createWindow</b><span>(options, returnCall)</span>
+<b>sendMessage</b><span>(message, args...)</span>
       <br>
     </p>
     
   </div>
   <div class='method_details'>
-    <p class='signature' id='closeWindow-dynamic'>
+    <p class='signature' id='receive-dynamic'>
       #
 (void)
-<b>closeWindow</b><span>(windowName)</span>
+<b>receive</b><span>(message, callback)</span>
       <br>
     </p>
     
   </div>
   <div class='method_details'>
-    <p class='signature' id='executeJavaScript-dynamic'>
+    <p class='signature' id='sendReceiveIPC-dynamic'>
       #
 (void)
-<b>executeJavaScript</b><span>(windowName, javascript)</span>
-      <br>
-    </p>
-    
-  </div>
-  <div class='method_details'>
-    <p class='signature' id='on-dynamic'>
-      #
-(void)
-<b>on</b><span>(receiver, message, callback)</span>
-      <br>
-    </p>
-    
-  </div>
-  <div class='method_details'>
-    <p class='signature' id='emit-dynamic'>
-      #
-(void)
-<b>emit</b><span>(message, args...)</span>
-      <br>
-    </p>
-    
-  </div>
-  <div class='method_details'>
-    <p class='signature' id='dispatch-dynamic'>
-      #
-(void)
-<b>dispatch</b><span>(handler, args...)</span>
-      <br>
-    </p>
-    
-  </div>
-  <div class='method_details'>
-    <p class='signature' id='emitTo-dynamic'>
-      #
-(void)
-<b>emitTo</b><span>(receiver, message, args...)</span>
+<b>sendReceiveIPC</b><span>(message, params, callback)</span>
       <br>
     </p>
     

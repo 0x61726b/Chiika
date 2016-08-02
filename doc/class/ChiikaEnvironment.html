@@ -30,17 +30,28 @@
       <table class='box'>
         <tr>
           <td>Defined in:</td>
-          <td>src\renderer\ChiikaEnvironment.coffee</td>
+          <td>src\chiika-environment.coffee</td>
         </tr>
       </table>
+      <h2>Variables Summary</h2>
+      <dl class='constants'>
+  <dt id='emitter-variable'>
+    emitter
+    =
+  </dt>
+  <dd>
+    <pre><code class='coffeescript'>null</code></pre>
+    
+  </dd>
+</dl>
       <h2>Instance Method Summary</h2>
       <ul class='summary'>
   <li>
     <span class='signature'>
-      <a href='#onChiikaReady-dynamic'>
+      <a href='#preload-dynamic'>
         #
 (void)
-<b>onChiikaReady</b><span>(callback)</span>
+<b>preload</b><span>()</span>
       </a>
     </span>
     <span class='desc'>
@@ -48,10 +59,10 @@
   </li>
   <li>
     <span class='signature'>
-      <a href='#chiikaReady-dynamic'>
+      <a href='#reInitializeUI-dynamic'>
         #
 (void)
-<b>chiikaReady</b><span>()</span>
+<b>reInitializeUI</b><span>(loading, main)</span>
       </a>
     </span>
     <span class='desc'>
@@ -59,10 +70,10 @@
   </li>
   <li>
     <span class='signature'>
-      <a href='#setApiBusy-dynamic'>
+      <a href='#sendNotification-dynamic'>
         #
 (void)
-<b>setApiBusy</b><span>(c)</span>
+<b>sendNotification</b><span>(title, body, icon)</span>
       </a>
     </span>
     <span class='desc'>
@@ -70,10 +81,10 @@
   </li>
   <li>
     <span class='signature'>
-      <a href='#debug-dynamic'>
+      <a href='#getWorkingDirectory-dynamic'>
         #
 (void)
-<b>debug</b><span>(text)</span>
+<b>getWorkingDirectory</b><span>()</span>
       </a>
     </span>
     <span class='desc'>
@@ -81,10 +92,10 @@
   </li>
   <li>
     <span class='signature'>
-      <a href='#getUserInfo-dynamic'>
+      <a href='#getResourcesPath-dynamic'>
         #
 (void)
-<b>getUserInfo</b><span>()</span>
+<b>getResourcesPath</b><span>()</span>
       </a>
     </span>
     <span class='desc'>
@@ -92,65 +103,10 @@
   </li>
   <li>
     <span class='signature'>
-      <a href='#rotateLogo-dynamic'>
+      <a href='#getUserTimezone-dynamic'>
         #
 (void)
-<b>rotateLogo</b><span>(cond)</span>
-      </a>
-    </span>
-    <span class='desc'>
-    </span>
-  </li>
-  <li>
-    <span class='signature'>
-      <a href='#setStatusText-dynamic'>
-        #
-(void)
-<b>setStatusText</b><span>(text, fadeout)</span>
-      </a>
-    </span>
-    <span class='desc'>
-    </span>
-  </li>
-  <li>
-    <span class='signature'>
-      <a href='#setSidebarInfo-dynamic'>
-        #
-(void)
-<b>setSidebarInfo</b><span>()</span>
-      </a>
-    </span>
-    <span class='desc'>
-    </span>
-  </li>
-  <li>
-    <span class='signature'>
-      <a href='#setActiveMenuItem-dynamic'>
-        #
-(void)
-<b>setActiveMenuItem</b><span>(index)</span>
-      </a>
-    </span>
-    <span class='desc'>
-    </span>
-  </li>
-  <li>
-    <span class='signature'>
-      <a href='#fadeIn-dynamic'>
-        #
-(void)
-<b>fadeIn</b><span>()</span>
-      </a>
-    </span>
-    <span class='desc'>
-    </span>
-  </li>
-  <li>
-    <span class='signature'>
-      <a href='#sideMenuClick-dynamic'>
-        #
-(void)
-<b>sideMenuClick</b><span>()</span>
+<b>getUserTimezone</b><span>()</span>
       </a>
     </span>
     <span class='desc'>
@@ -163,7 +119,7 @@
     <p class='signature' id='constructor-dynamic'>
       #
 (void)
-<b>constructor</b><span>(chiika, appDel, routeManager)</span>
+<b>constructor</b><span>(params = {})</span>
       <br>
     </p>
     
@@ -172,100 +128,55 @@
       <h2>Instance Method Details</h2>
       <div class='methods'>
   <div class='method_details'>
-    <p class='signature' id='onChiikaReady-dynamic'>
+    <p class='signature' id='preload-dynamic'>
       #
 (void)
-<b>onChiikaReady</b><span>(callback)</span>
+<b>preload</b><span>()</span>
       <br>
     </p>
     
   </div>
   <div class='method_details'>
-    <p class='signature' id='chiikaReady-dynamic'>
+    <p class='signature' id='reInitializeUI-dynamic'>
       #
 (void)
-<b>chiikaReady</b><span>()</span>
+<b>reInitializeUI</b><span>(loading, main)</span>
       <br>
     </p>
     
   </div>
   <div class='method_details'>
-    <p class='signature' id='setApiBusy-dynamic'>
+    <p class='signature' id='sendNotification-dynamic'>
       #
 (void)
-<b>setApiBusy</b><span>(c)</span>
+<b>sendNotification</b><span>(title, body, icon)</span>
       <br>
     </p>
     
   </div>
   <div class='method_details'>
-    <p class='signature' id='debug-dynamic'>
+    <p class='signature' id='getWorkingDirectory-dynamic'>
       #
 (void)
-<b>debug</b><span>(text)</span>
+<b>getWorkingDirectory</b><span>()</span>
       <br>
     </p>
     
   </div>
   <div class='method_details'>
-    <p class='signature' id='getUserInfo-dynamic'>
+    <p class='signature' id='getResourcesPath-dynamic'>
       #
 (void)
-<b>getUserInfo</b><span>()</span>
+<b>getResourcesPath</b><span>()</span>
       <br>
     </p>
     
   </div>
   <div class='method_details'>
-    <p class='signature' id='rotateLogo-dynamic'>
+    <p class='signature' id='getUserTimezone-dynamic'>
       #
 (void)
-<b>rotateLogo</b><span>(cond)</span>
-      <br>
-    </p>
-    
-  </div>
-  <div class='method_details'>
-    <p class='signature' id='setStatusText-dynamic'>
-      #
-(void)
-<b>setStatusText</b><span>(text, fadeout)</span>
-      <br>
-    </p>
-    
-  </div>
-  <div class='method_details'>
-    <p class='signature' id='setSidebarInfo-dynamic'>
-      #
-(void)
-<b>setSidebarInfo</b><span>()</span>
-      <br>
-    </p>
-    
-  </div>
-  <div class='method_details'>
-    <p class='signature' id='setActiveMenuItem-dynamic'>
-      #
-(void)
-<b>setActiveMenuItem</b><span>(index)</span>
-      <br>
-    </p>
-    
-  </div>
-  <div class='method_details'>
-    <p class='signature' id='fadeIn-dynamic'>
-      #
-(void)
-<b>fadeIn</b><span>()</span>
-      <br>
-    </p>
-    
-  </div>
-  <div class='method_details'>
-    <p class='signature' id='sideMenuClick-dynamic'>
-      #
-(void)
-<b>sideMenuClick</b><span>()</span>
+<b>getUserTimezone</b><span>()</span>
       <br>
     </p>
     

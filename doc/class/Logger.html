@@ -19,52 +19,28 @@
       Index
     </a>
     &raquo;
-    <span class='title'>DatabaseManager</span>
+    <span class='title'>Logger</span>
   </div>
 </div>
     <div id='content'>
       <h1>
         Class:
-        DatabaseManager
+        Logger
       </h1>
       <table class='box'>
         <tr>
           <td>Defined in:</td>
-          <td>src\main_process\database-manager.coffee</td>
+          <td>src\main_process\logger.coffee</td>
         </tr>
       </table>
       <h2>Variables Summary</h2>
       <dl class='constants'>
-  <dt id='usersDb-variable'>
-    usersDb
+  <dt id='logger-variable'>
+    logger
     =
   </dt>
   <dd>
     <pre><code class='coffeescript'>null</code></pre>
-    
-  </dd>
-  <dt id='emitter-variable'>
-    emitter
-    =
-  </dt>
-  <dd>
-    <pre><code class='coffeescript'>null</code></pre>
-    
-  </dd>
-  <dt id='promises-variable'>
-    promises
-    =
-  </dt>
-  <dd>
-    <pre><code class='coffeescript'>[]</code></pre>
-    
-  </dd>
-  <dt id='instances-variable'>
-    instances
-    =
-  </dt>
-  <dd>
-    <pre><code class='coffeescript'>[]</code></pre>
     
   </dd>
 </dl>
@@ -72,46 +48,14 @@
       <ul class='summary'>
   <li>
     <span class='signature'>
-      <a href='#onLoad-dynamic'>
+      <a href='#format-dynamic'>
         #
 (void)
-<b>onLoad</b><span>(callback)</span>
+<b>format</b><span>(options)</span>
       </a>
     </span>
     <span class='desc'>
-    </span>
-  </li>
-  <li>
-    <span class='signature'>
-      <a href='#createViewDb-dynamic'>
-        #
-(void)
-<b>createViewDb</b><span>(viewName)</span>
-      </a>
-    </span>
-    <span class='desc'>
-    </span>
-  </li>
-  <li>
-    <span class='signature'>
-      <a href='#emit-dynamic'>
-        #
-(void)
-<b>emit</b><span>(message)</span>
-      </a>
-    </span>
-    <span class='desc'>
-    </span>
-  </li>
-  <li>
-    <span class='signature'>
-      <a href='#on-dynamic'>
-        #
-(void)
-<b>on</b><span>(message, args...)</span>
-      </a>
-    </span>
-    <span class='desc'>
+      Formats the log string 
     </span>
   </li>
 </ul>
@@ -121,7 +65,7 @@
     <p class='signature' id='constructor-dynamic'>
       #
 (void)
-<b>constructor</b><span>()</span>
+<b>constructor</b><span>(loglevel)</span>
       <br>
     </p>
     
@@ -130,48 +74,30 @@
       <h2>Instance Method Details</h2>
       <div class='methods'>
   <div class='method_details'>
-    <p class='signature' id='onLoad-dynamic'>
+    <p class='signature' id='format-dynamic'>
       #
 (void)
-<b>onLoad</b><span>(callback)</span>
-      <br>
-    </p>
-    
-  </div>
-  <div class='method_details'>
-    <p class='signature' id='createViewDb-dynamic'>
-      #
-(void)
-<b>createViewDb</b><span>(viewName)</span>
+<b>format</b><span>(options)</span>
       <br>
     </p>
     <div class='docstring'>
-  <div class='note todo'>
-    <strong>TODO:</strong>
-    Make it so that this returns same instance with same view name 
-  </div>
-  
+  <p>Formats the log string</p>
 </div>
 <div class='tags'>
+  <h3>Parameters:</h3>
+  <ul class='param'>
+    <li>
+      <span class='name'>options</span>
+      <span class='type'>
+        (
+          <tt>Object</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>Options object passed by winston. </span>
+    </li>
+  </ul>
 </div>
-  </div>
-  <div class='method_details'>
-    <p class='signature' id='emit-dynamic'>
-      #
-(void)
-<b>emit</b><span>(message)</span>
-      <br>
-    </p>
-    
-  </div>
-  <div class='method_details'>
-    <p class='signature' id='on-dynamic'>
-      #
-(void)
-<b>on</b><span>(message, args...)</span>
-      <br>
-    </p>
-    
   </div>
 </div>
     </div>

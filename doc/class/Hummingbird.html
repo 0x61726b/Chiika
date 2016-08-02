@@ -19,99 +19,87 @@
       Index
     </a>
     &raquo;
-    <span class='title'>DatabaseManager</span>
+    <span class='title'>Hummingbird</span>
   </div>
 </div>
     <div id='content'>
       <h1>
         Class:
-        DatabaseManager
+        Hummingbird
       </h1>
       <table class='box'>
         <tr>
           <td>Defined in:</td>
-          <td>src\main_process\database-manager.coffee</td>
+          <td>scripts\_hummingbird.coffee</td>
         </tr>
       </table>
       <h2>Variables Summary</h2>
       <dl class='constants'>
-  <dt id='usersDb-variable'>
-    usersDb
+  <dt id='displayDescription-variable'>
+    displayDescription
+    =
+  </dt>
+  <dd>
+    <pre><code class='coffeescript'>&quot;Hummingbird v1&quot;</code></pre>
+    <div class='docstring'>
+  <p>Description for this script
+Will be visible on app</p>
+</div>
+<div class='tags'>
+</div>
+  </dd>
+  <dt id='name-variable'>
+    name
+    =
+  </dt>
+  <dd>
+    <pre><code class='coffeescript'>&quot;hummingbird&quot;</code></pre>
+    <div class='docstring'>
+  <p>Unique identifier for the app</p>
+</div>
+<div class='tags'>
+</div>
+  </dd>
+  <dt id='logo-variable'>
+    logo
+    =
+  </dt>
+  <dd>
+    <pre><code class='coffeescript'>&#39;..&#47;assets&#47;images&#47;hm.png&#39;</code></pre>
+    <div class='docstring'>
+  <p>Logo which will be seen at the login screen</p>
+</div>
+<div class='tags'>
+</div>
+  </dd>
+  <dt id='hummingbirdUser-variable'>
+    hummingbirdUser
     =
   </dt>
   <dd>
     <pre><code class='coffeescript'>null</code></pre>
-    
-  </dd>
-  <dt id='emitter-variable'>
-    emitter
-    =
-  </dt>
-  <dd>
-    <pre><code class='coffeescript'>null</code></pre>
-    
-  </dd>
-  <dt id='promises-variable'>
-    promises
-    =
-  </dt>
-  <dd>
-    <pre><code class='coffeescript'>[]</code></pre>
-    
-  </dd>
-  <dt id='instances-variable'>
-    instances
-    =
-  </dt>
-  <dd>
-    <pre><code class='coffeescript'>[]</code></pre>
-    
+    <div class='docstring'>
+  <p>Chiika lets you define multiple users
+In the methods below you can use whatever user you want
+For the default we use the user when you login.</p>
+</div>
+<div class='tags'>
+</div>
   </dd>
 </dl>
       <h2>Instance Method Summary</h2>
       <ul class='summary'>
   <li>
     <span class='signature'>
-      <a href='#onLoad-dynamic'>
-        #
-(void)
-<b>onLoad</b><span>(callback)</span>
-      </a>
-    </span>
-    <span class='desc'>
-    </span>
-  </li>
-  <li>
-    <span class='signature'>
-      <a href='#createViewDb-dynamic'>
-        #
-(void)
-<b>createViewDb</b><span>(viewName)</span>
-      </a>
-    </span>
-    <span class='desc'>
-    </span>
-  </li>
-  <li>
-    <span class='signature'>
-      <a href='#emit-dynamic'>
-        #
-(void)
-<b>emit</b><span>(message)</span>
-      </a>
-    </span>
-    <span class='desc'>
-    </span>
-  </li>
-  <li>
-    <span class='signature'>
       <a href='#on-dynamic'>
         #
 (void)
-<b>on</b><span>(message, args...)</span>
+<b>on</b><span>(event, args...)</span>
       </a>
     </span>
     <span class='desc'>
+      This method is controls the communication between app and script If you change this method things will break
+
     </span>
   </li>
 </ul>
@@ -121,57 +109,33 @@
     <p class='signature' id='constructor-dynamic'>
       #
 (void)
-<b>constructor</b><span>()</span>
+<b>constructor</b><span>(chiika)</span>
       <br>
     </p>
-    
+    <div class='docstring'>
+  <p>Will be called by Chiika with the API object
+you can do whatever you want with this object
+See the documentation for this object&#39;s methods,properties etc.</p>
+</div>
+<div class='tags'>
+</div>
   </div>
 </div>
       <h2>Instance Method Details</h2>
       <div class='methods'>
   <div class='method_details'>
-    <p class='signature' id='onLoad-dynamic'>
-      #
-(void)
-<b>onLoad</b><span>(callback)</span>
-      <br>
-    </p>
-    
-  </div>
-  <div class='method_details'>
-    <p class='signature' id='createViewDb-dynamic'>
-      #
-(void)
-<b>createViewDb</b><span>(viewName)</span>
-      <br>
-    </p>
-    <div class='docstring'>
-  <div class='note todo'>
-    <strong>TODO:</strong>
-    Make it so that this returns same instance with same view name 
-  </div>
-  
-</div>
-<div class='tags'>
-</div>
-  </div>
-  <div class='method_details'>
-    <p class='signature' id='emit-dynamic'>
-      #
-(void)
-<b>emit</b><span>(message)</span>
-      <br>
-    </p>
-    
-  </div>
-  <div class='method_details'>
     <p class='signature' id='on-dynamic'>
       #
 (void)
-<b>on</b><span>(message, args...)</span>
+<b>on</b><span>(event, args...)</span>
       <br>
     </p>
-    
+    <div class='docstring'>
+  <p>This method is controls the communication between app and script
+If you change this method things will break</p>
+</div>
+<div class='tags'>
+</div>
   </div>
 </div>
     </div>

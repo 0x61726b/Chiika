@@ -30,33 +30,306 @@
       <table class='box'>
         <tr>
           <td>Defined in:</td>
-          <td>src\browser\ipc-manager.coffee</td>
+          <td>src\main_process\ipc-manager.coffee</td>
         </tr>
       </table>
       <h2>Instance Method Summary</h2>
       <ul class='summary'>
   <li>
     <span class='signature'>
-      <a href='#registerEvents-dynamic'>
+      <a href='#answer-dynamic'>
         #
 (void)
-<b>registerEvents</b><span>()</span>
+<b>answer</b><span>(receiver, message, args...)</span>
       </a>
     </span>
     <span class='desc'>
+      Answer to a message coming from renderer process. 
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#send-dynamic'>
+        #
+(void)
+<b>send</b><span>(receiver, message, args...)</span>
+      </a>
+    </span>
+    <span class='desc'>
+      Receiver is a BrowserWindow Send message to a renderer process
+
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#receiveAnswer-dynamic'>
+        #
+(void)
+<b>receiveAnswer</b><span>(message, callback)</span>
+      </a>
+    </span>
+    <span class='desc'>
+      Receive message on the main process 
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#receive-dynamic'>
+        #
+(void)
+<b>receive</b><span>(message, callback)</span>
+      </a>
+    </span>
+    <span class='desc'>
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#handleEvents-dynamic'>
+        #
+(void)
+<b>handleEvents</b><span>()</span>
+      </a>
+    </span>
+    <span class='desc'>
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#windowMethodByName-dynamic'>
+        #
+(void)
+<b>windowMethodByName</b><span>()</span>
+      </a>
+    </span>
+    <span class='desc'>
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#callWindowMethod-dynamic'>
+        #
+(void)
+<b>callWindowMethod</b><span>()</span>
+      </a>
+    </span>
+    <span class='desc'>
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#reconstructUI-dynamic'>
+        #
+(void)
+<b>reconstructUI</b><span>()</span>
+      </a>
+    </span>
+    <span class='desc'>
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#modalWindowJsEval-dynamic'>
+        #
+(void)
+<b>modalWindowJsEval</b><span>()</span>
+      </a>
+    </span>
+    <span class='desc'>
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#refreshViewByName-dynamic'>
+        #
+(void)
+<b>refreshViewByName</b><span>()</span>
+      </a>
+    </span>
+    <span class='desc'>
+      Calls script event &#39;view-update&#39; to give the script a chance to update data 
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#login-dynamic'>
+        #
+(void)
+<b>login</b><span>()</span>
+      </a>
+    </span>
+    <span class='desc'>
+      We receive a user pass here, redirect it to the user script and let them process it 
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#loginCustom-dynamic'>
+        #
+(void)
+<b>loginCustom</b><span>()</span>
+      </a>
+    </span>
+    <span class='desc'>
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#getUIData-dynamic'>
+        #
+(void)
+<b>getUIData</b><span>()</span>
+      </a>
+    </span>
+    <span class='desc'>
+      When the main window loads , it will request UI data. 
     </span>
   </li>
 </ul>
       <h2>Instance Method Details</h2>
       <div class='methods'>
   <div class='method_details'>
-    <p class='signature' id='registerEvents-dynamic'>
+    <p class='signature' id='answer-dynamic'>
       #
 (void)
-<b>registerEvents</b><span>()</span>
+<b>answer</b><span>(receiver, message, args...)</span>
+      <br>
+    </p>
+    <div class='docstring'>
+  <p>Answer to a message coming from renderer process.</p>
+</div>
+<div class='tags'>
+</div>
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='send-dynamic'>
+      #
+(void)
+<b>send</b><span>(receiver, message, args...)</span>
+      <br>
+    </p>
+    <div class='docstring'>
+  <p>Receiver is a BrowserWindow
+Send message to a renderer process</p>
+</div>
+<div class='tags'>
+</div>
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='receiveAnswer-dynamic'>
+      #
+(void)
+<b>receiveAnswer</b><span>(message, callback)</span>
+      <br>
+    </p>
+    <div class='docstring'>
+  <p>Receive message on the main process</p>
+</div>
+<div class='tags'>
+</div>
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='receive-dynamic'>
+      #
+(void)
+<b>receive</b><span>(message, callback)</span>
       <br>
     </p>
     
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='handleEvents-dynamic'>
+      #
+(void)
+<b>handleEvents</b><span>()</span>
+      <br>
+    </p>
+    
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='windowMethodByName-dynamic'>
+      #
+(void)
+<b>windowMethodByName</b><span>()</span>
+      <br>
+    </p>
+    
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='callWindowMethod-dynamic'>
+      #
+(void)
+<b>callWindowMethod</b><span>()</span>
+      <br>
+    </p>
+    
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='reconstructUI-dynamic'>
+      #
+(void)
+<b>reconstructUI</b><span>()</span>
+      <br>
+    </p>
+    
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='modalWindowJsEval-dynamic'>
+      #
+(void)
+<b>modalWindowJsEval</b><span>()</span>
+      <br>
+    </p>
+    
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='refreshViewByName-dynamic'>
+      #
+(void)
+<b>refreshViewByName</b><span>()</span>
+      <br>
+    </p>
+    <div class='docstring'>
+  <p>Calls script event &#39;view-update&#39; to give the script a chance to update data</p>
+</div>
+<div class='tags'>
+</div>
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='login-dynamic'>
+      #
+(void)
+<b>login</b><span>()</span>
+      <br>
+    </p>
+    <div class='docstring'>
+  <p>We receive a user pass here, redirect it to the user script and let them process it</p>
+</div>
+<div class='tags'>
+</div>
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='loginCustom-dynamic'>
+      #
+(void)
+<b>loginCustom</b><span>()</span>
+      <br>
+    </p>
+    
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='getUIData-dynamic'>
+      #
+(void)
+<b>getUIData</b><span>()</span>
+      <br>
+    </p>
+    <div class='docstring'>
+  <p>When the main window loads , it will request UI data.
+We send it here..</p>
+</div>
+<div class='tags'>
+</div>
   </div>
 </div>
     </div>
