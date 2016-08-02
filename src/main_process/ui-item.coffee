@@ -25,7 +25,10 @@ module.exports = class UIItem
   needUpdate: false
   children: []
   constructor: (params={}) ->
-    { @name, @displayName,@displayType,@owner } = params
+    { @name, @displayName,@displayType,@owner, @category } = params
+    @children = []
+    @needUpdate = false
+    @dataSource = []
 
   addChild: (child) ->
     if child?
@@ -38,7 +41,7 @@ module.exports = class UIItem
     chiika.logger.info("Updating UIItem #{@name}")
     if @needUpdate
       if @owner?
-        chiika.chiikaApi.emitTo @owner,'view-update',this
+        chiika.chiikaApi.emit 'view-update',{ calling: @owner, view: this }
       else
         chiika.logger.error("Can't update an item without owner! UI Item: #{@name}")
       @needUpdate = false

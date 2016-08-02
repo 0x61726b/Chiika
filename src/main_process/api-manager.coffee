@@ -14,6 +14,9 @@
 #Description:
 #----------------------------------------------------------------------------
 
+
+
+
 path                    = require 'path'
 fs                      = require 'fs'
 _                       = require 'lodash'
@@ -27,8 +30,8 @@ rimraf                  = require 'rimraf'
 module.exports = class APIManager
   compiledUserScripts: []
   scriptInstances: []
+  scriptsDirs: []
   emitter: null
-
 
   constructor: ->
     global.api = this
@@ -37,8 +40,10 @@ module.exports = class APIManager
     @scriptsDir = path.join(chiika.getAppHome(),"Scripts")
     @scriptsCacheDir = path.join(chiika.getAppHome(),"Cache","Scripts")
 
-    @watchScripts()
+    #@scriptsDirs.push @scriptsDir
+    @scriptsDirs.push path.join(process.cwd(),"scripts")
 
+    @watchScripts()
 
   #
   # Script compile event
@@ -62,6 +67,9 @@ module.exports = class APIManager
     loginType  = instance.loginType
     isService  = instance.isService
 
+    if isService == null or _.isUndefined isService
+      isService = true
+
     localInstance = { name: scriptName, description: scriptDesc, logo: logo, instance: instance, loginType: loginType, isService: isService }
 
     if !_.isUndefined @getScriptByName(scriptName)
@@ -79,7 +87,6 @@ module.exports = class APIManager
 
     @initializeScript(scriptName)
 
-
   getScriptByName: (name) ->
     instance = _.find @scriptInstances, { name: name }
     if !_.isUndefined instance
@@ -93,7 +100,7 @@ module.exports = class APIManager
 
 
   initializeScript: (name) ->
-    chiika.chiikaApi.emitTo name, 'initialize'
+    chiika.chiikaApi.emit 'initialize', { calling: name }
 
   #
   # Compile user scripts
@@ -109,29 +116,29 @@ module.exports = class APIManager
     processedFileCount = 0
     scriptCount = 2
 
+    for scriptDir in @scriptsDirs
+      fs.readdir scriptDir,(err,files) =>
+        _.forEach files, (v,k) =>
+          stripExtension = string(v).chompRight('.coffee').s
 
-    fs.readdir @scriptsDir,(err,files) =>
-      _.forEach files, (v,k) =>
-        stripExtension = string(v).chompRight('.coffee').s
+          if stripExtension[0] == "_"
+            chiika.logger.info "[magenta](Api-Manager) Skipping disabled script " + stripExtension.substring(1,stripExtension.length)
+            return
+          chiika.logger.info "[magenta](Api-Manager) Compiling " + v
 
-        if stripExtension[0] == "_"
-          chiika.logger.info "[magenta](Api-Manager) Skipping disabled script " + stripExtension.substring(1,stripExtension.length)
-          return
-        chiika.logger.info "[magenta](Api-Manager) Compiling " + v
-
-        defer = _when.defer()
-        @promises.push defer.promise
+          defer = _when.defer()
+          @promises.push defer.promise
 
 
-        fs.readFile path.join(@scriptsDir,v),'utf-8', (err,data) =>
-          jsCode = data
+          fs.readFile path.join(scriptDir,v),'utf-8', (err,data) =>
+            jsCode = data
 
-          @compileScript jsCode,v,true, =>
-            defer.resolve()
-            processedFileCount++
+            @compileScript jsCode,v,true, =>
+              defer.resolve()
+              processedFileCount++
 
-            if processedFileCount == scriptCount
-              sanityCheck.resolve()
+              if processedFileCount == scriptCount
+                sanityCheck.resolve()
     _when.all(@promises)
 
 

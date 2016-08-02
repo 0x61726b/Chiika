@@ -103,7 +103,7 @@ module.exports = class WindowManager
 
       window.webContents.on 'dom-ready', =>
         @emitter.emit 'ui-dom-ready',window
-        chiika.chiikaApi.emitTo chiika.utility.chompRight(window.name,'modal'),'ui-dom-ready', window
+        chiika.chiikaApi.emit 'ui-dom-ready', window
 
   removeWindow: (window) ->
     match = _.find @windows,window
@@ -163,6 +163,7 @@ module.exports = class WindowManager
     if match?
       return match
     else
+      chiika.logger.warn("Window named #{name} can't be found.")
       return undefined
 
   getLoginWindow: ->

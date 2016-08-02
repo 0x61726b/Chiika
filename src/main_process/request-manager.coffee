@@ -43,6 +43,8 @@ module.exports = class RequestManager
           chiika.logger.error(body)
 
       callback(error,response,body)
+
+    chiika.logger.verbose("GET request on #{url}")
     request { url: url, headers: headers },onRequestReturn
 
 
@@ -70,6 +72,7 @@ module.exports = class RequestManager
           chiika.logger.error(body)
 
       callback(error,response,body)
+
     chiika.logger.verbose("POST request on #{url}")
     request.post { url: url, headers: headers },onRequestReturn
 

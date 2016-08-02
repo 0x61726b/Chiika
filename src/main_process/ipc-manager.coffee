@@ -30,7 +30,7 @@ module.exports = class IpcManager
     receiver.send message + '-response',args...
 
   #
-  # Receiver is a window
+  # Receiver is a BrowserWindow
   # Send message to a renderer process
   #
   send: (receiver,message,args...) ->
@@ -51,6 +51,7 @@ module.exports = class IpcManager
       callback(event,args)
 
   handleEvents: ->
+    @callWindowMethod()
     @getUIData()
     @getUserData()
     @login()
@@ -59,6 +60,21 @@ module.exports = class IpcManager
     @refreshViewByName()
     @modalWindowJsEval()
     @reconstructUI()
+    @windowMethodByName()
+
+  windowMethodByName: ->
+    @receive 'window-method', (event,args) =>
+      console.log args
+      win = chiika.windowManager.getWindowByName(args[1])
+      win[args[0]]()
+
+
+
+  callWindowMethod: ->
+    @receive 'call-window-method', (event,method) =>
+      win = BrowserWindow.fromWebContents(event.sender)
+      win[method]()
+
 
   reconstructUI: ->
     @receive 'reconstruct-ui', (event,args) =>
@@ -75,14 +91,13 @@ module.exports = class IpcManager
       #Args must have the 'windowName' property or the script will never receive the callback
       owner = string(args.windowName).chompRight('modal').s
 
-      chiika.chiikaApi.emitTo owner, 'ui-modal-message',args
+      chiika.chiikaApi.emit 'ui-modal-message',{ calling: owner, args: args }
       # if args.status
       #   console.log "Auth pin " + args.html
       #   chiika.windowManager.getWindowByName(args.windowName).close()
       # else
       #   #Denied
       #   chiika.windowManager.getWindowByName(args.windowName).close()
-
 
   #
   # Calls script event 'view-update' to give the script a chance to update data
@@ -91,8 +106,7 @@ module.exports = class IpcManager
     @receive 'refresh-view-by-name', (event,args) =>
       view = chiika.uiManager.getUIItem(args.viewName)
       if view?
-        chiika.chiikaApi.emitTo args.owner,'view-update',view
-
+        chiika.chiikaApi.emit 'view-update',{ calling: args.service,view: view }
 
   #
   # We receive a user pass here, redirect it to the user script and let them process it
@@ -103,11 +117,18 @@ module.exports = class IpcManager
         _.assign result,args
         @send(chiika.windowManager.getLoginWindow(), 'login-response', result)
       if args.login?
-        chiika.chiikaApi.emitTo args.service,'set-user-login',{ user: args.login.user, pass: args.login.pass, return: returnFromLogin}
+        chiika.chiikaApi.emit 'set-user-login',{ calling: args.service, user: args.login.user, pass: args.login.pass, return: returnFromLogin}
       else
         params = { return: returnFromLogin }
         _.assign params,args
-        chiika.chiikaApi.emitTo args.service,'set-user-login',params
+        chiika.chiikaApi.emit 'set-user-login',{ calling: args.service, params: params }
+
+    @receive 'continue-from-login', (event,args) =>
+      mainWnd = chiika.windowManager.getWindowByName('main')
+      uiItems = chiika.uiManager.getUIItems()
+
+      if uiItems.length > 0
+        @send mainWnd, 'get-ui-data-response',uiItems
 
 
   loginCustom: ->
@@ -143,6 +164,7 @@ module.exports = class IpcManager
       for script in scripts
         if script.isService
           services.push script
+
       if services.length > 0
         return services
       else

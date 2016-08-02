@@ -41,6 +41,9 @@ module.exports = class ChiikaIPC
       @sendMessage('ui-init-complete')
 
 
+  refreshUIData: (callback) ->
+    @receive 'get-ui-data-response',(event,args) =>
+      callback(args)
 
   getUIData: ->
     @preloadPromises.push @sendReceiveIPC 'get-ui-data',{}, (event,defer,args) =>
@@ -63,12 +66,16 @@ module.exports = class ChiikaIPC
 
 
   sendMessage: (message,args...) ->
-    ipcRenderer.send message,args...
+    ipcRenderer.send message,args
 
+  receive: (message,callback) ->
+    ipcRenderer.on message, (event,args...) =>
+      chiika.logger.info("[blue](RENDERER) Receiving #{message}")
+      callback(event,args...)
 
   sendReceiveIPC: (message,params,callback) ->
     defer = _when.defer()
-    chiika.logger.info("[blue](RENDERER) Sending #{message}")
+    chiika.logger.info("[red](RENDERER) Sending #{message}")
     ipcRenderer.send message,params
     ipcRenderer.on message + "-response", (event,args...) =>
       chiika.logger.info("[blue](RENDERER) Receiving #{message}-response")

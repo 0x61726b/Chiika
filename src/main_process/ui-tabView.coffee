@@ -36,7 +36,7 @@ module.exports = class TabView extends UIItem
           @needUpdate = true
         else
           @setDataSource(data)
-        
+
         _.forEach data, (v,k) =>
           @setTabData(v.name,v.data)
 
@@ -49,12 +49,12 @@ module.exports = class TabView extends UIItem
 
     if findUIItem?
       return findUIItem.dataSource
+
+
   save: ->
-    chiika.logger.info("Saving tab view data...")
+    chiika.logger.info("[red](#{@name}) Saving tab view data...")
     _.forEach @children, (v,k) =>
       @db.save { name: v.name, data: v.dataSource }
-
-
 
   #
   # Set multiple tabs at once
@@ -79,13 +79,10 @@ module.exports = class TabView extends UIItem
     chiika.logger.info("Setting data source for #{@name}")
 
     @dataSource = data
-
-
     _.forEach @dataSource, (v,k) =>
       @setTabData(v.name,v.data)
 
     @save()
-
 
   #
   # A Tab view consists of tabs

@@ -27,6 +27,7 @@ Logger                = require './main_process/Logger'
 ChiikaIPC             = require './chiika-ipc'
 
 class ChiikaEnvironment
+  emitter: null
   constructor: (params={}) ->
     {@applicationDelegate, @window,@chiikaHome} = params
 
@@ -44,20 +45,57 @@ class ChiikaEnvironment
     @ipc              = new ChiikaIPC()
 
 
-    @ipc.getUIData()
-    @ipc.getUsers()
-    @ipc.preload()
+
+    # @ipc.getUsers()
+    # @ipc.preload()
+
+    #
+    # @ipc.refreshUIData (args) =>
+    #   @uiData = args
+    #   console.log "Hello"
 
 
+
+  preload: ->
+    defer = _when.defer()
+
+    async = [ defer.promise ]
+
+    @ipc.sendMessage 'get-ui-data'
+    @ipc.refreshUIData (args) =>
+      @uiData = args
+      chiika.logger.renderer("UI data is present.")
+
+      infoStr = ''
+      for uiData in @uiData
+        infoStr += " #{uiData.displayName} ( #{uiData.displayType} )"
+
+      chiika.logger.renderer("Current UI items are #{infoStr}")
+      defer.resolve()
+
+    _when.all(async)
+
+  reInitializeUI: (loading,main) ->
+    @emitter.on 'reinitialize-ui', =>
+      loading()
+
+      @preload().then =>
+        setTimeout(main,2500)
 
   sendNotification: (title,body,icon) ->
     if !icon?
       icon = __dirname + "/../assets/images/chiika.png"
     notf = new Notification(title,{ body: body, icon: icon})
+
+
   getWorkingDirectory: ->
     process.cwd()
+
+
   getResourcesPath: ->
     process.resourcesPath
+
+
   getUserTimezone: ->
     moment = require 'moment-timezone'
     userTimezone = moment.tz(moment.tz.guess())

@@ -18,15 +18,71 @@ React = require('react')
 {Router,Route,BrowserHistory,Link} = require('react-router')
 {BrowserWindow, ipcRenderer,remote} = require 'electron'
 
-_ = require 'lodash'
-path = require 'path'
+_                 = require 'lodash'
+path              = require 'path'
 
 #Views
 
 SideMenu = React.createClass
-  componentDidMount: ->
+  menuItemsSet: false
+  isPendingUiItems: false
+  requiresRefresh: true
 
-  componentWillUnmount: ->
+  getInitialState: ->
+    uiItems: []
+    categories: []
+  componentWillMount: ->
+    chiika.ipc.refreshUIData (args) =>
+      @refreshSideMenu(args)
+
+
+
+  componentDidMount: ->
+    @refreshSideMenu(chiika.uiData)
+
+    if requiresRefresh
+      @refreshSideMenu(chiika.uiData)
+      requiresRefresh = false
+
+
+
+  refreshSideMenu: (menuItems) ->
+    if @requiresRefresh
+      chiika.logger.renderer("SideMenu requires refresh!")
+
+      @state.uiItems       = []
+      @state.categories    = []
+
+      chiika.logger.renderer("SideMenu::refreshSideMenu")
+
+      @pendingUiItems = []
+      @pendingCategories = []
+
+      _.forEach menuItems, (v,k) =>
+        #Add category
+
+        if _.indexOf(@pendingCategories, _.find(@pendingCategories, (o) -> return o == v.category )) == -1
+          @pendingCategories.push v.category
+
+        if _.indexOf(@pendingUiItems, _.find(@pendingUiItems, (o) -> return v.name == o.name )) == -1
+          @pendingUiItems.push v
+
+      if @isMounted()
+        @setState { uiItems: @pendingUiItems, categories: @pendingCategories }
+        requiresRefresh = false
+
+  renderCategory: (name,i) ->
+    <p className="list-title" key={i}>{name}</p>
+
+  renderMenuItem: (item,i) ->
+    <Link className="side-menu-link" to="#{item.name}" key={i}><li className="side-menu-li" key={i}>{item.displayName}</li></Link>
+
+  renderMenuItems: (category) ->
+    menuItemsOfThisCategory = _.filter(@state.uiItems, (o) ->
+      return o.category == category)
+    if menuItemsOfThisCategory.length > 0
+      menuItemsOfThisCategory.map (menuItem,j) =>
+        @renderMenuItem(menuItem,j + 1)
 
   render: () ->
     (<div className="sidebar">
@@ -46,16 +102,18 @@ SideMenu = React.createClass
       <div className="navigation">
         <ul>
           <Link className="side-menu-link active" to="Home"><li className="side-menu-li">Home</li></Link>
-          <p className="list-title">Lists</p>
-          <Link className="side-menu-link" to="AnimeList"><li className="side-menu-li">Anime List</li></Link>
-          <Link className="side-menu-link" to="MangaList"><li className="side-menu-li">Manga List</li></Link>
-          <p className="list-title">Watch</p>
-          <Link className="side-menu-link" to="Library"><li className="side-menu-li">Library</li></Link>
-          <Link className="side-menu-link" to="Calendar"><li className="side-menu-li">Calendar</li></Link>
-          <Link className="side-menu-link" to="Seasons"><li className="side-menu-li">Seasons</li></Link>
-          <p className="list-title">Discover</p>
-          <Link className="side-menu-link" to="Torrents"><li className="side-menu-li">Torrents</li></Link>
-         </ul>
+          {
+            @state.categories.map (category,i) =>
+              <div key={i}>
+              {
+                @renderCategory(category,i)
+              }
+              {
+                @renderMenuItems(category)
+              }
+              </div>
+          }
+        </ul>
       </div>
     </div>)
 

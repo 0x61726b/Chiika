@@ -56,23 +56,24 @@ module.exports = class UIManager
         v.needUpdate = true
         requiresUpdate.push v
 
-
     # Sort if necessary
     # Naah
     chiika.logger.info("#{requiresUpdate.length} item is waiting to update!")
 
-    requiresUpdate.map (item,i) => item.update()
+    requiresUpdate.map (item,i) =>
+      item.update()
 
 
   #
   # Adds a tab view, creates its associated DB interface and tries to load its data from DB
   #
   addTabView: (item) ->
-    tabView = new TabView({ name: item.name, displayName: item.displayName, tabView: item.tabView, owner: item.owner })
+    tabView = (new TabView({ name: item.name, displayName: item.displayName, tabView: item.tabView, owner: item.owner, category: item.category }))
     dbView = chiika.dbManager.createViewDb(item.name)
     tabView.setDatabaseInterface(dbView)
     tabView.loadTabData()
     tabView
+
 
 
   #
@@ -86,6 +87,7 @@ module.exports = class UIManager
       @preloadPromises.push tabView.db.promise
 
       @uiItems.push tabView
+      defer.resolve()
       chiika.dbManager.uiDb.addUIItem item, (err,count) =>
         defer.resolve()
         callback(err,count)

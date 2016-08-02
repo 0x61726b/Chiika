@@ -68,9 +68,10 @@ module.exports = class ChiikaPublicApi
   requestViewUpdate: (viewName,owner) ->
     view = chiika.uiManager.getUIItem(viewName)
     if view?
-      @emitTo owner,'view-update',view
+      @emit 'view-update', { calling: owner, view: view }
     else
       chiika.logger.error("Can't update a non-existent view.")
+
 
   createWindow: (options,returnCall) ->
     options.name += 'modal' # service/owner name + modal , anilistmodal etc.
@@ -87,10 +88,17 @@ module.exports = class ChiikaPublicApi
       wnd.webContents.executeJavaScript(javascript)
 
 
-  on: (receiver,message,args...) ->
-    sub = @emitter.on message,args...
-    @subscriptions.push { receiver: receiver , message: message, sub: sub }
-    sub
+  on: (receiver,message,callback) ->
+    @emitter.on message, (args) =>
+      if _.isUndefined args.calling
+        chiika.logger.error("Emitter has received #{message} but we don't know who to call to #{receiver} != #{args.calling}. Are you sure about this?")
+        # Assume, if no caller call everyone
+        callback(args)
+      if args.calling == receiver
+        callback(args)
+      else
+        chiika.logger.warn("Emitter has received #{message} but #{receiver} is not the same with #{args.calling}")
+
   emit: (message,args...) ->
     @emitter.emit message,args...
 
@@ -99,12 +107,9 @@ module.exports = class ChiikaPublicApi
 
 
   emitTo: (receiver,message,args...) ->
-    listeners = @emitter.handlersByEventName[message]
-    scripts = chiika.apiManager.getScripts()
-    index = _.indexOf scripts, _.find(scripts,{ name: receiver })
+    @emitter.emit message,args...
 
-
-    if index == -1
-      chiika.logger.error("[magenta](Chiika-API) There was a problem when sending #{message} to #{receiver}.")
-    else
-      @dispatch listeners[index],args...
+    # if index == -1
+    #   chiika.logger.error("[magenta](Chiika-API) There was a problem when sending #{message} to #{receiver}.")
+    # else
+    #   @dispatch listeners[index],args...

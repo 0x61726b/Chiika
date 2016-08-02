@@ -22,7 +22,6 @@ SideMenu = require './side-menu'
 Titlebar = require './titlebar'
 LoadingScreen = require './loading-screen'
 Home = require './home'
-Calendar = require './calendar'
 
 Content = React.createClass
   componentDidMount: ->
@@ -38,14 +37,19 @@ Content = React.createClass
     </div>)
 
 RouterContainer = React.createClass
-  waiting: true
-  componentDidMount: ->
-
   render: ->
     <div><SideMenu /><Content props={this.props}/></div>
 
 ChiikaRouter = React.createClass
-  componentDidMount: ->
+  route: []
+  getInitialState: ->
+    routes: @getRoutes()
+  getRoutes: ->
+    routes = []
+    chiika.uiData.map (route,i) => routes.push route
+    routes
+  renderSingleRoute: (route,i) ->
+    <Route name={route.name} path={route.name} component={Home} key={i} onEnter={@onEnter}/>
 
   onEnter:(nextState) ->
     path = nextState.location.pathname
@@ -56,6 +60,10 @@ ChiikaRouter = React.createClass
       <Route component={RouterContainer}>
         #<Route path="/" component={Home} onEnter={@onEnter}/>
         <Route name="Home" path="Home" component={Home} onEnter={@onEnter}/>
+        {
+          @state.routes.map (route,i) =>
+            @renderSingleRoute(route,i)
+        }
       </Route>
     </Router>)
 

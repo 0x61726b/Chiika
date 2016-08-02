@@ -17,6 +17,7 @@ React = require("react")
 ReactDOM = require("react-dom")
 
 Chiika = require("./chiika")
+LoadingScreen = require './loading-screen'
 
 Environment = require './chiika-environment'
 ApplicationDelegate = require './application-delegate'
@@ -25,10 +26,24 @@ Col = require './custom-column-types'
 
 window.$ = window.jQuery = require('./bundleJs.js')
 $ ->
+  loading = ->
+    ReactDOM.render(React.createElement(LoadingScreen), document.getElementById('app'))
+  app = ->
+    ReactDOM.render(React.createElement(Chiika), document.getElementById('app'))
+
+  loading()
+
   window.chiika = new Environment({
     window,
     applicationDelegate: new ApplicationDelegate,
     chiikaHome: process.env.CHIIKA_HOME,
     env: process.env
     })
-  ReactDOM.render(React.createElement(Chiika), document.getElementById('app'))
+  chiika.reInitializeUI(loading,app)
+
+
+  chiika.emitter.emit 'reinitialize-ui'
+  
+
+
+  #ReactDOM.render(React.createElement(Chiika), document.getElementById('app'))

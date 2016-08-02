@@ -44,19 +44,22 @@ MalLogin = React.createClass
     window.ipcManager = @ipcManager
 
     @ipcManager.sendReceiveIPC 'get-services',null,(event,defer,args) =>
-      @setState { services: args }
-      console.log args
+      if args?
+        console.log args
+        @setState { services: args }
 
-      args.map( (service,i) => $("#verifyBtn-#{service.name}").hide())
+        args.map( (service,i) => $("#verifyBtn-#{service.name}").hide())
 
-      args.map (service,i) =>
-        $("#authPin-#{service.name}").on 'input',=>
-          if _.isEmpty $("#authPin-#{service.name}").val()
-            $("#verifyBtn-#{service.name}").hide()
-            $("#gotoBtn-#{service.name}").show()
-          else
-            $("#verifyBtn-#{service.name}").show()
-            $("#gotoBtn-#{service.name}").hide()
+        args.map (service,i) =>
+          $("#authPin-#{service.name}").on 'input',=>
+            if _.isEmpty $("#authPin-#{service.name}").val()
+              $("#verifyBtn-#{service.name}").hide()
+              $("#gotoBtn-#{service.name}").show()
+            else
+              $("#verifyBtn-#{service.name}").show()
+              $("#gotoBtn-#{service.name}").hide()
+
+
 
 
     #This callback only gets called if error on login
@@ -82,10 +85,6 @@ MalLogin = React.createClass
         $("#verifyBtn-#{response.owner}").show()
       else
         @highlightFormByParent("red","#authPin-#{response.owner}")
-
-
-
-      #ToDo(ahmedbera) : Implement UI for error messages
 
   highlightFormByParent: (color,parent) ->
     user = $(parent + "#email")
@@ -133,6 +132,12 @@ MalLogin = React.createClass
     console.log authPin
     ipcRenderer.send 'set-user-login',{ authPin: authPin, service: serviceName }
 
+  continueToApp: (e) ->
+    console.log "Continue"
+    @ipcManager.sendMessage 'call-window-method','close'
+    @ipcManager.sendMessage 'window-method','show','main'
+    @ipcManager.sendMessage 'continue-from-login'
+
 
   loginBody: (key,service) ->
     (<div className="card" id="login-container" key=key>
@@ -156,18 +161,24 @@ MalLogin = React.createClass
         </form>
       </div>)
   render: () ->
-    serviceCount = @state.services.length
+    if @state.services?
+      serviceCount = @state.services.length
+    else
+      serviceCount = 0
     if serviceCount == 0
       <LoadingScreen />
     else
-      <div className="login-body">
-        {
-          for i in [0...serviceCount]
-            if @state.services[i].loginType == 'authPin'
-              @authPinBody i,@state.services[i]
-            else
-              @loginBody(i,@state.services[i])
-        }
+      <div className="login-body-outer">
+        <div className="login-body">
+          {
+            for i in [0...serviceCount]
+              if @state.services[i].loginType == 'authPin'
+                @authPinBody i,@state.services[i]
+              else
+                @loginBody(i,@state.services[i])
+          }
+        </div>
+        <input type="submit" onClick={this.continueToApp} className="button raised indigo log-btn-contiue" id="continue" value="Continue to Chiika"/>
       </div>
 
 ReactDOM.render(React.createElement(MalLogin), document.getElementById('app'))
