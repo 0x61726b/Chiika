@@ -14,14 +14,16 @@
 #Description:
 #----------------------------------------------------------------------------
 
-_ = require 'lodash'
-_when = require 'when'
-TabView = require './ui-tabView'
+_               = require 'lodash'
+_when           = require 'when'
+TabView         = require './ui-tabView'
 
 
 module.exports = class UIManager
   uiItems: []
   preloadPromises: []
+
+
 
   #
   # The purpose of this method is to load UI views and their respective databases
@@ -60,15 +62,24 @@ module.exports = class UIManager
     # Naah
     chiika.logger.info("#{requiresUpdate.length} item is waiting to update!")
 
+    async = []
     requiresUpdate.map (item,i) =>
-      item.update()
+      async.push item.update()
+
+    _when.all(async)
 
 
   #
   # Adds a tab view, creates its associated DB interface and tries to load its data from DB
   #
   addTabView: (item) ->
-    tabView = (new TabView({ name: item.name, displayName: item.displayName, tabView: item.tabView, owner: item.owner, category: item.category }))
+    tabView = (new TabView({ name: item.name,
+    displayName: item.displayName,
+    TabGridView: item.TabGridView,
+    owner: item.owner,
+    category: item.category,
+    displayType: item.displayType
+     }))
     dbView = chiika.dbManager.createViewDb(item.name)
     tabView.setDatabaseInterface(dbView)
     tabView.loadTabData()
@@ -82,7 +93,7 @@ module.exports = class UIManager
   # @return {Object} promise Returns a promise
   addUIItem: (item,callback) ->
     defer = _when.defer()
-    if item.displayType == 'tabView'
+    if item.displayType == 'TabGridView'
       tabView = @addTabView(item)
       @preloadPromises.push tabView.db.promise
 

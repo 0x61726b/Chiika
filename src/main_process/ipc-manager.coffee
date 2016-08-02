@@ -124,11 +124,7 @@ module.exports = class IpcManager
         chiika.chiikaApi.emit 'set-user-login',{ calling: args.service, params: params }
 
     @receive 'continue-from-login', (event,args) =>
-      mainWnd = chiika.windowManager.getWindowByName('main')
-      uiItems = chiika.uiManager.getUIItems()
-
-      if uiItems.length > 0
-        @send mainWnd, 'get-ui-data-response',uiItems
+      chiika.windowManager.showMainWindow(true)
 
 
   loginCustom: ->

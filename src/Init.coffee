@@ -13,23 +13,24 @@
 #authors: arkenthera
 #Description:
 #----------------------------------------------------------------------------
-React = require("react")
-ReactDOM = require("react-dom")
+React                    = require "react"
+ReactDOM                 = require "react-dom"
 
-Chiika = require("./chiika")
-LoadingScreen = require './loading-screen'
+Chiika                   = require "../chiika"
+LoadingScreen            = require '../loading-screen'
 
-Environment = require './chiika-environment'
-ApplicationDelegate = require './application-delegate'
+Environment              = require '../chiika-environment'
+ApplicationDelegate      = require '../application-delegate'
 
-Col = require './custom-column-types'
+Col                      = require '../custom-column-types'
 
-window.$ = window.jQuery = require('./bundleJs.js')
+window.$ = window.jQuery = require '../bundleJs.js'
 $ ->
   loading = ->
     ReactDOM.render(React.createElement(LoadingScreen), document.getElementById('app'))
   app = ->
-    ReactDOM.render(React.createElement(Chiika), document.getElementById('app'))
+    $(".loading-screen").fadeOut 'fast', ->
+      ReactDOM.render(React.createElement(Chiika), document.getElementById('app'))
 
   loading()
 
@@ -43,7 +44,7 @@ $ ->
 
 
   chiika.emitter.emit 'reinitialize-ui'
-  
+
 
 
   #ReactDOM.render(React.createElement(Chiika), document.getElementById('app'))

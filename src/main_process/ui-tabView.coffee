@@ -20,11 +20,10 @@ UIItem    = require './ui-item'
 {InvalidOperationException,InvalidParameterException} = require './exceptions'
 
 module.exports = class TabView extends UIItem
-  tabView:null
+  TabGridView:null
   gridSuffix: '_grid'
   constructor: (params={}) ->
-    {@tabView} = params
-    params.displayType = 'tabView'
+    {@TabGridView} = params
     super params
 
   loadTabData: ->
@@ -104,7 +103,7 @@ module.exports = class TabView extends UIItem
       throw new InvalidParameterException("Specified data has to be type of array.")
 
     _.forEach data, (v,k) =>
-      columnCount = @tabView.gridColumnList.length
+      columnCount = @TabGridView.gridColumnList.length
       requestedDataColumnCount = Object.keys(v).length
 
       if columnCount != requestedDataColumnCount - 1 # recordId

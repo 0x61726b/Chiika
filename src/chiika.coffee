@@ -23,6 +23,8 @@ Titlebar = require './titlebar'
 LoadingScreen = require './loading-screen'
 Home = require './home'
 
+TabGridView = require './view-tabGrid'
+
 Content = React.createClass
   componentDidMount: ->
 
@@ -38,7 +40,7 @@ Content = React.createClass
 
 RouterContainer = React.createClass
   render: ->
-    <div><SideMenu /><Content props={this.props}/></div>
+    <div id="appMain"><SideMenu /><Content props={this.props}/></div>
 
 ChiikaRouter = React.createClass
   route: []
@@ -48,13 +50,17 @@ ChiikaRouter = React.createClass
     routes = []
     chiika.uiData.map (route,i) => routes.push route
     routes
+
+  getComponent: (name) ->
+    if name == 'TabGridView'
+      return './view-tabGrid'
+
   renderSingleRoute: (route,i) ->
-    <Route name={route.name} path={route.name} component={Home} key={i} onEnter={@onEnter}/>
+    <Route name={route.name} path={route.name} component={require(@getComponent(route.displayType))} gridColumnData={route.children} key={i} dataSource={route[route.displayType]} onEnter={@onEnter}/>
 
   onEnter:(nextState) ->
     path = nextState.location.pathname
-  animeDetailsRoute: (props) ->
-    (<AnimeDetails {...props}/>)
+
   render: () ->
     (<Router history={BrowserHistory}>
       <Route component={RouterContainer}>

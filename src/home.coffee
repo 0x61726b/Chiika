@@ -14,15 +14,14 @@
 #Description:
 #----------------------------------------------------------------------------
 
-React = require('react')
-{Router,Route,BrowserHistory,Link} = require('react-router')
+React                               = require('react')
 
-_ = require 'lodash'
+_                                   = require 'lodash'
 #Views
 
 module.exports = React.createClass
   componentDidMount: ->
-
+    console.log "Hello"
   componentWillUnmount: ->
 
   render: ->

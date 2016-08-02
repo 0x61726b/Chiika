@@ -88,11 +88,11 @@ SideMenu = React.createClass
     (<div className="sidebar">
       <div className="topLeft">
         <div className="logoContainer">
-          <img className="chiikaLogo" src="assets/images/topLeftLogo.png"/>
+          <img className="chiikaLogo" src="../assets/images/topLeftLogo.png"/>
         </div>
         <Link to="User" className="userArea noDecoration">
           <div className="imageContainer">
-            <img id="userAvatar" className="img-circle avatar" src="assets/images/avatar.jpg"/>
+            <img id="userAvatar" className="img-circle avatar" src="../assets/images/avatar.jpg"/>
           </div>
           <div className="userInfo">
             Chiika

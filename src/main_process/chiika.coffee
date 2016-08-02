@@ -162,9 +162,9 @@ class Application
                       .then =>
                         chiika.logger.verbose("Preloading UI complete!")
                         @apiManager.compileUserScripts().then =>
-                          @uiManager.checkUIData()
-                          @windowManager.closeLoadingWindow()
-                          @windowManager.showMainWindow()
+                          @uiManager.checkUIData().then =>
+                            @windowManager.closeLoadingWindow()
+                            @windowManager.showMainWindow(true)
           else
             #This will probably fail if more than one script is being executed...
             #This means when all scripts are compiled,preload UI items
@@ -173,9 +173,7 @@ class Application
                         .then =>
                           chiika.logger.verbose("Preloading UI complete!")
                           @windowManager.closeLoadingWindow()
-                          @windowManager.showMainWindow()
-
-
+                          @windowManager.showMainWindow(true)
 
 
   animePrePrequest: (anime,receiver,sendToMainWindow,defer,defCallback) ->

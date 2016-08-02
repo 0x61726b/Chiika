@@ -62,7 +62,7 @@ module.exports = class WindowManager
     window = new BrowserWindow(windowOptions)
     @handleWindowEvents(window)
 
-    _.assign window, { name: options.name,rawWindowInstance: window }
+    _.assign window, { name: options.name,rawWindowInstance: window, url: options.url }
     @windows.push window
 
     if isMain
@@ -73,7 +73,8 @@ module.exports = class WindowManager
 
     chiika.logger.info("Adding new window..")
 
-    window.loadURL(options.url)
+    if options.loadImmediately
+      window.loadURL(options.url)
     window
 
   createModalWindow: (options,returnCallback) ->
@@ -143,6 +144,9 @@ module.exports = class WindowManager
       @emitter.emit 'ready-to-show'
       chiika.logger.info("[magenta](Window-Manager) Window has finished loading.")
 
+  loadURL: (window) ->
+    window.loadURL(window.url)
+
   openDevTools: (window) ->
     window.openDevTools()
 
@@ -169,8 +173,10 @@ module.exports = class WindowManager
   getLoginWindow: ->
     @getWindowByName('login')
 
-  showMainWindow: ->
+  showMainWindow: (loadURL) ->
     if @mainWindow?
+      if loadURL
+        @loadURL(@mainWindow)
       @mainWindow.show()
 
   showLoadingWindow: ->

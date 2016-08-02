@@ -25,6 +25,7 @@ getLibraryUrl = (type,user) ->
 authUrl = 'http://myanimelist.net/api/account/verify_credentials.xml'
 
 _       = require process.cwd() + '/node_modules/lodash'
+_when   = require process.cwd() + '/node_modules/when'
 string  = require process.cwd() + '/node_modules/string'
 
 
@@ -141,7 +142,8 @@ module.exports = class MyAnimelist
         anime.animeProgress = 0
       anime.animeTitle = v.series_title
       anime.animeScore = v.my_score
-
+      anime.animeScoreAverage = "0"
+      anime.animeLastUpdated = "0"
       anime.animeSeason = v.series_start
       anime.id = id
       anime.mal_id = v.series_animedb_id
@@ -200,6 +202,8 @@ module.exports = class MyAnimelist
         manga.mangaProgress = 0
       manga.mangaTitle = v.series_title
       manga.mangaScore = v.my_score
+      manga.mangaScoreAverage = "0"
+      manga.mangaLastUpdated = "0"
       manga.id = id
       manga.mal_id = v.series_mangadb_id
       manga
@@ -245,8 +249,13 @@ module.exports = class MyAnimelist
     # This method will be called if there are no UI elements in the database
     # or the user wants to refresh the views
     @on 'reconstruct-ui', (promise) =>
-      @createViewAnimelist(promise)
-      @createViewMangalist(promise)
+      chiika.logger.script("reconstruct-ui #{@name}")
+
+      async = []
+      async.push @createViewAnimelist(promise)
+      async.push @createViewMangalist(promise)
+
+      _when.all(async).then => promise.resolve()
 
     #console.log chiika.ui.getUIItem('animeList')
 
@@ -258,15 +267,16 @@ module.exports = class MyAnimelist
     @on 'view-update', (update) =>
       chiika.logger.info("[blue](SCRIPT) Updating view for #{update.view.name} - #{@name}")
 
-
       if update.view.name == 'animeList_myanimelist'
         #view.setData(@getAnimelistData())
         @getAnimelistData (result) =>
           @setAnimelistTabViewData(result.library.myanimelist.anime,update.view)
+          update.defer.resolve()
 
       if update.view.name == 'mangaList_myanimelist'
         @getMangalistData (result) =>
           @setMangalistTabViewData(result.library.myanimelist.manga,update.view)
+          update.defer.resolve()
 
 
     # chiika.makeGetRequestAuth urls[1],malUser,null, (error,response,body) =>
@@ -318,48 +328,59 @@ module.exports = class MyAnimelist
 
       chiika.makePostRequestAuth( authUrl, { userName: args.user, password: args.pass },null, onAuthComplete )
 
-  createViewAnimelist: (promise) ->
+  createViewAnimelist: () ->
+    defer = _when.defer()
+
     view = {
       name: 'animeList_myanimelist',
       displayName: 'Anime List',
-      displayType: 'tabView',
+      displayType: 'TabGridView',
       owner: @name, #Script name, the updates for this view will always be called at 'owner'
       category: 'MyAnimelist',
-      tabView: {
+      TabGridView: {
         tabList: [ 'watching','ptw','dropped','onhold','completed'],
         gridColumnList: [
-          { name: 'animeType',display: 'Type', sort: 'na', width:'40' },
-          { name: 'animeTitle',display: 'Title', sort: 'str', width:'150' },
-          { name: 'animeProgress',display: 'Progress', sort: 'int', width:'150' },
-          { name: 'animeScore',display: 'Score', sort: 'int', width:'50' },
-          { name: 'animeSeason',display: 'Season', sort: 'str', width:'100' },
+          { name: 'animeType',display: 'Type', sort: 'na', width:'40',align: 'center' },
+          { name: 'animeTitle',display: 'Title', sort: 'str', widthP:'60', align: 'left' },
+          { name: 'animeProgress',display: 'Progress', sort: 'int', widthP:'40', align: 'center' },
+          { name: 'animeScore',display: 'Score', sort: 'int', width:'100',align: 'center' },
+          { name: 'animeScoreAverage',display: 'Avg Score', sort: 'str', width:'100', align: 'center',hidden:true },
+          { name: 'animeSeason',display: 'Season', sort: 'str', width:'100', align: 'center'},
+          { name: 'animeLastUpdated',display: 'Season', sort: 'str', width:'100', align: 'center',hidden:true },
           { name: 'animeId',hidden: true }
         ]
       }
      }
-    @chiika.ui.addUIItem [view],=>
+    @chiika.ui.addUIItem view,=>
       @chiika.logger.verbose "Added new view #{view.name}!"
-      promise.resolve()
+      defer.resolve()
+
+    defer.promise
 
 
-  createViewMangalist: (promise) ->
+  createViewMangalist: () ->
+    defer = _when.defer()
+
     view = {
       name: 'mangaList_myanimelist',
       displayName: 'Manga List',
-      displayType: 'tabView',
+      displayType: 'TabGridView',
       owner: @name, #Script name, the updates for this view will always be called at 'owner'
       category: 'MyAnimelist',
-      tabView: {
+      TabGridView: { #Must be the same name with displayType
         tabList: [ 'reading','ptr','dropped','onhold','completed'],
         gridColumnList: [
-          { name: 'mangaType',display: 'Type', sort: 'na', width:'40' },
-          { name: 'mangaTitle',display: 'Title', sort: 'str', width:'150' },
-          { name: 'mangaProgress',display: 'Progress', sort: 'int', width:'150' },
-          { name: 'mangaScore',display: 'Score', sort: 'int', width:'50' },
+          { name: 'mangaType',display: 'Type', sort: 'na', width:'40', align:'center' },
+          { name: 'mangaTitle',display: 'Title', sort: 'str', widthP:'60', align: 'left' },
+          { name: 'mangaProgress',display: 'Progress', sort: 'int', widthP:'40', align: 'center' },
+          { name: 'mangaScore',display: 'Score', sort: 'int', width:'100', align: 'center' },
+          { name: 'mangaScoreAverage',display: 'Avg Score', sort: 'str', width:'100', align: 'center',hidden:true },
+          { name: 'mangaLastUpdated',display: 'Season', sort: 'str', width:'100', align: 'center',hidden:true },
           { name: 'mangaId',hidden: true }
         ]
       }
      }
-    @chiika.ui.addUIItem [view],=>
+    @chiika.ui.addUIItem view,=>
       @chiika.logger.verbose "Added new view #{view.name}!"
-      promise.resolve()
+      defer.resolve()
+    defer.promise

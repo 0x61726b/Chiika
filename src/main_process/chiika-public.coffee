@@ -82,6 +82,7 @@ module.exports = class ChiikaPublicApi
     if !_.isUndefined wnd
       wnd.close()
 
+
   executeJavaScript: (windowName,javascript) ->
     wnd = chiika.windowManager.getWindowByName(windowName)
     if !_.isUndefined wnd

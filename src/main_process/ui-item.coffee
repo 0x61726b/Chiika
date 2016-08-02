@@ -15,6 +15,7 @@
 #----------------------------------------------------------------------------
 
 _         = require 'lodash'
+_when     = require 'when'
 
 module.exports = class UIItem
   name: null
@@ -39,12 +40,18 @@ module.exports = class UIItem
 
   update: ->
     chiika.logger.info("Updating UIItem #{@name}")
+
+    defer = _when.defer()
     if @needUpdate
       if @owner?
-        chiika.chiikaApi.emit 'view-update',{ calling: @owner, view: this }
+        chiika.chiikaApi.emit 'view-update',{ calling: @owner, view: this, defer: defer }
       else
         chiika.logger.error("Can't update an item without owner! UI Item: #{@name}")
+        defer.resolve()
       @needUpdate = false
+    else
+      defer.resolve()
+    defer.promise
 
 
   setDataSource: (data) ->

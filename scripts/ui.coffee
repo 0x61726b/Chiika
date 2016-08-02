@@ -54,51 +54,6 @@ module.exports = class UISetup
       @chiika.logger.verbose "Added new view #{view.name}!"
       promise.resolve()
 
-  createViewAnimelist: (promise) ->
-    view = {
-      name: 'animeList_myanimelist',
-      displayName: 'Anime List',
-      displayType: 'tabView',
-      owner: 'myanimelist', #Script name, the updates for this view will always be called at 'owner'
-      category: 'MyAnimelist',
-      tabView: {
-        tabList: [ 'watching','ptw','dropped','onhold','completed'],
-        gridColumnList: [
-          { name: 'animeType',display: 'Type', sort: 'na', width:'40' },
-          { name: 'animeTitle',display: 'Title', sort: 'str', width:'150' },
-          { name: 'animeProgress',display: 'Progress', sort: 'int', width:'150' },
-          { name: 'animeScore',display: 'Score', sort: 'int', width:'50' },
-          { name: 'animeSeason',display: 'Season', sort: 'str', width:'100' },
-          { name: 'animeId',hidden: true }
-        ]
-      }
-     }
-    @chiika.ui.addUIItem view,=>
-      @chiika.logger.verbose "Added new view #{view.name}!"
-      promise.resolve()
-
-
-  createViewMangalist: (promise) ->
-    view = {
-      name: 'mangaList_myanimelist',
-      displayName: 'Manga List',
-      displayType: 'tabView',
-      owner: 'myanimelist', #Script name, the updates for this view will always be called at 'owner'
-      category: 'MyAnimelist',
-      tabView: {
-        tabList: [ 'reading','ptr','dropped','onhold','completed'],
-        gridColumnList: [
-          { name: 'mangaType',display: 'Type', sort: 'na', width:'40' },
-          { name: 'mangaTitle',display: 'Title', sort: 'str', width:'150' },
-          { name: 'mangaProgress',display: 'Progress', sort: 'int', width:'150' },
-          { name: 'mangaScore',display: 'Score', sort: 'int', width:'50' },
-          { name: 'mangaId',hidden: true }
-        ]
-      }
-     }
-    @chiika.ui.addUIItem view,=>
-      @chiika.logger.verbose "Added new view #{view.name}!"
-      promise.resolve()
 
   createHome: (promise) ->
     view = {
@@ -124,9 +79,7 @@ module.exports = class UISetup
     # This method will be called if there are no UI elements in the database
     # or the user wants to refresh the views
     # @todo Implement reset
-    @on 'reconstruct-ui', (promise) =>
-      @createViewAnimelist(promise)
-      @createViewMangalist(promise)
-      @createHome(promise)
+    #@on 'reconstruct-ui', (promise) =>
+      #@createHome(promise)
 
     @on 'view-update', (view) =>

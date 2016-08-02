@@ -39,8 +39,9 @@ module.exports = class AppDelegate
         height: 900,
         title: 'Chiika',
         icon: "resources/icon.png",
-        url: "file://#{__dirname}/../static/LoginWindow.html"
-        show: false
+        url: "file://#{__dirname}/../static/LoginWindow.html",
+        show: false,
+        loadImmediately: true
         })
 
       mainWindow = chiika.windowManager.createWindowAndOpen(true,false,{
@@ -49,8 +50,9 @@ module.exports = class AppDelegate
         height: 900,
         title: 'Chiika',
         icon: "resources/icon.png",
-        url: "file://#{__dirname}/../index.html#Home"
-        show: false
+        url: "file://#{__dirname}/../static/index.html#Home"
+        show: false,
+        loadImmediately: false
         })
 
       loadingWindow = chiika.windowManager.createWindowAndOpen(false,true,{
@@ -60,7 +62,8 @@ module.exports = class AppDelegate
         title: 'Chiika',
         icon: "resources/icon.png",
         url: "file://#{__dirname}/../static/LoadingWindow.html",
-        show: true
+        show: true,
+        loadImmediately: true
         })
 
       chiika.windowManager.openDevTools(mainWindow)

@@ -73,6 +73,8 @@ class ChiikaEnvironment
       chiika.logger.renderer("Current UI items are #{infoStr}")
       defer.resolve()
 
+      console.log @uiData
+
     _when.all(async)
 
   reInitializeUI: (loading,main) ->
@@ -80,7 +82,7 @@ class ChiikaEnvironment
       loading()
 
       @preload().then =>
-        setTimeout(main,2500)
+        setTimeout(main,500)
 
   sendNotification: (title,body,icon) ->
     if !icon?
