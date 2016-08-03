@@ -114,8 +114,6 @@ class Application
 
     @appDelegate.run()
 
-
-
     @appDelegate.ready =>
       @dbManager.onLoad =>
         # run() method will open 3 windows when the app is ready

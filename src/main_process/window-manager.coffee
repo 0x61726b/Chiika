@@ -118,12 +118,14 @@ module.exports = class WindowManager
 
     if window?
       @emitter.on 'close', ->
-        winPosX = window.getPosition()[0]
-        winPosY = window.getPosition()[1]
-        width = window.getSize()[0]
-        height = window.getSize()[1]
 
-        chiika.settingsManager.setWindowProperties({ x: winPosX, y: winPosY,width: width, height: height })
+        if window.name == 'main'
+          winPosX = window.getPosition()[0]
+          winPosY = window.getPosition()[1]
+          width = window.getSize()[0]
+          height = window.getSize()[1]
+
+          chiika.settingsManager.setWindowProperties({ x: winPosX, y: winPosY,width: width, height: height })
     else
       chiika.logger.warn("Can't remember window properties because window is null.")
 

@@ -28,48 +28,48 @@ module.exports = class AppDelegate
     _when.all(@readyPromise).then => callback()
   onReady: ->
     defer = _when.defer()
-
     app.on 'ready', =>
-      defer.resolve()
-      chiika.logger.verbose("Electron app is ready")
+      chiika.settingsManager.initialize().then =>
+        defer.resolve()
+        chiika.logger.verbose("Electron app is ready")
 
-      loginWindow = chiika.windowManager.createWindowAndOpen(false,false,{
-        name: 'login',
-        width: 1600,
-        height: 900,
-        title: 'Chiika',
-        icon: "resources/icon.png",
-        url: "file://#{__dirname}/../static/LoginWindow.html",
-        show: false,
-        loadImmediately: true
-        })
+        loginWindow = chiika.windowManager.createWindowAndOpen(false,false,{
+          name: 'login',
+          width: 1600,
+          height: 900,
+          title: 'Chiika',
+          icon: "resources/icon.png",
+          url: "file://#{__dirname}/../static/LoginWindow.html",
+          show: false,
+          loadImmediately: true
+          })
 
-      mainWindow = chiika.windowManager.createWindowAndOpen(true,false,{
-        name: 'main',
-        width: 1400,
-        height: 900,
-        title: 'Chiika',
-        icon: "resources/icon.png",
-        url: "file://#{__dirname}/../static/index.html#Home"
-        show: false,
-        loadImmediately: false
-        })
+        mainWindow = chiika.windowManager.createWindowAndOpen(true,false,{
+          name: 'main',
+          width: 1400,
+          height: 900,
+          title: 'Chiika',
+          icon: "resources/icon.png",
+          url: "file://#{__dirname}/../static/index.html#Home"
+          show: false,
+          loadImmediately: false
+          })
 
-      loadingWindow = chiika.windowManager.createWindowAndOpen(false,true,{
-        name: 'loading',
-        width: 600,
-        height: 400,
-        title: 'Chiika',
-        icon: "resources/icon.png",
-        url: "file://#{__dirname}/../static/LoadingWindow.html",
-        show: true,
-        loadImmediately: true
-        })
+        loadingWindow = chiika.windowManager.createWindowAndOpen(false,true,{
+          name: 'loading',
+          width: 600,
+          height: 400,
+          title: 'Chiika',
+          icon: "resources/icon.png",
+          url: "file://#{__dirname}/../static/LoadingWindow.html",
+          show: true,
+          loadImmediately: true
+          })
 
-      chiika.windowManager.openDevTools(mainWindow)
-      chiika.windowManager.openDevTools(loginWindow)
+        chiika.windowManager.openDevTools(mainWindow)
+        chiika.windowManager.openDevTools(loginWindow)
 
-      chiika.settingsManager.applySettings()
+        chiika.settingsManager.applySettings()
     return defer.promise
 
 

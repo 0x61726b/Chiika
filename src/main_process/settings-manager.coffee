@@ -31,36 +31,43 @@ module.exports = class SettingsManager
     #Initialize settings related stuff
     process.env.CHIIKA_HOME = chiika.getAppHome()
 
+  initialize: ->
+    defer = _when.defer()
+
     @createFolders().then =>
       # defaultScriptDir = path.join(process.cwd(),"src","scripts")
       # chiika.utility.copyDirectoryToDestination(defaultScriptDir,path.join(chiika.getAppHome(),"Scripts"))
     #Copy default scripts
 
 
-    @configFilePath = path.join("Config","Chiika.json")
-    configExists = chiika.utility.fileExistsSmart @configFilePath
+      @configFilePath = path.join("Config","Chiika.json")
+      configExists = chiika.utility.fileExistsSmart @configFilePath
 
-    #Check if config file exists
-    #It does
-    if configExists
-      configFile = chiika.utility.readFileSmart(@configFilePath)
-      @appOptions = JSON.parse(configFile)
-    else #It doesnt
-      #Open the file for writing
-      cf = chiika.utility.openFileWSmart @configFilePath
+      #Check if config file exists
+      #It does
+      if configExists
+        configFile = chiika.utility.readFileSmart(@configFilePath)
+        @appOptions = JSON.parse(configFile)
+      else #It doesnt
+        #Open the file for writing
+        cf = chiika.utility.openFileWSmart @configFilePath
 
-      #Write the default options
-      chiika.utility.writeFileSmart @configFilePath, JSON.stringify(DefaultOptions)
+        #Write the default options
+        chiika.utility.writeFileSmart @configFilePath, JSON.stringify(DefaultOptions)
 
-      chiika.utility.closeFileSync(cf)
+        chiika.utility.closeFileSync(cf)
 
-      #Assign it to a local variable
-      @appOptions = DefaultOptions
+        #Assign it to a local variable
+        @appOptions = DefaultOptions
 
-      @firstLaunch = true
+        @firstLaunch = true
+
+      defer.resolve()
+      chiika.logger.info "[cyan](Settings-Manager) Settings initialized"
 
 
-    chiika.logger.info "[cyan](Settings-Manager) Settings initialized"
+    defer.promise
+
 
   applySettings: ->
     #Remember window properties
@@ -102,7 +109,7 @@ module.exports = class SettingsManager
   #
   #
   getOption: (name) ->
-    if _.isUndefined @appOptions[name]
+    if @appOptions[name]?
       chiika.logger.warn("The requested option #{@appOptions[name]} is not defined!")
       return undefined
     else
