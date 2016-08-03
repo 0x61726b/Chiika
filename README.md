@@ -22,7 +22,7 @@ gulp serve
 
 - Scripting support for users to extend functionality
 - MyAnimelist,Hummingbird and Anilist support out of the box (you can always add more library providers with scripting)
-- You can use multiple accounts at once, meaning it is possible to use both MAL and Hummingbird at the same time.
+- You can use multiple accounts at once, meaning it is possible to use both **MAL** and **Hummingbird** or **Anilist** at the **same** time.
 - Very easy to use public API for scripters
 - User Interface is exposed to public API so you can customize the app to your will
 - Anime video files/media player recognition *Only available for Win32 for now*
