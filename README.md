@@ -6,11 +6,6 @@
 
 [Chiika](http://chiika.moe/) is an upcoming cross platform desktop application which helps you manage anything related to your anime/manga.Chiika is written with [Electron](https://github.com/atom/electron)
 
-![](http://i.imgur.com/MATNWll.jpg)
-![Screenshot - Anime List](http://i.imgur.com/lK4llMI.png)
-![Details](http://i.imgur.com/r6KHf7T.png)
-![Scrobbler](http://i.imgur.com/gsAtn1L.png)
-
 #Running
 
 Use NPM to build and run Chiika.You will be greeted with login screen,there you can login with your MyAnimeList account.Your user info and lists will be retrieved upon login. Media detection only works on Windows *for now*.
@@ -39,6 +34,12 @@ gulp serve
 If you'd like to help us develop Chiika, send me an email.
 
 
+#Some Screenshots
+
+![](http://i.imgur.com/MATNWll.jpg)
+![Screenshot - Anime List](http://i.imgur.com/lK4llMI.png)
+![Details](http://i.imgur.com/r6KHf7T.png)
+![Scrobbler](http://i.imgur.com/gsAtn1L.png)
 
 #License
 
