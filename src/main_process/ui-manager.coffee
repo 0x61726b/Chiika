@@ -93,6 +93,7 @@ module.exports = class UIManager
     tabView
 
 
+
   #
   # Adds a UI item respective to their type, then creates a DB view for its data source
   #
@@ -100,10 +101,17 @@ module.exports = class UIManager
   addUIItem: (item,callback) ->
     defer = _when.defer()
     if item.displayType == 'TabGridView'
-      tabView = @addTabView(item)
-      @preloadPromises.push tabView.db.promise
+      #Check if view exists
+      findView = _.find @uiItems, (o) -> o.name == item.name
 
-      @uiItems.push tabView
+      if findView?
+        tabView = findView
+        @preloadPromises.push tabView.db.promise
+      else
+        tabView = @addTabView(item)
+        @uiItems.push tabView
+        @preloadPromises.push tabView.db.promise
+
       defer.resolve()
       chiika.dbManager.uiDb.addUIItem item, (err,count) =>
         defer.resolve()

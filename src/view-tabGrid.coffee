@@ -81,7 +81,11 @@ module.exports = React.createClass
     columnSorting = ""
     headerAligns = []
 
-    totalArea = $(".objbox").width()
+    if $(".objbox").scrollHeight > $(".objbox").height()
+      console.log "There is scrollbar"
+      totalArea = $(".objbox").width() - 20
+    else
+      totalArea = $(".objbox").width()
     fixedColumnsTotal = 0
 
     _.forEach @state.view.TabGridView.gridColumnList, (v,k) =>
@@ -89,6 +93,7 @@ module.exports = React.createClass
         fixedColumnsTotal += parseInt(v.width)
 
     diff = totalArea - fixedColumnsTotal
+
 
 
     _.forEach @state.view.TabGridView.gridColumnList, (v,k) =>
@@ -132,9 +137,13 @@ module.exports = React.createClass
     @currentGrid.parse gridConf,"js"
 
 
+
     $(window).resize( =>
       if @currentGrid?
-        totalArea = $(".objbox").width()
+        if $(".objbox")[0].scrollHeight > $(".objbox").height()
+          totalArea = $(".objbox").width() - 16
+        else
+          totalArea = $(".objbox").width()
         fixedColumnsTotal = 0
 
         _.forEach @state.view.TabGridView.gridColumnList, (v,k) =>
@@ -143,8 +152,8 @@ module.exports = React.createClass
 
         diff = totalArea - fixedColumnsTotal
 
-        for i in [0...@state.gridColumnList.length]
-          v = @state.gridColumnList[i]
+        for i in [0...@state.view.TabGridView.gridColumnList.length]
+          v = @state.view.TabGridView.gridColumnList[i]
           if !v.hidden
             width = 0
             if v.widthP?
@@ -153,6 +162,7 @@ module.exports = React.createClass
               width = v.width
             @currentGrid.setColWidth(i,width)
             )
+    $(window).trigger('resize')
 
   componentWillUnmount: ->
     #chiika.viewManager.onTabSelect(@props.route.view.name,@state.currentTabIndex)

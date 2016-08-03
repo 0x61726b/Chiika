@@ -49,7 +49,7 @@ ChiikaRouter = React.createClass
   getInitialState: ->
     test: false
     uiData: chiika.uiData
-    routerConfig: [ childRoutes:[] ]
+    routerConfig: @getRoutes(chiika.uiData)
 
   getRoutes: (uiData) ->
     routes = []
@@ -58,12 +58,10 @@ ChiikaRouter = React.createClass
       path: "/#{route.name}"
       component:require(chiika.viewManager.getComponent(route.displayType))
       view: route
-      test: @state.test
     }
 
     routerConfig = {
         component: RouterContainer,
-        test: @state.test
         childRoutes: [
           { name:'Home', path: '/Home', component: Home }
         ]
@@ -74,7 +72,7 @@ ChiikaRouter = React.createClass
   renderSingleRoute: (route,i) ->
     <Route name={route.name} path={route.name} key={i} component={require(chiika.viewManager.getComponent(route.displayType))} view={route} onEnter={@onEnter}/>
 
-  componentWillMount: ->
+  componentDidMount: ->
     @setState { routerConfig: @getRoutes(chiika.uiData) }
 
 
@@ -86,7 +84,6 @@ ChiikaRouter = React.createClass
 
         if findChildRoute?
           findChildRoute.view = v
-          console.log "Updating #{findChildRoute.name}"
       @setState { routerConfig: routerConfig }
 
 

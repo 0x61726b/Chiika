@@ -43,6 +43,7 @@ module.exports = class DbUI extends IDb
         loadDatabase()
 
 
+
   #
   # Adds user into the database.
   # Will check if the parameter use already exists in the database
@@ -55,10 +56,21 @@ module.exports = class DbUI extends IDb
   addUIItem: (menuItem,callback) ->
     #menuItem structure
     # { name: 'animeList', displayName: 'Anime List',displayType: 'tabView',tabList: [ 'watching','ptw','dropped','onhold','completed'] }
-    @insertRecord menuItem, callback
+    @insertRecord menuItem, (result) =>
+      #If it exists already,it won't insert, so update
+      if result.exists
+        @updateRecords menuItem,=>
+          if !_.isUndefined callback
+            callback()
+      else
+        callback()
 
     #@insertRecordWithKey user,callback
 
+
+  getUIItem: (name,callback) ->
+    @one('name',name,null).then (data) =>
+      callback(data)
   # #
   # # Updates the user
   # # @param [Object] user User object

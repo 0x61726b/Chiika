@@ -79,18 +79,22 @@ class ChiikaEnvironment
 
     _when.all(async)
 
-  reInitializeUI: (loading,main) ->
-    @emitter.on 'reinitialize-ui', =>
+  onReinitializeUI: (loading,main) ->
+    @emitter.on 'reinitialize-ui', (args) =>
       loading()
 
       @preload().then =>
-        setTimeout(main,500)
+        setTimeout(main,args.delay)
 
   sendNotification: (title,body,icon) ->
     if !icon?
       icon = __dirname + "/../assets/images/chiika.png"
     notf = new Notification(title,{ body: body, icon: icon})
 
+  reInitializeUI: (delay) ->
+    if !delay?
+      delay = 500
+    @emitter.emit 'reinitialize-ui',{ delay: delay }
 
   getWorkingDirectory: ->
     process.cwd()

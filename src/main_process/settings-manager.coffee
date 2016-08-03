@@ -94,13 +94,13 @@ module.exports = class SettingsManager
       "Scripts",
       "Cache",
       "Cache/Scripts",
-      "Data/Images",
-      "Data/dbs"
+      "Data/Images"
     ]
     promises = []
 
     _.forEach folders, (v,k) ->
       promises.push chiika.utility.createFolderSmart(v)
+    promises.push chiika.utility.createFolder(chiika.getDbHome())
     _when.all(promises)
 
 

@@ -37,8 +37,8 @@ module.exports = class IDb
       @promise = defer.promise
       promises.push @promise
 
-    @dbPhysicalPath = path.join(chiika.getAppHome(),"Data","dbs",@dbName + ".nosql")
-    @nosql = NoSQL.load(path.join(chiika.getAppHome(),"Data","dbs",@dbName + ".nosql"))
+    @dbPhysicalPath = path.join(chiika.getDbHome(),@dbName + ".nosql")
+    @nosql = NoSQL.load(path.join(chiika.getDbHome(),@dbName + ".nosql"))
     chiika.logger.debug "IDb::constructor {dbName:#{@dbName}}"
     chiika.logger.debug "Idb::constructor {dbPhysicalPath:#{@dbPhysicalPath}}"
 
@@ -156,7 +156,10 @@ module.exports = class IDb
       keysRecord = Object.keys(record)
       key = Object.keys(doc)[0]
       if key == Object.keys(record)[0] && record[key] == doc[key]
-        doc[keys[1]] = record[keysRecord[1]]
+        #doc[keys[1]] = record[keysRecord[1]]
+        doc = {}
+        _.forOwn record,(v,k) =>
+          doc[k] = v
         chiika.logger.verbose("[magenta](#{@name}) - Updated record with #{key}:#{doc[key]}")
         affectedRows++
       doc
@@ -165,7 +168,7 @@ module.exports = class IDb
     updateCallback = (err,count) =>
       if err
         throw err
-      chiika.logger.debug "UPDATED #{count}"
+      console.log "UPDATED #{count}"
       if _.isArray record
         keyExistsCallback = (result) ->
           if !result.exists

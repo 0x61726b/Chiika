@@ -21,7 +21,6 @@
 {BrowserWindow, ipcMain,globalShortcut,Tray,Menu,app} = require 'electron'
 
 
-
 yargs                             = require 'yargs'
 path                              = require 'path'
 
@@ -284,6 +283,8 @@ class Application
     @tools.downloadUserImage id,onFinished
   getAppHome: ->
     @chiikaHome
+  getDbHome: ->
+    path.join(@chiikaHome,"Data","Database")
   checkRememberWindowProperties: ->
     if @appOptions.RememberWindowSizeAndPosition
       if @appOptions.WindowProperties? && @appOptions.WindowProperties.size?

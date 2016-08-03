@@ -20,7 +20,6 @@ Chiika                   = require "../chiika"
 LoadingScreen            = require '../loading-screen'
 
 Environment              = require '../chiika-environment'
-ApplicationDelegate      = require '../application-delegate'
 
 Col                      = require '../custom-column-types'
 
@@ -36,14 +35,13 @@ $ ->
 
   window.chiika = new Environment({
     window,
-    applicationDelegate: new ApplicationDelegate,
     chiikaHome: process.env.CHIIKA_HOME,
     env: process.env
     })
-  chiika.reInitializeUI(loading,app)
+  chiika.onReinitializeUI(loading,app)
 
 
-  chiika.emitter.emit 'reinitialize-ui'
+  chiika.emitter.emit 'reinitialize-ui', { delay: 100 }
 
 
 
