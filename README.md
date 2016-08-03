@@ -2,13 +2,11 @@
 
 [![Dependency Status](https://david-dm.org/arkenthera/chiika.svg)](https://david-dm.org/arkenthera/chiika)
 [![Build Status](https://travis-ci.org/arkenthera/Chiika.svg?branch=master)](https://travis-ci.org/arkenthera/Chiika)
-[![Code Climate](https://codeclimate.com/github/arkenthera/Chiika/badges/gpa.svg)](https://codeclimate.com/github/arkenthera/Chiika)
-[![Test Coverage](https://codeclimate.com/github/arkenthera/Chiika/badges/coverage.svg)](https://codeclimate.com/github/arkenthera/Chiika/coverage)
-[![Issue Count](https://codeclimate.com/github/arkenthera/Chiika/badges/issue_count.svg)](https://codeclimate.com/github/arkenthera/Chiika)
+
 
 [Chiika](http://chiika.moe/) is an upcoming cross platform desktop application which helps you manage anything related to your anime/manga.Chiika is written with [Electron](https://github.com/atom/electron)
 
-![Login](http://i.imgur.com/56cRNUx.png)
+![](http://i.imgur.com/MATNWll.jpg)
 ![Screenshot - Anime List](http://i.imgur.com/lK4llMI.png)
 ![Details](http://i.imgur.com/r6KHf7T.png)
 ![Scrobbler](http://i.imgur.com/gsAtn1L.png)
@@ -27,14 +25,18 @@ gulp serve
 
 #Current Features
 
-- Full MyAnimelist integration (Anime/Manga list)
-- Local database using NoSQL
-- Anime video files/media player recognition *Win32*
+- Scripting support for users to extend functionality
+- MyAnimelist,Hummingbird and Anilist support out of the box (you can always add more library providers with scripting)
+- Very easy to use public API for scripters
+- User Interface is exposed to public API so you can customize the app to your will
+- Anime video files/media player recognition *Only available for Win32 for now*
 - Calendar using [Senpai](http://senpai.moe) season data
-- Searching & scraping off anime data from MyAnimelist
 - Rich list/grid features (sorting,filtering etc.)
 
 
+#Contributing
+
+If you'd like to help us develop Chiika, send me an email.
 
 
 
