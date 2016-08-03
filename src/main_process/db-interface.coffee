@@ -134,7 +134,7 @@ module.exports = class IDb
           chiika.logger.verbose("[magenta](#{@name}) - Key-value already exists #{key}:#{record[key]}. No need to insert, if you meant to update, use update method.")
           callback { exists: exists.exists }
       @checkIfKeyValueExists(record,onKeyExistsCheck)
-      
+
 
 
 
@@ -149,27 +149,23 @@ module.exports = class IDb
   updateRecords: (record,callback) ->
     chiika.logger.debug("IDb::updateRecord")
     affectedRows = 0
+
     #This function runs for every row in database !!
     updateFnc = (doc) =>
+      keys = Object.keys(doc)
+      keysRecord = Object.keys(record)
       key = Object.keys(doc)[0]
-      if _.isArray record
-        #Find this 'doc' if its on the record array
-        findObj = {}
-        findObj[key] = doc[key]
-        match = _.find record,findObj
+      if key == Object.keys(record)[0] && record[key] == doc[key]
+        doc[keys[1]] = record[keysRecord[1]]
+        chiika.logger.verbose("[magenta](#{@name}) - Updated record with #{key}:#{doc[key]}")
+        affectedRows++
+      doc
 
-        if !_.isUndefined match
-          doc = match
-          affectedRows++
-          chiika.logger.verbose("[magenta](#{@name}) - Updated record with #{key}:#{doc[key]}")
-      else
-        if key == Object.keys(record)[0] && record[key] == doc[key]
-          doc = record
-          chiika.logger.verbose("[magenta](#{@name}) - Updated record with #{key}:#{doc[key]}")
-          affectedRows++
-      return doc
 
     updateCallback = (err,count) =>
+      if err
+        throw err
+      chiika.logger.debug "UPDATED #{count}"
       if _.isArray record
         keyExistsCallback = (result) ->
           if !result.exists
@@ -178,9 +174,9 @@ module.exports = class IDb
 
       callback { rows: affectedRows }
 
-    @nosql.prepare(updateFnc, updateCallback, 'IDb::updateRecord')
+    @nosql.update(updateFnc, updateCallback,'IDb::updateRecord')
 
-    @nosql.update()
+    #@nosql.update()
     #@nosql.update( updateCallback, callback, 'IDb::updateRecord')
     chiika.logger.debug("IDb::updateRecord")
 

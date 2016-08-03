@@ -58,13 +58,15 @@ module.exports = class DbView extends IDb
   # @option user [Boolean] isPrimary When set, this user will be primary.
   # @todo Add parameter validation
   save: (data,callback) ->
-    #
     saveData = (data) =>
       @insertRecord data, (result) =>
+        #If it exists already,it won't insert, so update
         if result.exists
           @updateRecords data,=>
             if !_.isUndefined callback
-              callback user
+              callback()
+        else
+          callback()
 
 
     if !@isReady()

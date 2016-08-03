@@ -20,8 +20,9 @@ _                                   = require 'lodash'
 #Views
 
 module.exports = React.createClass
-  componentDidMount: ->
+  componentWillReceiveProps: ->
     
+
   componentWillUnmount: ->
 
   render: ->

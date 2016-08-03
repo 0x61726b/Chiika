@@ -82,10 +82,10 @@ module.exports = class MyAnimelist
       if response.statusCode == 200 or response.statusCode == 201
         @chiika.parser.parseXml(body)
                       .then (result) =>
-                        callback { response: response, library: result }
+                        callback { success:true,response: response, library: result }
       else
         @chiika.logger.warn("There was a problem retrieving library.")
-        callback { response: response }
+        callback { success:false,response: response }
 
     @chiika.makeGetRequest getLibraryUrl(type,userName),null, onGetUserLibrary
 
@@ -95,6 +95,7 @@ module.exports = class MyAnimelist
   getAnimelistData: (callback) ->
     if _.isUndefined @malUser
       @chiika.logger.error("User can't be retrieved.Aborting anime list request.")
+      callback( {success: false })
     else
       @retrieveLibrary 'anime',@malUser.realUserName, (result) =>
            userInfo = result.library.myanimelist.myinfo
@@ -110,6 +111,7 @@ module.exports = class MyAnimelist
   getMangalistData: (callback) ->
     if _.isUndefined @malUser
       @chiika.logger.error("User can't be retrieved.Aborting manga list request.")
+      callback( { success: false })
     else
       @retrieveLibrary 'manga',@malUser.realUserName, (result) =>
            userInfo = result.library.myanimelist.myinfo
@@ -137,21 +139,37 @@ module.exports = class MyAnimelist
     dropped = []
 
     matchGridColumns = (v,id) ->
+
       anime = {}
-      anime.animeType = "TV"
+      type = "Unknown"
+      if v.series_type == "1"
+        type = "TV"
+      if v.series_type == "2"
+        type = "OVA"
+      if v.series_type == "3"
+        type = "Movie"
+      if v.series_type == "4"
+        type = "Special"
+      if v.series_type == "5"
+        type = "ONA"
+      if v.series_type == "6"
+        type = "Music"
+      anime.animeType = type
       seriesEpisodes = v.series_episodes
 
       if seriesEpisodes != "0"
         anime.animeProgress = (parseInt(v.my_watched_episodes) / parseInt(v.series_episodes)) * 100
       else
         anime.animeProgress = 0
+      anime.animeProgress = parseInt(anime.animeProgress)
       anime.animeTitle = v.series_title
-      anime.animeScore = v.my_score
+      anime.animeScore = parseInt(v.my_score)
       anime.animeScoreAverage = "0"
       anime.animeLastUpdated = "0"
       anime.animeSeason = v.series_start
       anime.id = id + 1
       anime.mal_id = v.series_animedb_id
+
       anime
 
     _.forEach animeList, (v,k) =>
@@ -177,8 +195,6 @@ module.exports = class MyAnimelist
     animelistData.push { name: 'completed',data: completed }
     view.setData(animelistData)
 
-    baka = 42
-
 
   #
   # In the @createViewAnimelist, we created 5 tab
@@ -198,7 +214,21 @@ module.exports = class MyAnimelist
 
     matchGridColumns = (v,id) ->
       manga = {}
-      manga.mangaType = ""
+      type = "Unknown"
+      if v.series_type == "1"
+        type = "Normal"
+      if v.series_type == "2"
+        type = "Novel"
+      if v.series_type == "3"
+        type = "Oneshot"
+      if v.series_type == "4"
+        type = "Doujinshi"
+      if v.series_type == "5"
+        type = "Manwha"
+      if v.series_type == "6"
+        type = "Manhua"
+
+      manga.mangaType = type
       seriesChapters = v.series_chapters
 
       if seriesChapters != "0"
@@ -275,13 +305,17 @@ module.exports = class MyAnimelist
       if update.view.name == 'animeList_myanimelist'
         #view.setData(@getAnimelistData())
         @getAnimelistData (result) =>
-          @setAnimelistTabViewData(result.library.myanimelist.anime,update.view)
-          update.defer.resolve()
+          if result.success
+            @setAnimelistTabViewData(result.library.myanimelist.anime,update.view).then => update.defer.resolve()
+          else
+            update.defer.resolve()
 
       if update.view.name == 'mangaList_myanimelist'
         @getMangalistData (result) =>
-          @setMangalistTabViewData(result.library.myanimelist.manga,update.view)
-          update.defer.resolve()
+          if result.success
+            @setMangalistTabViewData(result.library.myanimelist.manga,update.view).then => update.defer.resolve()
+          else
+            update.defer.resolve()
 
 
     # chiika.makeGetRequestAuth urls[1],malUser,null, (error,response,body) =>
@@ -317,7 +351,7 @@ module.exports = class MyAnimelist
 
               _when.all(async).then =>
                 args.return( { success: true })
-              
+
             newUser = { userName: args.user + "_" + @name,owner: @name, password: args.password, realUserName: args.user }
 
             chiika.parser.parseXml(body)

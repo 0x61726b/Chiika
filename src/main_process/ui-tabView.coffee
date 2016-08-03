@@ -15,9 +15,11 @@
 #----------------------------------------------------------------------------
 
 _         = require 'lodash'
+_when     = require 'when'
 UIItem    = require './ui-item'
 
 {InvalidOperationException,InvalidParameterException} = require './exceptions'
+
 
 module.exports = class TabView extends UIItem
   TabGridView:null
@@ -52,8 +54,17 @@ module.exports = class TabView extends UIItem
 
   save: ->
     chiika.logger.info("[red](#{@name}) Saving tab view data...")
+
+    async = []
+
     _.forEach @children, (v,k) =>
-      @db.save { name: v.name, data: v.dataSource }
+      deferSave = _when.defer()
+      async.push deferSave.promise
+      onSaved = ->
+        deferSave.resolve()
+      @db.save { name: v.name, data: v.dataSource }, onSaved
+
+    _when.all(async)
 
   #
   # Set multiple tabs at once

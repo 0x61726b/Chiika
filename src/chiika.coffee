@@ -28,6 +28,7 @@ TabGridView = require './view-tabGrid'
 Content = React.createClass
   componentDidMount: ->
 
+
   render: () ->
     (<div className="main">
       <div id="titleBar">
@@ -42,31 +43,69 @@ RouterContainer = React.createClass
   render: ->
     <div id="appMain"><SideMenu /><Content props={this.props}/></div>
 
-ChiikaRouter = React.createClass
-  route: []
-  getInitialState: ->
-    routes: @getRoutes()
-  getRoutes: ->
-    routes = []
-    chiika.uiData.map (route,i) => routes.push route
-    routes
 
+ChiikaRouter = React.createClass
+  routes: []
+  getInitialState: ->
+    test: false
+    uiData: chiika.uiData
+    routerConfig: [ childRoutes:[] ]
+
+  getRoutes: (uiData) ->
+    routes = []
+    uiData.map (route,i) => routes.push {
+      name: "/#{route.name}"
+      path: "/#{route.name}"
+      component:require(chiika.viewManager.getComponent(route.displayType))
+      view: route
+      test: @state.test
+    }
+
+    routerConfig = {
+        component: RouterContainer,
+        test: @state.test
+        childRoutes: [
+          { name:'Home', path: '/Home', component: Home }
+        ]
+    }
+    for route in routes
+      routerConfig.childRoutes.push route
+    routerConfig
   renderSingleRoute: (route,i) ->
     <Route name={route.name} path={route.name} key={i} component={require(chiika.viewManager.getComponent(route.displayType))} view={route} onEnter={@onEnter}/>
 
+  componentWillMount: ->
+    @setState { routerConfig: @getRoutes(chiika.uiData) }
+
+
+    chiika.ipc.refreshUIData (args) =>
+      routerConfig = @state.routerConfig
+      #routerConfig = @getRoutes(chiika.uiData)
+      _.forEach args, (v,k) =>
+        findChildRoute = _.find(routerConfig.childRoutes, (o) -> o.name == '/' + v.name)
+
+        if findChildRoute?
+          findChildRoute.view = v
+          console.log "Updating #{findChildRoute.name}"
+      @setState { routerConfig: routerConfig }
+
+
+
+
+  componentDidUpdate: ->
+    @state.uiDataChanged = false
+
+  componentDidMount: ->
+    changeTest = =>
+      routeConf = @state.routerConfig
+      routeConf.childRoutes[2].test = true
+      @setState { routerConfig: routeConf }
+
+    #setTimeout(changeTest,3000)
   onEnter:(nextState) ->
     path = nextState.location.pathname
 
   render: () ->
-    (<Router history={BrowserHistory}>
-      <Route component={RouterContainer}>
-        #<Route path="/" component={Home} onEnter={@onEnter}/>
-        <Route name="Home" path="Home" component={Home} onEnter={@onEnter}/>
-        {
-          @state.routes.map (route,i) =>
-            @renderSingleRoute(route,i)
-        }
-      </Route>
-    </Router>)
+    (<Router history={BrowserHistory} routes={@state.routerConfig}/>)
 
 module.exports = ChiikaRouter

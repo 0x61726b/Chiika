@@ -31,6 +31,40 @@ eXcell_typeWithIcon = (cell)->
   @setValue = (val) ->
     if val == 'TV'
       val = 'fa fa-television'
+
+    if val == 'OVA'
+      val = 'glyphicon glyphicon-cd'
+
+    if val == 'Movie'
+      val = 'fa fa-film'
+
+    if val == 'Special'
+      val = 'fa fa-star'
+
+    if val == 'ONA'
+      val = 'fa fa-chrome'
+
+    if val == 'Music'
+      val = 'fa fa-music'
+
+    if val == 'Normal' #Manga
+      val = ''
+
+    if val == 'Novel'
+      val = ''
+
+    if val == 'Oneshot'
+      val = ''
+
+    if val == 'Doujinshi'
+      val = ''
+
+    if val == 'Manwha'
+      val = ''
+
+    if val == 'Manhua'
+      val = ''
+
     @setCValue('<i class="'+val+'"></i>')
   @baka = 42
     #

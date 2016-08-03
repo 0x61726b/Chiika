@@ -35,6 +35,7 @@ module.exports = React.createClass
   componentWillMount: ->
 
   componentWillReceiveProps: (props) ->
+    console.log props.route
     tabCache = chiika.viewManager.getTabSelectedIndexByName(props.route.view.name)
     if @state.view.name != props.route.view.name
       @state.currentTabIndex = tabCache.index
@@ -47,12 +48,14 @@ module.exports = React.createClass
       findInDataSource = _.find(props.route.view.children, (o) -> o.name == name + "_grid")
       dataSourceLengths.push findInDataSource.dataSource.length
 
+    # console.log "Hello -------- "
+    # console.log props.route.view.children[0].dataSource[3]
+
     @setState {
       tabList: props.route.view.TabGridView.tabList,
       gridColumnData: props.route.view.children,
       view: props.route.view,
       tabDataSourceLenghts: dataSourceLengths }
-
   componentDidUpdate: ->
     @updateGrid(@state.tabList[@state.currentTabIndex].name + "_grid")
 
@@ -111,11 +114,11 @@ module.exports = React.createClass
 
     @currentGrid.setInitWidths( columnInitWidths )
     @currentGrid.setColumnIds( columnIdsForDhtml )
-    @currentGrid.setColSorting( columnSorting )
     @currentGrid.enableAutoWidth(true)
     @currentGrid.setHeader(columnTextForDhtml,null,headerAligns)
     @currentGrid.setColTypes( columnIdsForDhtml )
     @currentGrid.setColAlign( columnAligns )
+    @currentGrid.setColSorting( columnSorting )
 
 
     @currentGrid.enableMultiselect(true)
@@ -127,6 +130,7 @@ module.exports = React.createClass
 
     @currentGrid.init()
     @currentGrid.parse gridConf,"js"
+
 
     $(window).resize( =>
       if @currentGrid?

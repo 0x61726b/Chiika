@@ -64,16 +64,14 @@ module.exports = class IpcManager
 
   windowMethodByName: ->
     @receive 'window-method', (event,args) =>
-      console.log args
       win = chiika.windowManager.getWindowByName(args[1])
       win[args[0]]()
-
-
 
   callWindowMethod: ->
     @receive 'call-window-method', (event,method) =>
       win = BrowserWindow.fromWebContents(event.sender)
       win[method]()
+
 
 
   reconstructUI: ->
@@ -87,8 +85,6 @@ module.exports = class IpcManager
           chiika.chiikaApi.emit 'reconstruct-ui',{ defer: defer, calling: script.name }
       _when.all(async).then =>
         #Do something
-
-
 
 
   modalWindowJsEval: ->
@@ -110,8 +106,17 @@ module.exports = class IpcManager
   refreshViewByName: ->
     @receive 'refresh-view-by-name', (event,args) =>
       view = chiika.uiManager.getUIItem(args.viewName)
+
+      deferUpdate = _when.defer()
       if view?
-        chiika.chiikaApi.emit 'view-update',{ calling: args.service,view: view }
+        chiika.chiikaApi.emit 'view-update',{ calling: args.service,view: view,defer: deferUpdate }
+
+        deferUpdate.promise.then () =>
+          uiItems = chiika.uiManager.getUIItems()
+
+          if uiItems.length > 0
+            event.sender.send 'get-ui-data-response',uiItems
+
 
   #
   # We receive a user pass here, redirect it to the user script and let them process it
@@ -145,6 +150,7 @@ module.exports = class IpcManager
 
       if uiItems.length > 0
         uiItems
+
 
   #
   #
