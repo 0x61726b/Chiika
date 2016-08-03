@@ -26,6 +26,7 @@ module.exports = class UISetup
   name: "uiSetup"
   displayDescription: "UI Setup"
   isService: false
+  isActive: true
   # Will be called by Chiika with the API object
   # you can do whatever you want with this object
   # See the documentation for this object's methods,properties etc.
@@ -64,7 +65,7 @@ module.exports = class UISetup
       owner: @name,
      }
     @chiika.ui.addUIItem view,=>
-      @chiika.logger.verbose "Added new view #{view.name}!"
+      @chiika.logger.script("[yellow](#{@name})  Added new view #{view.name}!")
       promise.resolve()
 
 
@@ -79,7 +80,8 @@ module.exports = class UISetup
     # This method will be called if there are no UI elements in the database
     # or the user wants to refresh the views
     # @todo Implement reset
-    #@on 'reconstruct-ui', (promise) =>
-      #@createHome(promise)
+    @on 'reconstruct-ui', (update) =>
+      @chiika.logger.script("[yellow](#{@name}) reconstruct-ui")
+      update.defer.resolve()
 
     @on 'view-update', (view) =>

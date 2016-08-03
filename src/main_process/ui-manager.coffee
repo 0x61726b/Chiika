@@ -37,8 +37,15 @@ module.exports = class UIManager
 
     if chiika.dbManager.uiDb.uiData.length == 0
       chiika.logger.warn("[magenta](UI-Manager) There are no UI items...Calling reconstruct event")
-      chiika.chiikaApi.emit 'reconstruct-ui',defer
-      return defer.promise
+      scripts = chiika.apiManager.getScripts()
+
+      async = []
+      for script in scripts
+        if script.isActive
+          defer = _when.defer()
+          async.push defer.promise
+          chiika.chiikaApi.emit 'reconstruct-ui',{ defer: defer, calling: script.name }
+      return _when.all(async)
     else
       _.forEach(chiika.dbManager.uiDb.uiData, (v,k) => @preloadPromises.push @addUIItem(v,->) )
       return _when.all(@preloadPromises)
@@ -86,7 +93,6 @@ module.exports = class UIManager
     tabView
 
 
-
   #
   # Adds a UI item respective to their type, then creates a DB view for its data source
   #
@@ -102,8 +108,7 @@ module.exports = class UIManager
       chiika.dbManager.uiDb.addUIItem item, (err,count) =>
         defer.resolve()
         callback(err,count)
-        @checkUIData()
-
+        #@checkUIData()
 
 
       chiika.logger.verbose("[magenta](UI-Manager) Added a UI Item #{item.name}")

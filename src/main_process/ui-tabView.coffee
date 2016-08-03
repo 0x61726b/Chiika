@@ -102,12 +102,12 @@ module.exports = class TabView extends UIItem
     if !_.isArray data
       throw new InvalidParameterException("Specified data has to be type of array.")
 
-    _.forEach data, (v,k) =>
-      columnCount = @TabGridView.gridColumnList.length
-      requestedDataColumnCount = Object.keys(v).length
-
-      if columnCount != requestedDataColumnCount - 1 # recordId
-        throw new InvalidOperationException("You can't add more or less columns than specified. #{columnCount} vs #{requestedDataColumnCount - 1}")
+    # _.forEach data, (v,k) =>
+    #   columnCount = @TabGridView.gridColumnList.length
+    #   requestedDataColumnCount = Object.keys(v).length
+    #
+    #   if columnCount != requestedDataColumnCount - 1 # recordId
+    #     throw new InvalidOperationException("You can't add more or less columns than specified. #{columnCount} vs #{requestedDataColumnCount - 1}")
 
 
     findUIItem = _.find @children, { name: tabName }

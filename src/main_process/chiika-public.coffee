@@ -65,10 +65,10 @@ module.exports = class ChiikaPublicApi
       wnd.webContents.send message,args
 
 
-  requestViewUpdate: (viewName,owner) ->
+  requestViewUpdate: (viewName,owner,defer) ->
     view = chiika.uiManager.getUIItem(viewName)
     if view?
-      @emit 'view-update', { calling: owner, view: view }
+      @emit 'view-update', { calling: owner, view: view, defer: defer }
     else
       chiika.logger.error("Can't update a non-existent view.")
 
@@ -89,16 +89,22 @@ module.exports = class ChiikaPublicApi
       wnd.webContents.executeJavaScript(javascript)
 
 
+
   on: (receiver,message,callback) ->
     @emitter.on message, (args) =>
       if _.isUndefined args.calling
+        console.log "#{receiver} - #{message}"
         chiika.logger.error("Emitter has received #{message} but we don't know who to call to #{receiver} != #{args.calling}. Are you sure about this?")
         # Assume, if no caller call everyone
         callback(args)
       if args.calling == receiver
-        callback(args)
-      else
-        chiika.logger.warn("Emitter has received #{message} but #{receiver} is not the same with #{args.calling}")
+        script = chiika.apiManager.getScriptByName(receiver)
+
+        if script?
+          if script.isActive
+            callback(args)
+          else
+            chiika.logger.warn("Skipping #{receiver} - #{message} because #{receiver} is not active.")
 
   emit: (message,args...) ->
     @emitter.emit message,args...

@@ -32,15 +32,12 @@ module.exports = class ViewManager
       return './view-tabGrid'
 
   onTabSelect: (viewName,index,last) ->
-    console.log viewName
     @tabViewTabIndexCounter[viewName] = { index: index }
     if @scrollData[viewName]?
       @scrollData[viewName].scrollData[last] = $(".objbox").scrollTop()
     else
       @scrollData[viewName] = { scrollData: { } }
       @scrollData[viewName].scrollData[last] = $(".objbox").scrollTop()
-
-    console.log @scrollData[viewName]
   onTabViewUnmount: (viewName) ->
     #@scrollData[viewName] = null
 

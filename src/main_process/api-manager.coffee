@@ -66,11 +66,22 @@ module.exports = class APIManager
     logo       = instance.logo
     loginType  = instance.loginType
     isService  = instance.isService
+    isActive = instance.isActive
 
     if isService == null or _.isUndefined isService
       isService = true
+    if !isActive?
+      isActive = true
 
-    localInstance = { name: scriptName, description: scriptDesc, logo: logo, instance: instance, loginType: loginType, isService: isService }
+    localInstance = {
+      name: scriptName,
+      description: scriptDesc,
+      logo: logo,
+      instance: instance,
+      loginType: loginType,
+      isService: isService,
+      isActive: isActive
+    }
 
     if !_.isUndefined @getScriptByName(scriptName)
       #Script with the same name was compiled before, update it

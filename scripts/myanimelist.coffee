@@ -53,6 +53,11 @@ module.exports = class MyAnimelist
   #
   isService: true
 
+  #
+  #
+  #
+  isActive: true
+
   # Will be called by Chiika with the API object
   # you can do whatever you want with this object
   # See the documentation for this object's methods,properties etc.
@@ -145,7 +150,7 @@ module.exports = class MyAnimelist
       anime.animeScoreAverage = "0"
       anime.animeLastUpdated = "0"
       anime.animeSeason = v.series_start
-      anime.id = id
+      anime.id = id + 1
       anime.mal_id = v.series_animedb_id
       anime
 
@@ -204,7 +209,7 @@ module.exports = class MyAnimelist
       manga.mangaScore = v.my_score
       manga.mangaScoreAverage = "0"
       manga.mangaLastUpdated = "0"
-      manga.id = id
+      manga.id = id + 1
       manga.mal_id = v.series_mangadb_id
       manga
 
@@ -248,14 +253,14 @@ module.exports = class MyAnimelist
 
     # This method will be called if there are no UI elements in the database
     # or the user wants to refresh the views
-    @on 'reconstruct-ui', (promise) =>
-      chiika.logger.script("reconstruct-ui #{@name}")
+    @on 'reconstruct-ui', (update) =>
+      chiika.logger.script("[yellow](#{@name}) reconstruct-ui #{@name}")
 
       async = []
-      async.push @createViewAnimelist(promise)
-      async.push @createViewMangalist(promise)
+      async.push @createViewAnimelist()
+      async.push @createViewMangalist()
 
-      _when.all(async).then => promise.resolve()
+      _when.all(async).then => update.defer.resolve()
 
     #console.log chiika.ui.getUIItem('animeList')
 
@@ -265,7 +270,7 @@ module.exports = class MyAnimelist
     # You should update your data here
     # This event will then save the data to the view's local DB to use it locally.
     @on 'view-update', (update) =>
-      chiika.logger.info("[blue](SCRIPT) Updating view for #{update.view.name} - #{@name}")
+      chiika.logger.script("[yellow](#{@name}) Updating view for #{update.view.name} - #{@name}")
 
       if update.view.name == 'animeList_myanimelist'
         #view.setData(@getAnimelistData())
@@ -300,8 +305,19 @@ module.exports = class MyAnimelist
         else
           if response.statusCode == 200 or response.statusCode == 201
             userAdded = =>
-              chiika.requestViewUpdate('animeList_myanimelist',@name)
-              chiika.requestViewUpdate('mangaList_myanimelist',@name)
+              async = []
+
+              deferUpdate1 = _when.defer()
+              deferUpdate2 = _when.defer()
+              async.push deferUpdate1
+              async.push deferUpdate2
+
+              chiika.requestViewUpdate('animeList_myanimelist',@name,deferUpdate1)
+              chiika.requestViewUpdate('mangaList_myanimelist',@name,deferUpdate2)
+
+              _when.all(async).then =>
+                args.return( { success: true })
+              
             newUser = { userName: args.user + "_" + @name,owner: @name, password: args.password, realUserName: args.user }
 
             chiika.parser.parseXml(body)
@@ -315,7 +331,6 @@ module.exports = class MyAnimelist
                            else
                              _.assign @malUser,newUser
                              chiika.users.updateUser @malUser,userAdded
-            args.return( { success: true })
 
             #  if chiika.users.getUser(malUser.userName)?
             #    chiika.users.updateUser malUser

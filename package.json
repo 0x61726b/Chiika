@@ -6,7 +6,7 @@
   "productName": "Chiika",
   "scripts": {
     "start": "gulp serve",
-    "test": "coffeelint src/browser/tools/options.coffee"
+    "test": "./node_modules/.bin/jasmine-node ./spec --verbose --coffee"
   },
   "keywords": [
     "electron",
@@ -97,6 +97,7 @@
     "gulp-useref": "^1.2.0",
     "gulp-watch": "^4.2.4",
     "history": "^1.17.0",
+    "jasmine-node": "^1.14.5",
     "main-bower-files": "^2.8.0",
     "react-fontawesome": "^0.3.3"
   }

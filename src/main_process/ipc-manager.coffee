@@ -79,9 +79,14 @@ module.exports = class IpcManager
   reconstructUI: ->
     @receive 'reconstruct-ui', (event,args) =>
       #
-      defer = _when.defer()
-      chiika.chiikaApi.emit 'reconstruct-ui',defer
-
+      async = []
+      for script in chiika.apiManager.getScripts()
+        if script.isActive
+          defer = _when.defer()
+          async.push defer.promise
+          chiika.chiikaApi.emit 'reconstruct-ui',{ defer: defer, calling: script.name }
+      _when.all(async).then =>
+        #Do something
 
 
 
@@ -158,7 +163,7 @@ module.exports = class IpcManager
 
       services = []
       for script in scripts
-        if script.isService
+        if script.isService && script.isActive
           services.push script
 
       if services.length > 0

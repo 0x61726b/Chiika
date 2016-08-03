@@ -23,6 +23,7 @@ _                                       = require 'lodash'
 module.exports = React.createClass
   getInitialState: ->
     tabList: []
+    tabDataSourceLenghts: []
     gridColumnList: []
     gridColumnData: []
     currentTabIndex: 0
@@ -38,7 +39,19 @@ module.exports = React.createClass
     if @state.view.name != props.route.view.name
       @state.currentTabIndex = tabCache.index
 
-    @setState { tabList: props.route.view.TabGridView.tabList, gridColumnList: props.route.view.TabGridView.gridColumnList, gridColumnData: props.route.view.children, view: props.route.view }
+    dataSourceLengths = []
+
+    _.forEach props.route.view.TabGridView.tabList, (v,k) ->
+      name =  v.name
+
+      findInDataSource = _.find(props.route.view.children, (o) -> o.name == name + "_grid")
+      dataSourceLengths.push findInDataSource.dataSource.length
+
+    @setState {
+      tabList: props.route.view.TabGridView.tabList,
+      gridColumnData: props.route.view.children,
+      view: props.route.view,
+      tabDataSourceLenghts: dataSourceLengths }
 
   componentDidUpdate: ->
     @updateGrid(@state.tabList[@state.currentTabIndex].name + "_grid")
@@ -68,14 +81,14 @@ module.exports = React.createClass
     totalArea = $(".objbox").width()
     fixedColumnsTotal = 0
 
-    _.forEach @state.gridColumnList, (v,k) =>
+    _.forEach @state.view.TabGridView.gridColumnList, (v,k) =>
       if v.width? && !v.hidden
         fixedColumnsTotal += parseInt(v.width)
 
     diff = totalArea - fixedColumnsTotal
 
 
-    _.forEach @state.gridColumnList, (v,k) =>
+    _.forEach @state.view.TabGridView.gridColumnList, (v,k) =>
       if !v.hidden
         columnIdsForDhtml += v.name + ","
         columnTextForDhtml += v.display + ","
@@ -120,7 +133,7 @@ module.exports = React.createClass
         totalArea = $(".objbox").width()
         fixedColumnsTotal = 0
 
-        _.forEach @state.gridColumnList, (v,k) =>
+        _.forEach @state.view.TabGridView.gridColumnList, (v,k) =>
           if v.width? && !v.hidden
             fixedColumnsTotal += parseInt(v.width)
 
@@ -135,7 +148,6 @@ module.exports = React.createClass
             else
               width = v.width
             @currentGrid.setColWidth(i,width)
-            console.log "Setting col #{i} width #{width}"
             )
 
   componentWillUnmount: ->
@@ -148,7 +160,7 @@ module.exports = React.createClass
     <Tabs selectedIndex={@state.currentTabIndex} onSelect={@onSelect}>
         <TabList>
           {@state.tabList.map((tab, i) =>
-                <Tab key={i}>{tab.display} <span className="label raised theme-accent">0</span></Tab>
+                <Tab key={i}>{tab.display} <span className="label raised theme-accent">{@state.tabDataSourceLenghts[i]}</span></Tab>
                 )}
         </TabList>
         {

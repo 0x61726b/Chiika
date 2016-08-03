@@ -50,6 +50,7 @@ module.exports = class ChiikaIPC
       defer.resolve()
       console.log args
 
+
   getUsers: ->
     @preloadPromises.push @sendReceiveIPC 'get-user-data',{}, (event,defer,args) =>
       defer.resolve()
@@ -59,6 +60,11 @@ module.exports = class ChiikaIPC
   refreshViewByName: (name) ->
     @sendReceiveIPC 'refresh-view-by-name',name, (event,args,defer) =>
       console.log "refresh-view-by-name hello"
+
+
+  openLoginWindow: ->
+    @sendMessage 'window-method','show','login'
+
 
 
   reconstructUI: () ->

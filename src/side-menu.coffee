@@ -44,6 +44,12 @@ SideMenu = React.createClass
       @refreshSideMenu(chiika.uiData)
       requiresRefresh = false
 
+  componentDidUpdate: ->
+    $(".side-menu-link").click ->
+      if !this.classList.contains "active"
+        $(".side-menu-link").removeClass "active"
+        $(this).toggleClass "active"
+
 
 
   refreshSideMenu: (menuItems) ->
@@ -60,6 +66,10 @@ SideMenu = React.createClass
 
       _.forEach menuItems, (v,k) =>
         #Add category
+
+        if v.displayType == 'TabGridView' && v.children.length == 0
+          return
+
 
         if _.indexOf(@pendingCategories, _.find(@pendingCategories, (o) -> return o == v.category )) == -1
           @pendingCategories.push v.category

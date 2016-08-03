@@ -26,6 +26,8 @@ urls = [
 ]
 
 _ = require process.cwd() + '/node_modules/lodash'
+_when   = require process.cwd() + '/node_modules/when'
+string  = require process.cwd() + '/node_modules/string'
 
 
 module.exports = class Hummingbird
@@ -47,6 +49,10 @@ module.exports = class Hummingbird
   #
   hummingbirdUser: null
 
+  isService: true
+
+  isActive: true
+
   # Will be called by Chiika with the API object
   # you can do whatever you want with this object
   # See the documentation for this object's methods,properties etc.
@@ -58,22 +64,6 @@ module.exports = class Hummingbird
   #
   on: (event,args...) ->
     @chiika.on @name,event,args...
-
-
-  #
-  #
-  #
-  dummyAnimelistData: ->
-    sampleData = [{ id:0 , animeType: 'TV', animeProgress: 50, animeTitle: 'Test', animeScore: 5, animeSeason: '2016-05-05'}]
-
-    animelistData = []
-    animelistData.push { name: 'watching',data: sampleData }
-    animelistData.push { name: 'ptw',data: sampleData }
-    animelistData.push { name: 'dropped',data: sampleData }
-    animelistData.push { name: 'onhold',data: sampleData }
-    animelistData.push { name: 'completed',data: sampleData }
-
-    animelistData
 
 
   # Hummingbird https://github.com/hummingbird-me/hummingbird/wiki/API-v1-Methods#user--get-information
@@ -102,10 +92,10 @@ module.exports = class Hummingbird
       if response.statusCode == 200 or response.statusCode == 201
         library = JSON.parse(body)
 
-        callback { response: response, library: library }
+        callback { success: true,response: response, library: library }
       else
         @chiika.logger.warn("There was a problem retrieving library.")
-        callback { response: response }
+        callback { success: false,response: response }
 
     @chiika.makeGetRequest baseUrl + userName + "/library",null, onGetUserLibrary
 
@@ -115,6 +105,7 @@ module.exports = class Hummingbird
   getAnimelistData: (callback) ->
     if _.isUndefined @hummingbirdUser
       @chiika.logger.error("User can't be retrieved.")
+      callback( {success: false })
     else
       @retrieveLibrary @hummingbirdUser.userName, (result) =>
         if result.response.statusCode == 200 or result.response.statusCode == 201
@@ -140,10 +131,24 @@ module.exports = class Hummingbird
 
     matchGridColumns = (v,id) ->
       anime = {}
+      episodes_watched = v.episodes_watched
+      episode_count = v.anime.episode_count
+
+      if parseInt(episode_count) == 0
+        anime.animeProgress = 0
+      else
+        anime.animeProgress = (parseInt(episodes_watched) / parseInt(episode_count)) * 100
       anime.animeType = v.anime.show_type
-      anime.animeProgress = 50
+
+      anime.animeCommunityRating = v.anime.community_rating
+      anime.animeAgeRating = v.anime.age_rating
+      anime.animeAlternateTitle = v.anime.alternate_title
+      anime.animeEpisodeLength = v.anime.episode_length
+      anime.animeGenres = v.anime.genres
       anime.animeTitle = v.anime.title
       anime.animeScore = 0
+      anime.animeLastUpdated = v.updated_at
+      anime.animeLastWatched = v.last_watched
       if v.rating.type == "simple"
         if v.rating.value == "negative"
           anime.animeScore = 2.4
@@ -154,9 +159,11 @@ module.exports = class Hummingbird
         if v.rating.value == null
           anime.animeScore = 0
       else
-        anime.animeScore = v.rating.value
+        anime.animeScore = parseInt(v.rating.value)
+
+
       anime.animeSeason = v.anime.started_airing
-      anime.id = id
+      anime.id = id + 1
       anime
 
     _.forEach animeList, (v,k) =>
@@ -176,9 +183,9 @@ module.exports = class Hummingbird
     animelistData = []
     animelistData.push { name: 'watching',data: watching }
     animelistData.push { name: 'ptw',data: ptw }
-    animelistData.push { name: 'dropped',data: completed }
+    animelistData.push { name: 'dropped',data: dropped }
     animelistData.push { name: 'onhold',data: onhold }
-    animelistData.push { name: 'completed',data: dropped }
+    animelistData.push { name: 'completed',data: completed }
     view.setData(animelistData)
 
   # After the constructor run() method will be called immediately after.
@@ -198,23 +205,27 @@ module.exports = class Hummingbird
 
     # This method will be called if there are no UI elements in the database
     # or the user wants to refresh the views
-    # @on 'reconstruct-ui', (promise) =>
-    #   @createViewAnimelist(promise)
+    @on 'reconstruct-ui', (update) =>
+      chiika.logger.script("reconstruct-ui #{@name}")
 
-    #console.log chiika.ui.getUIItem('animeList')
+      async = []
+      async.push @createViewAnimelist()
+
+      _when.all(async).then => update.defer.resolve()
 
     # This event is called each time the associated view needs to be updated then saved to DB
     # Note that its the actual data refreshing. Meaning for example, you need to SYNC your data to the remote one, this event occurs
     # This event won't be called each application launch unless "RefreshUponLaunch" option is ticked
     # You should update your data here
     # This event will then save the data to the view's local DB to use it locally.
-    @on 'view-update', (view) =>
-      chiika.logger.info("Updating view for #{view.name} - #{@name}")
+    @on 'view-update', (update) =>
+      chiika.logger.script("Updating view for #{update.view.name} - #{@name}")
 
-      if view.name == 'animeList_hummingbird'
-        #view.setData(@getAnimelistData())
+      if update.view.name == 'animeList_hummingbird'
         @getAnimelistData (result) =>
-          @setAnimelistTabViewData(result.library,view)
+          if result.success
+            @setAnimelistTabViewData(result.library,update.view)
+          update.defer.resolve({ success: result.success })
 
 
     # chiika.makeGetRequestAuth urls[1],malUser,null, (error,response,body) =>
@@ -253,15 +264,20 @@ module.exports = class Hummingbird
 
                 @hummingbirdUser = chiika.users.getUser(args.user)
 
+                deferUpdate = _when.defer()
+
                 userAdded = =>
-                  chiika.requestViewUpdate('animeList_hummingbird',@name)
+                  chiika.requestViewUpdate('animeList_hummingbird',@name,deferUpdate)
 
                 if _.isUndefined @hummingbirdUser
                   @hummingbirdUser = newUser
                   chiika.users.addUser @hummingbirdUser,userAdded
                 else
                   chiika.users.updateUser @hummingbirdUser,userAdded
-            args.return( { success: true })
+
+                deferUpdate.promise.then =>
+                  args.return( { success: true })
+
 
             #  if chiika.users.getUser(malUser.userName)?
             #    chiika.users.updateUser malUser
@@ -273,3 +289,39 @@ module.exports = class Hummingbird
             args.return( { success: false, response: response })
 
       chiika.makePostRequestAuth( urls[0], { userName: args.user, password: args.pass },null, onAuthComplete )
+
+
+  createViewAnimelist: () ->
+    defer = _when.defer()
+
+    view = {
+      name: 'animeList_hummingbird',
+      displayName: 'Anime List',
+      displayType: 'TabGridView',
+      owner: @name, #Script name, the updates for this view will always be called at 'owner'
+      category: 'Hummingbird',
+      TabGridView: {
+        tabList: [
+          { name:'watching', display: 'Watching' },
+          { name:'completed', display: 'Completed'},
+          { name:'onhold', display: 'On Hold'},
+          { name:'dropped', display: 'Dropped'},
+          { name:'ptw', display: 'Plan to Watch'}
+          ],
+        gridColumnList: [
+          { name: 'animeType',display: 'Type', sort: 'na', width:'40',align: 'center',headerAlign: 'center' },
+          { name: 'animeTitle',display: 'Title', sort: 'str', widthP:'60', align: 'left', headerAlign: 'left' },
+          { name: 'animeProgress',display: 'Progress', sort: 'int', widthP:'40', align: 'center',headerAlign: 'center' },
+          { name: 'animeScore',display: 'Score', sort: 'int', width:'100',align: 'center',headerAlign: 'center' },
+          { name: 'animeScoreAverage',display: 'Avg Score', sort: 'str', width:'100', align: 'center',hidden:true,headerAlign: 'center' },
+          { name: 'animeSeason',display: 'Season', sort: 'str', width:'100', align: 'center',headerAlign: 'center'},
+          { name: 'animeLastUpdated',display: 'Season', sort: 'str', width:'100', align: 'center',hidden:true,headerAlign: 'center' },
+          { name: 'animeId',hidden: true }
+        ]
+      }
+     }
+    @chiika.ui.addUIItem view,=>
+      @chiika.logger.verbose "Added new view #{view.name}!"
+      defer.resolve()
+
+    defer.promise
