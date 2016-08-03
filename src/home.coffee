@@ -21,7 +21,7 @@ _                                   = require 'lodash'
 
 module.exports = React.createClass
   componentDidMount: ->
-    console.log "Hello"
+    
   componentWillUnmount: ->
 
   render: ->

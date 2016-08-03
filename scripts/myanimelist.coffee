@@ -338,15 +338,21 @@ module.exports = class MyAnimelist
       owner: @name, #Script name, the updates for this view will always be called at 'owner'
       category: 'MyAnimelist',
       TabGridView: {
-        tabList: [ 'watching','ptw','dropped','onhold','completed'],
+        tabList: [
+          { name:'watching', display: 'Watching' },
+          { name:'completed', display: 'Completed'},
+          { name:'onhold', display: 'On Hold'},
+          { name:'dropped', display: 'Dropped'},
+          { name:'ptw', display: 'Plan to Watch'}
+          ],
         gridColumnList: [
-          { name: 'animeType',display: 'Type', sort: 'na', width:'40',align: 'center' },
-          { name: 'animeTitle',display: 'Title', sort: 'str', widthP:'60', align: 'left' },
-          { name: 'animeProgress',display: 'Progress', sort: 'int', widthP:'40', align: 'center' },
-          { name: 'animeScore',display: 'Score', sort: 'int', width:'100',align: 'center' },
-          { name: 'animeScoreAverage',display: 'Avg Score', sort: 'str', width:'100', align: 'center',hidden:true },
-          { name: 'animeSeason',display: 'Season', sort: 'str', width:'100', align: 'center'},
-          { name: 'animeLastUpdated',display: 'Season', sort: 'str', width:'100', align: 'center',hidden:true },
+          { name: 'animeType',display: 'Type', sort: 'na', width:'40',align: 'center',headerAlign: 'center' },
+          { name: 'animeTitle',display: 'Title', sort: 'str', widthP:'60', align: 'left', headerAlign: 'left' },
+          { name: 'animeProgress',display: 'Progress', sort: 'int', widthP:'40', align: 'center',headerAlign: 'center' },
+          { name: 'animeScore',display: 'Score', sort: 'int', width:'100',align: 'center',headerAlign: 'center' },
+          { name: 'animeScoreAverage',display: 'Avg Score', sort: 'str', width:'100', align: 'center',hidden:true,headerAlign: 'center' },
+          { name: 'animeSeason',display: 'Season', sort: 'str', width:'100', align: 'center',headerAlign: 'center'},
+          { name: 'animeLastUpdated',display: 'Season', sort: 'str', width:'100', align: 'center',hidden:true,headerAlign: 'center' },
           { name: 'animeId',hidden: true }
         ]
       }
@@ -368,14 +374,20 @@ module.exports = class MyAnimelist
       owner: @name, #Script name, the updates for this view will always be called at 'owner'
       category: 'MyAnimelist',
       TabGridView: { #Must be the same name with displayType
-        tabList: [ 'reading','ptr','dropped','onhold','completed'],
+        tabList: [
+          { name:'reading', display: 'Reading' },
+          { name:'completed', display: 'Completed'},
+          { name:'onhold', display: 'On Hold'},
+          { name:'dropped', display: 'Dropped'},
+          { name:'ptr', display: 'Plan to Read'}
+          ],
         gridColumnList: [
-          { name: 'mangaType',display: 'Type', sort: 'na', width:'40', align:'center' },
-          { name: 'mangaTitle',display: 'Title', sort: 'str', widthP:'60', align: 'left' },
-          { name: 'mangaProgress',display: 'Progress', sort: 'int', widthP:'40', align: 'center' },
-          { name: 'mangaScore',display: 'Score', sort: 'int', width:'100', align: 'center' },
-          { name: 'mangaScoreAverage',display: 'Avg Score', sort: 'str', width:'100', align: 'center',hidden:true },
-          { name: 'mangaLastUpdated',display: 'Season', sort: 'str', width:'100', align: 'center',hidden:true },
+          { name: 'mangaType',display: 'Type', sort: 'na', width:'40', align:'center',headerAlign: 'center' },
+          { name: 'mangaTitle',display: 'Title', sort: 'str', widthP:'60', align: 'left',headerAlign: 'left' },
+          { name: 'mangaProgress',display: 'Progress', sort: 'int', widthP:'40', align: 'center',headerAlign: 'center' },
+          { name: 'mangaScore',display: 'Score', sort: 'int', width:'100', align: 'center',headerAlign: 'center' },
+          { name: 'mangaScoreAverage',display: 'Avg Score', sort: 'str', width:'100', align: 'center',hidden:true,headerAlign: 'center' },
+          { name: 'mangaLastUpdated',display: 'Season', sort: 'str', width:'100', align: 'center',hidden:true,headerAlign: 'center' },
           { name: 'mangaId',hidden: true }
         ]
       }

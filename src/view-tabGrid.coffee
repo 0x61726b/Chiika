@@ -26,18 +26,31 @@ module.exports = React.createClass
     gridColumnList: []
     gridColumnData: []
     currentTabIndex: 0
+    scrollData: []
+    view: {name: ''}
 
   currentGrid: null
+  scrollPending: false
   componentWillMount: ->
 
   componentWillReceiveProps: (props) ->
-    @setState { tabList: props.route.dataSource.tabList, gridColumnList: props.route.dataSource.gridColumnList, gridColumnData: props.route.gridColumnData }
+    tabCache = chiika.viewManager.getTabSelectedIndexByName(props.route.view.name)
+    if @state.view.name != props.route.view.name
+      @state.currentTabIndex = tabCache.index
+
+    @setState { tabList: props.route.view.TabGridView.tabList, gridColumnList: props.route.view.TabGridView.gridColumnList, gridColumnData: props.route.view.children, view: props.route.view }
 
   componentDidUpdate: ->
-    @updateGrid(@state.tabList[@state.currentTabIndex] + "_grid")
+    @updateGrid(@state.tabList[@state.currentTabIndex].name + "_grid")
+
+    scroll = chiika.viewManager.getTabScrollAmount(@state.view.name,@state.currentTabIndex)
+    $(".objbox").scrollTop(scroll)
+
 
   onSelect: (index,last) ->
     @setState { currentTabIndex: index }
+    chiika.viewManager.onTabSelect(@state.view.name,index,last)
+
 
   updateGrid: (name) ->
     if @currentGrid?
@@ -50,6 +63,7 @@ module.exports = React.createClass
     columnInitWidths = ""
     columnAligns = ""
     columnSorting = ""
+    headerAligns = []
 
     totalArea = $(".objbox").width()
     fixedColumnsTotal = 0
@@ -67,6 +81,7 @@ module.exports = React.createClass
         columnTextForDhtml += v.display + ","
         columnSorting += v.sort + ","
         columnAligns += v.align + ","
+        headerAligns.push "text-align: #{v.headerAlign};"
 
         if v.widthP?
           calculatedWidth = diff * (v.widthP / 100)
@@ -85,7 +100,7 @@ module.exports = React.createClass
     @currentGrid.setColumnIds( columnIdsForDhtml )
     @currentGrid.setColSorting( columnSorting )
     @currentGrid.enableAutoWidth(true)
-    @currentGrid.setHeader(columnTextForDhtml,null,["text-align:center;","text-align:left;","text-align:center;","text-align:center;","text-align:center;"]) #To-do move this to owner script
+    @currentGrid.setHeader(columnTextForDhtml,null,headerAligns)
     @currentGrid.setColTypes( columnIdsForDhtml )
     @currentGrid.setColAlign( columnAligns )
 
@@ -101,29 +116,31 @@ module.exports = React.createClass
     @currentGrid.parse gridConf,"js"
 
     $(window).resize( =>
-      console.log "resize"
-      totalArea = $(".objbox").width()
-      fixedColumnsTotal = 0
+      if @currentGrid?
+        totalArea = $(".objbox").width()
+        fixedColumnsTotal = 0
 
-      _.forEach @state.gridColumnList, (v,k) =>
-        if v.width? && !v.hidden
-          fixedColumnsTotal += parseInt(v.width)
+        _.forEach @state.gridColumnList, (v,k) =>
+          if v.width? && !v.hidden
+            fixedColumnsTotal += parseInt(v.width)
 
-      diff = totalArea - fixedColumnsTotal
+        diff = totalArea - fixedColumnsTotal
 
-      for i in [0...@state.gridColumnList.length]
-        v = @state.gridColumnList[i]
-        if !v.hidden
-          width = 0
-          if v.widthP?
-            width = diff * (v.widthP / 100)
-          else
-            width = v.width
-          @currentGrid.setColWidth(i,width)
-          console.log "Setting col #{i} width #{width}"
-          )
+        for i in [0...@state.gridColumnList.length]
+          v = @state.gridColumnList[i]
+          if !v.hidden
+            width = 0
+            if v.widthP?
+              width = diff * (v.widthP / 100)
+            else
+              width = v.width
+            @currentGrid.setColWidth(i,width)
+            console.log "Setting col #{i} width #{width}"
+            )
 
   componentWillUnmount: ->
+    #chiika.viewManager.onTabSelect(@props.route.view.name,@state.currentTabIndex)
+    chiika.viewManager.onTabViewUnmount(@state.view.name)
     if @currentGrid?
       @currentGrid.clearAll()
       @currentGrid = null
@@ -131,13 +148,13 @@ module.exports = React.createClass
     <Tabs selectedIndex={@state.currentTabIndex} onSelect={@onSelect}>
         <TabList>
           {@state.tabList.map((tab, i) =>
-                <Tab key={i}>{tab} <span className="label raised theme-accent">0</span></Tab>
+                <Tab key={i}>{tab.display} <span className="label raised theme-accent">0</span></Tab>
                 )}
         </TabList>
         {
           @state.tabList.map (tab,i) =>
             <TabPanel key={i}>
-              <div id="#{tab}_grid" className="listCommon"></div>
+              <div id="#{tab.name}_grid" className="listCommon"></div>
             </TabPanel>
         }
       </Tabs>

@@ -25,6 +25,7 @@ _when                 = require 'when'
 Logger                = require './main_process/Logger'
 
 ChiikaIPC             = require './chiika-ipc'
+ViewManager           = require './view-manager'
 
 class ChiikaEnvironment
   emitter: null
@@ -43,6 +44,7 @@ class ChiikaEnvironment
     @logger           = remote.getGlobal('logger')
 
     @ipc              = new ChiikaIPC()
+    @viewManager      = new ViewManager()
 
 
 

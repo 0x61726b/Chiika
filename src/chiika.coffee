@@ -51,12 +51,8 @@ ChiikaRouter = React.createClass
     chiika.uiData.map (route,i) => routes.push route
     routes
 
-  getComponent: (name) ->
-    if name == 'TabGridView'
-      return './view-tabGrid'
-
   renderSingleRoute: (route,i) ->
-    <Route name={route.name} path={route.name} component={require(@getComponent(route.displayType))} gridColumnData={route.children} key={i} dataSource={route[route.displayType]} onEnter={@onEnter}/>
+    <Route name={route.name} path={route.name} key={i} component={require(chiika.viewManager.getComponent(route.displayType))} view={route} onEnter={@onEnter}/>
 
   onEnter:(nextState) ->
     path = nextState.location.pathname

@@ -21,7 +21,6 @@
 {BrowserWindow, ipcMain,globalShortcut,Tray,Menu,app} = require 'electron'
 
 
-
 yargs                             = require 'yargs'
 path                              = require 'path'
 
