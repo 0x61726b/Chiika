@@ -8,7 +8,7 @@
 
 #Running
 
-Use NPM to build and run Chiika.You will be greeted with login screen,there you can login with your MyAnimeList account.Your user info and lists will be retrieved upon login. Media detection only works on Windows *for now*.
+Use NPM to build and run Chiika.You will be greeted with login screen,there you can login with your account.Your user info and lists will be retrieved upon login. Media detection only works on Windows *for now*.
 
 ```
 npm install -g gulp bower
@@ -22,6 +22,7 @@ gulp serve
 
 - Scripting support for users to extend functionality
 - MyAnimelist,Hummingbird and Anilist support out of the box (you can always add more library providers with scripting)
+- You can use multiple accounts at once, meaning it is possible to use both MAL and Hummingbird at the same time.
 - Very easy to use public API for scripters
 - User Interface is exposed to public API so you can customize the app to your will
 - Anime video files/media player recognition *Only available for Win32 for now*
