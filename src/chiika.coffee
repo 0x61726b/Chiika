@@ -41,11 +41,12 @@ Content = React.createClass
 
 RouterContainer = React.createClass
   render: ->
-    <div id="appMain"><SideMenu /><Content props={this.props}/></div>
+    <div id="appMain"><SideMenu props={this.props} /><Content props={this.props}/></div>
 
 
 ChiikaRouter = React.createClass
   routes: []
+  currentRouteName: null
   getInitialState: ->
     test: false
     uiData: chiika.uiData
@@ -58,20 +59,18 @@ ChiikaRouter = React.createClass
       path: "/#{route.name}"
       component:require(chiika.viewManager.getComponent(route.displayType))
       view: route
+      onEnter: @onEnter
     }
 
     routerConfig = {
         component: RouterContainer,
         childRoutes: [
-          { name:'Home', path: '/Home', component: Home }
+          { name:'Home', path: '/Home', component: Home, onEnter: @onEnter }
         ]
     }
     for route in routes
       routerConfig.childRoutes.push route
     routerConfig
-  renderSingleRoute: (route,i) ->
-    <Route name={route.name} path={route.name} key={i} component={require(chiika.viewManager.getComponent(route.displayType))} view={route} onEnter={@onEnter}/>
-
   componentDidMount: ->
     @setState { routerConfig: @getRoutes(chiika.uiData) }
 
@@ -86,21 +85,24 @@ ChiikaRouter = React.createClass
           findChildRoute.view = v
       @setState { routerConfig: routerConfig }
 
+    routerConfig = @state.routerConfig
+    _.forEach @state.uiData, (v,k) =>
+      findChildRoute = _.find(routerConfig.childRoutes, (o) -> o.name == @currentRouteName)
+
+      if findChildRoute?
+        findChildRoute.view = v
+    @setState { routerConfig: routerConfig }
 
 
 
   componentDidUpdate: ->
     @state.uiDataChanged = false
 
-  componentDidMount: ->
-    changeTest = =>
-      routeConf = @state.routerConfig
-      routeConf.childRoutes[2].test = true
-      @setState { routerConfig: routeConf }
-
-    #setTimeout(changeTest,3000)
   onEnter:(nextState) ->
-    path = nextState.location.pathname
+    path = nextState.routes[1].name
+    routerConfig = @state.routerConfig
+
+    @currentRouteName = nextState.location.pathname
 
   render: () ->
     (<Router history={BrowserHistory} routes={@state.routerConfig}/>)

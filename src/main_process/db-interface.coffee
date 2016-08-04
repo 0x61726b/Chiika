@@ -80,6 +80,7 @@ module.exports = class IDb
       onOne = (err,doc) ->
         if err
           throw err
+          chiika.logger.error err
         chiika.logger.debug("Idb::onOne")
         resolve(doc)
         #callback doc
@@ -136,9 +137,6 @@ module.exports = class IDb
       @checkIfKeyValueExists(record,onKeyExistsCheck)
 
 
-
-
-
   #
   # Updates record/records
   # @param {Object} record Record Object
@@ -155,27 +153,22 @@ module.exports = class IDb
       keys = Object.keys(doc)
       keysRecord = Object.keys(record)
       key = Object.keys(doc)[0]
+
       if key == Object.keys(record)[0] && record[key] == doc[key]
-        #doc[keys[1]] = record[keysRecord[1]]
-        doc = {}
         _.forOwn record,(v,k) =>
           doc[k] = v
-        chiika.logger.verbose("[magenta](#{@name}) - Updated record with #{key}:#{doc[key]}")
         affectedRows++
       doc
 
 
     updateCallback = (err,count) =>
       if err
+        chiika.logger.error err
         throw err
-      console.log "UPDATED #{count}"
-      if _.isArray record
-        keyExistsCallback = (result) ->
-          if !result.exists
-            chiika.logger.warn("[magenta](#{@name}) - You are trying to update a key <#{result.key}> that's not in the database.")
-        record.map( (key,i) => @checkIfKeyValueExists(key,keyExistsCallback) )
 
-      callback { rows: affectedRows }
+      if count > 0
+        chiika.logger.verbose("[magenta](#{@name}) - Updated - #{count} ")
+      callback { rows: count }
 
     @nosql.update(updateFnc, updateCallback,'IDb::updateRecord')
 

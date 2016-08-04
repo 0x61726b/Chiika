@@ -45,10 +45,10 @@ SideMenu = React.createClass
       requiresRefresh = false
 
   componentDidUpdate: ->
-    $(".side-menu-link").click ->
-      if !this.classList.contains "active"
-        $(".side-menu-link").removeClass "active"
-        $(this).toggleClass "active"
+    # $(".side-menu-link").click ->
+    #   if !this.classList.contains "active"
+    #     $(".side-menu-link").removeClass "active"
+    #     $(this).toggleClass "active"
 
 
 
@@ -84,8 +84,12 @@ SideMenu = React.createClass
   renderCategory: (name,i) ->
     <p className="list-title" key={i}>{name}</p>
 
+  isMenuItemActive: (path) ->
+    currentPath = @props.props.location.pathname
+    if "/" + path == currentPath
+      'active'
   renderMenuItem: (item,i) ->
-    <Link className="side-menu-link" to="#{item.name}" key={i}><li className="side-menu-li" key={i}>{item.displayName}</li></Link>
+    <Link className="side-menu-link #{@isMenuItemActive(item.name)}" to="#{item.name}" key={i}><li className="side-menu-li" key={i}>{item.displayName}</li></Link>
 
   renderMenuItems: (category) ->
     menuItemsOfThisCategory = _.filter(@state.uiItems, (o) ->
@@ -111,7 +115,7 @@ SideMenu = React.createClass
       </div>
       <div className="navigation">
         <ul>
-          <Link className="side-menu-link active" to="Home"><li className="side-menu-li">Home</li></Link>
+          <Link className="side-menu-link #{@isMenuItemActive('Home')}" to="Home"><li className="side-menu-li">Home</li></Link>
           {
             @state.categories.map (category,i) =>
               <div key={i}>

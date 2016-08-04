@@ -35,7 +35,7 @@ module.exports = class UIManager
     chiika.logger.verbose("[magenta](UI-Manager) Preloading UI items..")
     defer = _when.defer()
 
-    if chiika.dbManager.uiDb.uiData.length == 0
+    if chiika.dbManager.uiDb.getUIItems().length == 0
       chiika.logger.warn("[magenta](UI-Manager) There are no UI items...Calling reconstruct event")
       scripts = chiika.apiManager.getScripts()
 
@@ -47,7 +47,7 @@ module.exports = class UIManager
           chiika.chiikaApi.emit 'reconstruct-ui',{ defer: defer, calling: script.name }
       return _when.all(async)
     else
-      _.forEach(chiika.dbManager.uiDb.uiData, (v,k) => @preloadPromises.push @addUIItem(v,->) )
+      _.forEach(chiika.dbManager.uiDb.getUIItems(), (v,k) => @preloadPromises.push @addOrUpdate(v,null,false) )
       return _when.all(@preloadPromises)
 
 
@@ -98,28 +98,33 @@ module.exports = class UIManager
   # Adds a UI item respective to their type, then creates a DB view for its data source
   #
   # @return {Object} promise Returns a promise
-  addUIItem: (item,callback) ->
-    defer = _when.defer()
-    if item.displayType == 'TabGridView'
-      #Check if view exists
-      findView = _.find @uiItems, (o) -> o.name == item.name
+  addOrUpdate: (item,callback,insert) ->
+    if !insert?
+      insert = true
 
+    #Check if view exists
+    defer = _when.defer()
+    findView = _.find @uiItems, (o) -> o.name == item.name
+    index = _.indexOf @uiItems,findView
+
+
+    if item.displayType == 'TabGridView'
       if findView?
-        tabView = findView
-        @preloadPromises.push tabView.db.promise
+        _.assign findView,item
+        @uiItems.splice(index,1,findView)
       else
         tabView = @addTabView(item)
         @uiItems.push tabView
         @preloadPromises.push tabView.db.promise
 
-      defer.resolve()
-      chiika.dbManager.uiDb.addUIItem item, (err,count) =>
+      if insert
+        chiika.dbManager.uiDb.addOrUpdate item, (error) =>
+          if error
+            chiika.logger.error error
+          defer.resolve()
+          callback?(error)
+      else
         defer.resolve()
-        callback(err,count)
-        #@checkUIData()
-
-
-      chiika.logger.verbose("[magenta](UI-Manager) Added a UI Item #{item.name}")
     defer.promise
 
   #
@@ -132,7 +137,7 @@ module.exports = class UIManager
     if instance?
       instance
     else
-      chiika.logger.error("Request UI item not found #{itemName}")
+      chiika.logger.error("getUIItem UI item not found #{itemName}")
       return null
 
   #
@@ -151,5 +156,5 @@ module.exports = class UIManager
     index = _.indexOf uiItems,match
 
     if match?
-      uiItems.splice(index,1,match)
+      @uiItems.splice(index,1,match)
       chiika.logger.verbose("[magenta](UI-Manager) Removed a UI Item #{item.name}")

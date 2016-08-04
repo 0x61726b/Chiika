@@ -51,7 +51,7 @@ module.exports = class UISetup
       displayType: 'tabView',
       owner: @name,
      }
-    @chiika.ui.addUIItem view,=>
+    @chiika.ui.addOrUpdate view,=>
       @chiika.logger.verbose "Added new view #{view.name}!"
       promise.resolve()
 

@@ -122,6 +122,8 @@ module.exports = class MyAnimelist
            callback(result)
 
 
+
+
   #
   # In the @createViewAnimelist, we created 5 tab
   # Here we supply the data of the tabs
@@ -257,7 +259,6 @@ module.exports = class MyAnimelist
 
 
 
-
     mangalistData = []
     mangalistData.push { name: 'reading',data: reading }
     mangalistData.push { name: 'ptr',data: ptr }
@@ -292,8 +293,6 @@ module.exports = class MyAnimelist
 
       _when.all(async).then => update.defer.resolve()
 
-    #console.log chiika.ui.getUIItem('animeList')
-
     # This event is called each time the associated view needs to be updated then saved to DB
     # Note that its the actual data refreshing. Meaning for example, you need to SYNC your data to the remote one, this event occurs
     # This event won't be called each application launch unless "RefreshUponLaunch" option is ticked
@@ -306,24 +305,16 @@ module.exports = class MyAnimelist
         #view.setData(@getAnimelistData())
         @getAnimelistData (result) =>
           if result.success
-            @setAnimelistTabViewData(result.library.myanimelist.anime,update.view).then => update.defer.resolve()
+            @setAnimelistTabViewData(result.library.myanimelist.anime,update.view).then => update.defer.resolve({ success: result.success })
           else
-            update.defer.resolve()
+            update.defer.resolve({ success: result.success })
 
       if update.view.name == 'mangaList_myanimelist'
         @getMangalistData (result) =>
           if result.success
-            @setMangalistTabViewData(result.library.myanimelist.manga,update.view).then => update.defer.resolve()
+            @setMangalistTabViewData(result.library.myanimelist.manga,update.view).then => update.defer.resolve({ success: result.success })
           else
-            update.defer.resolve()
-
-
-    # chiika.makeGetRequestAuth urls[1],malUser,null, (error,response,body) =>
-    #   chiika.parser.parseXml(body)
-    #                .then (xmlObject) =>
-    #                  _.assign malUser, { mal: xmlObject.myanimelist.myinfo }
-    #                  chiika.users.updateUser malUser
-
+            update.defer.resolve({ success: result.success })
 
     # This function is called from the login window.
     # For example, if you need a token, retrieve it here then store it by calling chiika.custom.addkey
@@ -380,7 +371,7 @@ module.exports = class MyAnimelist
   createViewAnimelist: () ->
     defer = _when.defer()
 
-    view = {
+    defaultView = {
       name: 'animeList_myanimelist',
       displayName: 'Anime List',
       displayType: 'TabGridView',
@@ -406,8 +397,18 @@ module.exports = class MyAnimelist
         ]
       }
      }
-    @chiika.ui.addUIItem view,=>
-      @chiika.logger.verbose "Added new view #{view.name}!"
+    #Check if view config file exists
+    viewConfig = "Config/DefaultMALAnimeTabGridView.json" #Path relative to app home
+    exists = @chiika.utility.fileExistsSmart(viewConfig)
+    view = {}
+    if !exists
+      @chiika.utility.writeFileSmart(viewConfig,JSON.stringify(defaultView))
+      view = defaultView
+    else
+      view = JSON.parse(@chiika.utility.readFileSmart(viewConfig))
+
+    @chiika.ui.addOrUpdate view,=>
+      @chiika.logger.verbose "Added or updated new view #{view.name}!"
       defer.resolve()
 
     defer.promise
@@ -416,7 +417,7 @@ module.exports = class MyAnimelist
   createViewMangalist: () ->
     defer = _when.defer()
 
-    view = {
+    defaultView = {
       name: 'mangaList_myanimelist',
       displayName: 'Manga List',
       displayType: 'TabGridView',
@@ -441,7 +442,16 @@ module.exports = class MyAnimelist
         ]
       }
      }
-    @chiika.ui.addUIItem view,=>
-      @chiika.logger.verbose "Added new view #{view.name}!"
+    viewConfig = "Config/DefaultMALMangaTabGridView.json" #Path relative to app home
+    exists = @chiika.utility.fileExistsSmart(viewConfig)
+    view = {}
+    if !exists
+      @chiika.utility.writeFileSmart(viewConfig,JSON.stringify(defaultView))
+      view = defaultView
+    else
+      view = JSON.parse(@chiika.utility.readFileSmart(viewConfig))
+
+    @chiika.ui.addOrUpdate view,=>
+      @chiika.logger.verbose "Added or updated new view #{view.name}!"
       defer.resolve()
     defer.promise

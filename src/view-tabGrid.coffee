@@ -136,7 +136,8 @@ module.exports = React.createClass
     @currentGrid.init()
     @currentGrid.parse gridConf,"js"
 
-
+    $(".form-control").on 'input', (e) =>
+      @currentGrid.filterBy(1,e.target.value)
 
     $(window).resize( =>
       if @currentGrid?

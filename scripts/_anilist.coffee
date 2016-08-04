@@ -109,7 +109,7 @@ module.exports = class Anilist
         ]
       }
      }
-    @chiika.ui.addUIItem view,=>
+    @chiika.ui.addOrUpdate view,=>
       @chiika.logger.verbose "Added new view #{view.name}!"
       promise.resolve()
 

@@ -154,19 +154,18 @@ module.exports = class APIManager
 
 
 
-
-
   #
   # Compiles javascript code
   #
   compileScript: (js,file,cache,callback) ->
     stripExtension = string(file).chompRight('.coffee').s
     try
-      compiledString = coffee.compile(js)
+      compiledString = coffee.compile js
       chiika.logger.info "[magenta](Api-Manager) Compiled " + file
-    catch
+    catch e
       chiika.logger.error("[magenta](Api-Manager) Error compiling user-script " + file)
-      throw "Can't continue."
+
+      throw e
 
     cachedScriptPath = path.join(@scriptsCacheDir,stripExtension + moment().valueOf() + '.chiikaJS')
     if cache

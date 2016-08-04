@@ -40,3 +40,5 @@ dist/
 bower_components/
 
 release/
+
+testOutput

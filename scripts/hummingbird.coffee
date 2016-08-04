@@ -224,8 +224,9 @@ module.exports = class Hummingbird
       if update.view.name == 'animeList_hummingbird'
         @getAnimelistData (result) =>
           if result.success
-            @setAnimelistTabViewData(result.library,update.view)
-          update.defer.resolve({ success: result.success })
+            @setAnimelistTabViewData(result.library,update.view).then => update.defer.resolve({ success: result.success })
+          else
+            update.defer.resolve({ success: result.success })
 
 
     # chiika.makeGetRequestAuth urls[1],malUser,null, (error,response,body) =>
@@ -294,7 +295,7 @@ module.exports = class Hummingbird
   createViewAnimelist: () ->
     defer = _when.defer()
 
-    view = {
+    defaultView = {
       name: 'animeList_hummingbird',
       displayName: 'Anime List',
       displayType: 'TabGridView',
@@ -319,8 +320,17 @@ module.exports = class Hummingbird
           { name: 'animeId',hidden: true }
         ]
       }
-     }
-    @chiika.ui.addUIItem view,=>
+    }
+    viewConfig = "Config/DefaultHummingbirdAnimeTabGridView.json" #Path relative to app home
+    exists = @chiika.utility.fileExistsSmart(viewConfig)
+    view = {}
+    if !exists
+      @chiika.utility.writeFileSmart(viewConfig,JSON.stringify(defaultView))
+      view = defaultView
+    else
+      view = JSON.parse(@chiika.utility.readFileSmart(viewConfig))
+
+    @chiika.ui.addOrUpdate view,=>
       @chiika.logger.verbose "Added new view #{view.name}!"
       defer.resolve()
 

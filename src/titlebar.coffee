@@ -45,8 +45,7 @@ module.exports = React.createClass
       remote.getCurrentWindow().maximize()
       @emitter.emit 'titlebar-maximize'
 
-    $(".form-control").on 'input', (e) ->
-      chiika.gridManager.filterGrid e.target.value
+    
 
   render: ->
     <div className="titlebar">

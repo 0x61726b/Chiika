@@ -51,10 +51,10 @@ module.exports = class UIItem
             chiika.logger.warn("view-update for #{@name} has failed.")
       else
         chiika.logger.error("Can't update an item without owner! UI Item: #{@name}")
-        defer.resolve()
+        defer.resolve( { success: false })
       @needUpdate = false
     else
-      defer.resolve()
+      defer.resolve({ success: true })
     defer.promise
 
 

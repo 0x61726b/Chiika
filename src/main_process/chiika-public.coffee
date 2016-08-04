@@ -28,6 +28,7 @@ module.exports = class ChiikaPublicApi
     @users               = @db.usersDb
     @custom              = @db.customDb
     @uiDb                = @db.uiDb
+    @utility             = chiika.utility
 
 
 

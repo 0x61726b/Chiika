@@ -70,6 +70,13 @@ module.exports = class ChiikaIPC
   reconstructUI: () ->
     @sendMessage 'reconstruct-ui'
 
+  onReconstructUI: ->
+    @receive 'reconstruct-ui-response', (event,args) =>
+      chiika.reInitializeUI()
+
+  disposeListeners: (channel) ->
+    ipcRenderer.removeAllListeners(channel)
+
 
   sendMessage: (message,args...) ->
     ipcRenderer.send message,args

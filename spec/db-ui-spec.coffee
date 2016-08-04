@@ -47,19 +47,100 @@ removeTestOutputFolder = ->
 
   defer.promise
 
-
 describe 'UI Database addUIItem', ->
-  promises = []
+  dbUI = null
 
-  dbUI = new DbUI { promises: promises }
+  jasmine.getEnv().defaultTimeoutInterval = 10000
 
-  it 'addItem getUIItem', (done) ->
-    createTestOutputFolder().then =>
-      dbUI.addUIItem { name: 'test', someArray: [], someCrazyUiParams: { baka: 'nano', chitoge:'best',girl:'rem',greaterThan: 'emilia' } }, ->
+  loadDatabase = ->
+    new Promise (resolve) =>
+      if dbUI?
+        resolve()
+        return
+      promises = []
+
+      dbUI = new DbUI { promises: promises }
+      createTestOutputFolder().then =>
+        _when.all(promises).then =>
+          console.log "UI loaded"
+          resolve()
+
+  beforeEach (done) =>
+    loadDatabase().then => done()
+
+  afterEach (done) =>
+    removeTestOutputFolder().then =>
+      dbUI = null
+      done()
+      #setTimeout(done,3000)
+
+  onComplete = (done) ->
+    done()
+
+  it 'Get UI item Sync', (done) ->
+    dbUI.addOrUpdate { name: 'animeList', displayName: 'Anime List', displayType: 'TabGridView', TabGridView: {} }, (error) ->
+      if error
+        throw error
+
+      uiItem = dbUI.getUIItemSync('animeList')
+
+      expect(uiItem.name).toBe('animeList')
+      done()
+
+  it 'Get UI items ASync', (done) ->
+    dbUI.addOrUpdate { name: 'animeList', displayName: 'Anime List', displayType: 'TabGridView', TabGridView: {} }, (error) ->
+      if error
+        throw error
+
+      animeList = dbUI.getUIItemSync 'animeList'
+      expect(animeList.name).toBe('animeList')
+      done()
 
 
-        dbUI.getUIItem 'test', (item) ->
-          expect(typeof item).toBe('object')
-          expect(item.name).toBe('test')
-          expect(item.someArray.length).toBe(0)
-          done()
+  it 'Adding and querying a UI item Sync', (done) ->
+      dbUI.addOrUpdate { name: 'test',displayName:'Test Display',displayType:'TabGridView', someArray: [], TabGridView: { baka: 'nano', chitoge:'best',girl:'rem',greaterThan: 'emilia' } }, (error) ->
+        if error
+          throw error
+        item = dbUI.getUIItemSync 'test'
+        expect(typeof item).toBe('object')
+        expect(_.size(item)).toBe(5)
+        expect(item.name).toBe('test')
+        expect(item.someArray.length).toBe(0)
+        onComplete(done)
+
+  #addUIItem should return an error.
+  it 'Trying to add item without a name key', (done) ->
+    dbUI.addOrUpdate { hue: 'hue',huheuhue:'huehuehe',memes: true }, (error) ->
+      if error
+        onComplete(done)
+
+  it 'Trying to add an item without item[displayType] property', (done) ->
+    #No TabGridView property should fail
+    dbUI.addOrUpdate { name: 'animeList', displayName: 'Anime List', displayType: 'TabGridView' }, (error) ->
+      if error
+        onComplete(done)
+  #
+  it 'Trying to call addOrUpdate on the same UI item twice first should add then update it', (done) ->
+    dbUI.addOrUpdate { name: 'animeList', displayName: 'Anime List', displayType: 'TabGridView', TabGridView: {} }, (error) ->
+      if error
+        throw error
+
+      item = dbUI.getUIItemSync 'animeList'
+      expect(_.size(item)).toBe(4)
+      expect(item.name).toBe('animeList')
+      expect(item.displayName).toBe('Anime List')
+
+      #Update the item
+      item.displayName = 'Updated Anime List'
+      item.newProperty = "FeelsAmazingMan"
+
+      dbUI.addOrUpdate item, (error) ->
+        if error
+          throw error
+
+        newItem = dbUI.getUIItemSync 'animeList'
+        expect(_.size(item)).toBe(5)
+        expect(item.name).toBe('animeList')
+        expect(item.displayName).toBe('Updated Anime List')
+
+        onComplete(done)

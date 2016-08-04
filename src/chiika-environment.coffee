@@ -47,6 +47,7 @@ class ChiikaEnvironment
     @viewManager      = new ViewManager()
 
 
+    @ipc.onReconstructUI()
 
     # @ipc.getUsers()
     # @ipc.preload()
@@ -83,6 +84,8 @@ class ChiikaEnvironment
     @emitter.on 'reinitialize-ui', (args) =>
       loading()
 
+      @ipc.disposeListeners('get-ui-data-response')
+
       @preload().then =>
         setTimeout(main,args.delay)
 
@@ -92,6 +95,8 @@ class ChiikaEnvironment
     notf = new Notification(title,{ body: body, icon: icon})
 
   reInitializeUI: (delay) ->
+    console.log "Reinitiazing UI"
+
     if !delay?
       delay = 500
     @emitter.emit 'reinitialize-ui',{ delay: delay }

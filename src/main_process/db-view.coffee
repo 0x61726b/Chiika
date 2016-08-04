@@ -47,7 +47,6 @@ module.exports = class DbView extends IDb
 
 
 
-
   #
   # Adds user into the database.
   # Will check if the parameter use already exists in the database

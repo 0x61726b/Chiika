@@ -85,6 +85,7 @@ module.exports = class IpcManager
           chiika.chiikaApi.emit 'reconstruct-ui',{ defer: defer, calling: script.name }
       _when.all(async).then =>
         #Do something
+        event.sender.send 'reconstruct-ui-response'
 
 
   modalWindowJsEval: ->

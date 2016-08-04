@@ -45,25 +45,57 @@ module.exports = class DbUI extends IDb
 
 
   #
-  # Adds user into the database.
+  # Adds or updates user into the database.
   # Will check if the parameter use already exists in the database
-  # If it exists it will cancel the operation.
   # @param [Object] user User object
   # @option user [String] userName Name of the user
   # @option user [String] password Password of the user
   # @option user [Boolean] isPrimary When set, this user will be primary.
   # @todo Add parameter validation
-  addUIItem: (menuItem,callback) ->
+  addOrUpdate: (menuItem,callback) ->
     #menuItem structure
     # { name: 'animeList', displayName: 'Anime List',displayType: 'tabView',tabList: [ 'watching','ptw','dropped','onhold','completed'] }
+    #Verify the structure
+    onWrongViewStructure = (error) ->
+      callback?(error)
+      chiika.logger.error(error)
+
+
+    if !menuItem.name?
+      onWrongViewStructure('UI Item must have a name property')
+      return
+
+    if !menuItem.displayName?
+      onWrongViewStructure('UI Item must have a displayName property')
+      return
+
+    if !menuItem.displayType?
+      onWrongViewStructure('UI Item must have a displayType property')
+      return
+
+    if !menuItem[menuItem.displayType]?
+      onWrongViewStructure("UI Item must have a #{menuItem.displayType} property")
+      return
+
+    onInsertOrUpdate = (insert,update) =>
+      if insert? # Insert
+        @uiData.push menuItem
+      if update?
+        findItem = _.find @uiData, (o) -> o.name == menuItem.name
+        index = _.indexOf @uiData,findItem
+        if findItem?
+          @uiData.splice(index,1,findItem)
+        else
+          chiika.logger.error("There was an update op but the local array doesn't have the entry.")
+      callback?()
+
     @insertRecord menuItem, (result) =>
       #If it exists already,it won't insert, so update
       if result.exists
         @updateRecords menuItem,=>
-          if !_.isUndefined callback
-            callback()
+          onInsertOrUpdate?(null,true)
       else
-        callback()
+        onInsertOrUpdate?(true,null)
 
     #@insertRecordWithKey user,callback
 
@@ -71,6 +103,18 @@ module.exports = class DbUI extends IDb
   getUIItem: (name,callback) ->
     @one('name',name,null).then (data) =>
       callback(data)
+
+  getUIItemSync: (name) ->
+    _.find(@uiData, (o) -> o.name == name)
+
+  getUIItemsAsync: (callback) ->
+    onAll = (data) ->
+      callback?(data)
+
+    @all(onAll)
+
+  getUIItems: ->
+    @uiData
   # #
   # # Updates the user
   # # @param [Object] user User object
