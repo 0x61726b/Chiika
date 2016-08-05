@@ -22,6 +22,7 @@ module.exports = class ChiikaPublicApi
   subscriptions: []
 
 
+
   constructor: (params={})->
     @emitter             = new Emitter
     {@logger, @db,@parser,@ui} = params
@@ -29,7 +30,6 @@ module.exports = class ChiikaPublicApi
     @custom              = @db.customDb
     @uiDb                = @db.uiDb
     @utility             = chiika.utility
-
 
 
 
