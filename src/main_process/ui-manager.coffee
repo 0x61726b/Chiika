@@ -74,8 +74,8 @@ module.exports = class UIManager
     requiresUpdate.map (item,i) =>
       async.push item.update()
 
-    _when.all(async)
 
+    _when.all(async)
 
 
 

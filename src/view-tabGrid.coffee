@@ -35,7 +35,6 @@ module.exports = React.createClass
   componentWillMount: ->
 
   componentWillReceiveProps: (props) ->
-    console.log props.route
     tabCache = chiika.viewManager.getTabSelectedIndexByName(props.route.view.name)
     if @state.view.name != props.route.view.name
       @state.currentTabIndex = tabCache.index
@@ -74,6 +73,8 @@ module.exports = React.createClass
       @currentGrid = null
     @currentGrid = new dhtmlXGridObject(name)
 
+    columnList = @state.view.TabGridView.gridColumnList
+
     columnIdsForDhtml = ""
     columnTextForDhtml = ""
     columnInitWidths = ""
@@ -88,7 +89,7 @@ module.exports = React.createClass
       totalArea = $(".objbox").width()
     fixedColumnsTotal = 0
 
-    _.forEach @state.view.TabGridView.gridColumnList, (v,k) =>
+    _.forEach columnList, (v,k) =>
       if v.width? && !v.hidden
         fixedColumnsTotal += parseInt(v.width)
 
@@ -96,7 +97,7 @@ module.exports = React.createClass
 
 
 
-    _.forEach @state.view.TabGridView.gridColumnList, (v,k) =>
+    _.forEach columnList, (v,k) =>
       if !v.hidden
         columnIdsForDhtml += v.name + ","
         columnTextForDhtml += v.display + ","
@@ -137,6 +138,11 @@ module.exports = React.createClass
     @currentGrid.parse gridConf,"js"
 
     @currentGrid.filterBy(1,$(".form-control").val())
+
+    for i in [0...columnList.length]
+      column = columnList[i]
+      if !column.hidden && column.customSort?
+        @currentGrid.setCustomSorting(window.sortFunctions[v.customSort],i)
 
     $(".form-control").on 'input', (e) =>
       @currentGrid.filterBy(1,e.target.value)

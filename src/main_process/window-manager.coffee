@@ -77,6 +77,7 @@ module.exports = class WindowManager
       window.loadURL(options.url)
     window
 
+
   createModalWindow: (options,returnCallback) ->
     if options.parent == 'main'
       parent = @getMainWindow()
@@ -86,11 +87,12 @@ module.exports = class WindowManager
     chiika.logger.info("Adding new modal window.. #{parent.name}")
 
     if parent?
-      window = new BrowserWindow({ webPreferences: { nodeIntegration: false, preload: __dirname + "/preload.js" }, parent: parent, modal:true, show: false, frame: false })
+      window = new BrowserWindow({ webPreferences: { nodeIntegration: false, preload: __dirname + "/preload.js" }, width:1400,height: 900,parent: parent, modal:true, show: false, frame: false })
       @handleWindowEvents(window)
 
       _.assign window, { name: options.name }
       @windows.push window
+      window.openDevTools()
 
       window.once 'ready-to-show', =>
         window.show()

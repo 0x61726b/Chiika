@@ -45,10 +45,6 @@ module.exports = class UIItem
     if @needUpdate
       if @owner?
         chiika.chiikaApi.emit 'view-update',{ calling: @owner, view: this, defer: defer }
-
-        defer.promise.then (resolve) =>
-          if !resolve.success
-            chiika.logger.warn("view-update for #{@name} has failed.")
       else
         chiika.logger.error("Can't update an item without owner! UI Item: #{@name}")
         defer.resolve( { success: false })

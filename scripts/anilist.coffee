@@ -24,7 +24,12 @@ fs            = require 'fs'
 
 
 
-javascriptToExecuteOnLoginPageOfAnilist = "if(typeof document.querySelectorAll('div.client h3')[0] !== 'undefined' && document.querySelectorAll('div.client h3')[0].innerHTML.substring(0,4) === 'Copy') {
+javascriptToExecuteOnLoginPageOfAnilist = "if (typeof document.querySelectorAll('form')[0] !== 'undefined' && document.querySelectorAll('form')[0].getAttribute('ng-submit') === 'logVm.login()') {
+document.querySelectorAll('form')[0].addEventListener('submit',function() {
+  var userName = document.querySelectorAll('input')[0].value;
+  window.ipc.send('modal-window-message',{ name: 'set-user-name', userName: userName,windowName: window.electronWindow.name });
+  }); }
+if(typeof document.querySelectorAll('div.client h3')[0] !== 'undefined' && document.querySelectorAll('div.client h3')[0].innerHTML.substring(0,4) === 'Copy') {
 window.ipc.send('modal-window-message', { name: 'inform-login-response',status: true, html: document.querySelectorAll('body div.client h2')[0].innerHTML, windowName: window.electronWindow.name } ); }
 if(typeof document.querySelector('input[name=deny]') !== 'undefined') {
 document.querySelector('input[name=deny]').addEventListener('click',function() {
@@ -133,20 +138,21 @@ module.exports = class Anilist
           if @loginProps.refresh_token?
             async.push @addOrUpdateKey { name: 'anilistRefreshToken', value: @loginProps.refresh_token }
 
+          isTokenValid = true
           _when.all(async).then => resolve({ valid: isTokenValid, token:currentToken })
 
       currentToken = @chiika.custom.getKey('anilistAccessToken')
-      expires = @chiika.custom.getKey('anilistExpireDate').value
-      refreshToken = @chiika.custom.getKey('anilistRefreshToken').value
+      expires = @chiika.custom.getKey('anilistExpireDate')
+      refreshToken = @chiika.custom.getKey('anilistRefreshToken')
 
       if _.isUndefined currentToken
         @chiika.logger.warn("Anilist token doesnt exist.Requesting new")
         @chiika.makePostRequest( authUrl + "/access_token?grant_type=authorization_pin&client_id=#{@anilistClientId}&client_secret=#{@anilistSecret}&code=#{authPin}",null, onAuthComplete )
 
 
-      else if moment().isAfter(moment.unix(expires))
+      else if moment().isAfter(moment.unix(expires.value))
         @chiika.logger.warn("Anilist token has expired.Requesting new")
-        @chiika.makePostRequest( authUrl + "/access_token?grant_type=refresh_token&client_id=#{@anilistClientId}&client_secret=#{@anilistSecret}&refresh_token=#{refreshToken}",null, onAuthComplete )
+        @chiika.makePostRequest( authUrl + "/access_token?grant_type=refresh_token&client_id=#{@anilistClientId}&client_secret=#{@anilistSecret}&refresh_token=#{refreshToken.value}",null, onAuthComplete )
 
 
       else
@@ -182,6 +188,19 @@ module.exports = class Anilist
         else
           @chiika.logger.error("Library from #{@name} couldn't be retrieved.")
           callback(result)
+  #
+  #
+  #
+  getMangalistData: (callback) ->
+    if _.isUndefined @anilistUser
+      @chiika.logger.error("User can't be retrieved.")
+    else
+      @retrieveLibrary 'mangalist',@anilistUser.realUserName, (result) =>
+        if result.response.statusCode == 200 or result.response.statusCode == 201
+          callback(result)
+        else
+          @chiika.logger.error("Library from #{@name} couldn't be retrieved.")
+          callback(result)
 
 
   # After the constructor run() method will be called immediately after.
@@ -204,7 +223,7 @@ module.exports = class Anilist
     @on 'reconstruct-ui', (update) =>
       async = []
       async.push @createViewAnimelist()
-      #async.push @createViewMangalist()
+      async.push @createViewMangalist()
 
       _when.all(async).then => update.defer.resolve()
 
@@ -230,6 +249,20 @@ module.exports = class Anilist
 
         @chiika.closeWindow(args.args.windowName)
 
+      if args.args.name == 'set-user-name'
+        # Send the user name to login form
+        # From anilist, the userName will come as userName@mail.com
+        # But to use in API we need displayName or user ID.
+        # Assume that the userName userName@mail.com will be displayName
+        # Inform users that they need to input their displayName if its different
+        userName = args.args.userName
+
+        if userName.indexOf('@') > 0
+          #Is an email adress
+          userName = userName.substring(0,userName.indexOf('@'))
+        @chiika.sendMessageToWindow 'login','inform-login-set-form-value', { owner: @name, target: 'userName', value: userName }
+
+
     # args is a window instance
     @on 'ui-dom-ready', (args) =>
       @chiika.executeJavaScript(args.name,javascriptToExecuteOnLoginPageOfAnilist)
@@ -247,17 +280,14 @@ module.exports = class Anilist
       if update.view.name == 'animeList_anilist'
         @getAnimelistData (result) =>
           if result.success
-            console.log result.library.lists.watching[0]
-            #update.defer.resolve()
-            @setAnimelistTabViewData(result.library.lists,update.view)
-            #@setAnimelistTabViewData(result.library,view).then => update.defer.resolve({ success: result.success })
+            @setAnimelistTabViewData(result.library.lists,update.view).then => update.defer.resolve({ success: result.success })
           else
             update.defer.resolve({ success: result.success })
 
       if update.view.name == 'mangaList_anilist'
         @getMangalistData (result) =>
           if result.success
-            @setMangalistTabViewData(result.library,view).then => update.defer.resolve({ success: result.success })
+            @setMangalistTabViewData(result.library.lists,update.view).then => update.defer.resolve({ success: result.success })
           else
             update.defer.resolve({ success: result.success })
 
@@ -291,12 +321,12 @@ module.exports = class Anilist
             async = []
 
             deferUpdate1 = _when.defer()
-            #deferUpdate2 = _when.defer()
-            async.push deferUpdate1
-            #async.push deferUpdate2
+            deferUpdate2 = _when.defer()
+            async.push deferUpdate1.promise
+            async.push deferUpdate2.promise
 
             chiika.requestViewUpdate('animeList_anilist',@name,deferUpdate1)
-            #chiika.requestViewUpdate('mangaList_myanimelist',@name,deferUpdate2)
+            chiika.requestViewUpdate('mangaList_anilist',@name,deferUpdate2)
 
             _when.all(async).then =>
               args.return( { success: true })
@@ -325,12 +355,37 @@ module.exports = class Anilist
 
     matchGridColumns = (v,id) ->
       anime = {}
-      anime.animeType = v.type
-      anime.animeProgress = 50
-      anime.animeTitle = v.anime.title
-      anime.animeScore = 0
-      anime.id = id
+      anime.animeType = v.anime.type
+      anime.animeTitleRomaji = v.anime.title_romaji
+      anime.animeTitleJapanese = v.anime.title_japanese
+      anime.animeTitleEnglish = v.anime.title_english
+      anime.animeImageUrlSmall = v.anime.image_url_sml
+      anime.animeImageUrlMedium = v.anime.image_url_med
+      anime.animeImageUrlLarge = v.anime.image_url_lge
+      anime.animeScoreAverage = v.anime.average_score
+      anime.animeTitle = anime.animeTitleEnglish
+      anime.airingStatus = v.anime.airing_status
+      anime.animePopularity = v.anime.populartiy
+      anime.animeSynonyms = v.anime.synonyms
+      anime.animeTotalEpisodes = v.anime.total_episodes
+      anime.anilistId = v.anime.id
+      anime.animeAdult = v.anime.adult
+
+      anime.animeEpisodesWatched = v.episodes_watched
+      anime.animeLastUpdated = v.updated_time
+      anime.animeAddedTime = v.added_time
+      anime.animeScoreRaw = v.score_raw
+      anime.animeScore = v.score_raw
+
+      if parseInt(v.anime.total_episodes) > 0
+        progress = (parseInt(v.episodes_watched) / parseInt(v.anime.total_episodes)) * 100
+      else
+        progress = 0
+
+      anime.animeProgress = progress
+      anime.id = id + 1
       anime
+
 
     _.forEach animeList.watching, (v,k) =>
       watching.push matchGridColumns(v,watching.length)
@@ -353,11 +408,88 @@ module.exports = class Anilist
     animelistData = []
     animelistData.push { name: 'watching',data: watching }
     animelistData.push { name: 'ptw',data: ptw }
-    animelistData.push { name: 'dropped',data: completed }
+    animelistData.push { name: 'dropped',data: dropped }
     animelistData.push { name: 'onhold',data: onhold }
-    animelistData.push { name: 'completed',data: dropped }
+    animelistData.push { name: 'completed',data: completed }
     view.setData(animelistData)
 
+
+  #
+  # In the @createViewAnimelist, we created 5 tab
+  # Here we supply the data of the tabs
+  # The format is { name: 'tabname', data: [] }
+  # The data array has to follow the grid rules in order to appear in the grid correctly.
+  # Also they need to have a unique ID
+  # For animeList object, see https://github.com/hummingbird-me/hummingbird/wiki/API-v1-Structures#library-entry-object
+  setMangalistTabViewData: (mangaList,view) ->
+    reading = []
+    ptr = []
+    completed = []
+    onhold = []
+    dropped = []
+
+    matchGridColumns = (v,id) ->
+      manga = {}
+      manga.mangaType = v.manga.type
+      manga.mangaTitleRomaji = v.manga.title_romaji
+      manga.mangaTitleJapanese = v.manga.title_japanese
+      manga.mangaTitleEnglish = v.manga.title_english
+      manga.mangaImageUrlSmall = v.manga.image_url_sml
+      manga.mangaImageUrlMedium = v.manga.image_url_med
+      manga.mangaImageUrlLarge = v.manga.image_url_lge
+      manga.mangaScoreAverage = v.manga.average_score
+      manga.mangaTitle = manga.mangaTitleEnglish
+      manga.mangaPopularity = v.manga.populartiy
+      manga.mangaSynonyms = v.manga.synonyms
+      manga.mangaId = v.manga.id
+      manga.mangaAdult = v.manga.adult
+      manga.mangaPublishingStatus = v.manga.publishing_status
+
+      manga.mangaChaptersRead = v.chapters_read
+      manga.mangaVolumesRead = v.volumes_read
+      manga.mangaLastUpdated = v.updated_time
+      manga.mangaAddedTime = v.added_time
+      manga.mangaScoreRaw = v.score_raw
+      manga.mangaScore = v.score_raw
+      manga.mangaTotalChapters = v.manga.total_chapters
+      manga.mangaTotalVolumes = v.manga.total_volumes
+      manga.mangaScore = v.score_raw
+
+      if parseInt(manga.mangaTotalVolumes) > 0
+        progress = (parseInt(manga.mangaChaptersRead) / parseInt(manga.mangaTotalVolumes)) * 100
+      else
+        progress = 0
+
+      manga.mangaProgress = progress
+      manga.id = id + 1
+      manga
+
+
+    _.forEach mangaList.reading, (v,k) =>
+      reading.push matchGridColumns(v,reading.length)
+
+    _.forEach mangaList.plan_to_read, (v,k) =>
+      ptr.push matchGridColumns(v,ptr.length)
+
+    _.forEach mangaList.dropped, (v,k) =>
+      dropped.push matchGridColumns(v,dropped.length)
+
+    _.forEach mangaList.completed, (v,k) =>
+      completed.push matchGridColumns(v,completed.length)
+
+    _.forEach mangaList.on_hold, (v,k) =>
+      onhold.push matchGridColumns(v,onhold.length)
+
+
+
+
+    mangalistData = []
+    mangalistData.push { name: 'reading',data: reading }
+    mangalistData.push { name: 'ptr',data: ptr }
+    mangalistData.push { name: 'dropped',data: dropped }
+    mangalistData.push { name: 'onhold',data: onhold }
+    mangalistData.push { name: 'completed',data: completed }
+    view.setData(mangalistData)
   # Creates a 'view'
   # A view is something which will appear at the side menu which you can navigate to
   # See the documentation for view types
@@ -383,11 +515,11 @@ module.exports = class Anilist
         gridColumnList: [
           { name: 'animeType',display: 'Type', sort: 'na', width:'40',align: 'center',headerAlign: 'center' },
           { name: 'animeTitle',display: 'Title', sort: 'str', widthP:'60', align: 'left', headerAlign: 'left' },
-          { name: 'animeProgress',display: 'Progress', sort: 'int', widthP:'40', align: 'center',headerAlign: 'center' },
+          { name: 'animeProgress',display: 'Progress', sort: 'int',widthP:'40', align: 'center',headerAlign: 'center' },
           { name: 'animeScore',display: 'Score', sort: 'int', width:'100',align: 'center',headerAlign: 'center' },
-          { name: 'animeScoreAverage',display: 'Avg Score', sort: 'str', width:'100', align: 'center',hidden:true,headerAlign: 'center' },
-          { name: 'animeSeason',display: 'Season', sort: 'str', width:'100', align: 'center',headerAlign: 'center'},
-          { name: 'animeLastUpdated',display: 'Season', sort: 'str', width:'100', align: 'center',hidden:true,headerAlign: 'center' },
+          { name: 'animeScoreAverage',display: 'Avg Score', sort: 'str', width:'100', align: 'center',headerAlign: 'center' },
+          { name: 'animeSeason',display: 'Season', sort: 'str', width:'100', align: 'center',headerAlign: 'center', hidden: true },
+          { name: 'animeLastUpdated',display: 'Last Updated', sort: 'str', width:'100', align: 'center',hidden:true,headerAlign: 'center' },
           { name: 'animeId',hidden: true }
         ]
       }
@@ -427,12 +559,12 @@ module.exports = class Anilist
           { name:'ptr', display: 'Plan to Read'}
           ],
         gridColumnList: [
-          { name: 'mangaType',display: 'Type', sort: 'na', width:'40', align:'center',headerAlign: 'center' },
+          { name: 'mangaType',display: 'Type', sort: 'na', width:'40', align:'center',headerAlign: 'center',hidden:true },
           { name: 'mangaTitle',display: 'Title', sort: 'str', widthP:'60', align: 'left',headerAlign: 'left' },
           { name: 'mangaProgress',display: 'Progress', sort: 'int', widthP:'40', align: 'center',headerAlign: 'center' },
           { name: 'mangaScore',display: 'Score', sort: 'int', width:'100', align: 'center',headerAlign: 'center' },
-          { name: 'mangaScoreAverage',display: 'Avg Score', sort: 'str', width:'100', align: 'center',hidden:true,headerAlign: 'center' },
-          { name: 'mangaLastUpdated',display: 'Season', sort: 'str', width:'100', align: 'center',hidden:true,headerAlign: 'center' },
+          { name: 'mangaScoreAverage',display: 'Avg Score', sort: 'str', width:'100', align: 'center',headerAlign: 'center' },
+          { name: 'mangaLastUpdated',display: 'Season', sort: 'str', width:'100', align: 'center',headerAlign: 'center' },
           { name: 'mangaId',hidden: true }
         ]
       }

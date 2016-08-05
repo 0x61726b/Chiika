@@ -92,7 +92,6 @@ module.exports = class IpcManager
     @receive 'modal-window-message', (event,args) =>
       #Args must have the 'windowName' property or the script will never receive the callback
       owner = string(args.windowName).chompRight('modal').s
-
       console.log owner
 
       chiika.chiikaApi.emit 'ui-modal-message',{ calling: owner, args: args }

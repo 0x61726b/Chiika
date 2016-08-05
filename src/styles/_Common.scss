@@ -23,7 +23,7 @@ $userInfo-font-size: 16px;
 $mainArea-height: calc(100% - #{$titlebar-height});
 $chiika-rot-speed: 2s;
 $tabListHeight: 35px; //Fix me ?
-$statusBarHeight: 30px;
+$statusBarHeight: 0px;
 .strecthToMainArea {
   height: $mainArea-height;
 }

@@ -43,6 +43,7 @@ MalLogin = React.createClass
 
     window.ipcManager = @ipcManager
 
+
     @ipcManager.sendReceiveIPC 'get-services',null,(event,defer,args) =>
       if args?
         console.log args
@@ -74,6 +75,7 @@ MalLogin = React.createClass
       else
         console.log response
         @highlightFormByParent("green","#loginForm-#{response.service} ")
+      $("#continue").prop("disabled",false)
 
 
     ipcRenderer.on 'inform-login-response', (event,response) =>
@@ -85,6 +87,13 @@ MalLogin = React.createClass
         $("#verifyBtn-#{response.owner}").show()
       else
         @highlightFormByParent("red","#authPin-#{response.owner}")
+
+      $("#continue").prop("disabled",false)
+
+    ipcRenderer.on 'inform-login-set-form-value', (event,response) =>
+      parent = "#loginForm-#{response.owner} "
+      $(parent + "##{response.target}").val(response.value)
+      console.log response
 
   highlightFormByParent: (color,parent) ->
     user = $(parent + "#email")
@@ -104,7 +113,7 @@ MalLogin = React.createClass
       e.preventDefault()
       false
       )
-
+    
   onSubmit: (e) ->
     parent = "#" + $(e.target).parent().attr('id') + " "
     user = $(parent + "#email").val()
@@ -121,18 +130,25 @@ MalLogin = React.createClass
       ipcRenderer.send 'set-user-login',{ login: loginData, service: serviceName }
 
 
+
+
   onSubmitAuthPin: (e) ->
     id = $(e.target).parent().attr("id")
     serviceName = string(id).chompLeft('loginForm-').s
     ipcRenderer.send 'set-user-auth-pin',{ service: serviceName }
+
+    $("#continue").prop('disabled',true)
 
   onSubmitAuthPinStep2: (e) ->
     id = $(e.target).parent().attr("id")
     parent = "#" + $(e.target).parent().attr('id') + " "
     serviceName = string(id).chompLeft('loginForm-').s
     authPin = $("#authPin-#{serviceName}").val()
-    user = $(parent + "#user").val()
+    user = $(parent + "#userName").val()
+
     ipcRenderer.send 'set-user-login',{ authPin: authPin, service: serviceName, user: user }
+
+    $("#continue").prop('disabled',true)
 
   continueToApp: (e) ->
     @ipcManager.sendMessage 'call-window-method','close'
@@ -156,9 +172,9 @@ MalLogin = React.createClass
         <img src={service.logo} id="mal-logo" style={{width: 200 , height: 200}} alt="" />
         <form className="" id="loginForm-#{service.name}">
         <label htmlFor="log-usr">User Name</label>
-        <input type="text" className="text-input" id="user" required autofocus/>
+        <input type="text" className="text-input" id="userName" placeholder="Will be automatically replaced. If not, type your display name" required autofocus/>
           <label htmlFor="log-usr">Auth Pin</label>
-          <input type="text" className="text-input" id="authPin-#{service.name}" required autofocus disabled value="Will be automatically replaced"/>
+          <input type="text" className="text-input" id="authPin-#{service.name}" required autofocus disabled placeholder="Will be automatically replaced"/>
           <input type="submit" onClick={this.onSubmitAuthPin} className="button raised indigo log-btn" id="gotoBtn-#{service.name}" value="Go to #{service.description}"/>
           <input type="submit" onClick={this.onSubmitAuthPinStep2} className="button raised indigo log-btn" id="verifyBtn-#{service.name}" value="Verify"/>
         </form>

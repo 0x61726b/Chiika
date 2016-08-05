@@ -14,6 +14,7 @@
 #Description:
 #----------------------------------------------------------------------------
 
+window.sortFunctions = {}
 ###########
 #
 # TYPE ICON
@@ -99,6 +100,12 @@ window.eXcell_animeScore.prototype = new eXcell
 window.eXcell_mangaScore = eXcell_score
 window.eXcell_mangaScore.prototype = new eXcell
 
+window.eXcell_animeScoreAverage = eXcell_score
+window.eXcell_animeScoreAverage.prototype = new eXcell
+
+window.eXcell_mangaScoreAverage = eXcell_score
+window.eXcell_mangaScoreAverage.prototype = new eXcell
+
 
 ###########
 #
@@ -115,11 +122,27 @@ eXcell_animeProgress = (cell)->
   @isDisabled = ->
     return true
   @setValue = (val) ->
-    @setCValue('<div class="progress-bar thin">
-    <div class="indigo" style="width:'+val+'%;" />
-    </div>')
+    @setCValue("<div class='progress-bar thin' sort-data=#{val}>
+    <div class='indigo' style=width:#{val}%; />
+    </div>",val)
+  @getValue = ->
+    parseInt(this.cell.firstChild.getAttribute('sort-data'))
   @baka = 42
     #
+# progress_customSort = (a,b,order) ->
+#   if order == "asc"
+#     if (b) > (a)
+#       1
+#     else
+#       -1
+#   else
+#     if (a) > (b)
+#       1
+#     else
+#       -1
+#
+# window.sortFunctions.progress = progress_customSort
+
 window.eXcell_animeProgress = eXcell_animeProgress
 window.eXcell_animeProgress.prototype = new eXcell
 

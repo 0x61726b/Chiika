@@ -31,14 +31,6 @@ _when                             = require 'when'
 {Emitter,Disposable}              = require 'event-kit'
 string                            = require 'string'
 
-# ---------------------------
-#
-# ---------------------------
-
-
-#ipcHelpers = require '../ipcHelpers'
-#MediaDetect = require('./tools/src/media-detect-win32')
-
 
 ApplicationWindow                 = require './app-window'
 menubar                           = require './menubar'

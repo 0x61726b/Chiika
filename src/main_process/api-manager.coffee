@@ -15,8 +15,6 @@
 #----------------------------------------------------------------------------
 
 
-
-
 path                    = require 'path'
 fs                      = require 'fs'
 _                       = require 'lodash'
@@ -26,6 +24,7 @@ string                  = require 'string'
 {Emitter}               = require 'event-kit'
 moment                  = require 'moment'
 rimraf                  = require 'rimraf'
+
 
 module.exports = class APIManager
   compiledUserScripts: []
@@ -45,6 +44,7 @@ module.exports = class APIManager
 
     @watchScripts()
 
+
   #
   # Script compile event
   # @param {String} script The path of compiled script
@@ -60,6 +60,7 @@ module.exports = class APIManager
       _.remove(chiika.chiikaApi.subscriptions, sub)
 
     instance.run(chiika.chiikaApi)
+
 
     scriptName = instance.name
     scriptDesc = instance.displayDescription
@@ -82,6 +83,7 @@ module.exports = class APIManager
       isService: isService,
       isActive: isActive
     }
+
 
     if !_.isUndefined @getScriptByName(scriptName)
       #Script with the same name was compiled before, update it
@@ -109,7 +111,6 @@ module.exports = class APIManager
   getScripts: ->
     @scriptInstances
 
-
   initializeScript: (name) ->
     chiika.chiikaApi.emit 'initialize', { calling: name }
 
@@ -125,10 +126,12 @@ module.exports = class APIManager
     @promises.push sanityPromise
 
     processedFileCount = 0
-    scriptCount = 2
+    scriptCount = 0
+
 
     for scriptDir in @scriptsDirs
       fs.readdir scriptDir,(err,files) =>
+        scriptCount = files.length
         _.forEach files, (v,k) =>
           stripExtension = string(v).chompRight('.coffee').s
 
