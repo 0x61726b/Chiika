@@ -66,13 +66,24 @@ module.exports = class DbCustom extends IDb
   # @param [Object] callback Function which will be called upon insert
   # @todo Add parameter validation
   addKey: (object,callback) ->
-    entries    = [] # Object to be added
+    onInsertOrUpdate = (insert,update) =>
+      if insert? # Insert
+        @keys.push object
+      if update?
+        findItem = _.find @keys, (o) -> o.name == object.name
+        index = _.indexOf @keys,findItem
+        if findItem?
+          @keys.splice(index,1,findItem)
+        else
+          chiika.logger.error("There was an update op but the local array doesn't have the entry.")
+      callback?()
 
-    onInsertComplete = (err,count) =>
-      chiika.logger.verbose "Key added"
-      @keys.push object
-      if !_.isUndefined callback
-        callback()
+    onInsertComplete = (result) =>
+      if result.exists
+        @updateRecords object,=>
+          onInsertOrUpdate?(null,true)
+      else
+        onInsertOrUpdate?(true,null)
 
     @insertRecord object,onInsertComplete
 

@@ -41,6 +41,20 @@ td {
   height: 100vh;
   -webkit-app-region: drag;
 }
+
+::-webkit-scrollbar-corner {
+  background-color: transparent;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 2px;
+  background: rgba(150, 150, 150, .33);
+}
 /*
 .loading-screen > div {
   display: flex;

@@ -93,6 +93,8 @@ module.exports = class IpcManager
       #Args must have the 'windowName' property or the script will never receive the callback
       owner = string(args.windowName).chompRight('modal').s
 
+      console.log owner
+
       chiika.chiikaApi.emit 'ui-modal-message',{ calling: owner, args: args }
       # if args.status
       #   console.log "Auth pin " + args.html
@@ -119,6 +121,7 @@ module.exports = class IpcManager
             event.sender.send 'get-ui-data-response',uiItems
 
 
+
   #
   # We receive a user pass here, redirect it to the user script and let them process it
   #
@@ -130,9 +133,9 @@ module.exports = class IpcManager
       if args.login?
         chiika.chiikaApi.emit 'set-user-login',{ calling: args.service, user: args.login.user, pass: args.login.pass, return: returnFromLogin}
       else
-        params = { return: returnFromLogin }
+        params = { return: returnFromLogin,calling: args.service }
         _.assign params,args
-        chiika.chiikaApi.emit 'set-user-login',{ calling: args.service, params: params }
+        chiika.chiikaApi.emit 'set-user-login',params
 
     @receive 'continue-from-login', (event,args) =>
       chiika.windowManager.showMainWindow(true)

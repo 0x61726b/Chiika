@@ -136,13 +136,15 @@ module.exports = React.createClass
     @currentGrid.init()
     @currentGrid.parse gridConf,"js"
 
+    @currentGrid.filterBy(1,$(".form-control").val())
+
     $(".form-control").on 'input', (e) =>
       @currentGrid.filterBy(1,e.target.value)
 
     $(window).resize( =>
       if @currentGrid?
         if $(".objbox")[0].scrollHeight > $(".objbox").height()
-          totalArea = $(".objbox").width() - 16
+          totalArea = $(".objbox").width() - 8
         else
           totalArea = $(".objbox").width()
         fixedColumnsTotal = 0
@@ -169,6 +171,7 @@ module.exports = React.createClass
     #chiika.viewManager.onTabSelect(@props.route.view.name,@state.currentTabIndex)
     chiika.viewManager.onTabViewUnmount(@state.view.name)
     if @currentGrid?
+      $(".form-control").off 'input'
       @currentGrid.clearAll()
       @currentGrid = null
   render: ->

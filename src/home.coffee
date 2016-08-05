@@ -17,13 +17,51 @@
 React                               = require('react')
 
 _                                   = require 'lodash'
+Chart                               = require 'chart.js'
 #Views
 
 module.exports = React.createClass
   componentWillReceiveProps: ->
-    
+    @props.data = {
+      labels: ["Your Score", "Total"],
+      datasets: [{
+        label: '# of Votes',
+        data: [7.4, 2.6],
+        backgroundColor: ['rgba(255, 159, 64, 1)'],
+        borderColor: [
+          'rgba(255, 159, 64, 1)'],
+        borderWidth: 0
+        }]}
 
+  componentDidMount: ->
+    chartCanvas = @refs.chart
+
+    options = {
+      type: 'doughnut',
+      options: { legend: { display: false} },
+      data: {
+        labels: ["Your Score", "Total"],
+        datasets: [{
+          label: '# of Votes',
+          data: [7.4, 2.6],
+          backgroundColor: ['rgba(255, 159, 64, 1)'],
+          borderColor: [
+            'rgba(255, 159, 64, 1)'],
+          borderWidth: 0
+          }]}
+      }
+    @chart = new Chart(chartCanvas,options)
+
+    @setState { chart: chartCanvas }
+
+  componentDidUpdate: ->
+    # chart = this.state.chart;
+    # data = this.props.data;
+    #
+    # data.datasets.forEach((dataset, i) => chart.data.datasets[i].data = dataset.data);
+    #
+    # chart.data.labels = data.labels;
   componentWillUnmount: ->
-
+    @chart.destroy()
   render: ->
-    (<div id="myGrid" />)
+    (<canvas ref={'chart'} height={'400'} width={'600'}></canvas>)

@@ -19,10 +19,10 @@ _when           = require 'when'
 TabView         = require './ui-tabView'
 
 
+
 module.exports = class UIManager
   uiItems: []
   preloadPromises: []
-
 
 
   #
@@ -51,6 +51,7 @@ module.exports = class UIManager
       return _when.all(@preloadPromises)
 
 
+
   #
   # Will check if there are empty 'dataSource's. If one is found, we will mark it needUpdate
   # then update method will call the script and there the script can fill data
@@ -76,6 +77,8 @@ module.exports = class UIManager
     _when.all(async)
 
 
+
+
   #
   # Adds a tab view, creates its associated DB interface and tries to load its data from DB
   #
@@ -91,8 +94,6 @@ module.exports = class UIManager
     tabView.setDatabaseInterface(dbView)
     tabView.loadTabData()
     tabView
-
-
 
   #
   # Adds a UI item respective to their type, then creates a DB view for its data source

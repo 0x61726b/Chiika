@@ -48,7 +48,7 @@ MalLogin = React.createClass
         console.log args
         @setState { services: args }
 
-        args.map( (service,i) => $("#verifyBtn-#{service.name}").hide())
+        #args.map( (service,i) => $("#verifyBtn-#{service.name}").hide())
 
         args.map (service,i) =>
           $("#authPin-#{service.name}").on 'input',=>
@@ -120,6 +120,7 @@ MalLogin = React.createClass
       loginData = { user: user, pass: pass }
       ipcRenderer.send 'set-user-login',{ login: loginData, service: serviceName }
 
+
   onSubmitAuthPin: (e) ->
     id = $(e.target).parent().attr("id")
     serviceName = string(id).chompLeft('loginForm-').s
@@ -127,13 +128,13 @@ MalLogin = React.createClass
 
   onSubmitAuthPinStep2: (e) ->
     id = $(e.target).parent().attr("id")
+    parent = "#" + $(e.target).parent().attr('id') + " "
     serviceName = string(id).chompLeft('loginForm-').s
     authPin = $("#authPin-#{serviceName}").val()
-    console.log authPin
-    ipcRenderer.send 'set-user-login',{ authPin: authPin, service: serviceName }
+    user = $(parent + "#user").val()
+    ipcRenderer.send 'set-user-login',{ authPin: authPin, service: serviceName, user: user }
 
   continueToApp: (e) ->
-    console.log "Continue"
     @ipcManager.sendMessage 'call-window-method','close'
     @ipcManager.sendMessage 'window-method','show','main'
     @ipcManager.sendMessage 'continue-from-login'
@@ -154,8 +155,10 @@ MalLogin = React.createClass
     (<div className="card" id="login-container" key=key>
         <img src={service.logo} id="mal-logo" style={{width: 200 , height: 200}} alt="" />
         <form className="" id="loginForm-#{service.name}">
+        <label htmlFor="log-usr">User Name</label>
+        <input type="text" className="text-input" id="user" required autofocus/>
           <label htmlFor="log-usr">Auth Pin</label>
-          <input type="text" className="text-input" id="authPin-#{service.name}" required autofocus/>
+          <input type="text" className="text-input" id="authPin-#{service.name}" required autofocus disabled value="Will be automatically replaced"/>
           <input type="submit" onClick={this.onSubmitAuthPin} className="button raised indigo log-btn" id="gotoBtn-#{service.name}" value="Go to #{service.description}"/>
           <input type="submit" onClick={this.onSubmitAuthPinStep2} className="button raised indigo log-btn" id="verifyBtn-#{service.name}" value="Verify"/>
         </form>
