@@ -64,13 +64,13 @@ module.exports = React.createClass
 
 
 
-    $.bridget 'packery',Packery
-    $.bridget 'draggabilly',draggabilly
-
-    grid = $('.gridTest').packery({
-      itemSelector: '.card.grid',
-      percentPosition: true
-      })
+    # $.bridget 'packery',Packery
+    # $.bridget 'draggabilly',draggabilly
+    #
+    # grid = $('.gridTest').packery({
+    #   itemSelector: '.card.grid',
+    #   percentPosition: true
+    #   })
 
 
   componentDidUpdate: ->
@@ -83,7 +83,7 @@ module.exports = React.createClass
   componentWillUnmount: ->
 
   render: ->
-    <div className="gridTest">
+    <div className="gridTest" id="homeGrid">
       <div className="card grid teal" id="card-thisWeek">
         <div className="grid-sizer"></div>
         <div className="home-inline title">
@@ -212,13 +212,13 @@ module.exports = React.createClass
           <button type="button" className="button raised lightblue" name="button">Anime List <i className="ion-ios-list"></i></button>
         </div>
         <div className="recent-images">
-        <div className="card image-card">
+          <div className="card image-card">
             <div className="watch-img">
               <img src="./../assets/images/cover1.jpg" width="120" height="180" alt="" />
               <a>Shirobako</a>
             </div>
             <div className="watch-info">
-            <p>Kono Bijutsubu ni wa Mondai ga Aru!</p>
+              <p>Kono Bijutsubu ni wa Mondai ga Aru!</p>
               <span className="label indigo">Episode 6 out of 12</span>
               <span>
               <span className="label red">TV</span>

@@ -16,34 +16,22 @@ body {
   scrollbar-track-color: #b8c0c8;
 }
 
-.card {
-  width: 20%;
+.gridTest {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: flex-start;
+  overflow-y: scroll;
 }
-
-
-/* */
-
-#card-thisWeek {
-  width: 40%;
+.gridTest > .card {
+  flex-basis: 300px;
+  flex-grow: 1;
 }
-#card-news {
-  width: 40%;
+.gridTest > .card:nth-of-type(3n+1) {
+  flex-grow: 2;
 }
-#card-soon {
-  width: 30%;
+#card-cw, #card-cnw {
+  flex-basis: 100%;
 }
-#card-cw {
-  width: 90%;
-}
-#card-cnw {
-  width: 70%;
-}
-.grid-sizer {
-  width: 0;
-}
-
-/* */
-
 /**Card Title**/
 
 .home-inline {
