@@ -18,9 +18,7 @@ React                               = require('react')
 
 _                                   = require 'lodash'
 Chart                               = require 'chart.js'
-Packery                             = require 'packery'
 jQBridger                           = require 'jquery-bridget'
-draggabilly                         = require 'draggabilly'
 #Views
 
 module.exports = React.createClass
@@ -62,15 +60,24 @@ module.exports = React.createClass
 
     window.$ = require 'jquery'
 
-
-
-    # $.bridget 'packery',Packery
+    #$.bridget 'sortable',require('D:/Arken/C++/ElectronProjects/Chiika/Sortable.js')
     # $.bridget 'draggabilly',draggabilly
     #
     # grid = $('.gridTest').packery({
     #   itemSelector: '.card.grid',
     #   percentPosition: true
     #   })
+
+    #Sortable = require('D:/Arken/C++/ElectronProjects/Chiika/Sortable.js')
+    # sortable = new Sortable(document.getElementById('homeGrid'),{
+    #   handle: '.card',
+    #   animation: 150
+    # })
+    # $("#homeGrid").sortable({
+    #  handle: '.card',
+    #  animation: 150
+    # })
+
 
 
   componentDidUpdate: ->

@@ -92,7 +92,6 @@ module.exports = class APIManager
       index = _.indexOf @scriptInstances, _.find(@scriptInstances,localInstance)
       @scriptInstances.splice(index,1,localInstance)
 
-
       chiika.logger.info("[magenta](Api-Manager) Updating script instance #{rScript.name}")
     else
       chiika.logger.info("[magenta](Api-Manager) Adding new script instance #{rScript.name}")
@@ -114,6 +113,9 @@ module.exports = class APIManager
   initializeScript: (name) ->
     chiika.chiikaApi.emit 'initialize', { calling: name }
 
+  postInit: () ->
+    chiika.chiikaApi.emit 'post-initialize', {}
+
   #
   # Compile user scripts
   # @return
@@ -126,12 +128,11 @@ module.exports = class APIManager
     @promises.push sanityPromise
 
     processedFileCount = 0
-    scriptCount = 0
-
+    scriptCount = 2
 
     for scriptDir in @scriptsDirs
       fs.readdir scriptDir,(err,files) =>
-        scriptCount = files.length
+        #scriptCount = files.length
         _.forEach files, (v,k) =>
           stripExtension = string(v).chompRight('.coffee').s
 

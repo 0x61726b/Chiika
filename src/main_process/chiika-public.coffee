@@ -17,11 +17,10 @@
 {InvalidParameterException} = require './exceptions'
 _ = require 'lodash'
 
+
 module.exports = class ChiikaPublicApi
   emitter: null
   subscriptions: []
-
-
 
   constructor: (params={})->
     @emitter             = new Emitter
@@ -30,7 +29,6 @@ module.exports = class ChiikaPublicApi
     @custom              = @db.customDb
     @uiDb                = @db.uiDb
     @utility             = chiika.utility
-
 
 
   makeGetRequest:(url,headers,callback) ->
@@ -107,8 +105,9 @@ module.exports = class ChiikaPublicApi
           else
             chiika.logger.warn("Skipping #{receiver} - #{message} because #{receiver} is not active.")
 
-  emit: (message,args...) ->
-    @emitter.emit message,args...
+  emit: (message,args) ->
+    chiika.logger.debug("Emitting #{message} to #{args.calling}")
+    @emitter.emit message,args
 
   dispatch: (handler,args...)->
     @emitter.constructor.dispatch handler,args...

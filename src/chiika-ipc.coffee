@@ -57,13 +57,21 @@ module.exports = class ChiikaIPC
       console.log args
 
 
+  getDetailsLayout: (id,owner,callback) ->
+    @sendMessage 'details-layout-request', { id: id , owner: owner }
+
+
+    disposable = @receive 'details-layout-request-response', (event,args) =>
+      callback(args)
+      @disposeListeners('details-layout-request-response')
+
   refreshViewByName: (name) ->
     @sendReceiveIPC 'refresh-view-by-name',name, (event,args,defer) =>
       console.log "refresh-view-by-name hello"
 
 
   openLoginWindow: ->
-    @sendMessage 'window-method','show','login'
+    @sendMessage 'window-method',{ method: 'show', window:'login' }
 
 
 
@@ -78,7 +86,8 @@ module.exports = class ChiikaIPC
     ipcRenderer.removeAllListeners(channel)
 
 
-  sendMessage: (message,args...) ->
+  sendMessage: (message,args) ->
+    chiika.logger.renderer("Sending #{message}")
     ipcRenderer.send message,args
 
   receive: (message,callback) ->

@@ -31,9 +31,11 @@ module.exports = class UIItem
     @needUpdate = false
     @dataSource = []
 
+
   addChild: (child) ->
     if child?
       @children.push child
+
 
   setDatabaseInterface: (db) ->
     @db = db

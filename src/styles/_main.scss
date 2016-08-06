@@ -22,7 +22,7 @@
   width: calc(100% - #{$sidebar-width});
 }
 .content {
-  height: calc(100% - #{$titlebar-height+$statusBarHeight});
+  height: calc(100% - #{$titlebar-height});
   overflow: hidden;
   background-color: $body-bg;
 }

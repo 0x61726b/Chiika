@@ -51,6 +51,13 @@ module.exports = class TabView extends UIItem
     if findUIItem?
       return findUIItem.dataSource
 
+  getData: ->
+    data = []
+    _.forEach @children, (v,k) ->
+      _.forEach v.dataSource, (v,k) ->
+        data.push v
+    data
+
 
   save: ->
     chiika.logger.info("[red](#{@name}) Saving tab view data...")

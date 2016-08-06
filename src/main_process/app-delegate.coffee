@@ -37,18 +37,19 @@ module.exports = class AppDelegate
           name: 'login',
           width: 1600,
           height: 900,
-          title: 'Chiika',
+          title: 'Huehueheuehueheu',
           icon: "resources/icon.png",
           url: "file://#{__dirname}/../static/LoginWindow.html",
           show: false,
           loadImmediately: true
           })
 
+
         mainWindow = chiika.windowManager.createWindowAndOpen(true,false,{
           name: 'main',
           width: 1400,
           height: 900,
-          title: 'Chiika',
+          title: 'HUehueheuhue',
           icon: "resources/icon.png",
           url: "file://#{__dirname}/../static/index.html#Home"
           show: false,

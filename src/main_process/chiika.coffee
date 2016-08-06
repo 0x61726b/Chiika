@@ -126,6 +126,7 @@ class Application
                         @windowManager.getWindowByName('login').show()
                         @windowManager.getWindowByName('loading').hide()
 
+
         # If there are no users but there are UI data
         # preload UI data first, this way scripts can instantly access UI data without waiting
         #
@@ -134,7 +135,8 @@ class Application
                     .then =>
                       chiika.logger.verbose("Preloading UI complete!")
                       @apiManager.compileUserScripts().then =>
-                        @uiManager.checkUIData()
+                        @uiManager.checkUIData().then =>
+                          @apiManager.postInit()
                         @windowManager.getWindowByName('login').show()
                         @windowManager.getWindowByName('loading').hide()
 
@@ -151,6 +153,7 @@ class Application
                         chiika.logger.verbose("Preloading UI complete!")
                         @apiManager.compileUserScripts().then =>
                           @uiManager.checkUIData().then =>
+                            @apiManager.postInit()
                             @windowManager.closeLoadingWindow()
                             @windowManager.showMainWindow(true)
           else

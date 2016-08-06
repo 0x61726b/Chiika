@@ -16,6 +16,7 @@
     "roboto-fontface": "~0.4.3",
     "components-font-awesome": "~4.5.0",
     "yui-css": "0.0.10",
-    "dhtmlx": "dhtmlx-arkenthera#*"
+    "dhtmlx": "dhtmlx-arkenthera#*",
+    "Sortable": "sortablejs#^1.4.2"
   }
 }

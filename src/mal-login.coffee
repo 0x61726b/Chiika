@@ -113,7 +113,7 @@ MalLogin = React.createClass
       e.preventDefault()
       false
       )
-    
+
   onSubmit: (e) ->
     parent = "#" + $(e.target).parent().attr('id') + " "
     user = $(parent + "#email").val()
@@ -152,7 +152,7 @@ MalLogin = React.createClass
 
   continueToApp: (e) ->
     @ipcManager.sendMessage 'call-window-method','close'
-    @ipcManager.sendMessage 'window-method','show','main'
+    @ipcManager.sendMessage 'window-method',{ method: 'show', window:'main' }
     @ipcManager.sendMessage 'continue-from-login'
 
 

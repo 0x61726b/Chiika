@@ -105,36 +105,19 @@ module.exports = class IDb
   insertRecord: (record,callback) ->
     chiika.logger.debug("Idb::insertRecord")
 
-    if _.isArray record
-      _.forEach record, (v,k) =>
-        keys = Object.keys(v)
-        key = keys[0]
+    keys = Object.keys(record)
+    key = keys[0]
 
-
-        #Check if the value exists
-        onKeyExistsCheck = (exists) =>
-          if !exists.exists
-            @internalInsertRecord v,callback
-            chiika.logger.verbose("[magenta](#{@name}) - Added new record #{key}:#{record[key]}")
-            callback { exists: exists.exists }
-          else
-            chiika.logger.verbose("[magenta](#{@name}) - Key-value already exists #{key}:#{v[key]}. No need to insert, if you meant to update, use update method.")
-            callback { exists: exists.exists }
-        @checkIfKeyValueExists(v,onKeyExistsCheck)
-    else
-      keys = Object.keys(record)
-      key = keys[0]
-
-      #Check if the value exists
-      onKeyExistsCheck = (exists) =>
-        if !exists.exists
-          @internalInsertRecord record,callback
-          chiika.logger.verbose("[magenta](#{@name}) - Added new record #{key}:#{record[key]}")
-          callback { exists: exists.exists }
-        else
-          chiika.logger.verbose("[magenta](#{@name}) - Key-value already exists #{key}:#{record[key]}. No need to insert, if you meant to update, use update method.")
-          callback { exists: exists.exists }
-      @checkIfKeyValueExists(record,onKeyExistsCheck)
+    #Check if the value exists
+    onKeyExistsCheck = (exists) =>
+      if !exists.exists
+        @internalInsertRecord record,callback
+        chiika.logger.verbose("[magenta](#{@name}) - Added new record #{key}:#{record[key]}")
+        callback { exists: exists.exists }
+      else
+        chiika.logger.verbose("[magenta](#{@name}) - Key-value already exists #{key}:#{record[key]}. No need to insert, if you meant to update, use update method.")
+        callback { exists: exists.exists }
+    @checkIfKeyValueExists(record,onKeyExistsCheck)
 
 
   #

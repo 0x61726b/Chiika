@@ -16,6 +16,7 @@
 
 _               = require 'lodash'
 _when           = require 'when'
+UIItem          = require './ui-item'
 TabView         = require './ui-tabView'
 
 
@@ -109,6 +110,14 @@ module.exports = class UIManager
     index = _.indexOf @uiItems,findView
 
 
+    if item.displayType == 'subview'
+      if findView?
+        _.assign findView,item
+        @uiItems.splice(index,1,findView)
+      else
+        view = new UIItem({ name: item.name, displayName: item.displayName, displayType: item.displayType, owner: item.owner, category: 'not_display'})
+        @uiItems.push view
+
     if item.displayType == 'TabGridView'
       if findView?
         _.assign findView,item
@@ -118,14 +127,14 @@ module.exports = class UIManager
         @uiItems.push tabView
         @preloadPromises.push tabView.db.promise
 
-      if insert
-        chiika.dbManager.uiDb.addOrUpdate item, (error) =>
-          if error
-            chiika.logger.error error
-          defer.resolve()
-          callback?(error)
-      else
+    if insert
+      chiika.dbManager.uiDb.addOrUpdate item, (error) =>
+        if error
+          chiika.logger.error error
         defer.resolve()
+        callback?(error)
+    else
+      defer.resolve()
     defer.promise
 
   #

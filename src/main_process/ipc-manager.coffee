@@ -61,18 +61,28 @@ module.exports = class IpcManager
     @modalWindowJsEval()
     @reconstructUI()
     @windowMethodByName()
+    @detailsLayoutRequest()
 
   windowMethodByName: ->
     @receive 'window-method', (event,args) =>
-      win = chiika.windowManager.getWindowByName(args[1])
-      win[args[0]]()
+      console.log args
+      win = chiika.windowManager.getWindowByName(args.window)
+      win[args.method]()
 
   callWindowMethod: ->
     @receive 'call-window-method', (event,method) =>
+      console.log method
       win = BrowserWindow.fromWebContents(event.sender)
       win[method]()
 
 
+  detailsLayoutRequest: ->
+    @receive 'details-layout-request', (event,args) =>
+      returnFromScript = (layout) ->
+        event.sender.send 'details-layout-request-response',layout
+
+      params = { calling: args.owner, id: args.id, return: returnFromScript }
+      chiika.chiikaApi.emit 'details-layout', params
 
   reconstructUI: ->
     @receive 'reconstruct-ui', (event,args) =>
@@ -138,6 +148,7 @@ module.exports = class IpcManager
 
     @receive 'continue-from-login', (event,args) =>
       chiika.windowManager.showMainWindow(true)
+      chiika.apiManager.postInit()
 
 
   loginCustom: ->

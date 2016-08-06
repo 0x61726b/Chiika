@@ -26,6 +26,7 @@ Logger                = require './main_process/Logger'
 
 ChiikaIPC             = require './chiika-ipc'
 ViewManager           = require './view-manager'
+CardManager           = require './card-manager'
 
 class ChiikaEnvironment
   emitter: null
@@ -45,6 +46,46 @@ class ChiikaEnvironment
 
     @ipc              = new ChiikaIPC()
     @viewManager      = new ViewManager()
+    @cardManager      = new CardManager()
+
+    testCard =
+      name: 'typeMiniCard'
+      title: 'Type'
+      content: 'TV'
+      type: 'miniCard'
+
+    seasonCard =
+      name: 'seasonMiniCard'
+      title: 'Season'
+      content: 'Fall 2014'
+      type: 'miniCard'
+
+    episodeCard =
+      name: 'episodeMiniCard'
+      title: 'Episode'
+      content: '6/24'
+      type: 'miniCard'
+
+    studioCard =
+      name: 'studioMiniCard'
+      title: 'Studio'
+      content: 'Feel'
+      type: 'miniCard'
+
+    sourceCard =
+      name: 'sourceMiniCard'
+      title: 'Source'
+      content: 'Manga'
+      type: 'miniCard'
+
+    @cardManager.addCard(testCard)
+    @cardManager.addCard(seasonCard)
+    @cardManager.addCard(episodeCard)
+    @cardManager.addCard(studioCard)
+    @cardManager.addCard(sourceCard)
+
+    
+
 
 
     @ipc.onReconstructUI()

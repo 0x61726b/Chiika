@@ -124,6 +124,200 @@ module.exports = class MyAnimelist
 
 
 
+
+
+  # After the constructor run() method will be called immediately after.
+  # Use this method to do what you will
+  #
+  run: (chiika) ->
+    #This is the first event called here to let user do some initializing
+    @on 'initialize',=>
+      # You may not use an account for Chiika
+      # But to use hummingbird, you need one regardlesss.
+      @malUser = @chiika.users.getDefaultUser(@name)
+
+      if _.isUndefined @malUser
+        @chiika.logger.warn("Default user for myanimelist doesn't exist. If this is the first time launch, you can ignore this.")
+
+
+    @on 'post-initialize', =>
+      chiika.logger.script("[yellow](#{@name}) post-initialize #{@name}")
+      animeListView = @chiika.ui.getUIItem('animeList_myanimelist')
+      if animeListView?
+        @animelist = animeListView.getData()
+        chiika.logger.script("[yellow](#{@name}) Animelist data length #{@animelist.length} #{@name}")
+
+      mangaListView = @chiika.ui.getUIItem('mangaList_myanimelist')
+      if mangaListView?
+        @mangalist = mangaListView.getData()
+        chiika.logger.script("[yellow](#{@name}) Animelist data length #{@mangalist.length} #{@name}")
+
+
+    # This method will be called if there are no UI elements in the database
+    # or the user wants to refresh the views
+    @on 'reconstruct-ui', (update) =>
+      chiika.logger.script("[yellow](#{@name}) reconstruct-ui #{@name}")
+
+      async = []
+      async.push @createViewAnimelist()
+      async.push @createViewMangalist()
+
+      testView =
+        name: "animelist_extra"
+        owner: @name
+        displayName: 'subview'
+        displayType: 'subview'
+        subview:{}
+
+      @chiika.ui.addOrUpdate testView, =>
+        chiika.logger.script("[yellow](#{@name}) added view testview #{@name}")
+
+
+      _when.all(async).then => update.defer.resolve()
+
+
+    @on 'details-layout', (args) =>
+      chiika.logger.script("[yellow](#{@name}) Details-Layout #{args.id}")
+
+      id = args.id
+
+      animeEntry = _.find @animelist, (o) -> (o.mal_id) == args.id
+
+
+      if animeEntry?
+        entry = animeEntry
+        title = entry.animeTitle
+        score = entry.animeScore
+        type = entry.animeType
+        season = entry.animeSeason
+        score = parseInt(entry.animeScore)
+
+
+        image = entry.animeImage
+        synonyms = entry.animeSynonyms
+
+        if synonyms?
+          synonyms = synonyms.split(";")[0]
+        else
+          synonyms = ""
+
+      # if mangaEntry?
+      #   entry = mangaEntry
+      #   title = entry.mangaTitle
+      #   score = entry.mangaScore
+      #   type = entry.mangaType
+      #   season = entry.mangaSeason
+      #   score = entry.mangaScore
+
+      typeCard =
+        name: 'typeMiniCard'
+        title: 'Type'
+        content: type
+        type: 'miniCard'
+
+      seasonCard =
+        name: 'scoreMiniCard'
+        title: 'Season'
+        content: season
+        type: 'miniCard'
+
+      detailsLayout =
+        title: title
+        genres: synonyms
+        list: true
+        synopsis: ''
+        cover: image
+        characters: []
+        actionButtons: [
+          { name: 'Torrent', action: 'torrent',color: 'lightblue' },
+          { name: 'Library', action: 'library',color: 'purple' }
+          { name: 'Play Next', action: 'playnext',color: 'teal' }
+          { name: 'Search', action: 'search',color: 'green' }
+        ]
+        scoring:
+          type: 'normal'
+          userScore: score
+        miniCards: [typeCard,seasonCard]
+      args.return(detailsLayout)
+
+    # This event is called each time the associated view needs to be updated then saved to DB
+    # Note that its the actual data refreshing. Meaning for example, you need to SYNC your data to the remote one, this event occurs
+    # This event won't be called each application launch unless "RefreshUponLaunch" option is ticked
+    # You should update your data here
+    # This event will then save the data to the view's local DB to use it locally.
+    @on 'view-update', (update) =>
+      chiika.logger.script("[yellow](#{@name}) Updating view for #{update.view.name} - #{@name}")
+
+      if update.view.name == 'animeList_myanimelist'
+        #view.setData(@getAnimelistData())
+        @getAnimelistData (result) =>
+          if result.success
+            @setAnimelistTabViewData(result.library.myanimelist.anime,update.view).then => update.defer.resolve({ success: result.success })
+          else
+            @chiika.logger.warn("[yellow](#{@name}) view-update has failed.")
+            update.defer.resolve({ success: result.success })
+      else if update.view.name == 'mangaList_myanimelist'
+        @getMangalistData (result) =>
+          if result.success
+            @setMangalistTabViewData(result.library.myanimelist.manga,update.view).then => update.defer.resolve({ success: result.success })
+          else
+            update.defer.resolve({ success: result.success })
+
+      else
+        update.defer.resolve({ success: false })
+
+    # This function is called from the login window.
+    # For example, if you need a token, retrieve it here then store it by calling chiika.custom.addkey
+    # Note that you dont have to do anything here if you want
+    # But storing a user to avoid logging in each time you launch the app is a good practice
+    # Another note is , you MUST call the  'args.return' or the app wont continue executing
+    #
+    @on 'set-user-login', (args,callback) =>
+      chiika.logger.script("[yellow](#{@name}) Auth in process " + args.user)
+      onAuthComplete = (error,response,body) =>
+        if error?
+          chiika.logger.error(error)
+        else
+          if response.statusCode == 200 or response.statusCode == 201
+            userAdded = =>
+              async = []
+
+              deferUpdate1 = _when.defer()
+              deferUpdate2 = _when.defer()
+              async.push deferUpdate1
+              async.push deferUpdate2
+
+              chiika.requestViewUpdate('animeList_myanimelist',@name,deferUpdate1)
+              chiika.requestViewUpdate('mangaList_myanimelist',@name,deferUpdate2)
+
+              _when.all(async).then =>
+                args.return( { success: true })
+
+            newUser = { userName: args.user + "_" + @name,owner: @name, password: args.password, realUserName: args.user }
+
+            chiika.parser.parseXml(body)
+                         .then (xmlObject) =>
+                           @malUser = chiika.users.getUser(args.user + "_" + @name)
+
+                           _.assign newUser, { malID: xmlObject.user.id }
+                           if _.isUndefined @malUser
+                             @malUser = newUser
+                             chiika.users.addUser @malUser,userAdded
+                           else
+                             _.assign @malUser,newUser
+                             chiika.users.updateUser @malUser,userAdded
+
+            #  if chiika.users.getUser(malUser.userName)?
+            #    chiika.users.updateUser malUser
+            #  else
+            #  chiika.users.addUser malUser
+          else
+            #Login failed, use the callback to tell the app that login isn't succesful.
+            #
+            args.return( { success: false, response: response })
+
+      chiika.makePostRequestAuth( authUrl, { userName: args.user, password: args.pass },null, onAuthComplete )
+
   #
   # In the @createViewAnimelist, we created 5 tab
   # Here we supply the data of the tabs
@@ -132,7 +326,7 @@ module.exports = class MyAnimelist
   # Also they need to have a unique ID
   # For animeList object, see myanimelist.net/malappinfo.php?u=arkenthera&type=anime&status=all
   setAnimelistTabViewData: (animeList,view) ->
-    sampleData = [{ id:0 , animeType: 'TV', animeProgress: 50, animeTitle: 'Test', animeScore: 5, animeSeason: '2016-05-05'}]
+
 
     watching = []
     ptw = []
@@ -167,8 +361,12 @@ module.exports = class MyAnimelist
       anime.animeTitle = v.series_title
       anime.animeScore = parseInt(v.my_score)
       anime.animeScoreAverage = "0"
-      anime.animeLastUpdated = "0"
+      anime.animeLastUpdated = v.my_last_updated
       anime.animeSeason = v.series_start
+      anime.animeImage = v.series_image
+      anime.animeSynonyms = v.series_synonyms
+      anime.animeEpisodes = v.series_episodes
+      anime.animeWatchedEpisodes = v.my_watched_episodes
       anime.id = id + 1
       anime.mal_id = v.series_animedb_id
 
@@ -267,107 +465,6 @@ module.exports = class MyAnimelist
     mangalistData.push { name: 'completed',data: completed }
     view.setData(mangalistData)
 
-  # After the constructor run() method will be called immediately after.
-  # Use this method to do what you will
-  #
-  run: (chiika) ->
-    #This is the first event called here to let user do some initializing
-    @on 'initialize',=>
-      # You may not use an account for Chiika
-      # But to use hummingbird, you need one regardlesss.
-      @malUser = @chiika.users.getDefaultUser(@name)
-
-      if _.isUndefined @malUser
-        @chiika.logger.warn("Default user for myanimelist doesn't exist. If this is the first time launch, you can ignore this.")
-
-
-
-    # This method will be called if there are no UI elements in the database
-    # or the user wants to refresh the views
-    @on 'reconstruct-ui', (update) =>
-      chiika.logger.script("[yellow](#{@name}) reconstruct-ui #{@name}")
-
-      async = []
-      async.push @createViewAnimelist()
-      async.push @createViewMangalist()
-
-      _when.all(async).then => update.defer.resolve()
-
-    # This event is called each time the associated view needs to be updated then saved to DB
-    # Note that its the actual data refreshing. Meaning for example, you need to SYNC your data to the remote one, this event occurs
-    # This event won't be called each application launch unless "RefreshUponLaunch" option is ticked
-    # You should update your data here
-    # This event will then save the data to the view's local DB to use it locally.
-    @on 'view-update', (update) =>
-      chiika.logger.script("[yellow](#{@name}) Updating view for #{update.view.name} - #{@name}")
-
-      if update.view.name == 'animeList_myanimelist'
-        #view.setData(@getAnimelistData())
-        @getAnimelistData (result) =>
-          if result.success
-            @setAnimelistTabViewData(result.library.myanimelist.anime,update.view).then => update.defer.resolve({ success: result.success })
-          else
-            @chiika.logger.warn("[yellow](#{@name}) view-update has failed.")
-            update.defer.resolve({ success: result.success })
-
-      if update.view.name == 'mangaList_myanimelist'
-        @getMangalistData (result) =>
-          if result.success
-            @setMangalistTabViewData(result.library.myanimelist.manga,update.view).then => update.defer.resolve({ success: result.success })
-          else
-            update.defer.resolve({ success: result.success })
-
-    # This function is called from the login window.
-    # For example, if you need a token, retrieve it here then store it by calling chiika.custom.addkey
-    # Note that you dont have to do anything here if you want
-    # But storing a user to avoid logging in each time you launch the app is a good practice
-    # Another note is , you MUST call the  'args.return' or the app wont continue executing
-    #
-    @on 'set-user-login', (args,callback) =>
-      chiika.logger.script("[yellow](#{@name}) Auth in process " + args.user)
-      onAuthComplete = (error,response,body) =>
-        if error?
-          chiika.logger.error(error)
-        else
-          if response.statusCode == 200 or response.statusCode == 201
-            userAdded = =>
-              async = []
-
-              deferUpdate1 = _when.defer()
-              deferUpdate2 = _when.defer()
-              async.push deferUpdate1
-              async.push deferUpdate2
-
-              chiika.requestViewUpdate('animeList_myanimelist',@name,deferUpdate1)
-              chiika.requestViewUpdate('mangaList_myanimelist',@name,deferUpdate2)
-
-              _when.all(async).then =>
-                args.return( { success: true })
-
-            newUser = { userName: args.user + "_" + @name,owner: @name, password: args.password, realUserName: args.user }
-
-            chiika.parser.parseXml(body)
-                         .then (xmlObject) =>
-                           @malUser = chiika.users.getUser(args.user + "_" + @name)
-
-                           _.assign newUser, { malID: xmlObject.user.id }
-                           if _.isUndefined @malUser
-                             @malUser = newUser
-                             chiika.users.addUser @malUser,userAdded
-                           else
-                             _.assign @malUser,newUser
-                             chiika.users.updateUser @malUser,userAdded
-
-            #  if chiika.users.getUser(malUser.userName)?
-            #    chiika.users.updateUser malUser
-            #  else
-            #  chiika.users.addUser malUser
-          else
-            #Login failed, use the callback to tell the app that login isn't succesful.
-            #
-            args.return( { success: false, response: response })
-
-      chiika.makePostRequestAuth( authUrl, { userName: args.user, password: args.pass },null, onAuthComplete )
 
   createViewAnimelist: () ->
     defer = _when.defer()

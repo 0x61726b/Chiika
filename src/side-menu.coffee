@@ -70,6 +70,8 @@ SideMenu = React.createClass
         if v.displayType == 'TabGridView' && v.children.length == 0
           return
 
+        if v.displayType != 'TabGridView'
+          return
 
         if _.indexOf(@pendingCategories, _.find(@pendingCategories, (o) -> return o == v.category )) == -1
           @pendingCategories.push v.category

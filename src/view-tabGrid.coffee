@@ -133,7 +133,6 @@ module.exports = React.createClass
 
     gridConf = { data: gridData.dataSource }
 
-
     @currentGrid.init()
     @currentGrid.parse gridConf,"js"
 
@@ -146,6 +145,12 @@ module.exports = React.createClass
 
     $(".form-control").on 'input', (e) =>
       @currentGrid.filterBy(1,e.target.value)
+
+    @currentGrid.attachEvent 'onRowDblClicked', (rId,cInd) ->
+      for i in  [0...gridConf.data.length]
+        if i == rId - 1
+          find = gridConf.data[i]
+          window.location = "#details/#{find.mal_id}"
 
     $(window).resize( =>
       if @currentGrid?
