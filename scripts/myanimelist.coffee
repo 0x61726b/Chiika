@@ -23,9 +23,16 @@ getLibraryUrl = (type,user) ->
 
 
 authUrl = 'http://myanimelist.net/api/account/verify_credentials.xml'
+animePageUrl = 'http://myanimelist.net/anime/'
 
 getSearchUrl = (type,keywords) ->
   "http://myanimelist.net/api/#{type}/search.xml?q=#{keywords}"
+
+getSearchExtendedUrl = (type,id) ->
+  if type == 'manga'
+    "http://myanimelist.net/includes/ajax.inc.php?id=#{id}&t=65"
+  else
+    "http://myanimelist.net/includes/ajax.inc.php?id=#{id}&t=64"
 
 _       = require process.cwd() + '/node_modules/lodash'
 _when   = require process.cwd() + '/node_modules/when'
@@ -140,6 +147,21 @@ module.exports = class MyAnimelist
      @chiika.makeGetRequestAuth getSearchUrl(type,keywords.split(" ").join("+")),{ userName: @malUser.realUserName, password: @malUser.password },null, onSearchComplete
 
 
+  #
+  #
+  #
+  searchExtended: (type,id,callback) ->
+    onSearchComplete = (error,response,body) =>
+      callback(@chiika.parser.parseMyAnimelistExtendedSearch(body))
+
+    @chiika.makeGetRequest getSearchExtendedUrl(type,id),null, onSearchComplete
+
+
+  animePageScrape: (id,callback) ->
+    onRequest = (error,response,body) =>
+      callback(@chiika.parser.parseAnimeDetailsMalPage(body))
+
+    @chiika.makeGetRequest animePageUrl + id,null,onRequest
 
 
 
@@ -165,10 +187,35 @@ module.exports = class MyAnimelist
         @animelist = animeListView.getData()
         chiika.logger.script("[yellow](#{@name}) Animelist data length #{@animelist.length} #{@name}")
 
-      animelistExtraView = @chiika.ui.getUIItem('animeList_extra')
-      if animelistExtraView?
-        @animelistExtra = animelistExtraView.getData()
-        chiika.logger.script("[yellow](#{@name}) AnimelistExtra data length #{@animelistExtra.length} #{@name}")
+      searchDataView = @chiika.ui.getUIItem('myanimelist_animeSearch')
+      searchExtendedDataView = @chiika.ui.getUIItem('myanimelist_animeSearchExtended')
+      animeScrapeView = @chiika.ui.getUIItem('myanimelist_scrape')
+      if searchDataView?
+        @animelistExtra = searchDataView.getData()
+      if searchExtendedDataView?
+        @extendedData = searchExtendedDataView.getData()
+
+        _.forEach @extendedData, (v,k) =>
+          findInSearchData = _.find @animelistExtra, (o) -> o.mal_id == v.mal_id
+
+          if findInSearchData?
+            _.assign findInSearchData, v
+          else
+            @animelistExtra.push v
+
+      if animeScrapeView?
+        @scrapeData = animeScrapeView.getData()
+
+        _.forEach @scrapeData, (v,k) =>
+          findInScrapeData = _.find @animelistExtra, (o) -> o.mal_id == v.mal_id
+
+          if findInScrapeData?
+            _.assign findInScrapeData,v
+          else
+            @animelistExtra.push v
+
+      console.log @animelistExtra
+      chiika.logger.script("[yellow](#{@name}) AnimelistExtra data length #{@animelistExtra.length} #{@name}")
 
       mangaListView = @chiika.ui.getUIItem('mangaList_myanimelist')
       if mangaListView?
@@ -184,18 +231,9 @@ module.exports = class MyAnimelist
       async = []
       async.push @createViewAnimelist()
       async.push @createViewMangalist()
-
-      testView =
-        name: "animeList_extra"
-        owner: @name
-        displayName: 'subview'
-        displayType: 'subview'
-        subview:{}
-
-      @chiika.ui.addOrUpdate testView, =>
-        chiika.logger.script("[yellow](#{@name}) added view testview #{@name}")
-
-
+      async.push @createMalScrapeView()
+      async.push @createSearchDataView()
+      async.push @createSearchExtendedDataView()
       _when.all(async).then => update.defer.resolve()
 
 
@@ -224,15 +262,58 @@ module.exports = class MyAnimelist
           else
             update.defer.resolve({ success: result.success })
 
-      else if update.view.name == 'animeList_extra'
+      else if update.view.name == 'myanimelist_scrape'
+        anime = update.params.anime
+
+        if anime?
+          @animePageScrape anime.mal_id, (result) ->
+
+            if result?
+              newAnimeEntry = {}
+              newAnimeEntry.mal_id = anime.mal_id
+              newAnimeEntry.animeStudio = result.studio
+              newAnimeEntry.animeSource = result.source
+              newAnimeEntry.animeJapanese = result.japanese
+              newAnimeEntry.animeBroadcast = result.broadcast
+              newAnimeEntry.animeDuration = result.duration
+              newAnimeEntry.animeAired = result.aired
+              newAnimeEntry.animeCharacters = result.characters
+              update.view.setData(newAnimeEntry,'mal_id').then (args) =>
+                update.defer.resolve({ success: true, entry: newAnimeEntry, updated: args.rows })
+            else
+              update.defer.resolve({ success: false })
+        else
+          update.defer.resolve({ success: false })
+      else if update.view.name == 'myanimelist_animeSearchExtended'
+        anime = update.params.anime
+
+        if anime?
+          @searchExtended 'anime', anime.mal_id, (result) ->
+
+            if result?
+              newAnimeEntry = {}
+              newAnimeEntry.mal_id = anime.mal_id
+              newAnimeEntry.animeGenres = result.genres
+              newAnimeEntry.animeScoreAverage = result.score
+              newAnimeEntry.animeRanked = result.rank
+              newAnimeEntry.animePopularity = result.popularity
+              newAnimeEntry.scoredBy = result.scoredBy
+
+              update.view.setData(newAnimeEntry,'mal_id').then (args) =>
+                update.defer.resolve({ success: true, entry: newAnimeEntry, updated: args.rows })
+            else
+              update.defer.resolve({ success: false, response: "No Entry" })
+        else
+          update.defer.resolve({ success: false })
+
+      else if update.view.name == 'myanimelist_animeSearch'
         anime = update.params.anime
 
         if anime?
           @chiika.logger.script("[yellow](#{@name}) animeList_extra update!")
-
-
-          matchXml = (v) ->
+          searchMatch = (v) ->
             newAnimeEntry = {}
+            newAnimeEntry.mal_id = v.id
             newAnimeEntry.animeEnglish = v.english
             newAnimeEntry.animeTitle = v.title
             newAnimeEntry.animeSynonyms = v.synonyms
@@ -252,31 +333,30 @@ module.exports = class MyAnimelist
               isArray = true
               _.forEach list, (v,k) =>
                 if v.id == anime.mal_id
-                  newAnimeEntry = matchXml(v)
+                  newAnimeEntry = searchMatch(v)
                   return false
             else
-              newAnimeEntry = matchXml(list)
-
-            newAnimeEntry.mal_id = anime.mal_id
+              newAnimeEntry = searchMatch(list)
 
             if isArray && list.length > 0
-              update.view.setData(newAnimeEntry,'mal_id').then => update.defer.resolve({ success: true, entry: newAnimeEntry, count: list.length })
+              update.view.setData(newAnimeEntry,'mal_id').then (args) =>
+                update.defer.resolve({ success: true, entry: newAnimeEntry, count: list.length, updated: args.rows })
             else if _.size(list) > 0
-              update.view.setData(newAnimeEntry,'mal_id').then =>
-                update.defer.resolve({ success: true, entry: newAnimeEntry })
+              update.view.setData(newAnimeEntry,'mal_id').then (args) =>
+                update.defer.resolve({ success: true, entry: newAnimeEntry, updated: args.rows })
             else
               update.defer.resolve({ success: false, response: 'No entry.' })
         else
-          update.defer.resolve({ success: false, response: body })
-      else
-        update.defer.resolve({ success: false })
+          update.defer.resolve({ success: false })
 
 
 
     @on 'details-layout', (args) =>
       chiika.logger.script("[yellow](#{@name}) Details-Layout #{args.id}")
 
-      defer = _when.defer()
+      waitSearch = _when.defer()
+      waitSearchExtended = _when.defer()
+      waitScrape = _when.defer()
       id = args.id
 
       animeEntry = _.find @animelist, (o) -> (o.mal_id) == args.id
@@ -289,13 +369,28 @@ module.exports = class MyAnimelist
 
 
       if animeEntry?
-        defer.promise.then (result) =>
-          combine = animeEntry
-          _.assign combine,result.entry
-          args.return(@getDetailsLayout(combine))
+        waitSearch.promise.then (result) =>
+          if result.updated > 0
+            combine = animeEntry
+            _.assign combine,result.entry
+            args.return(@getDetailsLayout(combine))
 
+        waitSearchExtended.promise.then (result) =>
+          if result.updated > 0
+            combine = animeEntry
+            _.assign combine,result.entry
+            args.return(@getDetailsLayout(combine))
 
-        @chiika.requestViewUpdate('animeList_extra',@name, defer,{ anime: animeEntry })
+        waitScrape.promise.then (result) =>
+
+          if result.updated > 0
+            combine = animeEntry
+            _.assign combine,result.entry
+            args.return(@getDetailsLayout(combine))
+
+        @chiika.requestViewUpdate('myanimelist_animeSearch',@name, waitSearch,{ anime: animeEntry })
+        @chiika.requestViewUpdate('myanimelist_animeSearchExtended',@name, waitSearchExtended,{ anime: animeEntry })
+        @chiika.requestViewUpdate('myanimelist_scrape',@name, waitScrape,{ anime: animeEntry })
         #
         # If there is no extra record,return the raw one
         #
@@ -325,8 +420,6 @@ module.exports = class MyAnimelist
 
               chiika.requestViewUpdate('animeList_myanimelist',@name,deferUpdate1)
               chiika.requestViewUpdate('mangaList_myanimelist',@name,deferUpdate2)
-
-              console.log @malUser
 
               _when.all(async).then =>
                 args.return( { success: true })
@@ -367,6 +460,17 @@ module.exports = class MyAnimelist
     season = entry.animeSeason ? ""
     score = parseInt(entry.animeScore) ? 0
     averageScore = (entry.animeScoreAverage) ? "0"
+    popularity = entry.animePopularity ? ""
+    ranked = entry.animeRanked ? ""
+    genres = entry.animeGenres ? ""
+    scoredBy = entry.scoredBy ? "0"
+    studio = entry.animeStudio ? null
+    broadcastDate = entry.animeBroadcast ? ""
+    aired = entry.animeAired ? ""
+    japanese = entry.animeJapanese ? ""
+    source = entry.animeSource ? ""
+    duration = entry.animeDuration ? ""
+    characters = entry.animeCharacters ? []
 
 
     image = entry.animeImage ? "le_default_image"
@@ -397,25 +501,52 @@ module.exports = class MyAnimelist
       content: season
       type: 'miniCard'
 
-    avgScoreCard =
-      name: 'averageScoreMiniCard'
-      title: 'Average Score'
-      content: averageScore
+    sourceCard =
+      name: 'sourceMiniCard'
+      title: 'Source'
+      content: source
+      type: 'miniCard'
+
+    if studio?
+      studioCard =
+        name: 'studioMiniCard'
+        title: 'Studio'
+        content: studio.name
+        type: 'miniCard'
+
+    durationCard =
+      name: 'durationMiniCard'
+      title: 'Duration'
+      content: duration
       type: 'miniCard'
 
     cards = [typeCard,seasonCard]
 
-    if averageScore != ""
-      cards.push avgScoreCard
+    if source != ""
+      cards.push sourceCard
+
+    if studio?
+      cards.push studioCard
+
+    if duration != ""
+      cards.push durationCard
+
+    if genres == ""
+      genres = synonyms
+    else
+      genresText = ""
+      genres.map (genre,i) => genresText += genre + ","
+      genres = genresText
 
     detailsLayout =
       title: title
-      genres: synonyms
+      genres: genres
       list: true
       synopsis: synopsis
       cover: image
       english: english
-      characters: []
+      voted: scoredBy
+      characters: characters
       actionButtons: [
         { name: 'Torrent', action: 'torrent',color: 'lightblue' },
         { name: 'Library', action: 'library',color: 'purple' }
@@ -425,7 +556,8 @@ module.exports = class MyAnimelist
       scoring:
         type: 'normal'
         userScore: score
-      miniCards: [typeCard,seasonCard,avgScoreCard]
+        average: averageScore
+      miniCards: cards
   #
   # In the @createViewAnimelist, we created 5 tab
   # Here we supply the data of the tabs
@@ -572,6 +704,46 @@ module.exports = class MyAnimelist
     mangalistData.push { name: 'onhold',data: onhold }
     mangalistData.push { name: 'completed',data: completed }
     view.setData(mangalistData)
+
+
+  createMalScrapeView: ->
+    new Promise (resolve) =>
+      scrapeData =
+        name: "myanimelist_scrape"
+        owner: @name
+        displayName: 'subview'
+        displayType: 'subview'
+        subview:{}
+
+      @chiika.ui.addOrUpdate scrapeData, =>
+        chiika.logger.script("[yellow](#{@name}) added view #{scrapeData.name}")
+        resolve()
+
+  createSearchDataView: ->
+    new Promise (resolve) =>
+      searchData =
+        name: "myanimelist_animeSearch"
+        owner: @name
+        displayName: 'subview'
+        displayType: 'subview'
+        subview:{}
+
+      @chiika.ui.addOrUpdate searchData, =>
+        chiika.logger.script("[yellow](#{@name}) added view #{searchData.name}")
+        resolve()
+
+  createSearchExtendedDataView: ->
+    new Promise (resolve) =>
+      searchExtendedData =
+        name: "myanimelist_animeSearchExtended"
+        owner: @name
+        displayName: 'subview'
+        displayType: 'subview'
+        subview:{}
+
+      @chiika.ui.addOrUpdate searchExtendedData, =>
+        chiika.logger.script("[yellow](#{@name}) added view #{searchExtendedData.name}")
+        resolve()
 
 
   createViewAnimelist: () ->

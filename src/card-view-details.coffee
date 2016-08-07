@@ -55,6 +55,7 @@ module.exports = React.createClass
 
     if scoring.type == 'normal' #0-10
       userScore = scoring.userScore
+      average = scoring.average
       remainder = 10 - userScore
       options = {
         type: 'doughnut',
@@ -64,10 +65,10 @@ module.exports = React.createClass
             data: [userScore,remainder],
             backgroundColor: ["#0288D1"]
             },{
-            data: [remainder,userScore],
+            data: [average,10 - average],
             backgroundColor: ["#6A1B9A"]
           }]
-          labels: ["e","y"]
+          labels: ["Average","y"]
         }
       }
       chart = new Chart(document.getElementById("score-circle"),options)
@@ -111,7 +112,7 @@ module.exports = React.createClass
             <canvas id="score-circle" width="100" height="100"></canvas>
           </div>
           <span className="detailsPage-score-info">
-            <h5>From 5,854 votes</h5>
+            <h5>From { @state.layout.voted ? ""} votes</h5>
             <span>
               <h5>Your Score</h5>
               {

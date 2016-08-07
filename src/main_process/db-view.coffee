@@ -45,8 +45,6 @@ module.exports = class DbView extends IDb
       @on 'load', =>
         loadDatabase()
 
-
-
   #
   # Adds user into the database.
   # Will check if the parameter use already exists in the database
@@ -61,11 +59,11 @@ module.exports = class DbView extends IDb
       @insertRecord data, (result) =>
         #If it exists already,it won't insert, so update
         if result.exists
-          @updateRecords data,=>
+          @updateRecords data, (args) =>
             if !_.isUndefined callback
-              callback()
+              callback(args)
         else
-          callback()
+          callback( {rows: 1 })
 
 
     if !@isReady()

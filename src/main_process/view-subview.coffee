@@ -61,6 +61,6 @@ module.exports = class SubView extends UIItem
       else
         @dataSource.push data
 
-      onSaved = ->
-        resolve()
+      onSaved = (args) ->
+        resolve(args)
       @db.save data, onSaved
