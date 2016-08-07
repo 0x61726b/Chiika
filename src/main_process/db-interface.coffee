@@ -13,7 +13,7 @@
 #authors: arkenthera
 #Description:
 #----------------------------------------------------------------------------
-NoSQL     = require 'NoSQL'
+NoSQL     = require 'nosql'
 path      = require 'path'
 _         = require 'lodash'
 _when     = require 'when'
