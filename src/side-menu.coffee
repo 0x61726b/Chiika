@@ -100,6 +100,9 @@ SideMenu = React.createClass
       menuItemsOfThisCategory.map (menuItem,j) =>
         @renderMenuItem(menuItem,j + 1)
 
+  openModal: ->
+    window.yuiModal()
+
   render: () ->
     (<div className="sidebar">
       <div className="topLeft">
@@ -130,6 +133,7 @@ SideMenu = React.createClass
               </div>
           }
         </ul>
+        <button className="button raised red" onClick={@openModal} id="settings-button">Settings</button>
       </div>
     </div>)
 

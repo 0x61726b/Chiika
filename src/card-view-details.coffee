@@ -14,12 +14,12 @@
 #Description:
 #----------------------------------------------------------------------------
 
-React                               = require('react')
+React = require('react')
 
-_                                   = require 'lodash'
+_ = require 'lodash'
 
-CardView                            = require './card-view'
-LoadingMini                         = require './loading-mini'
+CardView = require './card-view'
+LoadingMini = require './loading-mini'
 
 module.exports = React.createClass
   getInitialState: ->
@@ -35,7 +35,7 @@ module.exports = React.createClass
         userScore: 0
   componentWillMount: ->
     console.log "Will mount"
-    id =  @props.params.id
+    id = @props.params.id
 
     owner = 'myanimelist'
 
@@ -56,23 +56,21 @@ module.exports = React.createClass
     if scoring.type == 'normal' #0-10
       userScore = scoring.userScore
       remainder = 10 - userScore
-
-
-    options = {
-      type: 'doughnut',
-      options: { legend: { display: false}, cutoutPercentage: 75 },
-      data: {
-        labels: ["Your Score", "Total"],
-        datasets: [{
-          label: '# of Votes',
-          data: [userScore,remainder],
-          backgroundColor: ['rgba(255, 159, 64, 1)'],
-          borderColor: [
-            'rgba(255, 159, 64, 1)'],
-          borderWidth: 0
-          }]}
+      options = {
+        type: 'doughnut',
+        options: { legend: { display: false}, cutoutPercentage: 60 },
+        data: {
+          datasets: [{
+            data: [userScore,remainder],
+            backgroundColor: ["#0288D1"]
+            },{
+            data: [remainder,userScore],
+            backgroundColor: ["#6A1B9A"]
+          }]
+          labels: ["e","y"]
+        }
       }
-    chart = new Chart(document.getElementById("score-circle"),options)
+      chart = new Chart(document.getElementById("score-circle"),options)
 
   render: ->
     <div className="detailsPage">
@@ -110,22 +108,22 @@ module.exports = React.createClass
         </div>
         <div className="detailsPage-score detailsPage-row">
           <div>
-            <canvas id="score-circle" width="200" height="200"></canvas>
+            <canvas id="score-circle" width="100" height="100"></canvas>
           </div>
           <span className="detailsPage-score-info">
-              <h5>From 5,854 votes</h5>
-              <span>
-                <h5>Your Score</h5>
-                {
-                  if @state.layout.scoring.type == "normal"
-                    <select className="button yellow" name="" value={@state.layout.scoring.userScore}>
-                    {
-                      [0,1,2,3,4,5,6,7,8,9,10].map (score,i) =>
-                        <option value={score} key={i}>{score}</option>
-                    }
-                    </select>
-                }
-              </span>
+            <h5>From 5,854 votes</h5>
+            <span>
+              <h5>Your Score</h5>
+              {
+                if @state.layout.scoring.type == "normal"
+                  <select className="button yellow" name="" value={@state.layout.scoring.userScore}>
+                  {
+                    [0,1,2,3,4,5,6,7,8,9,10].map (score,i) =>
+                      <option value={score} key={i}>{score}</option>
+                  }
+                  </select>
+              }
+            </span>
             </span>
         </div>
         <div className="detailsPage-miniCards detailsPage-row">

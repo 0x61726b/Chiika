@@ -45,7 +45,6 @@ module.exports = React.createClass
       remote.getCurrentWindow().maximize()
       @emitter.emit 'titlebar-maximize'
 
-    
 
   render: ->
     <div className="titlebar">

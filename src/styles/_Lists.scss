@@ -3,6 +3,9 @@
   height: 100%;
 }
 /****************************************/
+div.gridbox .objbox {
+  background-color: $body-bg;
+}
 div.gridbox_material.gridbox .xhdr {
   background-color: $body-bg;
   border: none;

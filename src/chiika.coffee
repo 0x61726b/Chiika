@@ -20,6 +20,7 @@ React = require('react')
 
 SideMenu = require './side-menu'
 Titlebar = require './titlebar'
+Settings = require './settings'
 LoadingScreen = require './loading-screen'
 Home = require './home'
 
@@ -38,6 +39,9 @@ Content = React.createClass
       </div>
       <div className="content">
         {this.props.props.children}
+      </div>
+      <div id="settings">
+        <Settings />
       </div>
     </div>)
 
