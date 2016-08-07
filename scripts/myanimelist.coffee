@@ -24,6 +24,9 @@ getLibraryUrl = (type,user) ->
 
 authUrl = 'http://myanimelist.net/api/account/verify_credentials.xml'
 
+getSearchUrl = (type,keywords) ->
+  "http://myanimelist.net/api/#{type}/search.xml?q=#{keywords}"
+
 _       = require process.cwd() + '/node_modules/lodash'
 _when   = require process.cwd() + '/node_modules/when'
 string  = require process.cwd() + '/node_modules/string'
@@ -121,6 +124,21 @@ module.exports = class MyAnimelist
 
            callback(result)
 
+  #
+  # Searches animelist either manga or anime
+  #
+  search: (type,keywords,callback) ->
+    if _.isUndefined @malUser
+     @chiika.logger.error("User can't be retrieved.Aborting search request.")
+     callback( { success: false })
+    else
+     onSearchComplete = (error,response,body) =>
+       @chiika.parser.parseXml(body)
+                     .then (result) =>
+                       callback(result.anime.entry)
+
+     @chiika.makeGetRequestAuth getSearchUrl(type,keywords.split(" ").join("+")),{ userName: @malUser.realUserName, password: @malUser.password },null, onSearchComplete
+
 
 
 
@@ -147,6 +165,11 @@ module.exports = class MyAnimelist
         @animelist = animeListView.getData()
         chiika.logger.script("[yellow](#{@name}) Animelist data length #{@animelist.length} #{@name}")
 
+      animelistExtraView = @chiika.ui.getUIItem('animeList_extra')
+      if animelistExtraView?
+        @animelistExtra = animelistExtraView.getData()
+        chiika.logger.script("[yellow](#{@name}) AnimelistExtra data length #{@animelistExtra.length} #{@name}")
+
       mangaListView = @chiika.ui.getUIItem('mangaList_myanimelist')
       if mangaListView?
         @mangalist = mangaListView.getData()
@@ -163,7 +186,7 @@ module.exports = class MyAnimelist
       async.push @createViewMangalist()
 
       testView =
-        name: "animelist_extra"
+        name: "animeList_extra"
         owner: @name
         displayName: 'subview'
         displayType: 'subview'
@@ -176,69 +199,7 @@ module.exports = class MyAnimelist
       _when.all(async).then => update.defer.resolve()
 
 
-    @on 'details-layout', (args) =>
-      chiika.logger.script("[yellow](#{@name}) Details-Layout #{args.id}")
 
-      id = args.id
-
-      animeEntry = _.find @animelist, (o) -> (o.mal_id) == args.id
-
-
-      if animeEntry?
-        entry = animeEntry
-        title = entry.animeTitle
-        score = entry.animeScore
-        type = entry.animeType
-        season = entry.animeSeason
-        score = parseInt(entry.animeScore)
-
-
-        image = entry.animeImage
-        synonyms = entry.animeSynonyms
-
-        if synonyms?
-          synonyms = synonyms.split(";")[0]
-        else
-          synonyms = ""
-
-      # if mangaEntry?
-      #   entry = mangaEntry
-      #   title = entry.mangaTitle
-      #   score = entry.mangaScore
-      #   type = entry.mangaType
-      #   season = entry.mangaSeason
-      #   score = entry.mangaScore
-
-      typeCard =
-        name: 'typeMiniCard'
-        title: 'Type'
-        content: type
-        type: 'miniCard'
-
-      seasonCard =
-        name: 'scoreMiniCard'
-        title: 'Season'
-        content: season
-        type: 'miniCard'
-
-      detailsLayout =
-        title: title
-        genres: synonyms
-        list: true
-        synopsis: ''
-        cover: image
-        characters: []
-        actionButtons: [
-          { name: 'Torrent', action: 'torrent',color: 'lightblue' },
-          { name: 'Library', action: 'library',color: 'purple' }
-          { name: 'Play Next', action: 'playnext',color: 'teal' }
-          { name: 'Search', action: 'search',color: 'green' }
-        ]
-        scoring:
-          type: 'normal'
-          userScore: score
-        miniCards: [typeCard,seasonCard]
-      args.return(detailsLayout)
 
     # This event is called each time the associated view needs to be updated then saved to DB
     # Note that its the actual data refreshing. Meaning for example, you need to SYNC your data to the remote one, this event occurs
@@ -263,8 +224,83 @@ module.exports = class MyAnimelist
           else
             update.defer.resolve({ success: result.success })
 
+      else if update.view.name == 'animeList_extra'
+        anime = update.params.anime
+
+        if anime?
+          @chiika.logger.script("[yellow](#{@name}) animeList_extra update!")
+
+
+          matchXml = (v) ->
+            newAnimeEntry = {}
+            newAnimeEntry.animeEnglish = v.english
+            newAnimeEntry.animeTitle = v.title
+            newAnimeEntry.animeSynonyms = v.synonyms
+            newAnimeEntry.animeType = v.type
+            newAnimeEntry.animeStartDate = v.start_date
+            newAnimeEntry.animeEndDate = v.end_date
+            newAnimeEntry.animeStatus = v.status
+            newAnimeEntry.animeImage = v.image
+            newAnimeEntry.animeScoreAverage = v.score
+            newAnimeEntry.animeSynopsis = v.synopsis
+            newAnimeEntry
+
+          newAnimeEntry = {}
+          @search 'anime',anime.animeTitle, (list) =>
+            isArray = false
+            if _.isArray list
+              isArray = true
+              _.forEach list, (v,k) =>
+                if v.id == anime.mal_id
+                  newAnimeEntry = matchXml(v)
+                  return false
+            else
+              newAnimeEntry = matchXml(list)
+
+            newAnimeEntry.mal_id = anime.mal_id
+
+            if isArray && list.length > 0
+              update.view.setData(newAnimeEntry,'mal_id').then => update.defer.resolve({ success: true, entry: newAnimeEntry, count: list.length })
+            else if _.size(list) > 0
+              update.view.setData(newAnimeEntry,'mal_id').then =>
+                update.defer.resolve({ success: true, entry: newAnimeEntry })
+            else
+              update.defer.resolve({ success: false, response: 'No entry.' })
+        else
+          update.defer.resolve({ success: false, response: body })
       else
         update.defer.resolve({ success: false })
+
+
+
+    @on 'details-layout', (args) =>
+      chiika.logger.script("[yellow](#{@name}) Details-Layout #{args.id}")
+
+      defer = _when.defer()
+      id = args.id
+
+      animeEntry = _.find @animelist, (o) -> (o.mal_id) == args.id
+      animeExtraEntry = _.find @animelistExtra, (o) -> (o.mal_id) == args.id
+
+      if animeEntry? && animeExtraEntry?
+        combine = animeEntry
+        _.assign combine,animeExtraEntry
+        args.return(@getDetailsLayout(combine))
+
+
+      if animeEntry?
+        defer.promise.then (result) =>
+          combine = animeEntry
+          _.assign combine,result.entry
+          args.return(@getDetailsLayout(combine))
+
+
+        @chiika.requestViewUpdate('animeList_extra',@name, defer,{ anime: animeEntry })
+        #
+        # If there is no extra record,return the raw one
+        #
+        if !animeExtraEntry?
+          args.return(@getDetailsLayout(animeEntry))
 
     # This function is called from the login window.
     # For example, if you need a token, retrieve it here then store it by calling chiika.custom.addkey
@@ -290,10 +326,12 @@ module.exports = class MyAnimelist
               chiika.requestViewUpdate('animeList_myanimelist',@name,deferUpdate1)
               chiika.requestViewUpdate('mangaList_myanimelist',@name,deferUpdate2)
 
+              console.log @malUser
+
               _when.all(async).then =>
                 args.return( { success: true })
 
-            newUser = { userName: args.user + "_" + @name,owner: @name, password: args.password, realUserName: args.user }
+            newUser = { userName: args.user + "_" + @name,owner: @name, password: args.pass, realUserName: args.user }
 
             chiika.parser.parseXml(body)
                          .then (xmlObject) =>
@@ -318,6 +356,76 @@ module.exports = class MyAnimelist
 
       chiika.makePostRequestAuth( authUrl, { userName: args.user, password: args.pass },null, onAuthComplete )
 
+
+
+
+  getDetailsLayout: (animeEntry) ->
+    entry = animeEntry
+    title = entry.animeTitle ? ""
+    score = entry.animeScore ? "0.0"
+    type = entry.animeType ? ""
+    season = entry.animeSeason ? ""
+    score = parseInt(entry.animeScore) ? 0
+    averageScore = (entry.animeScoreAverage) ? "0"
+
+
+    image = entry.animeImage ? "le_default_image"
+    synonyms = entry.animeSynonyms ? ""
+
+    if synonyms?
+      synonyms = synonyms.split(";")[0]
+    else
+      synonyms = ""
+
+    synopsis = entry.animeSynopsis ? ""
+    english = entry.animeEnglish ? ""
+
+    if synopsis?
+      #Replace html stuff
+      synopsis = synopsis.split("[i]").join("<i>")
+      synopsis = synopsis.split("[/i]").join("</i>")
+
+    typeCard =
+      name: 'typeMiniCard'
+      title: 'Type'
+      content: type
+      type: 'miniCard'
+
+    seasonCard =
+      name: 'seasonMiniCard'
+      title: 'Season'
+      content: season
+      type: 'miniCard'
+
+    avgScoreCard =
+      name: 'averageScoreMiniCard'
+      title: 'Average Score'
+      content: averageScore
+      type: 'miniCard'
+
+    cards = [typeCard,seasonCard]
+
+    if averageScore != ""
+      cards.push avgScoreCard
+
+    detailsLayout =
+      title: title
+      genres: synonyms
+      list: true
+      synopsis: synopsis
+      cover: image
+      english: english
+      characters: []
+      actionButtons: [
+        { name: 'Torrent', action: 'torrent',color: 'lightblue' },
+        { name: 'Library', action: 'library',color: 'purple' }
+        { name: 'Play Next', action: 'playnext',color: 'teal' }
+        { name: 'Search', action: 'search',color: 'green' }
+      ]
+      scoring:
+        type: 'normal'
+        userScore: score
+      miniCards: [typeCard,seasonCard,avgScoreCard]
   #
   # In the @createViewAnimelist, we created 5 tab
   # Here we supply the data of the tabs

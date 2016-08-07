@@ -64,10 +64,16 @@ module.exports = class ChiikaPublicApi
       wnd.webContents.send message,args
 
 
-  requestViewUpdate: (viewName,owner,defer) ->
+  requestViewUpdate: (viewName,owner,defer,params) ->
+    if !params?
+      params = {}
+
+    if _.isUndefined params
+      params = {}
+
     view = chiika.uiManager.getUIItem(viewName)
     if view?
-      @emit 'view-update', { calling: owner, view: view, defer: defer }
+      @emit 'view-update', { calling: owner, view: view, defer: defer, params: params }
     else
       chiika.logger.error("Can't update a non-existent view.")
 

@@ -18,6 +18,7 @@ _               = require 'lodash'
 _when           = require 'when'
 UIItem          = require './ui-item'
 TabView         = require './ui-tabView'
+SubView         = require './view-subview'
 
 
 
@@ -96,6 +97,14 @@ module.exports = class UIManager
     tabView.loadTabData()
     tabView
 
+  addSubView: (item) ->
+    subview = new SubView({ name: item.name, displayName: item.displayName, displayType: item.displayType, owner: item.owner, category: 'not_display'})
+    dbView = chiika.dbManager.createViewDb(item.name)
+    subview.setDatabaseInterface(dbView)
+    subview.load()
+    subview
+
+
   #
   # Adds a UI item respective to their type, then creates a DB view for its data source
   #
@@ -115,7 +124,7 @@ module.exports = class UIManager
         _.assign findView,item
         @uiItems.splice(index,1,findView)
       else
-        view = new UIItem({ name: item.name, displayName: item.displayName, displayType: item.displayType, owner: item.owner, category: 'not_display'})
+        view = @addSubView(item)
         @uiItems.push view
 
     if item.displayType == 'TabGridView'

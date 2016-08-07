@@ -38,8 +38,11 @@ module.exports = class ViewManager
     else
       @scrollData[viewName] = { scrollData: { } }
       @scrollData[viewName].scrollData[last] = $(".objbox").scrollTop()
-  onTabViewUnmount: (viewName) ->
-    #@scrollData[viewName] = null
+
+  onTabViewUnmount: (viewName,index) ->
+    @tabViewTabIndexCounter[viewName] = { index: index }
+    if @scrollData[viewName]?
+      @scrollData[viewName].scrollData[index] = $(".objbox").scrollTop()
 
   getTabScrollAmount: (viewName,index) ->
     if @scrollData[viewName]?

@@ -32,8 +32,6 @@ module.exports = React.createClass
 
   currentGrid: null
   scrollPending: false
-  componentWillMount: ->
-
   componentWillReceiveProps: (props) ->
     tabCache = chiika.viewManager.getTabSelectedIndexByName(props.route.view.name)
     if @state.view.name != props.route.view.name
@@ -63,7 +61,7 @@ module.exports = React.createClass
 
 
   onSelect: (index,last) ->
-    @setState { currentTabIndex: index }
+    @setState { currentTabIndex: index, lastTabIndex: last }
     chiika.viewManager.onTabSelect(@state.view.name,index,last)
 
 
@@ -180,7 +178,9 @@ module.exports = React.createClass
 
   componentWillUnmount: ->
     #chiika.viewManager.onTabSelect(@props.route.view.name,@state.currentTabIndex)
-    chiika.viewManager.onTabViewUnmount(@state.view.name)
+    chiika.viewManager.onTabViewUnmount(@state.view.name,@state.currentTabIndex)
+    scroll = chiika.viewManager.getTabScrollAmount(@state.view.name,@state.currentTabIndex)
+
     if @currentGrid?
       $(".form-control").off 'input'
       @currentGrid.clearAll()

@@ -44,7 +44,7 @@ module.exports = React.createClass
       console.log @state.layout
 
   componentWillUnmount:->
-    console.log "Will unmount"
+    chiika.ipc.disposeListeners('details-layout-request-response')
   componentDidMount: ->
     console.log "Mount"
   componentDidUpdate: ->
@@ -142,14 +142,10 @@ module.exports = React.createClass
             <div className="title">
               <h2>Synopsis</h2>
             </div>
-            <div className="card-content">
-              {
-                if @state.layout.synopsis.length > 0
-                  @state.layout.synopsis
-                else
-                  <LoadingMini />
-              }
-            </div>
+            {
+              if @state.layout.synopsis.length > 0
+                <div className="card-content" dangerouslySetInnerHTML={{__html: @state.layout.synopsis }} />
+            }
           </div>
           <div className="detailsPage-card-item">
             <div className="title">
@@ -157,9 +153,7 @@ module.exports = React.createClass
             </div>
             <div className="card-content">
               {
-                if @state.layout.characters.length == 0
-                  <LoadingMini />
-                else
+                if @state.layout.characters.length > 0
                   @state.layout.characters.map (ch,i) =>
                     <div key={i}>
                       <img src={ch.image} alt=""></img>

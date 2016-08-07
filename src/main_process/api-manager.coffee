@@ -32,6 +32,7 @@ module.exports = class APIManager
   scriptsDirs: []
   emitter: null
 
+
   constructor: ->
     global.api = this
     @emitter = new Emitter
@@ -157,7 +158,6 @@ module.exports = class APIManager
     _when.all(@promises)
 
 
-
   #
   # Compiles javascript code
   #
@@ -181,6 +181,8 @@ module.exports = class APIManager
 
         @onScriptCompiled cachedScriptPath
         callback()
+
+
 
   #
   # Watch the changes of the scripts and recompile

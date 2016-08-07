@@ -77,6 +77,7 @@ module.exports = class RequestManager
     request.post { url: url, headers: headers },onRequestReturn
 
 
+
   makeGetRequestAuth: (url,user,headers,callback) ->
     form = { username: user.userName, password: user.password }
     auth = { user: user.userName, password: user.password }

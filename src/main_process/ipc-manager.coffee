@@ -151,6 +151,7 @@ module.exports = class IpcManager
       chiika.apiManager.postInit()
 
 
+
   loginCustom: ->
     @receive 'set-user-auth-pin', (event,args) =>
       chiika.chiikaApi.emitTo args.service,'set-user-auth-pin',{}

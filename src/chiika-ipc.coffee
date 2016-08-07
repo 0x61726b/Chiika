@@ -63,7 +63,6 @@ module.exports = class ChiikaIPC
 
     disposable = @receive 'details-layout-request-response', (event,args) =>
       callback(args)
-      @disposeListeners('details-layout-request-response')
 
   refreshViewByName: (name) ->
     @sendReceiveIPC 'refresh-view-by-name',name, (event,args,defer) =>
