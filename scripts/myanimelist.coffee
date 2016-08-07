@@ -214,7 +214,7 @@ module.exports = class MyAnimelist
           else
             @animelistExtra.push v
 
-      console.log @animelistExtra
+      
       chiika.logger.script("[yellow](#{@name}) AnimelistExtra data length #{@animelistExtra.length} #{@name}")
 
       mangaListView = @chiika.ui.getUIItem('mangaList_myanimelist')

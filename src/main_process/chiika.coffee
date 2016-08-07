@@ -71,7 +71,7 @@ process.on 'uncaughtException',(err) ->
 module.exports =
 class Application
   window: null,
-  loginWindow: null,
+  loginWindow: null
 
 
   #
@@ -126,6 +126,8 @@ class Application
                         @windowManager.getWindowByName('login').show()
                         @windowManager.getWindowByName('loading').hide()
 
+                        @emitter.emit 'chiika-ready'
+
 
         # If there are no users but there are UI data
         # preload UI data first, this way scripts can instantly access UI data without waiting
@@ -139,6 +141,8 @@ class Application
                           @apiManager.postInit()
                         @windowManager.getWindowByName('login').show()
                         @windowManager.getWindowByName('loading').hide()
+
+                        @emitter.emit 'chiika-ready'
 
         if userCount > 0
           # If there are no UI items
@@ -156,6 +160,8 @@ class Application
                             @apiManager.postInit()
                             @windowManager.closeLoadingWindow()
                             @windowManager.showMainWindow(true)
+
+                            @emitter.emit 'chiika-ready'
           else
             #This will probably fail if more than one script is being executed...
             #This means when all scripts are compiled,preload UI items
@@ -166,160 +172,9 @@ class Application
                           @windowManager.closeLoadingWindow()
                           @windowManager.showMainWindow(true)
 
+                          @emitter.emit 'chiika-ready'
 
-  animePrePrequest: (anime,receiver,sendToMainWindow,defer,defCallback) ->
-    if defer
-      deferredCalls = []
-    if anime? && !anime.series_english?
-      if defer
-        _deferred1 = _when.defer()
-        deferredCalls.push _deferred1.promise
-      @requestAnimeSearch anime.series_title, (completed) =>
-        if defer
-          _deferred1.resolve()
-          @sendIPC receiver, 'request-search-anime-response',completed
-
-          if sendToMainWindow
-            @sendIPC @window.window.webContents, 'request-search-anime-response',completed
-        else
-          @sendIPC receiver, 'request-search-anime-response',completed
-
-          if sendToMainWindow
-            @sendIPC @window.window.webContents, 'request-search-anime-response',completed
-
-    if anime? && !anime.misc_genres?
-      if defer
-        _deferred2 = _when.defer()
-        deferredCalls.push _deferred2.promise
-      @requestAnimeDetailsSmall anime.series_animedb_id, (completed) =>
-        if defer
-          _deferred2.resolve()
-          @sendIPC receiver, 'request-anime-details-small-response', completed
-          if sendToMainWindow
-            @sendIPC @window.window.webContents, 'request-anime-details-small-response',completed
-        else
-          sender.send 'request-anime-details-small-response', completed
-          if sendToMainWindow
-            @sendIPC @window.window.webContents, 'request-anime-details-small-response',completed
-
-    if anime? && !anime.misc_source?
-      if defer
-        _deferred3 = _when.defer()
-        deferredCalls.push _deferred3.promise
-      @requestAnimeDetailsMalPage anime.series_animedb_id, (completed) =>
-        if defer
-          _deferred3.resolve()
-          @sendIPC receiver, 'request-anime-details-mal-page-response', completed
-          if sendToMainWindow
-            @sendIPC @window.window.webContents, 'request-anime-details-mal-page-response',completed
-        else
-          @sendIPC receiver, 'request-anime-details-mal-page-response', completed
-          if sendToMainWindow
-            @sendIPC @window.window.webContents, 'request-anime-details-mal-page-response',completed
-
-    if defer
-      _when.all(deferredCalls)
-            .then ( => defCallback()
-            )
-
-  requestAnimeDetailsMalPage: (animeId,callback) ->
-    application.logDebug "RequestAnimeDetailsMalPage - " + animeId
-    @tools.animeDetailsMalPage animeId, (response) ->
-      animeDetails = { series_animedb_id: animeId }
-      _.assign animeDetails, response.animeDetails
-      Database.updateAnimeEntryMalPage animeDetails, (dbResponse) ->
-        if dbResponse.updated
-          dbAnimeCb = (data) ->
-            callback { newDb: data, updatedEntry: animeDetails }
-          Database.loadAnimeDb dbAnimeCb
-  requestAnimeDetailsSmall: (animeId,callback) ->
-    application.logDebug "RequestAnimeDetailsSmall - " + animeId
-    @tools.animeDetailsSmall animeId, (response) ->
-      animeDetails = { series_animedb_id: animeId }
-      _.assign animeDetails,response.animeDetails
-      Database.updateAnimeEntrySmall animeDetails,->
-        dbAnimeCb = (data) ->
-          callback {newDb: data, updatedEntry: animeDetails}
-        Database.loadAnimeDb dbAnimeCb
-
-  requestAnimeSearch: (searchTerms,callback) ->
-    application.logDebug "RequestAnimeSearch - " + searchTerms
-    reqSearchCb = (response) =>
-      if response.success
-        if response.anime.entry?
-          if _.isArray response.anime.entry
-            application.logInfo "Search returned succesful with " + response.anime.entry.length + " entries "
-          else
-            application.logInfo "Search returned succesful with 1 entry"
-
-          #Search data has contributed to the Database
-          #Let the renderer know the new data
-          Database.updateAnimeDbFromSearchData response.anime.entry,->
-            dbAnimeCb = (data) ->
-              callback { success: true, list : data,searchResults: response.anime.entry }
-            Database.loadAnimeDb dbAnimeCb
-      else
-        #event.sender.send 'request-search-response', { success: false, response: response }
-        if response.statusCode == 204
-          application.logInfo "Search returned empty for " + searchTerms
-        callback response
-
-    @tools.searchAnime @loggedUser, searchTerms,reqSearchCb
-  onRequestError: (callback) ->
-    console.log callback.errorMessage
-  sendIPC: (receiver,message,args) ->
-    application.logDebug ">IPC: " + message
-    receiver.send message,args
-
-  downloadUserImage: (id) ->
-    onFinished = =>
-      @window.window.webContents.send('download-image')
-      application.logInfo "User image download has finished."
-    @tools.downloadUserImage id,onFinished
   getAppHome: ->
     @chiikaHome
   getDbHome: ->
     path.join(@chiikaHome,"Data","Database")
-  checkRememberWindowProperties: ->
-    if @appOptions.RememberWindowSizeAndPosition
-      if @appOptions.WindowProperties? && @appOptions.WindowProperties.size?
-        @mainWindowSize = @appOptions.WindowProperties.size
-      else
-        @mainWindowSize = @calculateWindowSize()
-
-        if !@appOptions.WindowProperties?
-          @appOptions.WindowProperties = {}
-        @appOptions.WindowProperties.size = @mainWindowSize
-      if @appOptions.WindowProperties? && @appOptions.WindowProperties.position?
-        @mainWindowPosition = @appOptions.WindowProperties.position
-      else
-        screenRes = @getScreenRes()
-        @mainWindowPosition = { x: screenRes.width / 2 - @mainWindowSize.width/2, y: screenRes.height / 2 - @mainWindowSize.height/2  }
-        if !@appOptions.WindowProperties?
-          @appOptions.WindowProperties = {}
-        @appOptions.WindowProperties.position = @mainWindowPosition
-
-      @saveOptions()
-    else
-      @mainWindowSize = @calculateWindowSize()
-      screenRes = @getScreenRes()
-      @mainWindowPosition = { x: screenRes.width / 2 - @mainWindowSize.width/2, y: screenRes.height / 2 - @mainWindowSize.height/2  }
-
-  # openLoginWindow: ->
-  #   options = {
-  #      frame:false,
-  #      width:800,
-  #      height:600,
-  #      icon:'./resources/icon.png'
-  #   }
-  #
-  #
-  #   @LoginWindow = new BrowserWindow(options);
-  #   @LoginWindow.loadURL("file://#{__dirname}/../renderer/MyAnimeListLogin.html")
-  #   #@LoginWindow.openDevTools()
-
-
-
-
-
-application = new Application

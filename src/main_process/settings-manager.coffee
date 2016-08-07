@@ -20,6 +20,8 @@ _                   = require 'lodash'
 _when               = require 'when'
 path                = require 'path'
 
+
+
 module.exports = class SettingsManager
   appOptions: null
   firstLaunch: false
@@ -30,6 +32,11 @@ module.exports = class SettingsManager
   constructor: ->
     #Initialize settings related stuff
     process.env.CHIIKA_HOME = chiika.getAppHome()
+
+    if process.env.TEST_MODE?
+      chiika.testMode = true
+    else
+      chiika.testMode = false
 
   initialize: ->
     defer = _when.defer()
