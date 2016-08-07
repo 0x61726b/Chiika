@@ -6,14 +6,20 @@ addons:
     packages:
       - xvfb
 
+before_install:
+  - if [[ $TRAVIS_OS_NAME = "linux" ]]; then
+      export DISPLAY=:99.0;
+      sh -e /etc/init.d/xvfb start;
+      sleep 3;
+    fi
+
+
 install:
-  - export DISPLAY=':99.0'
-  - Xvfb :99 -extension RANDR -screen 0 1024x768x24 > /dev/null 2>&1 &
-
-
-script:
   - npm install -g coffee-script
   - npm install -g mocha
   - npm install -g electron-mocha
   - npm install
   - electron-mocha --compilers coffee:coffee-script/register ./spec/app-spec.coffee
+
+script:
+  - npm install
