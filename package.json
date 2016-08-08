@@ -84,6 +84,7 @@
     "electron-windows-installer": "^1.2.2",
     "fluentnode": "^0.6.3",
     "fs-jetpack": "^0.7.1",
+    "mkdirp": "^0.5.1",
     "gulp": "^3.9.1",
     "gulp-babel": "^5.1.0",
     "gulp-coffee-react": "^1.0.0",
