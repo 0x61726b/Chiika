@@ -105,76 +105,75 @@ class Application
 
     @appDelegate.run()
 
+
     @appDelegate.ready =>
       @dbManager.onLoad =>
-        # run() method will open 3 windows when the app is ready
-        # loading,main,login (main,login not visible)
-        # If there are no users, close loading,show login
-        # If there are users, close loading, show main window
-        userCount = @dbManager.usersDb.users.length
-        chiika.logger.verbose("User count #{userCount}")
+        @run()
 
-        # If there are no users and UI data
-        # Compile scripts first
-        # Because if there are no UI data, UI Manager will ask scripts to create UI data, so we need scripts compiled
-        #
-        if userCount == 0 && @uiManager.getUIItemsCount() == 0
-          @apiManager.compileUserScripts().then =>
-            @uiManager.preloadUIItems()
-                      .then =>
-                        chiika.logger.verbose("Preloading UI complete!")
-                        @windowManager.getWindowByName('login').show()
-                        @windowManager.getWindowByName('loading').hide()
+  run: ->
+    # appDelegate.run() method will open 3 windows when the app is ready
+    # loading,main,login (main,login not visible)
+    # If there are no users, close loading,show login
+    # If there are users, close loading, show main window
+    userCount = @dbManager.usersDb.users.length
+    chiika.logger.verbose("User count #{userCount}")
 
-                        @emitter.emit 'chiika-ready'
+    # If there are no users and UI data
+    # Compile scripts first
+    # Because if there are no UI data, UI Manager will ask scripts to create UI data, so we need scripts compiled
+    #
+    if userCount == 0 && @uiManager.getUIItemsCount() == 0
+      @apiManager.compileUserScripts().then =>
+        @uiManager.preloadUIItems()
+                  .then =>
+                    chiika.logger.verbose("Preloading UI complete!")
+                    @windowManager.getWindowByName('login').show()
+                    @windowManager.getWindowByName('loading').hide()
 
 
-        # If there are no users but there are UI data
-        # preload UI data first, this way scripts can instantly access UI data without waiting
-        #
-        if userCount == 0 && @uiManager.getUIItemsCount() > 0
+    # If there are no users but there are UI data
+    # preload UI data first, this way scripts can instantly access UI data without waiting
+    #
+    if userCount == 0 && @uiManager.getUIItemsCount() > 0
+      @uiManager.preloadUIItems()
+                .then =>
+                  chiika.logger.verbose("Preloading UI complete!")
+                  @apiManager.compileUserScripts().then =>
+                    @uiManager.checkUIData().then =>
+                      @apiManager.postInit()
+                    @windowManager.getWindowByName('login').show()
+                    @windowManager.getWindowByName('loading').hide()
+
+    if userCount > 0
+      # If there are no UI items
+      # compile scripts first
+      # if there are UI items,
+      # preload them first so when script is ready, they can access them right of the bat
+      # after preload and script compile, check if the views need update
+      # if they do, call view-update event so script can respond
+      if @uiManager.getUIItemsCount() > 0
+        @uiManager.preloadUIItems()
+                  .then =>
+                    chiika.logger.verbose("Preloading UI complete!")
+                    @apiManager.compileUserScripts().then =>
+                      @uiManager.checkUIData().then =>
+                        @apiManager.postInit()
+                        @windowManager.closeLoadingWindow()
+                        @windowManager.showMainWindow(true)
+      else
+        #This will probably fail if more than one script is being executed...
+        #This means when all scripts are compiled,preload UI items
+        @apiManager.compileUserScripts().then =>
           @uiManager.preloadUIItems()
                     .then =>
                       chiika.logger.verbose("Preloading UI complete!")
-                      @apiManager.compileUserScripts().then =>
-                        @uiManager.checkUIData().then =>
-                          @apiManager.postInit()
-                        @windowManager.getWindowByName('login').show()
-                        @windowManager.getWindowByName('loading').hide()
-
-                        @emitter.emit 'chiika-ready'
-
-        if userCount > 0
-          # If there are no UI items
-          # compile scripts first
-          # if there are UI items,
-          # preload them first so when script is ready, they can access them right of the bat
-          # after preload and script compile, check if the views need update
-          # if they do, call view-update event so script can respond
-          if @uiManager.getUIItemsCount() > 0
-            @uiManager.preloadUIItems()
-                      .then =>
-                        chiika.logger.verbose("Preloading UI complete!")
-                        @apiManager.compileUserScripts().then =>
-                          @uiManager.checkUIData().then =>
-                            @apiManager.postInit()
-                            @windowManager.closeLoadingWindow()
-                            @windowManager.showMainWindow(true)
-
-                            @emitter.emit 'chiika-ready'
-          else
-            #This will probably fail if more than one script is being executed...
-            #This means when all scripts are compiled,preload UI items
-            @apiManager.compileUserScripts().then =>
-              @uiManager.preloadUIItems()
-                        .then =>
-                          chiika.logger.verbose("Preloading UI complete!")
-                          @windowManager.closeLoadingWindow()
-                          @windowManager.showMainWindow(true)
-
-                          @emitter.emit 'chiika-ready'
+                      @windowManager.closeLoadingWindow()
+                      @windowManager.showMainWindow(true)
 
   getAppHome: ->
     @chiikaHome
   getDbHome: ->
     path.join(@chiikaHome,"Data","Database")
+
+
+app = new Application()

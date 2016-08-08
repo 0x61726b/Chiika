@@ -14,19 +14,36 @@
 #Description:
 #----------------------------------------------------------------------------
 
-describe 'app', ->
+# describe 'app', ->
+#
+#   it 'test', (done) ->
+#     this.timeout(0)
+#
+#     Application = require process.cwd() + '/src/main_process/chiika'
+#
+#     app = new Application()
+#     app.appDelegate.onAppReady().then =>
+#       app.dbManager.onLoad =>
+#         app.run()
+#         setTimeout(done,2000)
+#
+#     test = 42
 
-  it 'test', (done) ->
-    this.timeout(0)
+Application = require('spectron').Application
+assert = require('assert')
 
-    Application = require process.cwd() + '/src/main_process/chiika'
+describe 'application launch',->
+  @timeout(10000)
 
-    app = new Application()
-    app.appDelegate.onAppReady().then =>
-      app.dbManager.onLoad =>
-        app.apiManager.compileUserScripts().then =>
-          app.uiManager.preloadUIItems().then =>
-            chiika.logger.verbose("Preloading UI complete!")
-            done()
+  beforeEach =>
+    @app = new Application { path: process.cwd() + "/.serve/main_process/chiika.js"}
 
-    test = 42
+    @app.start()
+
+  afterEach =>
+    if @app && @app.isRunning()
+      @app.stop()
+
+  it 'shows an initial window', ->
+    @app.client.getWindowCount().then (count) =>
+      assert.equal(count, 1)

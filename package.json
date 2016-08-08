@@ -99,6 +99,7 @@
     "history": "^1.17.0",
     "jasmine-node": "^1.14.5",
     "main-bower-files": "^2.8.0",
-    "react-fontawesome": "^0.3.3"
+    "react-fontawesome": "^0.3.3",
+    "spectron": "^3.3.0"
   }
 }

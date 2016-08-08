@@ -168,10 +168,10 @@ Copy_Node_modules = () ->
       catch
         #console.log "Couldnt find " + modulePath
 
-      if pjson? && existsInFolder
-        for innerModule of pjson.dependencies
-          dependencies.push innerModule
-          recursiveDepFinder innerModule,dependencies
+      # if pjson? && existsInFolder
+      #   for innerModule of pjson.dependencies
+      #     dependencies.push innerModule
+      #     recursiveDepFinder innerModule,dependencies
       return
 
     for name of packageJson.dependencies
