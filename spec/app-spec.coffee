@@ -39,16 +39,11 @@ describe 'application launch', ->
   #   setup.stopApplication(app)
 
 
-  it 'opens test app', (done) =>
+  it 'opens chiika', (done) =>
       setup.startApplication({
         args: [path.join(__dirname, '..')]})
       .then (startedApp) =>
-          app = startedApp
-          app.client.waitUntilWindowLoaded()
-            .browserWindow.focus()
-            .getWindowCount().should.eventually.equal(1)
-            .then =>
-              setup.stopApplication(app).then => done()
+          done()
       baka = 42
 
   # it 'opens chiika', (done) =>

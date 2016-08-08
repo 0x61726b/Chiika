@@ -28,7 +28,10 @@ module.exports = class Setup
     else
       options.startTimeout = 10000
     options.chromeDriverLogPath = process.cwd() + "/logs/log.txt"
-    console.log options
+
+    process.on 'uncaughtException',(err) ->
+      console.log err
+
     app = new Application(options)
     try
       app.start().then =>

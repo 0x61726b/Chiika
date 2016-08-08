@@ -1,0 +1,1083 @@
+[0.348][INFO]: COMMAND InitSession {
+   "desiredCapabilities": {
+      "browserName": "electron",
+      "chromeOptions": {
+         "args": [ "spectron-path=D:\\Arken\\C++\\ElectronProjects\\Chiika\\node_modules\\.bin\\electron.cmd", "spectron-arg0=D:\\Arken\\C++\\ElectronProjects\\Chiika" ],
+         "binary": "D:\\Arken\\C++\\ElectronProjects\\Chiika\\node_modules\\spectron\\bin\\launcher.exe"
+      },
+      "handlesAlerts": true,
+      "javascriptEnabled": true,
+      "locationContextEnabled": true,
+      "loggingPrefs": {
+         "browser": "ALL",
+         "driver": "ALL"
+      },
+      "requestOrigins": {
+         "name": "webdriverio",
+         "url": "http://webdriver.io",
+         "version": "4.2.3"
+      },
+      "rotatable": true
+   }
+}
+[0.349][INFO]: Populating Preferences file: {
+   "alternate_error_pages": {
+      "enabled": false
+   },
+   "autofill": {
+      "enabled": false
+   },
+   "browser": {
+      "check_default_browser": false
+   },
+   "distribution": {
+      "import_bookmarks": false,
+      "import_history": false,
+      "import_search_engine": false,
+      "make_chrome_default_for_user": false,
+      "show_welcome_page": false,
+      "skip_first_run_ui": true
+   },
+   "dns_prefetching": {
+      "enabled": false
+   },
+   "profile": {
+      "content_settings": {
+         "pattern_pairs": {
+            "https://*,*": {
+               "media-stream": {
+                  "audio": "Default",
+                  "video": "Default"
+               }
+            }
+         }
+      },
+      "default_content_setting_values": {
+         "geolocation": 1
+      },
+      "default_content_settings": {
+         "geolocation": 1,
+         "mouselock": 1,
+         "notifications": 1,
+         "popups": 1,
+         "ppapi-broker": 1
+      },
+      "password_manager_enabled": false
+   },
+   "safebrowsing": {
+      "enabled": false
+   },
+   "search": {
+      "suggest_enabled": false
+   },
+   "translate": {
+      "enabled": false
+   }
+}
+[0.350][INFO]: Populating Local State file: {
+   "background_mode": {
+      "enabled": false
+   },
+   "ssl": {
+      "rev_checking": {
+         "enabled": false
+      }
+   }
+}
+[0.354][INFO]: Can not set to US keyboard layout - Some keycodes may beinterpreted incorrectly
+[0.354][INFO]: Launching chrome: "D:\Arken\C++\ElectronProjects\Chiika\node_modules\spectron\bin\launcher.exe" --disable-background-networking --disable-client-side-phishing-detection --disable-component-update --disable-default-apps --disable-hang-monitor --disable-popup-blocking --disable-prompt-on-repost --disable-sync --disable-web-resources --enable-logging --ignore-certificate-errors --load-extension="C:\Users\alperen\AppData\Local\Temp\scoped_dir16048_54\internal" --log-level=0 --metrics-recording-only --no-first-run --password-store=basic --remote-debugging-port=12295 --safebrowsing-disable-auto-update --safebrowsing-disable-download-protection --spectron-arg0="D:\Arken\C++\ElectronProjects\Chiika" --spectron-path="D:\Arken\C++\ElectronProjects\Chiika\node_modules\.bin\electron.cmd" --test-type=webdriver --use-mock-keychain --user-data-dir="C:\Users\alperen\AppData\Local\Temp\scoped_dir16048_30441" data:,
+[0.382][DEBUG]: DevTools request: http://localhost:12295/json/version
+[2.391][DEBUG]: DevTools request failed
+[2.442][DEBUG]: DevTools request: http://localhost:12295/json/version
+[2.637][DEBUG]: DevTools response: {
+   "Browser": "",
+   "Protocol-Version": "1.1",
+   "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Electron/1.3.2 Safari/537.36",
+   "WebKit-Version": "537.36 (@49721773c8dd62828e471ca69e2c89767f98c690)"
+}
+
+[2.638][DEBUG]: DevTools request: http://localhost:12295/json
+[2.639][DEBUG]: DevTools response: [ {
+   "description": "",
+   "devtoolsFrontendUrl": "/devtools/inspector.html?ws=localhost:12295/devtools/page/00706973-a057-4348-8ba3-7238da8adf3d",
+   "id": "00706973-a057-4348-8ba3-7238da8adf3d",
+   "title": "",
+   "type": "page",
+   "url": "file:///D:/Arken/C++/ElectronProjects/Chiika/testDist/static/LoginWindow.html",
+   "webSocketDebuggerUrl": "ws://localhost:12295/devtools/page/00706973-a057-4348-8ba3-7238da8adf3d"
+} ]
+
+[2.640][DEBUG]: DevTools request: http://localhost:12295/json
+[2.641][DEBUG]: DevTools response: [ {
+   "description": "",
+   "devtoolsFrontendUrl": "/devtools/inspector.html?ws=localhost:12295/devtools/page/00706973-a057-4348-8ba3-7238da8adf3d",
+   "id": "00706973-a057-4348-8ba3-7238da8adf3d",
+   "title": "",
+   "type": "page",
+   "url": "file:///D:/Arken/C++/ElectronProjects/Chiika/testDist/static/LoginWindow.html",
+   "webSocketDebuggerUrl": "ws://localhost:12295/devtools/page/00706973-a057-4348-8ba3-7238da8adf3d"
+} ]
+
+[2.647][INFO]: resolved localhost to ["::1","127.0.0.1"]
+[3.648][DEBUG]: DEVTOOLS COMMAND Console.enable (id=1) {
+
+}
+[3.649][DEBUG]: DEVTOOLS COMMAND DOM.getDocument (id=2) {
+
+}
+[3.649][DEBUG]: DEVTOOLS COMMAND Runtime.enable (id=3) {
+
+}
+[3.649][DEBUG]: DEVTOOLS COMMAND Page.enable (id=4) {
+
+}
+[3.649][DEBUG]: DEVTOOLS COMMAND Page.enable (id=5) {
+
+}
+[3.649][DEBUG]: DEVTOOLS RESPONSE Console.enable (id=1) {
+
+}
+[3.649][DEBUG]: DEVTOOLS RESPONSE DOM.getDocument (id=2) {
+   "root": {
+      "baseURL": "data:text/html,chromewebdata",
+      "childNodeCount": 1,
+      "children": [ {
+         "attributes": [  ],
+         "childNodeCount": 2,
+         "children": [ {
+            "attributes": [  ],
+            "childNodeCount": 0,
+            "localName": "head",
+            "nodeId": 3,
+            "nodeName": "HEAD",
+            "nodeType": 1,
+            "nodeValue": ""
+         }, {
+            "attributes": [  ],
+            "childNodeCount": 0,
+            "localName": "body",
+            "nodeId": 4,
+            "nodeName": "BODY",
+            "nodeType": 1,
+            "nodeValue": ""
+         } ],
+         "frameId": "10292.1",
+         "localName": "html",
+         "nodeId": 2,
+         "nodeName": "HTML",
+         "nodeType": 1,
+         "nodeValue": ""
+      } ],
+      "documentURL": "data:text/html,chromewebdata",
+      "localName": "",
+      "nodeId": 1,
+      "nodeName": "#document",
+      "nodeType": 9,
+      "nodeValue": "",
+      "xmlVersion": ""
+   }
+}
+[3.649][DEBUG]: DEVTOOLS EVENT Runtime.executionContextCreated {
+   "context": {
+      "frameId": "10292.1",
+      "id": 1,
+      "isDefault": true,
+      "name": "",
+      "origin": "://"
+   }
+}
+[3.649][DEBUG]: DEVTOOLS RESPONSE Runtime.enable (id=3) {
+
+}
+[3.649][DEBUG]: DEVTOOLS RESPONSE Page.enable (id=4) {
+
+}
+[3.649][DEBUG]: DEVTOOLS RESPONSE Page.enable (id=5) {
+
+}
+[3.649][DEBUG]: DEVTOOLS COMMAND Page.enable (id=6) {
+
+}
+[3.650][DEBUG]: DEVTOOLS RESPONSE Page.enable (id=6) {
+
+}
+[3.650][DEBUG]: DEVTOOLS COMMAND Runtime.evaluate (id=7) {
+   "expression": "(function() { // Copyright (c) 2012 The Chromium Authors. All rights reserved.\n// Use of this source code is governed by a BSD-style license that can be\n// found in the LICENSE file.\n\n/**\n * Enum f...",
+   "returnByValue": true
+}
+[3.656][DEBUG]: DEVTOOLS RESPONSE Runtime.evaluate (id=7) {
+   "result": {
+      "type": "object",
+      "value": {
+         "status": 0,
+         "value": 1
+      }
+   },
+   "wasThrown": false
+}
+[3.656][INFO]: RESPONSE InitSession {
+   "acceptSslCerts": true,
+   "applicationCacheEnabled": false,
+   "browserConnectionEnabled": false,
+   "browserName": "chrome",
+   "chrome": {
+      "chromedriverVersion": "2.21 (0b5aa7b6ca450681c58087e14f72238aab5ab823)",
+      "userDataDir": "C:\\Users\\alperen\\AppData\\Local\\Temp\\scoped_dir16048_30441"
+   },
+   "cssSelectorsEnabled": true,
+   "databaseEnabled": false,
+   "handlesAlerts": true,
+   "hasTouchScreen": false,
+   "javascriptEnabled": true,
+   "locationContextEnabled": true,
+   "mobileEmulationEnabled": false,
+   "nativeEvents": true,
+   "platform": "Windows NT",
+   "rotatable": false,
+   "takesHeapSnapshot": true,
+   "takesScreenshot": true,
+   "version": "",
+   "webStorageEnabled": true
+}
+[3.666][INFO]: COMMAND ExecuteScript {
+   "args": [ "require" ],
+   "script": "return (function (requireName) {\n    return typeof window[requireName] === 'function'\n  }).apply(null, arguments)"
+}
+[3.666][INFO]: Waiting for pending navigations...
+[3.666][DEBUG]: DEVTOOLS COMMAND DOM.getDocument (id=8) {
+
+}
+[3.666][DEBUG]: DEVTOOLS RESPONSE DOM.getDocument (id=8) {
+   "root": {
+      "baseURL": "data:text/html,chromewebdata",
+      "childNodeCount": 1,
+      "children": [ {
+         "attributes": [  ],
+         "childNodeCount": 2,
+         "children": [ {
+            "attributes": [  ],
+            "childNodeCount": 0,
+            "localName": "head",
+            "nodeId": 7,
+            "nodeName": "HEAD",
+            "nodeType": 1,
+            "nodeValue": ""
+         }, {
+            "attributes": [  ],
+            "childNodeCount": 0,
+            "localName": "body",
+            "nodeId": 8,
+            "nodeName": "BODY",
+            "nodeType": 1,
+            "nodeValue": ""
+         } ],
+         "frameId": "10292.1",
+         "localName": "html",
+         "nodeId": 6,
+         "nodeName": "HTML",
+         "nodeType": 1,
+         "nodeValue": ""
+      } ],
+      "documentURL": "data:text/html,chromewebdata",
+      "localName": "",
+      "nodeId": 5,
+      "nodeName": "#document",
+      "nodeType": 9,
+      "nodeValue": "",
+      "xmlVersion": ""
+   }
+}
+[3.667][DEBUG]: DEVTOOLS COMMAND Runtime.evaluate (id=9) {
+   "expression": "var isLoaded = document.readyState == 'complete' ||    document.readyState == 'interactive';if (isLoaded) {  var frame = document.createElement('iframe');  frame.name = 'chromedriver dummy frame'; ..."
+}
+[3.672][DEBUG]: DEVTOOLS EVENT DOM.childNodeCountUpdated {
+   "childNodeCount": 1,
+   "nodeId": 8
+}
+[3.672][DEBUG]: DEVTOOLS EVENT Page.frameAttached {
+   "frameId": "10292.4",
+   "parentFrameId": "10292.1"
+}
+[3.672][DEBUG]: DEVTOOLS EVENT Page.frameStartedLoading {
+   "frameId": "10292.4"
+}
+[3.672][DEBUG]: DEVTOOLS EVENT Page.frameNavigated {
+   "frame": {
+      "id": "10292.4",
+      "loaderId": "10292.5",
+      "mimeType": "text/html",
+      "name": "chromedriver dummy frame",
+      "parentId": "10292.1",
+      "securityOrigin": "://",
+      "url": "about:blank"
+   }
+}
+[3.672][DEBUG]: DEVTOOLS EVENT Runtime.executionContextCreated {
+   "context": {
+      "frameId": "10292.4",
+      "id": 2,
+      "isDefault": true,
+      "name": "",
+      "origin": "://"
+   }
+}
+[3.672][DEBUG]: DEVTOOLS EVENT Page.frameStoppedLoading {
+   "frameId": "10292.4"
+}
+[3.672][DEBUG]: DEVTOOLS RESPONSE Runtime.evaluate (id=9) {
+   "result": {
+      "description": "1",
+      "type": "number",
+      "value": 1
+   },
+   "wasThrown": false
+}
+[3.672][INFO]: Done waiting for pending navigations. Status: ok
+[3.673][DEBUG]: DEVTOOLS COMMAND Runtime.evaluate (id=10) {
+   "expression": "(function() { // Copyright (c) 2012 The Chromium Authors. All rights reserved.\n// Use of this source code is governed by a BSD-style license that can be\n// found in the LICENSE file.\n\n/**\n * Enum f...",
+   "returnByValue": true
+}
+[3.676][DEBUG]: DEVTOOLS EVENT DOM.childNodeCountUpdated {
+   "childNodeCount": 0,
+   "nodeId": 8
+}
+[3.676][DEBUG]: DEVTOOLS EVENT Runtime.executionContextDestroyed {
+   "executionContextId": 2
+}
+[3.676][DEBUG]: DEVTOOLS EVENT Page.frameDetached {
+   "frameId": "10292.4"
+}
+[3.677][DEBUG]: DEVTOOLS RESPONSE Runtime.evaluate (id=10) {
+   "result": {
+      "type": "object",
+      "value": {
+         "status": 0,
+         "value": true
+      }
+   },
+   "wasThrown": false
+}
+[3.677][INFO]: Waiting for pending navigations...
+[3.677][INFO]: Done waiting for pending navigations. Status: ok
+[3.677][INFO]: RESPONSE ExecuteScript true
+[3.683][INFO]: COMMAND ExecuteScript {
+   "args": [  ],
+   "script": "return (function () {\n    if (typeof process === 'object') return process.versions.electron\n  }).apply(null, arguments)"
+}
+[3.683][INFO]: Waiting for pending navigations...
+[3.683][INFO]: Done waiting for pending navigations. Status: ok
+[3.683][DEBUG]: DEVTOOLS COMMAND Runtime.evaluate (id=11) {
+   "expression": "(function() { // Copyright (c) 2012 The Chromium Authors. All rights reserved.\n// Use of this source code is governed by a BSD-style license that can be\n// found in the LICENSE file.\n\n/**\n * Enum f...",
+   "returnByValue": true
+}
+[3.685][DEBUG]: DEVTOOLS RESPONSE Runtime.evaluate (id=11) {
+   "result": {
+      "type": "object",
+      "value": {
+         "status": 0,
+         "value": "1.3.2"
+      }
+   },
+   "wasThrown": false
+}
+[3.685][INFO]: Waiting for pending navigations...
+[3.685][INFO]: Done waiting for pending navigations. Status: ok
+[3.685][INFO]: RESPONSE ExecuteScript "1.3.2"
+[3.690][INFO]: COMMAND ExecuteScript {
+   "args": [ "require" ],
+   "script": "return (function (requireName) {\n    var electron = window[requireName]('electron')\n\n    var api = {\n      browserWindow: {},\n      electron: {},\n      rendererProcess: {},\n      webContents: {}\n  ..."
+}
+[3.690][INFO]: Waiting for pending navigations...
+[3.690][INFO]: Done waiting for pending navigations. Status: ok
+[3.690][DEBUG]: DEVTOOLS COMMAND Runtime.evaluate (id=12) {
+   "expression": "(function() { // Copyright (c) 2012 The Chromium Authors. All rights reserved.\n// Use of this source code is governed by a BSD-style license that can be\n// found in the LICENSE file.\n\n/**\n * Enum f...",
+   "returnByValue": true
+}
+[3.755][DEBUG]: DEVTOOLS RESPONSE Runtime.evaluate (id=12) {
+   "result": {
+      "type": "object",
+      "value": {
+         "status": 0,
+         "value": {
+            "browserWindow": {
+               "addListener": "browserWindow.addListener",
+               "blur": "browserWindow.blur",
+               "blurWebView": "browserWindow.blurWebView",
+               "capturePage": "browserWindow.capturePage",
+               "center": "browserWindow.center",
+               "close": "browserWindow.close",
+               "closeDevTools": "browserWindow.closeDevTools",
+               "destroy": "browserWindow.destroy",
+               "emit": "browserWindow.emit",
+               "eventNames": "browserWindow.eventNames",
+               "flashFrame": "browserWindow.flashFrame",
+               "focus": "browserWindow.focus",
+               "focusOnWebView": "browserWindow.focusOnWebView",
+               "getBounds": "browserWindow.getBounds",
+               "getChildWindows": "browserWindow.getChildWindows",
+               "getContentSize": "browserWindow.getContentSize",
+               "getMaxListeners": "browserWindow.getMaxListeners",
+               "getMaximumSize": "browserWindow.getMaximumSize",
+               "getMinimumSize": "browserWindow.getMinimumSize",
+               "~~~": "..."
+            },
+            "electron": {
+               "clipboard": {
+                  "availableFormats": "electron.clipboard.availableFormats",
+                  "clear": "electron.clipboard.clear",
+                  "has": "electron.clipboard.has",
+                  "read": "electron.clipboard.read",
+                  "readBookmark": "electron.clipboard.readBookmark",
+                  "readHTML": "electron.clipboard.readHTML",
+                  "readHtml": "electron.clipboard.readHtml",
+                  "readImage": "electron.clipboard.readImage",
+                  "readRTF": "electron.clipboard.readRTF",
+                  "readRtf": "electron.clipboard.readRtf",
+                  "readText": "electron.clipboard.readText",
+                  "write": "electron.clipboard.write",
+                  "writeBookmark": "electron.clipboard.writeBookmark",
+                  "writeHTML": "electron.clipboard.writeHTML",
+                  "writeHtml": "electron.clipboard.writeHtml",
+                  "writeImage": "electron.clipboard.writeImage",
+                  "writeRTF": "electron.clipboard.writeRTF",
+                  "writeRtf": "electron.clipboard.writeRtf",
+                  "writeText": "electron.clipboard.writeText"
+               },
+               "crashReporter": {
+                  "getLastCrashReport": "electron.crashReporter.getLastCrashReport",
+                  "getUploadedReports": "electron.crashReporter.getUploadedReports",
+                  "start": "electron.crashReporter.start"
+               },
+               "desktopCapturer": {
+                  "getSources": "electron.desktopCapturer.getSources"
+               },
+               "ipcRenderer": {
+                  "addListener": "electron.ipcRenderer.addListener",
+                  "domain": "electron.ipcRenderer.domain",
+                  "emit": "electron.ipcRenderer.emit",
+                  "eventNames": "electron.ipcRenderer.eventNames",
+                  "getMaxListeners": "electron.ipcRenderer.getMaxListeners",
+                  "listenerCount": "electron.ipcRenderer.listenerCount",
+                  "listeners": "electron.ipcRenderer.listeners",
+                  "on": "electron.ipcRenderer.on",
+                  "once": "electron.ipcRenderer.once",
+                  "prependListener": "electron.ipcRenderer.prependListener",
+                  "prependOnceListener": "electron.ipcRenderer.prependOnceListener",
+                  "removeAllListeners": "electron.ipcRenderer.removeAllListeners",
+                  "removeListener": "electron.ipcRenderer.removeListener",
+                  "send": "electron.ipcRenderer.send",
+                  "sendSync": "electron.ipcRenderer.sendSync",
+                  "sendTo": "electron.ipcRenderer.sendTo",
+                  "sendToAll": "electron.ipcRenderer.sendToAll",
+                  "sendToHost": "electron.ipcRenderer.sendToHost",
+                  "setMaxListeners": "electron.ipcRenderer.setMaxListeners"
+               },
+               "isPromise": {
+
+               },
+               "nativeImage": {
+                  "createEmpty": "electron.nativeImage.createEmpty",
+                  "createFromBuffer": "electron.nativeImage.createFromBuffer",
+                  "createFromDataURL": "electron.nativeImage.createFromDataURL",
+                  "createFromPath": "electron.nativeImage.createFromPath"
+               },
+               "remote": {
+                  "BrowserWindow": {
+                     "addDevToolsExtension": "electron.remote.BrowserWindow.addDevToolsExtension",
+                     "fromDevToolsWebContents": "electron.remote.BrowserWindow.fromDevToolsWebContents",
+                     "fromId": "electron.remote.BrowserWindow.fromId",
+                     "fromWebContents": "electron.remote.BrowserWindow.fromWebContents",
+                     "getAllWindows": "electron.remote.BrowserWindow.getAllWindows",
+                     "getDevToolsExtensions": "electron.remote.BrowserWindow.getDevToolsExtensions",
+                     "getFocusedWindow": "electron.remote.BrowserWindow.getFocusedWindow",
+                     "removeDevToolsExtension": "electron.remote.BrowserWindow.removeDevToolsExtension"
+                  },
+                  "Menu": {
+                     "buildFromTemplate": "electron.remote.Menu.buildFromTemplate",
+                     "getApplicationMenu": "electron.remote.Menu.getApplicationMenu",
+                     "sendActionToFirstResponder": "electron.remote.Menu.sendActionToFirstResponder",
+                     "setApplicationMenu": "electron.remote.Menu.setApplicationMenu"
+                  },
+                  "MenuItem": {
+                     "types": "electron.remote.MenuItem.types"
+                  },
+                  "NavigationController": "electron.remote.NavigationController",
+                  "app": {
+                     "addListener": "electron.remote.app.addListener",
+                     "addRecentDocument": "electron.remote.app.addRecentDocument",
+                     "allowNTLMCredentialsForAllDomains": "electron.remote.app.allowNTLMCredentialsForAllDomains",
+                     "clearRecentDocuments": "electron.remote.app.clearRecentDocuments",
+                     "commandLine": "electron.remote.app.commandLine",
+                     "disableHardwareAcceleration": "electron.remote.app.disableHardwareAcceleration",
+                     "domain": "electron.remote.app.domain",
+                     "emit": "electron.remote.app.emit",
+                     "eventNames": "electron.remote.app.eventNames",
+                     "exit": "electron.remote.app.exit",
+                     "focus": "electron.remote.app.focus",
+                     "getAppPath": "electron.remote.app.getAppPath",
+                     "getApplicationMenu": "electron.remote.app.getApplicationMenu",
+                     "getBadgeCount": "electron.remote.app.getBadgeCount",
+                     "getLocale": "electron.remote.app.getLocale",
+                     "getLoginItemSettings": "electron.remote.app.getLoginItemSettings",
+                     "getMaxListeners": "electron.remote.app.getMaxListeners",
+                     "getName": "electron.remote.app.getName",
+                     "getPath": "electron.remote.app.getPath",
+                     "~~~": "..."
+                  },
+                  "autoUpdater": {
+                     "addListener": "electron.remote.autoUpdater.addListener",
+                     "domain": "electron.remote.autoUpdater.domain",
+                     "emit": "electron.remote.autoUpdater.emit",
+                     "eventNames": "electron.remote.autoUpdater.eventNames",
+                     "getMaxListeners": "electron.remote.autoUpdater.getMaxListeners",
+                     "listenerCount": "electron.remote.autoUpdater.listenerCount",
+                     "listeners": "electron.remote.autoUpdater.listeners",
+                     "on": "electron.remote.autoUpdater.on",
+                     "once": "electron.remote.autoUpdater.once",
+                     "prependListener": "electron.remote.autoUpdater.prependListener",
+                     "prependOnceListener": "electron.remote.autoUpdater.prependOnceListener",
+                     "removeAllListeners": "electron.remote.autoUpdater.removeAllListeners",
+                     "removeListener": "electron.remote.autoUpdater.removeListener",
+                     "setMaxListeners": "electron.remote.autoUpdater.setMaxListeners"
+                  },
+                  "clipboard": {
+                     "availableFormats": "electron.remote.clipboard.availableFormats",
+                     "clear": "electron.remote.clipboard.clear",
+                     "has": "electron.remote.clipboard.has",
+                     "read": "electron.remote.clipboard.read",
+                     "readBookmark": "electron.remote.clipboard.readBookmark",
+                     "readHTML": "electron.remote.clipboard.readHTML",
+                     "readHtml": "electron.remote.clipboard.readHtml",
+                     "readImage": "electron.remote.clipboard.readImage",
+                     "readRTF": "electron.remote.clipboard.readRTF",
+                     "readRtf": "electron.remote.clipboard.readRtf",
+                     "readText": "electron.remote.clipboard.readText",
+                     "write": "electron.remote.clipboard.write",
+                     "writeBookmark": "electron.remote.clipboard.writeBookmark",
+                     "writeHTML": "electron.remote.clipboard.writeHTML",
+                     "writeHtml": "electron.remote.clipboard.writeHtml",
+                     "writeImage": "electron.remote.clipboard.writeImage",
+                     "writeRTF": "electron.remote.clipboard.writeRTF",
+                     "writeRtf": "electron.remote.clipboard.writeRtf",
+                     "writeText": "electron.remote.clipboard.writeText"
+                  },
+                  "contentTracing": {
+                     "cancelWatchEvent": "electron.remote.contentTracing.cancelWatchEvent",
+                     "getCategories": "electron.remote.contentTracing.getCategories",
+                     "getTraceBufferUsage": "electron.remote.contentTracing.getTraceBufferUsage",
+                     "setWatchEvent": "electron.remote.contentTracing.setWatchEvent",
+                     "startRecording": "electron.remote.contentTracing.startRecording",
+                     "stopRecording": "electron.remote.contentTracing.stopRecording"
+                  },
+                  "crashReporter": {
+                     "getLastCrashReport": "electron.remote.crashReporter.getLastCrashReport",
+                     "getUploadedReports": "electron.remote.crashReporter.getUploadedReports",
+                     "start": "electron.remote.crashReporter.start"
+                  },
+                  "createFunctionWithReturnValue": "electron.remote.createFunctionWithReturnValue",
+                  "dialog": {
+                     "showErrorBox": "electron.remote.dialog.showErrorBox",
+                     "showMessageBox": "electron.remote.dialog.showMessageBox",
+                     "showOpenDialog": "electron.remote.dialog.showOpenDialog",
+                     "showSaveDialog": "electron.remote.dialog.showSaveDialog"
+                  },
+                  "getBuiltin": "electron.remote.getBuiltin",
+                  "getCurrentWebContents": "electron.remote.getCurrentWebContents",
+                  "getCurrentWindow": "electron.remote.getCurrentWindow",
+                  "getGlobal": "electron.remote.getGlobal",
+                  "getGuestWebContents": "electron.remote.getGuestWebContents",
+                  "globalShortcut": {
+                     "isRegistered": "electron.remote.globalShortcut.isRegistered",
+                     "register": "electron.remote.globalShortcut.register",
+                     "unregister": "electron.remote.globalShortcut.unregister",
+                     "unregisterAll": "electron.remote.globalShortcut.unregisterAll"
+                  },
+                  "ipcMain": {
+                     "addListener": "electron.remote.ipcMain.addListener",
+                     "domain": "electron.remote.ipcMain.domain",
+                     "emit": "electron.remote.ipcMain.emit",
+                     "eventNames": "electron.remote.ipcMain.eventNames",
+                     "getMaxListeners": "electron.remote.ipcMain.getMaxListeners",
+                     "listenerCount": "electron.remote.ipcMain.listenerCount",
+                     "listeners": "electron.remote.ipcMain.listeners",
+                     "on": "electron.remote.ipcMain.on",
+                     "once": "electron.remote.ipcMain.once",
+                     "prependListener": "electron.remote.ipcMain.prependListener",
+                     "prependOnceListener": "electron.remote.ipcMain.prependOnceListener",
+                     "removeAllListeners": "electron.remote.ipcMain.removeAllListeners",
+                     "removeListener": "electron.remote.ipcMain.removeListener",
+                     "setMaxListeners": "electron.remote.ipcMain.setMaxListeners"
+                  },
+                  "isPromise": "electron.remote.isPromise",
+                  "~~~": "..."
+               },
+               "screen": {
+                  "addListener": "electron.screen.addListener",
+                  "domain": "electron.screen.domain",
+                  "emit": "electron.screen.emit",
+                  "eventNames": "electron.screen.eventNames",
+                  "getAllDisplays": "electron.screen.getAllDisplays",
+                  "getCursorScreenPoint": "electron.screen.getCursorScreenPoint",
+                  "getDisplayMatching": "electron.screen.getDisplayMatching",
+                  "getDisplayNearestPoint": "electron.screen.getDisplayNearestPoint",
+                  "getMaxListeners": "electron.screen.getMaxListeners",
+                  "getPrimaryDisplay": "electron.screen.getPrimaryDisplay",
+                  "listenerCount": "electron.screen.listenerCount",
+                  "listeners": "electron.screen.listeners",
+                  "on": "electron.screen.on",
+                  "once": "electron.screen.once",
+                  "prependListener": "electron.screen.prependListener",
+                  "prependOnceListener": "electron.screen.prependOnceListener",
+                  "removeAllListeners": "electron.screen.removeAllListeners",
+                  "removeListener": "electron.screen.removeListener",
+                  "setMaxListeners": "electron.screen.setMaxListeners"
+               },
+               "shell": {
+                  "beep": "electron.shell.beep",
+                  "moveItemToTrash": "electron.shell.moveItemToTrash",
+                  "openExternal": "electron.shell.openExternal",
+                  "openItem": "electron.shell.openItem",
+                  "readShortcutLink": "electron.shell.readShortcutLink",
+                  "showItemInFolder": "electron.shell.showItemInFolder",
+                  "writeShortcutLink": "electron.shell.writeShortcutLink"
+               },
+               "webFrame": {
+                  "addListener": "electron.webFrame.addListener",
+                  "attachGuest": "electron.webFrame.attachGuest",
+                  "clearCache": "electron.webFrame.clearCache",
+                  "domain": "electron.webFrame.domain",
+                  "emit": "electron.webFrame.emit",
+                  "eventNames": "electron.webFrame.eventNames",
+                  "executeJavaScript": "electron.webFrame.executeJavaScript",
+                  "getMaxListeners": "electron.webFrame.getMaxListeners",
+                  "getResourceUsage": "electron.webFrame.getResourceUsage",
+                  "getZoomFactor": "electron.webFrame.getZoomFactor",
+                  "getZoomLevel": "electron.webFrame.getZoomLevel",
+                  "insertText": "electron.webFrame.insertText",
+                  "listenerCount": "electron.webFrame.listenerCount",
+                  "listeners": "electron.webFrame.listeners",
+                  "on": "electron.webFrame.on",
+                  "once": "electron.webFrame.once",
+                  "prependListener": "electron.webFrame.prependListener",
+                  "prependOnceListener": "electron.webFrame.prependOnceListener",
+                  "registerElementResizeCallback": "electron.webFrame.registerElementResizeCallback",
+                  "~~~": "..."
+               }
+            },
+            "rendererProcess": {
+               "NativeModule": "process.NativeModule",
+               "abort": "process.abort",
+               "activateUvLoop": "process.activateUvLoop",
+               "addListener": "process.addListener",
+               "arch": "process.arch",
+               "argv": "process.argv",
+               "assert": "process.assert",
+               "atomBinding": "process.atomBinding",
+               "binding": "process.binding",
+               "chdir": "process.chdir",
+               "config": "process.config",
+               "cpuUsage": "process.cpuUsage",
+               "crash": "process.crash",
+               "cwd": "process.cwd",
+               "debugPort": "process.debugPort",
+               "dlopen": "process.dlopen",
+               "domain": "process.domain",
+               "emit": "process.emit",
+               "emitWarning": "process.emitWarning",
+               "~~~": "..."
+            },
+            "webContents": {
+               "addListener": "webContents.addListener",
+               "addWorkSpace": "webContents.addWorkSpace",
+               "beginFrameSubscription": "webContents.beginFrameSubscription",
+               "canGoBack": "webContents.canGoBack",
+               "canGoForward": "webContents.canGoForward",
+               "canGoToIndex": "webContents.canGoToIndex",
+               "canGoToOffset": "webContents.canGoToOffset",
+               "capturePage": "webContents.capturePage",
+               "clearHistory": "webContents.clearHistory",
+               "closeDevTools": "webContents.closeDevTools",
+               "copy": "webContents.copy",
+               "copyImageAt": "webContents.copyImageAt",
+               "cut": "webContents.cut",
+               "delete": "webContents.delete",
+               "destroy": "webContents.destroy",
+               "disableDeviceEmulation": "webContents.disableDeviceEmulation",
+               "downloadURL": "webContents.downloadURL",
+               "emit": "webContents.emit",
+               "enableDeviceEmulation": "webContents.enableDeviceEmulation",
+               "~~~": "..."
+            }
+         }
+      }
+   },
+   "wasThrown": false
+}
+[3.757][INFO]: Waiting for pending navigations...
+[3.757][INFO]: Done waiting for pending navigations. Status: ok
+[3.758][INFO]: RESPONSE ExecuteScript {
+   "browserWindow": {
+      "addListener": "browserWindow.addListener",
+      "blur": "browserWindow.blur",
+      "blurWebView": "browserWindow.blurWebView",
+      "capturePage": "browserWindow.capturePage",
+      "center": "browserWindow.center",
+      "close": "browserWindow.close",
+      "closeDevTools": "browserWindow.closeDevTools",
+      "destroy": "browserWindow.destroy",
+      "emit": "browserWindow.emit",
+      "eventNames": "browserWindow.eventNames",
+      "flashFrame": "browserWindow.flashFrame",
+      "focus": "browserWindow.focus",
+      "focusOnWebView": "browserWindow.focusOnWebView",
+      "getBounds": "browserWindow.getBounds",
+      "getChildWindows": "browserWindow.getChildWindows",
+      "getContentSize": "browserWindow.getContentSize",
+      "getMaxListeners": "browserWindow.getMaxListeners",
+      "getMaximumSize": "browserWindow.getMaximumSize",
+      "getMinimumSize": "browserWindow.getMinimumSize",
+      "~~~": "..."
+   },
+   "electron": {
+      "clipboard": {
+         "availableFormats": "electron.clipboard.availableFormats",
+         "clear": "electron.clipboard.clear",
+         "has": "electron.clipboard.has",
+         "read": "electron.clipboard.read",
+         "readBookmark": "electron.clipboard.readBookmark",
+         "readHTML": "electron.clipboard.readHTML",
+         "readHtml": "electron.clipboard.readHtml",
+         "readImage": "electron.clipboard.readImage",
+         "readRTF": "electron.clipboard.readRTF",
+         "readRtf": "electron.clipboard.readRtf",
+         "readText": "electron.clipboard.readText",
+         "write": "electron.clipboard.write",
+         "writeBookmark": "electron.clipboard.writeBookmark",
+         "writeHTML": "electron.clipboard.writeHTML",
+         "writeHtml": "electron.clipboard.writeHtml",
+         "writeImage": "electron.clipboard.writeImage",
+         "writeRTF": "electron.clipboard.writeRTF",
+         "writeRtf": "electron.clipboard.writeRtf",
+         "writeText": "electron.clipboard.writeText"
+      },
+      "crashReporter": {
+         "getLastCrashReport": "electron.crashReporter.getLastCrashReport",
+         "getUploadedReports": "electron.crashReporter.getUploadedReports",
+         "start": "electron.crashReporter.start"
+      },
+      "desktopCapturer": {
+         "getSources": "electron.desktopCapturer.getSources"
+      },
+      "ipcRenderer": {
+         "addListener": "electron.ipcRenderer.addListener",
+         "domain": "electron.ipcRenderer.domain",
+         "emit": "electron.ipcRenderer.emit",
+         "eventNames": "electron.ipcRenderer.eventNames",
+         "getMaxListeners": "electron.ipcRenderer.getMaxListeners",
+         "listenerCount": "electron.ipcRenderer.listenerCount",
+         "listeners": "electron.ipcRenderer.listeners",
+         "on": "electron.ipcRenderer.on",
+         "once": "electron.ipcRenderer.once",
+         "prependListener": "electron.ipcRenderer.prependListener",
+         "prependOnceListener": "electron.ipcRenderer.prependOnceListener",
+         "removeAllListeners": "electron.ipcRenderer.removeAllListeners",
+         "removeListener": "electron.ipcRenderer.removeListener",
+         "send": "electron.ipcRenderer.send",
+         "sendSync": "electron.ipcRenderer.sendSync",
+         "sendTo": "electron.ipcRenderer.sendTo",
+         "sendToAll": "electron.ipcRenderer.sendToAll",
+         "sendToHost": "electron.ipcRenderer.sendToHost",
+         "setMaxListeners": "electron.ipcRenderer.setMaxListeners"
+      },
+      "isPromise": {
+
+      },
+      "nativeImage": {
+         "createEmpty": "electron.nativeImage.createEmpty",
+         "createFromBuffer": "electron.nativeImage.createFromBuffer",
+         "createFromDataURL": "electron.nativeImage.createFromDataURL",
+         "createFromPath": "electron.nativeImage.createFromPath"
+      },
+      "remote": {
+         "BrowserWindow": {
+            "addDevToolsExtension": "electron.remote.BrowserWindow.addDevToolsExtension",
+            "fromDevToolsWebContents": "electron.remote.BrowserWindow.fromDevToolsWebContents",
+            "fromId": "electron.remote.BrowserWindow.fromId",
+            "fromWebContents": "electron.remote.BrowserWindow.fromWebContents",
+            "getAllWindows": "electron.remote.BrowserWindow.getAllWindows",
+            "getDevToolsExtensions": "electron.remote.BrowserWindow.getDevToolsExtensions",
+            "getFocusedWindow": "electron.remote.BrowserWindow.getFocusedWindow",
+            "removeDevToolsExtension": "electron.remote.BrowserWindow.removeDevToolsExtension"
+         },
+         "Menu": {
+            "buildFromTemplate": "electron.remote.Menu.buildFromTemplate",
+            "getApplicationMenu": "electron.remote.Menu.getApplicationMenu",
+            "sendActionToFirstResponder": "electron.remote.Menu.sendActionToFirstResponder",
+            "setApplicationMenu": "electron.remote.Menu.setApplicationMenu"
+         },
+         "MenuItem": {
+            "types": "electron.remote.MenuItem.types"
+         },
+         "NavigationController": "electron.remote.NavigationController",
+         "app": {
+            "addListener": "electron.remote.app.addListener",
+            "addRecentDocument": "electron.remote.app.addRecentDocument",
+            "allowNTLMCredentialsForAllDomains": "electron.remote.app.allowNTLMCredentialsForAllDomains",
+            "clearRecentDocuments": "electron.remote.app.clearRecentDocuments",
+            "commandLine": "electron.remote.app.commandLine",
+            "disableHardwareAcceleration": "electron.remote.app.disableHardwareAcceleration",
+            "domain": "electron.remote.app.domain",
+            "emit": "electron.remote.app.emit",
+            "eventNames": "electron.remote.app.eventNames",
+            "exit": "electron.remote.app.exit",
+            "focus": "electron.remote.app.focus",
+            "getAppPath": "electron.remote.app.getAppPath",
+            "getApplicationMenu": "electron.remote.app.getApplicationMenu",
+            "getBadgeCount": "electron.remote.app.getBadgeCount",
+            "getLocale": "electron.remote.app.getLocale",
+            "getLoginItemSettings": "electron.remote.app.getLoginItemSettings",
+            "getMaxListeners": "electron.remote.app.getMaxListeners",
+            "getName": "electron.remote.app.getName",
+            "getPath": "electron.remote.app.getPath",
+            "~~~": "..."
+         },
+         "autoUpdater": {
+            "addListener": "electron.remote.autoUpdater.addListener",
+            "domain": "electron.remote.autoUpdater.domain",
+            "emit": "electron.remote.autoUpdater.emit",
+            "eventNames": "electron.remote.autoUpdater.eventNames",
+            "getMaxListeners": "electron.remote.autoUpdater.getMaxListeners",
+            "listenerCount": "electron.remote.autoUpdater.listenerCount",
+            "listeners": "electron.remote.autoUpdater.listeners",
+            "on": "electron.remote.autoUpdater.on",
+            "once": "electron.remote.autoUpdater.once",
+            "prependListener": "electron.remote.autoUpdater.prependListener",
+            "prependOnceListener": "electron.remote.autoUpdater.prependOnceListener",
+            "removeAllListeners": "electron.remote.autoUpdater.removeAllListeners",
+            "removeListener": "electron.remote.autoUpdater.removeListener",
+            "setMaxListeners": "electron.remote.autoUpdater.setMaxListeners"
+         },
+         "clipboard": {
+            "availableFormats": "electron.remote.clipboard.availableFormats",
+            "clear": "electron.remote.clipboard.clear",
+            "has": "electron.remote.clipboard.has",
+            "read": "electron.remote.clipboard.read",
+            "readBookmark": "electron.remote.clipboard.readBookmark",
+            "readHTML": "electron.remote.clipboard.readHTML",
+            "readHtml": "electron.remote.clipboard.readHtml",
+            "readImage": "electron.remote.clipboard.readImage",
+            "readRTF": "electron.remote.clipboard.readRTF",
+            "readRtf": "electron.remote.clipboard.readRtf",
+            "readText": "electron.remote.clipboard.readText",
+            "write": "electron.remote.clipboard.write",
+            "writeBookmark": "electron.remote.clipboard.writeBookmark",
+            "writeHTML": "electron.remote.clipboard.writeHTML",
+            "writeHtml": "electron.remote.clipboard.writeHtml",
+            "writeImage": "electron.remote.clipboard.writeImage",
+            "writeRTF": "electron.remote.clipboard.writeRTF",
+            "writeRtf": "electron.remote.clipboard.writeRtf",
+            "writeText": "electron.remote.clipboard.writeText"
+         },
+         "contentTracing": {
+            "cancelWatchEvent": "electron.remote.contentTracing.cancelWatchEvent",
+            "getCategories": "electron.remote.contentTracing.getCategories",
+            "getTraceBufferUsage": "electron.remote.contentTracing.getTraceBufferUsage",
+            "setWatchEvent": "electron.remote.contentTracing.setWatchEvent",
+            "startRecording": "electron.remote.contentTracing.startRecording",
+            "stopRecording": "electron.remote.contentTracing.stopRecording"
+         },
+         "crashReporter": {
+            "getLastCrashReport": "electron.remote.crashReporter.getLastCrashReport",
+            "getUploadedReports": "electron.remote.crashReporter.getUploadedReports",
+            "start": "electron.remote.crashReporter.start"
+         },
+         "createFunctionWithReturnValue": "electron.remote.createFunctionWithReturnValue",
+         "dialog": {
+            "showErrorBox": "electron.remote.dialog.showErrorBox",
+            "showMessageBox": "electron.remote.dialog.showMessageBox",
+            "showOpenDialog": "electron.remote.dialog.showOpenDialog",
+            "showSaveDialog": "electron.remote.dialog.showSaveDialog"
+         },
+         "getBuiltin": "electron.remote.getBuiltin",
+         "getCurrentWebContents": "electron.remote.getCurrentWebContents",
+         "getCurrentWindow": "electron.remote.getCurrentWindow",
+         "getGlobal": "electron.remote.getGlobal",
+         "getGuestWebContents": "electron.remote.getGuestWebContents",
+         "globalShortcut": {
+            "isRegistered": "electron.remote.globalShortcut.isRegistered",
+            "register": "electron.remote.globalShortcut.register",
+            "unregister": "electron.remote.globalShortcut.unregister",
+            "unregisterAll": "electron.remote.globalShortcut.unregisterAll"
+         },
+         "ipcMain": {
+            "addListener": "electron.remote.ipcMain.addListener",
+            "domain": "electron.remote.ipcMain.domain",
+            "emit": "electron.remote.ipcMain.emit",
+            "eventNames": "electron.remote.ipcMain.eventNames",
+            "getMaxListeners": "electron.remote.ipcMain.getMaxListeners",
+            "listenerCount": "electron.remote.ipcMain.listenerCount",
+            "listeners": "electron.remote.ipcMain.listeners",
+            "on": "electron.remote.ipcMain.on",
+            "once": "electron.remote.ipcMain.once",
+            "prependListener": "electron.remote.ipcMain.prependListener",
+            "prependOnceListener": "electron.remote.ipcMain.prependOnceListener",
+            "removeAllListeners": "electron.remote.ipcMain.removeAllListeners",
+            "removeListener": "electron.remote.ipcMain.removeListener",
+            "setMaxListeners": "electron.remote.ipcMain.setMaxListeners"
+         },
+         "isPromise": "electron.remote.isPromise",
+         "~~~": "..."
+      },
+      "screen": {
+         "addListener": "electron.screen.addListener",
+         "domain": "electron.screen.domain",
+         "emit": "electron.screen.emit",
+         "eventNames": "electron.screen.eventNames",
+         "getAllDisplays": "electron.screen.getAllDisplays",
+         "getCursorScreenPoint": "electron.screen.getCursorScreenPoint",
+         "getDisplayMatching": "electron.screen.getDisplayMatching",
+         "getDisplayNearestPoint": "electron.screen.getDisplayNearestPoint",
+         "getMaxListeners": "electron.screen.getMaxListeners",
+         "getPrimaryDisplay": "electron.screen.getPrimaryDisplay",
+         "listenerCount": "electron.screen.listenerCount",
+         "listeners": "electron.screen.listeners",
+         "on": "electron.screen.on",
+         "once": "electron.screen.once",
+         "prependListener": "electron.screen.prependListener",
+         "prependOnceListener": "electron.screen.prependOnceListener",
+         "removeAllListeners": "electron.screen.removeAllListeners",
+         "removeListener": "electron.screen.removeListener",
+         "setMaxListeners": "electron.screen.setMaxListeners"
+      },
+      "shell": {
+         "beep": "electron.shell.beep",
+         "moveItemToTrash": "electron.shell.moveItemToTrash",
+         "openExternal": "electron.shell.openExternal",
+         "openItem": "electron.shell.openItem",
+         "readShortcutLink": "electron.shell.readShortcutLink",
+         "showItemInFolder": "electron.shell.showItemInFolder",
+         "writeShortcutLink": "electron.shell.writeShortcutLink"
+      },
+      "webFrame": {
+         "addListener": "electron.webFrame.addListener",
+         "attachGuest": "electron.webFrame.attachGuest",
+         "clearCache": "electron.webFrame.clearCache",
+         "domain": "electron.webFrame.domain",
+         "emit": "electron.webFrame.emit",
+         "eventNames": "electron.webFrame.eventNames",
+         "executeJavaScript": "electron.webFrame.executeJavaScript",
+         "getMaxListeners": "electron.webFrame.getMaxListeners",
+         "getResourceUsage": "electron.webFrame.getResourceUsage",
+         "getZoomFactor": "electron.webFrame.getZoomFactor",
+         "getZoomLevel": "electron.webFrame.getZoomLevel",
+         "insertText": "electron.webFrame.insertText",
+         "listenerCount": "electron.webFrame.listenerCount",
+         "listeners": "electron.webFrame.listeners",
+         "on": "electron.webFrame.on",
+         "once": "electron.webFrame.once",
+         "prependListener": "electron.webFrame.prependListener",
+         "prependOnceListener": "electron.webFrame.prependOnceListener",
+         "registerElementResizeCallback": "electron.webFrame.registerElementResizeCallback",
+         "~~~": "..."
+      }
+   },
+   "rendererProcess": {
+      "NativeModule": "process.NativeModule",
+      "abort": "process.abort",
+      "activateUvLoop": "process.activateUvLoop",
+      "addListener": "process.addListener",
+      "arch": "process.arch",
+      "argv": "process.argv",
+      "assert": "process.assert",
+      "atomBinding": "process.atomBinding",
+      "binding": "process.binding",
+      "chdir": "process.chdir",
+      "config": "process.config",
+      "cpuUsage": "process.cpuUsage",
+      "crash": "process.crash",
+      "cwd": "process.cwd",
+      "debugPort": "process.debugPort",
+      "dlopen": "process.dlopen",
+      "domain": "process.domain",
+      "emit": "process.emit",
+      "emitWarning": "process.emitWarning",
+      "~~~": "..."
+   },
+   "webContents": {
+      "addListener": "webContents.addListener",
+      "addWorkSpace": "webContents.addWorkSpace",
+      "beginFrameSubscription": "webContents.beginFrameSubscription",
+      "canGoBack": "webContents.canGoBack",
+      "canGoForward": "webContents.canGoForward",
+      "canGoToIndex": "webContents.canGoToIndex",
+      "canGoToOffset": "webContents.canGoToOffset",
+      "capturePage": "webContents.capturePage",
+      "clearHistory": "webContents.clearHistory",
+      "closeDevTools": "webContents.closeDevTools",
+      "copy": "webContents.copy",
+      "copyImageAt": "webContents.copyImageAt",
+      "cut": "webContents.cut",
+      "delete": "webContents.delete",
+      "destroy": "webContents.destroy",
+      "disableDeviceEmulation": "webContents.disableDeviceEmulation",
+      "downloadURL": "webContents.downloadURL",
+      "emit": "webContents.emit",
+      "enableDeviceEmulation": "webContents.enableDeviceEmulation",
+      "~~~": "..."
+   }
+}
+[3.783][INFO]: COMMAND SetScriptTimeout {
+   "ms": 5000
+}
+[3.783][INFO]: RESPONSE SetScriptTimeout
+[3.792][INFO]: COMMAND GetWindows {
+
+}
+[3.792][DEBUG]: DevTools request: http://localhost:12295/json
+[3.793][DEBUG]: DevTools response: [ {
+   "description": "",
+   "id": "00706973-a057-4348-8ba3-7238da8adf3d",
+   "title": "LoginWindow.html",
+   "type": "page",
+   "url": "file:///D:/Arken/C++/ElectronProjects/Chiika/testDist/static/LoginWindow.html"
+} ]
+
+[3.793][INFO]: RESPONSE GetWindows [ "CDwindow-00706973-a057-4348-8ba3-7238da8adf3d" ]
+[3.798][INFO]: COMMAND SwitchToWindow {
+   "name": "CDwindow-00706973-a057-4348-8ba3-7238da8adf3d"
+}
+[3.798][DEBUG]: DevTools request: http://localhost:12295/json
+[3.798][DEBUG]: DevTools response: [ {
+   "description": "",
+   "id": "00706973-a057-4348-8ba3-7238da8adf3d",
+   "title": "LoginWindow.html",
+   "type": "page",
+   "url": "file:///D:/Arken/C++/ElectronProjects/Chiika/testDist/static/LoginWindow.html"
+} ]
+
+[3.798][INFO]: RESPONSE SwitchToWindow
+[3.803][INFO]: COMMAND ExecuteScript {
+   "args": [ "app", "quit", [  ], "require" ],
+   "script": "return (function callMainApi(moduleName, api, args, requireName) {\n  var module = window[requireName]('electron').remote\n  if (moduleName) {\n    module = module[moduleName]\n  }\n  if (typeof module[..."
+}
+[3.803][INFO]: Waiting for pending navigations...
+[3.803][INFO]: Done waiting for pending navigations. Status: ok
+[3.803][DEBUG]: DEVTOOLS COMMAND Runtime.evaluate (id=13) {
+   "expression": "(function() { // Copyright (c) 2012 The Chromium Authors. All rights reserved.\n// Use of this source code is governed by a BSD-style license that can be\n// found in the LICENSE file.\n\n/**\n * Enum f...",
+   "returnByValue": true
+}
+[3.821][DEBUG]: DEVTOOLS EVENT Inspector.detached {
+   "reason": "target_closed"
+}
+[3.821][INFO]: Waiting for pending navigations...
+[3.821][INFO]: Done waiting for pending navigations. Status: disconnected: not connected to DevTools
+[3.821][DEBUG]: DevTools request: http://localhost:12295/json
+[3.823][DEBUG]: DevTools response: [  ]
+
+[3.823][INFO]: RESPONSE ExecuteScript
+[4.830][INFO]: COMMAND Quit {
+
+}
+[4.830][INFO]: RESPONSE Quit
+[4.830][DEBUG]: Log type 'driver' lost 87 entries on destruction
+[4.830][DEBUG]: Log type 'browser' lost 0 entries on destruction
