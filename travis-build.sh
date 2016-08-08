@@ -15,6 +15,6 @@ node --version
 npm --version
 
 npm install
-gulp compile:scripts
-ls .serve
+mkdir .serve
+gulp compile:scripts:not:watch
 npm test

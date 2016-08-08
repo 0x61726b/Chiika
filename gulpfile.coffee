@@ -121,6 +121,14 @@ Compile_scripts_for_distribution = () ->
       .pipe(coffee())
       .pipe(gulp.dest(distDir))
 
+
+  gulp.task 'compile:scripts:not:watch', () ->
+    coffee = require "gulp-coffee-react"
+    gulp.src('src/**/*.{cjsx,coffee}')
+      .pipe(plumber())
+      .pipe(coffee())
+      .pipe(gulp.dest(serveDir))
+
     # gulp.src('src/*.js')
     #     .pipe(gulp.dest(distDir))
     # gulp.src('src/browser/tools/src/*.js')
