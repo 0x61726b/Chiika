@@ -29,7 +29,7 @@ describe 'application launch', ->
   app = null
 
   beforeEach () =>
-    console.log "before each"
+    console.log "Electron path #{setup.getElectronPath()}"
     setup.startApplication({
       args: [path.join(__dirname, '..')]})
     .then (startedApp) =>
