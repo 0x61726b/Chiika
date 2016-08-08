@@ -75,6 +75,7 @@
     "crojsdoc": "^0.8.17",
     "del": "^1.1.1",
     "drex": "^0.1.4",
+    "electron": "^1.3.2",
     "electron-installer-squirrel-windows": "^1.2.2",
     "electron-packager": "^4.1.3",
     "electron-prebuilt": "^0.36.5",
