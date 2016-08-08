@@ -108,7 +108,7 @@ module.exports = React.createClass
           </span>
         </div>
         <div className="detailsPage-score detailsPage-row">
-          <div>
+          <div className="score-circle-div" data-score={@state.layout.scoring.average}>
             <canvas id="score-circle" width="100" height="100"></canvas>
           </div>
           <span className="detailsPage-score-info">
@@ -117,7 +117,7 @@ module.exports = React.createClass
               <h5>Your Score</h5>
               {
                 if @state.layout.scoring.type == "normal"
-                  <select className="button yellow" name="" value={@state.layout.scoring.userScore}>
+                  <select className="button lightblue" name="" value={@state.layout.scoring.userScore}>
                   {
                     [0,1,2,3,4,5,6,7,8,9,10].map (score,i) =>
                       <option value={score} key={i}>{score}</option>

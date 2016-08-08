@@ -75,23 +75,52 @@
   margin: 0;
   margin-right: 4px;
 }
+.detailsPage-score-info h5 span {
+  font-size: 20px;
+}
+.detailsPage-score-info h5 span:nth-child(2) {
+  color: #6A1B9A;
+}
 .detailsPage-miniCards {
   display: inline-flex;
+  flex-wrap: wrap;
 }
 .detailsPage-miniCards > .card {
   margin-top: 4px;
   text-align: center;
+  padding: 8px;
 }
 .detailsPage-miniCards > .card > .title {
   margin-bottom: 6px;
+  margin: -4px -8px 12px -8px
 }
 .detailsPage-miniCards > .card > p, .score-select {
   font-size: 18px;
   margin: 1px 0px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .mini-card-title {
   margin: 0;
   margin-bottom: 2px;
+}
+.score-circle-div {
+  position: relative;
+}
+.score-circle-div:after {
+  content:attr(data-score);
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  font-size: 20px;
+  font-weight: 500;
+  color: #6A1B9A;
 }
 
 /*Fix this*/
