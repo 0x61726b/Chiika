@@ -18,4 +18,4 @@ npm install
 npm run compileScripts
 sleep 10
 npm test
-cat ./../logs/log.txt
+cat /Users/travis/build/arkenthera/Chiika/logs/log.txt
