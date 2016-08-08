@@ -6,8 +6,7 @@
   "productName": "Chiika",
   "scripts": {
     "start": "gulp serve",
-    "test2": "mocha --compilers coffee:coffee-script/register ./spec/app-spec.coffee",
-    "test": "mocha ./spec/example-test.js"
+    "test": "mocha --compilers coffee:coffee-script/register ./spec/app-spec.coffee"
   },
   "keywords": [
     "electron",
