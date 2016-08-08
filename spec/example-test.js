@@ -14,7 +14,7 @@ describe('example application launch', function () {
 
   beforeEach(function () {
     return helpers.startApplication({
-      args: [path.join(__dirname, 'fixtures', 'example')]
+      args: [path.join(__dirname, '..')]
     }).then(function (startedApp) { app = startedApp })
   })
 

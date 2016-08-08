@@ -15,4 +15,6 @@ node --version
 npm --version
 
 npm install
-mocha ./spec/example-test.js
+gulp compile:scripts:not:watch
+sleep 10
+npm test
