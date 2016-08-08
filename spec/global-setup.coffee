@@ -38,5 +38,5 @@ module.exports = class Setup
     if (!app || !app.isRunning())
       return
 
-    app.stop().then =>
-      assert.equal(app.isRunning(), false)
+    console.log "Stopping"
+    app.stop()

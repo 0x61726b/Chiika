@@ -28,21 +28,40 @@ describe 'application launch', ->
 
   app = null
 
-  beforeEach () =>
-    console.log "Electron path #{setup.getElectronPath()}"
-    setup.startApplication({
-      args: [path.join(__dirname, '..','testapp')]})
-    .then (startedApp) =>
-        app = startedApp
+  # beforeEach () =>
+  #   console.log "Electron path #{setup.getElectronPath()}"
+  #   setup.startApplication({
+  #     args: [path.join(__dirname, '..','testapp')]})
+  #   .then (startedApp) =>
+  #       app = startedApp
+  #
+  # afterEach =>
+  #   setup.stopApplication(app)
 
-  afterEach =>
-    setup.stopApplication(app)
 
+  it 'opens test app', (done) =>
+      setup.startApplication({
+        args: [path.join(__dirname, '..','testapp')]})
+      .then (startedApp) =>
+          app = startedApp
+          app.client.waitUntilWindowLoaded()
+            .browserWindow.focus()
+            .getWindowCount().should.eventually.equal(1)
+            .then =>
+              setup.stopApplication(app).then => done()
+      baka = 42
 
-  it 'opens a window', =>
-    app.client.waitUntilWindowLoaded()
-      .browserWindow.focus()
-      .getWindowCount().should.eventually.equal(1)
+  it 'opens chiika', (done) =>
+      setup.startApplication({
+        args: [path.join(__dirname, '..')]})
+      .then (startedApp) =>
+          app = startedApp
+          app.client.waitUntilWindowLoaded()
+            .browserWindow.focus()
+            .getWindowCount().should.eventually.equal(1)
+            .then =>
+              setup.stopApplication(app).then => done()
+      baka = 42
       # .browserWindow.isMinimized().should.eventually.be.false
       # .browserWindow.isDevToolsOpened().should.eventually.be.false
       # .browserWindow.isVisible().should.eventually.be.true
