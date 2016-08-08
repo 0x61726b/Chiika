@@ -86,24 +86,24 @@
       this.emitter = new Emitter;
       this.utility = new Utility();
       this.settingsManager = new SettingsManager();
-      this.apiManager = new APIManager();
-      this.dbManager = new DbManager();
-      this.requestManager = new RequestManager();
-      this.parser = new Parser();
-      this.uiManager = new UIManager();
-      this.chiikaApi = new ChiikaPublicApi({
-        logger: this.logger,
-        db: this.dbManager,
-        parser: this.parser,
-        ui: this.uiManager
-      });
+      // this.apiManager = new APIManager();
+      // this.dbManager = new DbManager();
+      // this.requestManager = new RequestManager();
+      // this.parser = new Parser();
+      // this.uiManager = new UIManager();
+      // this.chiikaApi = new ChiikaPublicApi({
+      //   logger: this.logger,
+      //   db: this.dbManager,
+      //   parser: this.parser,
+      //   ui: this.uiManager
+      // });
       this.windowManager = new WindowManager();
       this.appDelegate = new AppDelegate();
-      this.ipcManager = new IpcManager();
-      this.ipcManager.handleEvents();
-      app.commandLine.appendSwitch('--disable-2d-canvas-image-chromium');
-      app.commandLine.appendSwitch('--disable-accelerated-2d-canvas');
-      app.commandLine.appendSwitch('--disable-gpu');
+      // this.ipcManager = new IpcManager();
+      // this.ipcManager.handleEvents();
+      // app.commandLine.appendSwitch('--disable-2d-canvas-image-chromium');
+      // app.commandLine.appendSwitch('--disable-accelerated-2d-canvas');
+      // app.commandLine.appendSwitch('--disable-gpu');
       this.appDelegate.run();
     }
 

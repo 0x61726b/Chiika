@@ -10,9 +10,9 @@ global.before =>
 
 module.exports = class Setup
   getElectronPath: ->
-    electronPath = path.join(__dirname, '..', 'node_modules', 'electron-prebuilt','dist', 'electron')
+    electronPath = path.join(__dirname, '..', 'node_modules','.bin','electron')
     if (process.platform == 'win32')
-      electronPath += '.exe'
+      electronPath += '.cmd'
     electronPath
 
   setupTimeout: (test) ->
