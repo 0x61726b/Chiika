@@ -2,7 +2,7 @@
   "name": "chiika",
   "version": "0.0.3",
   "description": "Electron boilerplate project with React-coffee",
-  "main": "./test1/main.js",
+  "main": "./testDist/main_process/chiika.js",
   "productName": "Chiika",
   "scripts": {
     "start": "electron .serve/main_process/chiika.js",
