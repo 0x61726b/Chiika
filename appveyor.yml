@@ -23,7 +23,7 @@ test_script:
   - node --version
   - .\node_modules\.bin\npm --version
   - mkdir .serve
-  - gulp compile:scripts:not:watch
+  - .\node_modules\.bin\gulp compile:scripts:not:watch
   - ls .serve
   - ls .serve/main_process
   - .\node_modules\.bin\mocha --compilers coffee:coffee-script/register ./spec/app-spec.coffee
