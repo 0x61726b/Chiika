@@ -22,4 +22,8 @@ install:
 test_script:
   - node --version
   - .\node_modules\.bin\npm --version
-  - .\node_modules\.bin\mocha -g "opens a window"
+  - mkdir .serve
+  - gulp compile:scripts:not:watch
+  - ls .serve
+  - ls .serve/main_process
+  - .\node_modules\.bin\mocha --compilers coffee:coffee-script/register ./spec/app-spec.coffee

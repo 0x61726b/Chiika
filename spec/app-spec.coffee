@@ -31,7 +31,7 @@ describe 'application launch', ->
   beforeEach () =>
     console.log "Electron path #{setup.getElectronPath()}"
     setup.startApplication({
-      args: [path.join(__dirname, '..')]})
+      args: [path.join(__dirname, '..','testapp')]})
     .then (startedApp) =>
         app = startedApp
 
