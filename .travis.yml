@@ -8,6 +8,10 @@ before_script:
   - sleep 3
 
 script:
+  - mkdir .serve
+  - gulp compile:scripts:not:watch
+  - ls .serve
+  - ls .serve/main_process
   - npm test
 
 branches:
