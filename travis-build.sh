@@ -18,4 +18,3 @@ npm install
 mkdir .serve
 gulp compile:scripts:not:watch
 ls .serve
-npm test

@@ -15,6 +15,7 @@ before_install:
 
 script:
   - ./travis-build.sh
+  - mocha --compilers coffee:coffee-script/register ./spec/app-spec.coffee
 
 cache:
   directories:
