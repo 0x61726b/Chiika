@@ -15,4 +15,6 @@ node --version
 npm --version
 
 npm install
+gulp compile:scripts
+ls .serve
 npm test
