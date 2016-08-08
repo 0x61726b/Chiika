@@ -27,6 +27,7 @@ module.exports = class Setup
       options.startTimeout = 30000
     else
       options.startTimeout = 10000
+    console.log options
     app = new Application(options)
     app.start().then =>
       assert.equal(app.isRunning(), true)
