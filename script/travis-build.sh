@@ -20,5 +20,4 @@ npm install
 sleep 3
 npm run compileScripts
 sleep 10
-npm install mkdirp
 npm test

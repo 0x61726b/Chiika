@@ -40,11 +40,13 @@ describe 'application launch', ->
 
 
   it 'opens chiika', (done) =>
-      setup.startApplication({
-        args: [path.join(__dirname, '..','testapp')]})
-      .then (startedApp) =>
+    setup.setupTimeout(this)
+    setup.startApplication({
+      args: [path.join(__dirname, '..')]})
+    .then (startedApp) =>
+        setup.stopApplication(startedApp).then =>
           done()
-      baka = 42
+    baka = 42
 
   # it 'opens chiika', (done) =>
   #     setup.startApplication({

@@ -26,19 +26,15 @@ module.exports = class Setup
     if (process.env.CI?)
       options.startTimeout = 30000
     else
-      options.startTimeout = 10000
-    options.chromeDriverLogPath = process.cwd() + "/logs/log.txt"
+      options.startTimeout = 30000
 
-    process.on 'uncaughtException',(err) ->
-      console.log err
 
     app = new Application(options)
-    try
-      app.start().then =>
-        console.log "started"
-        @stopApplication(app)
-    catch error
-      console.log error
+    app.start().then =>
+      console.log "started"
+      assert.equal(app.isRunning(), true)
+      chaiAsPromised.transferPromiseness = app.transferPromiseness
+      app
 
   stopApplication:(app) ->
     if (!app || !app.isRunning())

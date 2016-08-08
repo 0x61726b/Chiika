@@ -14,7 +14,6 @@
 #Description:
 #----------------------------------------------------------------------------
 
-NoSQL           = require 'NoSQL'
 path            = require 'path'
 
 DbUsers         = require './db-users'

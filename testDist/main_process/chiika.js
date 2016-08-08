@@ -50,26 +50,27 @@
   AppDelegate = require('./app-delegate');
 
   process.on('uncaughtException', function(err) {
-    var error, errorFunction, fileLine, i, line, _i, _results;
-    if (err && (err.stack != null)) {
-      error = err.stack.split("\n");
-      _results = [];
-      for (i = _i = 0; _i < 5; i = ++_i) {
-        line = error[i];
-        line = string(line).trimLeft().s;
-        if (i > 0) {
-          fileLine = line.substring(line.lastIndexOf('\\') + 1, line.length - 1);
-          errorFunction = line.substring(3, line.indexOf('('));
-          _results.push(chiika.logger.error(errorFunction + " - " + fileLine));
-        } else {
-          _results.push(chiika.logger.error(line));
-        }
-      }
-      return _results;
-    } else {
-      chiika.logger.error("Hmm....");
-      return chiika.logger.error(err);
-    }
+    console.log(err);
+    // var error, errorFunction, fileLine, i, line, _i, _results;
+    // if (err && (err.stack != null)) {
+    //   error = err.stack.split("\n");
+    //   _results = [];
+    //   for (i = _i = 0; _i < 5; i = ++_i) {
+    //     line = error[i];
+    //     line = string(line).trimLeft().s;
+    //     if (i > 0) {
+    //       fileLine = line.substring(line.lastIndexOf('\\') + 1, line.length - 1);
+    //       errorFunction = line.substring(3, line.indexOf('('));
+    //       _results.push(chiika.logger.error(errorFunction + " - " + fileLine));
+    //     } else {
+    //       _results.push(chiika.logger.error(line));
+    //     }
+    //   }
+    //   return _results;
+    // } else {
+    //   chiika.logger.error("Hmm....");
+    //   return chiika.logger.error(err);
+    // }
   });
 
   module.exports = Application = (function() {

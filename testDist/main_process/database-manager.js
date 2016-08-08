@@ -1,8 +1,6 @@
 (function() {
-  var DatabaseManager, DbCustom, DbUI, DbUsers, DbView, Emitter, NoSQL, path, _, _when,
+  var DatabaseManager, DbCustom, DbUI, DbUsers, DbView, Emitter, path, _, _when,
     __slice = [].slice;
-
-  NoSQL = require('NoSQL');
 
   path = require('path');
 
