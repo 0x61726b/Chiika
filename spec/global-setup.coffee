@@ -24,7 +24,7 @@ module.exports = class Setup
   startApplication: (options) ->
     options.path = @getElectronPath()
     if (process.env.CI?)
-      options.startTimeout = 30000
+      options.startTimeout = 100000
     else
       options.startTimeout = 30000
 
@@ -32,6 +32,7 @@ module.exports = class Setup
     app = new Application(options)
     app.start().then =>
       console.log "started"
+      app.client.getMainProcessLogs().then (logs) => console.log logs
       assert.equal(app.isRunning(), true)
       chaiAsPromised.transferPromiseness = app.transferPromiseness
       app

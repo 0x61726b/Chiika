@@ -79,6 +79,7 @@
     Application.prototype.loginWindow = null;
 
     function Application() {
+      console.log("Application constructor");
       global.chiika = this;
       this.chiikaHome = path.join(app.getPath('appData'), "chiika");
       this.logger = new Logger("verbose").logger;
