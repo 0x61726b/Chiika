@@ -17,16 +17,16 @@ module.exports = class Setup
 
   setupTimeout: (test) ->
     if (process.env.CI)
-      test.timeout(30000)
+      test.timeout(100000)
     else
-      test.timeout(30000)
+      test.timeout(100000)
 
   startApplication: (options) ->
     options.path = @getElectronPath()
     if (process.env.CI?)
       options.startTimeout = 100000
     else
-      options.startTimeout = 30000
+      options.startTimeout = 100000
 
 
     app = new Application(options)
