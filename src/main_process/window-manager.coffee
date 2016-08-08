@@ -34,7 +34,7 @@ module.exports = class WindowManager
   constructor: ->
     @emitter = new Emitter
 
-  createWindowAndOpen: (isMain,isLoading,options) ->
+  createWindowAndOpen: (options) ->
     windowOptions = {
       width: options.width,
       height: options.height,
@@ -45,7 +45,7 @@ module.exports = class WindowManager
       backgroundColor: '#2e2c29'
     }
 
-    if isMain
+    if options.name == 'main'
       #Get window settings
       winProps = chiika.settingsManager.getOption('WindowProperties')
       remember = chiika.settingsManager.getOption('RememberWindowSizeAndPosition')
@@ -65,16 +65,18 @@ module.exports = class WindowManager
     _.assign window, { name: options.name,rawWindowInstance: window, url: options.url }
     @windows.push window
 
-    if isMain
+    if options.name == 'main'
       @mainWindow = window
 
-    if isLoading
+    if options.name == 'loading'
       @loadingWindow = window
 
     chiika.logger.info("Adding new window..")
 
     if options.loadImmediately
       window.loadURL(options.url)
+
+    window.closeDevTools()
     window
 
 

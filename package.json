@@ -6,7 +6,7 @@
   "productName": "Chiika",
   "scripts": {
     "start": "gulp serve",
-    "test": "./node_modules/.bin/jasmine-node ./spec --verbose --coffee"
+    "test": "mocha --compilers coffee:coffee-script/register ./spec/app-spec.coffee"
   },
   "keywords": [
     "electron",
@@ -68,6 +68,8 @@
   },
   "devDependencies": {
     "asar": "^0.11.0",
+    "chai": "^3.5.0",
+    "chai-as-promised": "^5.3.0",
     "coffeelint": "^1.14.2",
     "crojsdoc": "^0.8.17",
     "del": "^1.1.1",
@@ -77,6 +79,7 @@
     "electron-prebuilt": "^0.36.5",
     "electron-react-devtools": "^0.3.1",
     "electron-windows-installer": "^1.2.2",
+    "fluentnode": "^0.6.3",
     "fs-jetpack": "^0.7.1",
     "gulp": "^3.9.1",
     "gulp-babel": "^5.1.0",

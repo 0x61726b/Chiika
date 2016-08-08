@@ -106,9 +106,9 @@ class Application
     @appDelegate.run()
 
 
-    @appDelegate.ready =>
-      @dbManager.onLoad =>
-        @run()
+    # @appDelegate.ready =>
+    #   @dbManager.onLoad =>
+    #     @run()
 
   run: ->
     # appDelegate.run() method will open 3 windows when the app is ready
@@ -127,8 +127,8 @@ class Application
         @uiManager.preloadUIItems()
                   .then =>
                     chiika.logger.verbose("Preloading UI complete!")
-                    @windowManager.getWindowByName('login').show()
-                    @windowManager.getWindowByName('loading').hide()
+                    #@windowManager.getWindowByName('login').show()
+                    #@windowManager.getWindowByName('loading').hide()
 
 
     # If there are no users but there are UI data
@@ -141,8 +141,8 @@ class Application
                   @apiManager.compileUserScripts().then =>
                     @uiManager.checkUIData().then =>
                       @apiManager.postInit()
-                    @windowManager.getWindowByName('login').show()
-                    @windowManager.getWindowByName('loading').hide()
+                    # @windowManager.getWindowByName('login').show()
+                    # @windowManager.getWindowByName('loading').hide()
 
     if userCount > 0
       # If there are no UI items

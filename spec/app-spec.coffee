@@ -14,36 +14,38 @@
 #Description:
 #----------------------------------------------------------------------------
 
-# describe 'app', ->
-#
-#   it 'test', (done) ->
-#     this.timeout(0)
-#
-#     Application = require process.cwd() + '/src/main_process/chiika'
-#
-#     app = new Application()
-#     app.appDelegate.onAppReady().then =>
-#       app.dbManager.onLoad =>
-#         app.run()
-#         setTimeout(done,2000)
-#
-#     test = 42
+helpers = require './global-setup'
+path    = require 'path'
 
-Application = require('spectron').Application
-assert = require('assert')
+describe = global.describe
+it = global.it
+beforeEach = global.beforeEach
+afterEach = global.afterEach
 
-describe 'application launch',->
-  @timeout(10000)
+describe 'application launch', ->
+  setup = new helpers()
+  setup.setupTimeout(this)
 
-  beforeEach =>
-    @app = new Application { path: process.cwd() + "/.serve/main_process/chiika.js"}
+  app = null
 
-    @app.start()
+  beforeEach () =>
+    console.log "before each"
+    setup.startApplication({
+      args: [path.join(__dirname, '..')]})
+    .then (startedApp) =>
+        app = startedApp
 
   afterEach =>
-    if @app && @app.isRunning()
-      @app.stop()
+    setup.stopApplication(app)
 
-  it 'shows an initial window', ->
-    @app.client.getWindowCount().then (count) =>
-      assert.equal(count, 1)
+
+  it 'opens a window', =>
+    app.client.waitUntilWindowLoaded()
+      .browserWindow.focus()
+      .getWindowCount().should.eventually.equal(1)
+      # .browserWindow.isMinimized().should.eventually.be.false
+      # .browserWindow.isDevToolsOpened().should.eventually.be.false
+      # .browserWindow.isVisible().should.eventually.be.true
+      # .browserWindow.isFocused().should.eventually.be.true
+      # .browserWindow.getBounds().should.eventually.have.property('width').and.be.above(0)
+      # .browserWindow.getBounds().should.eventually.have.property('height').and.be.above(0)

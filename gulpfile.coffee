@@ -188,7 +188,7 @@ Write_a_package_json_for_distribution = () ->
     _ = require('lodash')
 
     json = _.cloneDeep(packageJson)
-    json.main = './main_process/Application.js'
+    json.main = './main_process/chiika.js'
     fs.writeFile(distDir + '/package.json', JSON.stringify(json), () -> done())
 
 Package_for_each_platforms = () ->
@@ -206,7 +206,7 @@ Package_for_each_platforms = () ->
         platform: platform
         out: releaseDir + '/' + platform + '-' + arch
         version: '0.36.7'
-        asar: true
+        asar: false
       , (err) -> console.log err
 
     return taskName

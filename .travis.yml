@@ -1,20 +1,16 @@
-language: node_js
-node_js:
-  - 0.12
-addons:
-  apt:
-    packages:
-      - xvfb
-
-install:
-  - export DISPLAY=':99.0'
-  - sudo apt-get install xvfb
-  - Xvfb :99 +extension RANDR -screen 0 1024x768x24 > /dev/null 2>&1 &
+os:
+  - linux
 
 
-script:
-  - npm install -g coffee-script
-  - npm install -g mocha
-  - npm install -g electron-mocha
-  - npm install
-  - electron-mocha --compilers coffee:coffee-script/register ./spec/app-spec.coffee
+branches:
+  only:
+    - master
+
+env:
+  - NODE_VERSION="4.2.1"
+
+script: ./travis-build.sh
+
+cache:
+  directories:
+    - node_modules
