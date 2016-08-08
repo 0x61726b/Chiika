@@ -42,7 +42,7 @@ describe 'application launch', ->
   it 'opens chiika', (done) =>
     setup.setupTimeout(this)
     setup.startApplication({
-      args: [path.join(__dirname, '..','test1')]})
+      args: [path.join(__dirname, '..')]})
     .then (startedApp) =>
         setup.stopApplication(startedApp).then =>
           done()
