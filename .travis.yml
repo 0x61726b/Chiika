@@ -12,7 +12,9 @@ env:
 before_install:
  - chmod +x ./travis-build.sh
 
-script: ./travis-build.sh
+script:
+  - gulp compile:scripts
+  - ./travis-build.sh
 
 cache:
   directories:
