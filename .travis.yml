@@ -9,6 +9,9 @@ branches:
 env:
   - NODE_VERSION="4.2.1"
 
+before_install:
+ - chmod +x ./travis-build.sh
+
 script: ./travis-build.sh
 
 cache:
