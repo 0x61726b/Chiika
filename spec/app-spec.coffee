@@ -41,18 +41,6 @@ describe 'application launch', ->
 
   it 'opens test app', (done) =>
       setup.startApplication({
-        args: [path.join(__dirname, '..','testapp')]})
-      .then (startedApp) =>
-          app = startedApp
-          app.client.waitUntilWindowLoaded()
-            .browserWindow.focus()
-            .getWindowCount().should.eventually.equal(1)
-            .then =>
-              setup.stopApplication(app).then => done()
-      baka = 42
-
-  it 'opens chiika', (done) =>
-      setup.startApplication({
         args: [path.join(__dirname, '..')]})
       .then (startedApp) =>
           app = startedApp
@@ -62,6 +50,18 @@ describe 'application launch', ->
             .then =>
               setup.stopApplication(app).then => done()
       baka = 42
+
+  # it 'opens chiika', (done) =>
+  #     setup.startApplication({
+  #       args: [path.join(__dirname, '..')]})
+  #     .then (startedApp) =>
+  #         app = startedApp
+  #         app.client.waitUntilWindowLoaded()
+  #           .browserWindow.focus()
+  #           .getWindowCount().should.eventually.equal(1)
+  #           .then =>
+  #             setup.stopApplication(app).then => done()
+  #     baka = 42
       # .browserWindow.isMinimized().should.eventually.be.false
       # .browserWindow.isDevToolsOpened().should.eventually.be.false
       # .browserWindow.isVisible().should.eventually.be.true

@@ -27,12 +27,15 @@ module.exports = class Setup
       options.startTimeout = 30000
     else
       options.startTimeout = 10000
+    options.chromeDriverLogPath = process.cwd() + "/logs/log.txt"
     console.log options
     app = new Application(options)
-    app.start().then =>
-      assert.equal(app.isRunning(), true)
-      chaiAsPromised.transferPromiseness = app.transferPromiseness
-      app
+    try
+      app.start().then =>
+        console.log "started"
+        @stopApplication(app)
+    catch error
+      console.log error
 
   stopApplication:(app) ->
     if (!app || !app.isRunning())
