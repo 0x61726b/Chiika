@@ -18,6 +18,7 @@ install:
   - sleep 3
   - npm run compileScripts
   - sleep 10
+  - npm install mkdirp
 
 script:
   - npm test
