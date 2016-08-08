@@ -41,7 +41,7 @@ describe 'application launch', ->
 
   it 'opens chiika', (done) =>
       setup.startApplication({
-        args: [path.join(__dirname, '..')]})
+        args: [path.join(__dirname, '..','testapp')]})
       .then (startedApp) =>
           done()
       baka = 42

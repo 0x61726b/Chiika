@@ -1,8 +1,8 @@
-[0.348][INFO]: COMMAND InitSession {
+[0.189][INFO]: COMMAND InitSession {
    "desiredCapabilities": {
       "browserName": "electron",
       "chromeOptions": {
-         "args": [ "spectron-path=D:\\Arken\\C++\\ElectronProjects\\Chiika\\node_modules\\.bin\\electron.cmd", "spectron-arg0=D:\\Arken\\C++\\ElectronProjects\\Chiika" ],
+         "args": [ "spectron-path=D:\\Arken\\C++\\ElectronProjects\\Chiika\\node_modules\\.bin\\electron.cmd", "spectron-arg0=D:\\Arken\\C++\\ElectronProjects\\Chiika\\testapp" ],
          "binary": "D:\\Arken\\C++\\ElectronProjects\\Chiika\\node_modules\\spectron\\bin\\launcher.exe"
       },
       "handlesAlerts": true,
@@ -20,7 +20,7 @@
       "rotatable": true
    }
 }
-[0.349][INFO]: Populating Preferences file: {
+[0.191][INFO]: Populating Preferences file: {
    "alternate_error_pages": {
       "enabled": false
    },
@@ -74,7 +74,7 @@
       "enabled": false
    }
 }
-[0.350][INFO]: Populating Local State file: {
+[0.192][INFO]: Populating Local State file: {
    "background_mode": {
       "enabled": false
    },
@@ -84,62 +84,62 @@
       }
    }
 }
-[0.354][INFO]: Can not set to US keyboard layout - Some keycodes may beinterpreted incorrectly
-[0.354][INFO]: Launching chrome: "D:\Arken\C++\ElectronProjects\Chiika\node_modules\spectron\bin\launcher.exe" --disable-background-networking --disable-client-side-phishing-detection --disable-component-update --disable-default-apps --disable-hang-monitor --disable-popup-blocking --disable-prompt-on-repost --disable-sync --disable-web-resources --enable-logging --ignore-certificate-errors --load-extension="C:\Users\alperen\AppData\Local\Temp\scoped_dir16048_54\internal" --log-level=0 --metrics-recording-only --no-first-run --password-store=basic --remote-debugging-port=12295 --safebrowsing-disable-auto-update --safebrowsing-disable-download-protection --spectron-arg0="D:\Arken\C++\ElectronProjects\Chiika" --spectron-path="D:\Arken\C++\ElectronProjects\Chiika\node_modules\.bin\electron.cmd" --test-type=webdriver --use-mock-keychain --user-data-dir="C:\Users\alperen\AppData\Local\Temp\scoped_dir16048_30441" data:,
-[0.382][DEBUG]: DevTools request: http://localhost:12295/json/version
-[2.391][DEBUG]: DevTools request failed
-[2.442][DEBUG]: DevTools request: http://localhost:12295/json/version
-[2.637][DEBUG]: DevTools response: {
+[0.195][INFO]: Can not set to US keyboard layout - Some keycodes may beinterpreted incorrectly
+[0.195][INFO]: Launching chrome: "D:\Arken\C++\ElectronProjects\Chiika\node_modules\spectron\bin\launcher.exe" --disable-background-networking --disable-client-side-phishing-detection --disable-component-update --disable-default-apps --disable-hang-monitor --disable-popup-blocking --disable-prompt-on-repost --disable-sync --disable-web-resources --enable-logging --ignore-certificate-errors --load-extension="C:\Users\alperen\AppData\Local\Temp\scoped_dir11304_12617\internal" --log-level=0 --metrics-recording-only --no-first-run --password-store=basic --remote-debugging-port=12877 --safebrowsing-disable-auto-update --safebrowsing-disable-download-protection --spectron-arg0="D:\Arken\C++\ElectronProjects\Chiika\testapp" --spectron-path="D:\Arken\C++\ElectronProjects\Chiika\node_modules\.bin\electron.cmd" --test-type=webdriver --use-mock-keychain --user-data-dir="C:\Users\alperen\AppData\Local\Temp\scoped_dir11304_27099" data:,
+[0.240][DEBUG]: DevTools request: http://localhost:12877/json/version
+[2.243][DEBUG]: DevTools request failed
+[2.293][DEBUG]: DevTools request: http://localhost:12877/json/version
+[2.493][DEBUG]: DevTools response: {
    "Browser": "",
    "Protocol-Version": "1.1",
    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Electron/1.3.2 Safari/537.36",
    "WebKit-Version": "537.36 (@49721773c8dd62828e471ca69e2c89767f98c690)"
 }
 
-[2.638][DEBUG]: DevTools request: http://localhost:12295/json
-[2.639][DEBUG]: DevTools response: [ {
+[2.493][DEBUG]: DevTools request: http://localhost:12877/json
+[2.494][DEBUG]: DevTools response: [ {
    "description": "",
-   "devtoolsFrontendUrl": "/devtools/inspector.html?ws=localhost:12295/devtools/page/00706973-a057-4348-8ba3-7238da8adf3d",
-   "id": "00706973-a057-4348-8ba3-7238da8adf3d",
+   "devtoolsFrontendUrl": "/devtools/inspector.html?ws=localhost:12877/devtools/page/0e382adf-685c-4451-8058-72c2eb548317",
+   "id": "0e382adf-685c-4451-8058-72c2eb548317",
    "title": "",
    "type": "page",
-   "url": "file:///D:/Arken/C++/ElectronProjects/Chiika/testDist/static/LoginWindow.html",
-   "webSocketDebuggerUrl": "ws://localhost:12295/devtools/page/00706973-a057-4348-8ba3-7238da8adf3d"
+   "url": "file:///D:/Arken/C++/ElectronProjects/Chiika/testapp/index.html",
+   "webSocketDebuggerUrl": "ws://localhost:12877/devtools/page/0e382adf-685c-4451-8058-72c2eb548317"
 } ]
 
-[2.640][DEBUG]: DevTools request: http://localhost:12295/json
-[2.641][DEBUG]: DevTools response: [ {
+[2.494][DEBUG]: DevTools request: http://localhost:12877/json
+[2.495][DEBUG]: DevTools response: [ {
    "description": "",
-   "devtoolsFrontendUrl": "/devtools/inspector.html?ws=localhost:12295/devtools/page/00706973-a057-4348-8ba3-7238da8adf3d",
-   "id": "00706973-a057-4348-8ba3-7238da8adf3d",
+   "devtoolsFrontendUrl": "/devtools/inspector.html?ws=localhost:12877/devtools/page/0e382adf-685c-4451-8058-72c2eb548317",
+   "id": "0e382adf-685c-4451-8058-72c2eb548317",
    "title": "",
    "type": "page",
-   "url": "file:///D:/Arken/C++/ElectronProjects/Chiika/testDist/static/LoginWindow.html",
-   "webSocketDebuggerUrl": "ws://localhost:12295/devtools/page/00706973-a057-4348-8ba3-7238da8adf3d"
+   "url": "file:///D:/Arken/C++/ElectronProjects/Chiika/testapp/index.html",
+   "webSocketDebuggerUrl": "ws://localhost:12877/devtools/page/0e382adf-685c-4451-8058-72c2eb548317"
 } ]
 
-[2.647][INFO]: resolved localhost to ["::1","127.0.0.1"]
-[3.648][DEBUG]: DEVTOOLS COMMAND Console.enable (id=1) {
+[2.501][INFO]: resolved localhost to ["::1","127.0.0.1"]
+[3.503][DEBUG]: DEVTOOLS COMMAND Console.enable (id=1) {
 
 }
-[3.649][DEBUG]: DEVTOOLS COMMAND DOM.getDocument (id=2) {
+[3.504][DEBUG]: DEVTOOLS COMMAND DOM.getDocument (id=2) {
 
 }
-[3.649][DEBUG]: DEVTOOLS COMMAND Runtime.enable (id=3) {
+[3.504][DEBUG]: DEVTOOLS COMMAND Runtime.enable (id=3) {
 
 }
-[3.649][DEBUG]: DEVTOOLS COMMAND Page.enable (id=4) {
+[3.504][DEBUG]: DEVTOOLS COMMAND Page.enable (id=4) {
 
 }
-[3.649][DEBUG]: DEVTOOLS COMMAND Page.enable (id=5) {
+[3.504][DEBUG]: DEVTOOLS COMMAND Page.enable (id=5) {
 
 }
-[3.649][DEBUG]: DEVTOOLS RESPONSE Console.enable (id=1) {
+[3.624][DEBUG]: DEVTOOLS RESPONSE Console.enable (id=1) {
 
 }
-[3.649][DEBUG]: DEVTOOLS RESPONSE DOM.getDocument (id=2) {
+[3.624][DEBUG]: DEVTOOLS RESPONSE DOM.getDocument (id=2) {
    "root": {
-      "baseURL": "data:text/html,chromewebdata",
+      "baseURL": "",
       "childNodeCount": 1,
       "children": [ {
          "attributes": [  ],
@@ -161,14 +161,14 @@
             "nodeType": 1,
             "nodeValue": ""
          } ],
-         "frameId": "10292.1",
+         "frameId": "4928.1",
          "localName": "html",
          "nodeId": 2,
          "nodeName": "HTML",
          "nodeType": 1,
          "nodeValue": ""
       } ],
-      "documentURL": "data:text/html,chromewebdata",
+      "documentURL": "",
       "localName": "",
       "nodeId": 1,
       "nodeName": "#document",
@@ -177,35 +177,56 @@
       "xmlVersion": ""
    }
 }
-[3.649][DEBUG]: DEVTOOLS EVENT Runtime.executionContextCreated {
-   "context": {
-      "frameId": "10292.1",
-      "id": 1,
-      "isDefault": true,
-      "name": "",
-      "origin": "://"
-   }
-}
-[3.649][DEBUG]: DEVTOOLS RESPONSE Runtime.enable (id=3) {
+[3.625][DEBUG]: DEVTOOLS RESPONSE Runtime.enable (id=3) {
 
 }
-[3.649][DEBUG]: DEVTOOLS RESPONSE Page.enable (id=4) {
+[3.625][DEBUG]: DEVTOOLS RESPONSE Page.enable (id=4) {
 
 }
-[3.649][DEBUG]: DEVTOOLS RESPONSE Page.enable (id=5) {
+[3.625][DEBUG]: DEVTOOLS RESPONSE Page.enable (id=5) {
 
 }
-[3.649][DEBUG]: DEVTOOLS COMMAND Page.enable (id=6) {
+[3.625][DEBUG]: DEVTOOLS COMMAND Page.enable (id=6) {
 
 }
-[3.650][DEBUG]: DEVTOOLS RESPONSE Page.enable (id=6) {
+[3.758][DEBUG]: DEVTOOLS RESPONSE Page.enable (id=6) {
 
 }
-[3.650][DEBUG]: DEVTOOLS COMMAND Runtime.evaluate (id=7) {
+[3.759][DEBUG]: DEVTOOLS COMMAND Runtime.evaluate (id=7) {
    "expression": "(function() { // Copyright (c) 2012 The Chromium Authors. All rights reserved.\n// Use of this source code is governed by a BSD-style license that can be\n// found in the LICENSE file.\n\n/**\n * Enum f...",
    "returnByValue": true
 }
-[3.656][DEBUG]: DEVTOOLS RESPONSE Runtime.evaluate (id=7) {
+[3.916][DEBUG]: DEVTOOLS EVENT Runtime.executionContextsCleared {
+
+}
+[3.916][DEBUG]: DEVTOOLS EVENT DOM.documentUpdated {
+
+}
+[3.916][DEBUG]: DEVTOOLS COMMAND DOM.getDocument (id=8) {
+
+}
+[3.932][DEBUG]: DEVTOOLS EVENT Page.frameNavigated {
+   "frame": {
+      "id": "4928.1",
+      "loaderId": "4928.3",
+      "mimeType": "text/html",
+      "securityOrigin": "file://",
+      "url": "file:///D:/Arken/C++/ElectronProjects/Chiika/testapp/index.html"
+   }
+}
+[3.932][DEBUG]: DEVTOOLS EVENT Console.messagesCleared {
+
+}
+[3.932][DEBUG]: DEVTOOLS EVENT Runtime.executionContextCreated {
+   "context": {
+      "frameId": "4928.1",
+      "id": 1,
+      "isDefault": true,
+      "name": "",
+      "origin": "file://"
+   }
+}
+[3.932][DEBUG]: DEVTOOLS RESPONSE Runtime.evaluate (id=7) {
    "result": {
       "type": "object",
       "value": {
@@ -215,14 +236,125 @@
    },
    "wasThrown": false
 }
-[3.656][INFO]: RESPONSE InitSession {
+[3.935][DEBUG]: DEVTOOLS EVENT Page.loadEventFired {
+   "timestamp": 30241.095
+}
+[3.936][DEBUG]: DEVTOOLS EVENT Page.frameStoppedLoading {
+   "frameId": "4928.1"
+}
+[3.936][DEBUG]: DEVTOOLS EVENT DOM.documentUpdated {
+
+}
+[3.936][DEBUG]: DEVTOOLS COMMAND DOM.getDocument (id=9) {
+
+}
+[3.936][DEBUG]: DEVTOOLS EVENT Page.domContentEventFired {
+   "timestamp": 30241.101
+}
+[3.936][DEBUG]: DEVTOOLS RESPONSE DOM.getDocument (id=8) {
+   "root": {
+      "baseURL": "file:///D:/Arken/C++/ElectronProjects/Chiika/testapp/index.html",
+      "childNodeCount": 2,
+      "children": [ {
+         "localName": "",
+         "nodeId": 6,
+         "nodeName": "html",
+         "nodeType": 10,
+         "nodeValue": "",
+         "publicId": "",
+         "systemId": ""
+      }, {
+         "attributes": [  ],
+         "childNodeCount": 2,
+         "children": [ {
+            "attributes": [  ],
+            "childNodeCount": 2,
+            "localName": "head",
+            "nodeId": 8,
+            "nodeName": "HEAD",
+            "nodeType": 1,
+            "nodeValue": ""
+         }, {
+            "attributes": [  ],
+            "childNodeCount": 9,
+            "localName": "body",
+            "nodeId": 9,
+            "nodeName": "BODY",
+            "nodeType": 1,
+            "nodeValue": ""
+         } ],
+         "frameId": "4928.1",
+         "localName": "html",
+         "nodeId": 7,
+         "nodeName": "HTML",
+         "nodeType": 1,
+         "nodeValue": ""
+      } ],
+      "documentURL": "file:///D:/Arken/C++/ElectronProjects/Chiika/testapp/index.html",
+      "localName": "",
+      "nodeId": 5,
+      "nodeName": "#document",
+      "nodeType": 9,
+      "nodeValue": "",
+      "xmlVersion": ""
+   }
+}
+[3.936][DEBUG]: DEVTOOLS RESPONSE DOM.getDocument (id=9) {
+   "root": {
+      "baseURL": "file:///D:/Arken/C++/ElectronProjects/Chiika/testapp/index.html",
+      "childNodeCount": 2,
+      "children": [ {
+         "localName": "",
+         "nodeId": 11,
+         "nodeName": "html",
+         "nodeType": 10,
+         "nodeValue": "",
+         "publicId": "",
+         "systemId": ""
+      }, {
+         "attributes": [  ],
+         "childNodeCount": 2,
+         "children": [ {
+            "attributes": [  ],
+            "childNodeCount": 2,
+            "localName": "head",
+            "nodeId": 13,
+            "nodeName": "HEAD",
+            "nodeType": 1,
+            "nodeValue": ""
+         }, {
+            "attributes": [  ],
+            "childNodeCount": 9,
+            "localName": "body",
+            "nodeId": 14,
+            "nodeName": "BODY",
+            "nodeType": 1,
+            "nodeValue": ""
+         } ],
+         "frameId": "4928.1",
+         "localName": "html",
+         "nodeId": 12,
+         "nodeName": "HTML",
+         "nodeType": 1,
+         "nodeValue": ""
+      } ],
+      "documentURL": "file:///D:/Arken/C++/ElectronProjects/Chiika/testapp/index.html",
+      "localName": "",
+      "nodeId": 10,
+      "nodeName": "#document",
+      "nodeType": 9,
+      "nodeValue": "",
+      "xmlVersion": ""
+   }
+}
+[3.937][INFO]: RESPONSE InitSession {
    "acceptSslCerts": true,
    "applicationCacheEnabled": false,
    "browserConnectionEnabled": false,
    "browserName": "chrome",
    "chrome": {
       "chromedriverVersion": "2.21 (0b5aa7b6ca450681c58087e14f72238aab5ab823)",
-      "userDataDir": "C:\\Users\\alperen\\AppData\\Local\\Temp\\scoped_dir16048_30441"
+      "userDataDir": "C:\\Users\\alperen\\AppData\\Local\\Temp\\scoped_dir11304_27099"
    },
    "cssSelectorsEnabled": true,
    "databaseEnabled": false,
@@ -239,115 +371,17 @@
    "version": "",
    "webStorageEnabled": true
 }
-[3.666][INFO]: COMMAND ExecuteScript {
+[3.951][INFO]: COMMAND ExecuteScript {
    "args": [ "require" ],
    "script": "return (function (requireName) {\n    return typeof window[requireName] === 'function'\n  }).apply(null, arguments)"
 }
-[3.666][INFO]: Waiting for pending navigations...
-[3.666][DEBUG]: DEVTOOLS COMMAND DOM.getDocument (id=8) {
-
-}
-[3.666][DEBUG]: DEVTOOLS RESPONSE DOM.getDocument (id=8) {
-   "root": {
-      "baseURL": "data:text/html,chromewebdata",
-      "childNodeCount": 1,
-      "children": [ {
-         "attributes": [  ],
-         "childNodeCount": 2,
-         "children": [ {
-            "attributes": [  ],
-            "childNodeCount": 0,
-            "localName": "head",
-            "nodeId": 7,
-            "nodeName": "HEAD",
-            "nodeType": 1,
-            "nodeValue": ""
-         }, {
-            "attributes": [  ],
-            "childNodeCount": 0,
-            "localName": "body",
-            "nodeId": 8,
-            "nodeName": "BODY",
-            "nodeType": 1,
-            "nodeValue": ""
-         } ],
-         "frameId": "10292.1",
-         "localName": "html",
-         "nodeId": 6,
-         "nodeName": "HTML",
-         "nodeType": 1,
-         "nodeValue": ""
-      } ],
-      "documentURL": "data:text/html,chromewebdata",
-      "localName": "",
-      "nodeId": 5,
-      "nodeName": "#document",
-      "nodeType": 9,
-      "nodeValue": "",
-      "xmlVersion": ""
-   }
-}
-[3.667][DEBUG]: DEVTOOLS COMMAND Runtime.evaluate (id=9) {
-   "expression": "var isLoaded = document.readyState == 'complete' ||    document.readyState == 'interactive';if (isLoaded) {  var frame = document.createElement('iframe');  frame.name = 'chromedriver dummy frame'; ..."
-}
-[3.672][DEBUG]: DEVTOOLS EVENT DOM.childNodeCountUpdated {
-   "childNodeCount": 1,
-   "nodeId": 8
-}
-[3.672][DEBUG]: DEVTOOLS EVENT Page.frameAttached {
-   "frameId": "10292.4",
-   "parentFrameId": "10292.1"
-}
-[3.672][DEBUG]: DEVTOOLS EVENT Page.frameStartedLoading {
-   "frameId": "10292.4"
-}
-[3.672][DEBUG]: DEVTOOLS EVENT Page.frameNavigated {
-   "frame": {
-      "id": "10292.4",
-      "loaderId": "10292.5",
-      "mimeType": "text/html",
-      "name": "chromedriver dummy frame",
-      "parentId": "10292.1",
-      "securityOrigin": "://",
-      "url": "about:blank"
-   }
-}
-[3.672][DEBUG]: DEVTOOLS EVENT Runtime.executionContextCreated {
-   "context": {
-      "frameId": "10292.4",
-      "id": 2,
-      "isDefault": true,
-      "name": "",
-      "origin": "://"
-   }
-}
-[3.672][DEBUG]: DEVTOOLS EVENT Page.frameStoppedLoading {
-   "frameId": "10292.4"
-}
-[3.672][DEBUG]: DEVTOOLS RESPONSE Runtime.evaluate (id=9) {
-   "result": {
-      "description": "1",
-      "type": "number",
-      "value": 1
-   },
-   "wasThrown": false
-}
-[3.672][INFO]: Done waiting for pending navigations. Status: ok
-[3.673][DEBUG]: DEVTOOLS COMMAND Runtime.evaluate (id=10) {
+[3.951][INFO]: Waiting for pending navigations...
+[3.951][INFO]: Done waiting for pending navigations. Status: ok
+[3.951][DEBUG]: DEVTOOLS COMMAND Runtime.evaluate (id=10) {
    "expression": "(function() { // Copyright (c) 2012 The Chromium Authors. All rights reserved.\n// Use of this source code is governed by a BSD-style license that can be\n// found in the LICENSE file.\n\n/**\n * Enum f...",
    "returnByValue": true
 }
-[3.676][DEBUG]: DEVTOOLS EVENT DOM.childNodeCountUpdated {
-   "childNodeCount": 0,
-   "nodeId": 8
-}
-[3.676][DEBUG]: DEVTOOLS EVENT Runtime.executionContextDestroyed {
-   "executionContextId": 2
-}
-[3.676][DEBUG]: DEVTOOLS EVENT Page.frameDetached {
-   "frameId": "10292.4"
-}
-[3.677][DEBUG]: DEVTOOLS RESPONSE Runtime.evaluate (id=10) {
+[3.954][DEBUG]: DEVTOOLS RESPONSE Runtime.evaluate (id=10) {
    "result": {
       "type": "object",
       "value": {
@@ -357,20 +391,20 @@
    },
    "wasThrown": false
 }
-[3.677][INFO]: Waiting for pending navigations...
-[3.677][INFO]: Done waiting for pending navigations. Status: ok
-[3.677][INFO]: RESPONSE ExecuteScript true
-[3.683][INFO]: COMMAND ExecuteScript {
+[3.954][INFO]: Waiting for pending navigations...
+[3.954][INFO]: Done waiting for pending navigations. Status: ok
+[3.954][INFO]: RESPONSE ExecuteScript true
+[3.960][INFO]: COMMAND ExecuteScript {
    "args": [  ],
    "script": "return (function () {\n    if (typeof process === 'object') return process.versions.electron\n  }).apply(null, arguments)"
 }
-[3.683][INFO]: Waiting for pending navigations...
-[3.683][INFO]: Done waiting for pending navigations. Status: ok
-[3.683][DEBUG]: DEVTOOLS COMMAND Runtime.evaluate (id=11) {
+[3.960][INFO]: Waiting for pending navigations...
+[3.960][INFO]: Done waiting for pending navigations. Status: ok
+[3.961][DEBUG]: DEVTOOLS COMMAND Runtime.evaluate (id=11) {
    "expression": "(function() { // Copyright (c) 2012 The Chromium Authors. All rights reserved.\n// Use of this source code is governed by a BSD-style license that can be\n// found in the LICENSE file.\n\n/**\n * Enum f...",
    "returnByValue": true
 }
-[3.685][DEBUG]: DEVTOOLS RESPONSE Runtime.evaluate (id=11) {
+[3.963][DEBUG]: DEVTOOLS RESPONSE Runtime.evaluate (id=11) {
    "result": {
       "type": "object",
       "value": {
@@ -380,20 +414,20 @@
    },
    "wasThrown": false
 }
-[3.685][INFO]: Waiting for pending navigations...
-[3.685][INFO]: Done waiting for pending navigations. Status: ok
-[3.685][INFO]: RESPONSE ExecuteScript "1.3.2"
-[3.690][INFO]: COMMAND ExecuteScript {
+[3.963][INFO]: Waiting for pending navigations...
+[3.963][INFO]: Done waiting for pending navigations. Status: ok
+[3.963][INFO]: RESPONSE ExecuteScript "1.3.2"
+[3.968][INFO]: COMMAND ExecuteScript {
    "args": [ "require" ],
    "script": "return (function (requireName) {\n    var electron = window[requireName]('electron')\n\n    var api = {\n      browserWindow: {},\n      electron: {},\n      rendererProcess: {},\n      webContents: {}\n  ..."
 }
-[3.690][INFO]: Waiting for pending navigations...
-[3.690][INFO]: Done waiting for pending navigations. Status: ok
-[3.690][DEBUG]: DEVTOOLS COMMAND Runtime.evaluate (id=12) {
+[3.968][INFO]: Waiting for pending navigations...
+[3.968][INFO]: Done waiting for pending navigations. Status: ok
+[3.968][DEBUG]: DEVTOOLS COMMAND Runtime.evaluate (id=12) {
    "expression": "(function() { // Copyright (c) 2012 The Chromium Authors. All rights reserved.\n// Use of this source code is governed by a BSD-style license that can be\n// found in the LICENSE file.\n\n/**\n * Enum f...",
    "returnByValue": true
 }
-[3.755][DEBUG]: DEVTOOLS RESPONSE Runtime.evaluate (id=12) {
+[4.060][DEBUG]: DEVTOOLS RESPONSE Runtime.evaluate (id=12) {
    "result": {
       "type": "object",
       "value": {
@@ -713,9 +747,9 @@
    },
    "wasThrown": false
 }
-[3.757][INFO]: Waiting for pending navigations...
-[3.757][INFO]: Done waiting for pending navigations. Status: ok
-[3.758][INFO]: RESPONSE ExecuteScript {
+[4.062][INFO]: Waiting for pending navigations...
+[4.062][INFO]: Done waiting for pending navigations. Status: ok
+[4.063][INFO]: RESPONSE ExecuteScript {
    "browserWindow": {
       "addListener": "browserWindow.addListener",
       "blur": "browserWindow.blur",
@@ -1026,58 +1060,58 @@
       "~~~": "..."
    }
 }
-[3.783][INFO]: COMMAND SetScriptTimeout {
+[4.098][INFO]: COMMAND SetScriptTimeout {
    "ms": 5000
 }
-[3.783][INFO]: RESPONSE SetScriptTimeout
-[3.792][INFO]: COMMAND GetWindows {
+[4.098][INFO]: RESPONSE SetScriptTimeout
+[4.110][INFO]: COMMAND GetWindows {
 
 }
-[3.792][DEBUG]: DevTools request: http://localhost:12295/json
-[3.793][DEBUG]: DevTools response: [ {
+[4.110][DEBUG]: DevTools request: http://localhost:12877/json
+[4.110][DEBUG]: DevTools response: [ {
    "description": "",
-   "id": "00706973-a057-4348-8ba3-7238da8adf3d",
-   "title": "LoginWindow.html",
+   "id": "0e382adf-685c-4451-8058-72c2eb548317",
+   "title": "Hello World!",
    "type": "page",
-   "url": "file:///D:/Arken/C++/ElectronProjects/Chiika/testDist/static/LoginWindow.html"
+   "url": "file:///D:/Arken/C++/ElectronProjects/Chiika/testapp/index.html"
 } ]
 
-[3.793][INFO]: RESPONSE GetWindows [ "CDwindow-00706973-a057-4348-8ba3-7238da8adf3d" ]
-[3.798][INFO]: COMMAND SwitchToWindow {
-   "name": "CDwindow-00706973-a057-4348-8ba3-7238da8adf3d"
+[4.110][INFO]: RESPONSE GetWindows [ "CDwindow-0e382adf-685c-4451-8058-72c2eb548317" ]
+[4.118][INFO]: COMMAND SwitchToWindow {
+   "name": "CDwindow-0e382adf-685c-4451-8058-72c2eb548317"
 }
-[3.798][DEBUG]: DevTools request: http://localhost:12295/json
-[3.798][DEBUG]: DevTools response: [ {
+[4.118][DEBUG]: DevTools request: http://localhost:12877/json
+[4.121][DEBUG]: DevTools response: [ {
    "description": "",
-   "id": "00706973-a057-4348-8ba3-7238da8adf3d",
-   "title": "LoginWindow.html",
+   "id": "0e382adf-685c-4451-8058-72c2eb548317",
+   "title": "Hello World!",
    "type": "page",
-   "url": "file:///D:/Arken/C++/ElectronProjects/Chiika/testDist/static/LoginWindow.html"
+   "url": "file:///D:/Arken/C++/ElectronProjects/Chiika/testapp/index.html"
 } ]
 
-[3.798][INFO]: RESPONSE SwitchToWindow
-[3.803][INFO]: COMMAND ExecuteScript {
+[4.121][INFO]: RESPONSE SwitchToWindow
+[4.127][INFO]: COMMAND ExecuteScript {
    "args": [ "app", "quit", [  ], "require" ],
    "script": "return (function callMainApi(moduleName, api, args, requireName) {\n  var module = window[requireName]('electron').remote\n  if (moduleName) {\n    module = module[moduleName]\n  }\n  if (typeof module[..."
 }
-[3.803][INFO]: Waiting for pending navigations...
-[3.803][INFO]: Done waiting for pending navigations. Status: ok
-[3.803][DEBUG]: DEVTOOLS COMMAND Runtime.evaluate (id=13) {
+[4.127][INFO]: Waiting for pending navigations...
+[4.127][INFO]: Done waiting for pending navigations. Status: ok
+[4.127][DEBUG]: DEVTOOLS COMMAND Runtime.evaluate (id=13) {
    "expression": "(function() { // Copyright (c) 2012 The Chromium Authors. All rights reserved.\n// Use of this source code is governed by a BSD-style license that can be\n// found in the LICENSE file.\n\n/**\n * Enum f...",
    "returnByValue": true
 }
-[3.821][DEBUG]: DEVTOOLS EVENT Inspector.detached {
+[4.141][DEBUG]: DEVTOOLS EVENT Inspector.detached {
    "reason": "target_closed"
 }
-[3.821][INFO]: Waiting for pending navigations...
-[3.821][INFO]: Done waiting for pending navigations. Status: disconnected: not connected to DevTools
-[3.821][DEBUG]: DevTools request: http://localhost:12295/json
-[3.823][DEBUG]: DevTools response: [  ]
+[4.141][INFO]: Waiting for pending navigations...
+[4.141][INFO]: Done waiting for pending navigations. Status: disconnected: not connected to DevTools
+[4.141][DEBUG]: DevTools request: http://localhost:12877/json
+[4.146][DEBUG]: DevTools response: [  ]
 
-[3.823][INFO]: RESPONSE ExecuteScript
-[4.830][INFO]: COMMAND Quit {
+[4.146][INFO]: RESPONSE ExecuteScript
+[5.155][INFO]: COMMAND Quit {
 
 }
-[4.830][INFO]: RESPONSE Quit
-[4.830][DEBUG]: Log type 'driver' lost 87 entries on destruction
-[4.830][DEBUG]: Log type 'browser' lost 0 entries on destruction
+[5.155][INFO]: RESPONSE Quit
+[5.155][DEBUG]: Log type 'driver' lost 86 entries on destruction
+[5.155][DEBUG]: Log type 'browser' lost 0 entries on destruction
