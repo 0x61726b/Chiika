@@ -15,6 +15,6 @@ node --version
 npm --version
 
 npm install
-gulp compile:scripts:not:watch
+npm run compileScripts
 sleep 10
 npm test

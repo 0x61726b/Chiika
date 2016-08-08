@@ -5,8 +5,9 @@
   "main": ".serve/main_process/chiika.js",
   "productName": "Chiika",
   "scripts": {
-    "start": "gulp serve",
-    "test": "mocha --compilers coffee:coffee-script/register ./spec/app-spec.coffee"
+    "start": "electron .serve/main_process/chiika.js",
+    "test": "mocha --compilers coffee:coffee-script/register ./spec/app-spec.coffee",
+    "compileScripts": "./node_modules/.bin/gulp compile:scripts:not:watch"
   },
   "keywords": [
     "electron",
