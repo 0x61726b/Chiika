@@ -84,7 +84,26 @@ module.exports = React.createClass
       }
         {
           if @state.layout.list
-            <button type="button" className="button raised lightblue">Watching</button>
+            <div>
+              <button type="button" className="button raised lightblue">Watching</button>
+              <div className="progressInteractions">
+                <div className="title">
+                  Episode
+                </div>
+                <div className="interactions">
+                  <button className="minus">
+                    -
+                  </button>
+                  <div className="number">
+                    <input type="text"name="name" value=""/>
+                    <span>/ 36</span>
+                  </div>
+                  <button className="plus">
+                    +
+                  </button>
+                </div>
+              </div>
+            </div>
         }
         {
           if @state.layout.list
@@ -162,5 +181,8 @@ module.exports = React.createClass
             </div>
           </div>
         </div>
+      </div>
+      <div className="fab">
+        >
       </div>
     </div>
