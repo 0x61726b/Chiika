@@ -28,40 +28,25 @@ describe 'application launch', ->
 
   app = null
 
-  # beforeEach () =>
-  #   console.log "Electron path #{setup.getElectronPath()}"
-  #   setup.startApplication({
-  #     args: [path.join(__dirname, '..','testapp')]})
-  #   .then (startedApp) =>
-  #       app = startedApp
-  #
-  # afterEach =>
-  #   setup.stopApplication(app)
-
-
-  it 'opens chiika', (done) =>
-    setup.setupTimeout(this)
+  beforeEach () =>
+    console.log "Electron path #{setup.getElectronPath()}"
     setup.startApplication({
       args: [path.join(__dirname, '..')]})
     .then (startedApp) =>
-        setup.stopApplication(startedApp).then =>
-          done()
-    baka = 42
+        app = startedApp
 
-  # it 'opens chiika', (done) =>
-  #     setup.startApplication({
-  #       args: [path.join(__dirname, '..')]})
-  #     .then (startedApp) =>
-  #         app = startedApp
-  #         app.client.waitUntilWindowLoaded()
-  #           .browserWindow.focus()
-  #           .getWindowCount().should.eventually.equal(1)
-  #           .then =>
-  #             setup.stopApplication(app).then => done()
-  #     baka = 42
-      # .browserWindow.isMinimized().should.eventually.be.false
-      # .browserWindow.isDevToolsOpened().should.eventually.be.false
-      # .browserWindow.isVisible().should.eventually.be.true
-      # .browserWindow.isFocused().should.eventually.be.true
-      # .browserWindow.getBounds().should.eventually.have.property('width').and.be.above(0)
-      # .browserWindow.getBounds().should.eventually.have.property('height').and.be.above(0)
+  afterEach =>
+    setup.stopApplication(app)
+
+
+
+   it 'opens chiika', () =>
+      app.client.waitUntilWindowLoaded()
+      .browserWindow.focus()
+      .getWindowCount().should.eventually.equal(1)
+      .browserWindow.isMinimized().should.eventually.be.false
+      .browserWindow.isDevToolsOpened().should.eventually.be.false
+      .browserWindow.isVisible().should.eventually.be.true
+      .browserWindow.isFocused().should.eventually.be.true
+      .browserWindow.getBounds().should.eventually.have.property('width').and.be.above(0)
+      .browserWindow.getBounds().should.eventually.have.property('height').and.be.above(0)

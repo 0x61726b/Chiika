@@ -31,8 +31,6 @@ module.exports = class Setup
 
     app = new Application(options)
     app.start().then =>
-      console.log "started"
-      app.client.getMainProcessLogs().then (logs) => console.log logs
       assert.equal(app.isRunning(), true)
       chaiAsPromised.transferPromiseness = app.transferPromiseness
       app
