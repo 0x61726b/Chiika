@@ -15,6 +15,4 @@ node --version
 npm --version
 
 npm install
-mkdir .serve
-gulp compile:scripts:not:watch
-ls .serve
+mocha ./spec/example-test.js
