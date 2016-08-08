@@ -13,3 +13,12 @@ fi
 
 node --version
 npm --version
+
+npm install
+sleep 3
+npm install
+sleep 3
+npm run compileScripts
+sleep 10
+npm install mkdirp
+npm test
