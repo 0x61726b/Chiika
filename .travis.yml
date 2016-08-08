@@ -9,7 +9,7 @@ branches:
 env:
   - NODE_VERSION="4.2.1"
 
-script:
+install:
   - chmod a+x ./script/travis-build.sh
   - ./script/travis-build.sh
   - npm install
@@ -18,8 +18,9 @@ script:
   - sleep 3
   - npm run compileScripts
   - sleep 10
+
+script:
   - npm test
-  - cat /home/travis/build/arkenthera/Chiika/logs/log.txt
 
 
 cache:
