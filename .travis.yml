@@ -10,10 +10,10 @@ env:
   - NODE_VERSION="4.2.1"
 
 install:
-  - chmod a+x ./script/travis-build.sh
+  - chmod a+x ./travis-build.sh
 
 script:
-  - ./script/travis-build.sh
+  - ./travis-build.sh
 
 
 

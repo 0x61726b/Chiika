@@ -19,18 +19,19 @@ module.exports = class Setup
     if (process.env.CI)
       test.timeout(100000)
     else
-      test.timeout(100000)
+      test.timeout(20000)
 
   startApplication: (options) ->
     options.path = @getElectronPath()
     if (process.env.CI?)
       options.startTimeout = 100000
     else
-      options.startTimeout = 100000
+      options.startTimeout = 20000
 
 
     app = new Application(options)
     app.start().then =>
+      console.log "Hello?"
       assert.equal(app.isRunning(), true)
       chaiAsPromised.transferPromiseness = app.transferPromiseness
       app

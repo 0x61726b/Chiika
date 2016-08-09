@@ -41,31 +41,31 @@ module.exports = class AppDelegate
           title: 'Huehueheuehueheu',
           icon: "resources/icon.png",
           url: "file://#{__dirname}/../static/LoginWindow.html",
-          show: true,
+          show: false,
           loadImmediately: true
           })
 
-        # mainWindow = chiika.windowManager.createWindowAndOpen(true,false,{
-        #   name: 'main',
-        #   width: 1400,
-        #   height: 900,
-        #   title: 'HUehueheuhue',
-        #   icon: "resources/icon.png",
-        #   url: "file://#{__dirname}/../static/index.html#Home"
-        #   show: false,
-        #   loadImmediately: false
-        #   })
-        #
-        # loadingWindow = chiika.windowManager.createWindowAndOpen(false,true,{
-        #   name: 'loading',
-        #   width: 600,
-        #   height: 400,
-        #   title: 'Chiika',
-        #   icon: "resources/icon.png",
-        #   url: "file://#{__dirname}/../static/LoadingWindow.html",
-        #   show: true,
-        #   loadImmediately: true
-        #   })
+        mainWindow = chiika.windowManager.createWindowAndOpen({
+          name: 'main',
+          width: 1400,
+          height: 900,
+          title: 'HUehueheuhue',
+          icon: "resources/icon.png",
+          url: "file://#{__dirname}/../static/index.html#Home"
+          show: false,
+          loadImmediately: false
+          })
+
+        loadingWindow = chiika.windowManager.createWindowAndOpen({
+          name: 'loading',
+          width: 600,
+          height: 400,
+          title: 'Chiika',
+          icon: "resources/icon.png",
+          url: "file://#{__dirname}/../static/LoadingWindow.html",
+          show: true,
+          loadImmediately: true
+          })
 
         #chiika.windowManager.openDevTools(mainWindow)
         #chiika.windowManager.openDevTools(loginWindow)
