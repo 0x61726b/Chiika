@@ -46,7 +46,7 @@ module.exports = class Setup
 
 
   removeAppData: ->
-    console.log @getDataPath()
+
     new Promise (resolve) =>
       rimraf @getDataPath(), resolve
 
@@ -83,6 +83,7 @@ module.exports = class Setup
 
     app.start().then =>
       console.log "Hello?"
+      console.log @getDataPath()
       assert.equal(app.isRunning(), true)
       chaiAsPromised.transferPromiseness = app.transferPromiseness
       app
