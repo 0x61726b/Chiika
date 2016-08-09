@@ -24,6 +24,8 @@ Settings = require './settings'
 LoadingScreen = require './loading-screen'
 Home = require './home'
 
+_ = require 'lodash'
+
 TabGridView = require './view-tabGrid'
 CardView = require './card-view'
 DetailsCardView = require './card-view-details'

@@ -67,8 +67,8 @@ module.exports = class AppDelegate
           loadImmediately: true
           })
 
-        #chiika.windowManager.openDevTools(mainWindow)
-        #chiika.windowManager.openDevTools(loginWindow)
+        chiika.windowManager.openDevTools(mainWindow)
+        chiika.windowManager.openDevTools(loginWindow)
 
         chiika.settingsManager.applySettings()
     return defer.promise

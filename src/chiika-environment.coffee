@@ -22,7 +22,7 @@ fs                    = require 'fs'
 path                  = require 'path'
 
 _when                 = require 'when'
-Logger                = require './main_process/Logger'
+Logger                = require './main_process/logger'
 
 ChiikaIPC             = require './chiika-ipc'
 ViewManager           = require './view-manager'
@@ -84,7 +84,7 @@ class ChiikaEnvironment
     @cardManager.addCard(studioCard)
     @cardManager.addCard(sourceCard)
 
-    
+
 
 
 

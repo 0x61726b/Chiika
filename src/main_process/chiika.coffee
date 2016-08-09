@@ -158,8 +158,9 @@ class Application
                     @apiManager.compileUserScripts().then =>
                       @uiManager.checkUIData().then =>
                         @apiManager.postInit()
-                        @windowManager.closeLoadingWindow()
-                        @windowManager.showMainWindow(true)
+                        @windowManager.getWindowByName('loading').hide()
+                        @windowManager.getWindowByName('main').show()
+                        @windowManager.loadURL(@windowManager.getWindowByName('main'))
       else
         #This will probably fail if more than one script is being executed...
         #This means when all scripts are compiled,preload UI items
@@ -167,8 +168,10 @@ class Application
           @uiManager.preloadUIItems()
                     .then =>
                       chiika.logger.verbose("Preloading UI complete!")
-                      @windowManager.closeLoadingWindow()
-                      @windowManager.showMainWindow(true)
+                      @windowManager.getWindowByName('loading').hide()
+                      @windowManager.getWindowByName('main').show()
+                      @windowManager.loadURL(@windowManager.getWindowByName('main'))
+
 
 
   getAppHome: ->

@@ -36,14 +36,15 @@ describe 'application launch', ->
         app = startedApp
 
   afterEach =>
-    setup.stopApplication(app)
+    console.log ""
+    #setup.stopApplication(app)
 
 
 
    it 'opens chiika', () =>
-      # app.client.waitUntilWindowLoaded()
-      # .browserWindow.focus()
-      # .getWindowCount().should.eventually.equal(1)
+      app.client.waitUntilWindowLoaded()
+      .browserWindow.focus()
+      .getWindowCount().should.eventually.equal(2)
       # .browserWindow.isMinimized().should.eventually.be.false
       # .browserWindow.isDevToolsOpened().should.eventually.be.false
       # .browserWindow.isVisible().should.eventually.be.true
