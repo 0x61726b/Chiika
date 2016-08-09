@@ -22,6 +22,7 @@ os                    = require 'os'
 rimraf                = require 'rimraf'
 _                     = require 'lodash'
 ncp                   = require 'ncp'
+fsextra               = require 'fs-extra'
 
 global.before =>
   chai.should()
@@ -58,7 +59,7 @@ module.exports = class Setup
 
   copyTestData: (folder) ->
     new Promise (resolve) =>
-      ncp path.join(__dirname,folder), path.join(@getDataPath(),".."),resolve
+      fsextra.copy path.join(__dirname,folder), path.join(@getDataPath(),".."),resolve
 
   setupTimeout: (test) ->
     if (process.env.CI)
