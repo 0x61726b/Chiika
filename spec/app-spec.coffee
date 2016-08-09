@@ -14,40 +14,84 @@
 #Description:
 #----------------------------------------------------------------------------
 
-helpers = require './global-setup'
-path    = require 'path'
+GlobalSetup               = require './global-setup'
+path                      = require 'path'
+_                         = require 'lodash'
 
-describe = global.describe
-it = global.it
-beforeEach = global.beforeEach
-afterEach = global.afterEach
 
-describe 'application launch', ->
-  setup = new helpers()
+describe 'General app tests', ->
+  setup = new GlobalSetup()
   setup.setupTimeout(this)
 
   app = null
 
-  beforeEach () =>
-    console.log "Electron path #{setup.getElectronPath()}"
-    setup.startApplication({
-      args: [path.join(__dirname, '..')]})
-    .then (startedApp) =>
-        app = startedApp
-
   afterEach =>
-    console.log ""
-    #setup.stopApplication(app)
+    setup.prettyPrintMainProcessLogs(app.client)
+
+  after =>
+    app = null
 
 
+  #
+  # Two windows are loading, and login.
+  #
+  describe 'Dev mode is true,but running in CI environment',->
+    before () =>
+      setup.startApplication({
+        args: [setup.chiikaPath()],
+        DEV_MODE:true,
+        RUNNING_TESTS: true
+      })
+      .then (startedApp) =>
+          app = startedApp
 
-   it 'opens chiika', () =>
-      app.client.waitUntilWindowLoaded()
-      .browserWindow.focus()
-      .getWindowCount().should.eventually.equal(2)
-      # .browserWindow.isMinimized().should.eventually.be.false
-      # .browserWindow.isDevToolsOpened().should.eventually.be.false
-      # .browserWindow.isVisible().should.eventually.be.true
-      # .browserWindow.isFocused().should.eventually.be.true
-      # .browserWindow.getBounds().should.eventually.have.property('width').and.be.above(0)
-      # .browserWindow.getBounds().should.eventually.have.property('height').and.be.above(0)
+    after =>
+      setup.stopApplication(app)
+
+    it 'Dev tools should not open', () =>
+      setup.removeAppData().then =>
+        app.client.getWindowCount().should.eventually.equal(2).pause(500)
+
+
+  #
+  # Two windows are loading, and login.
+  #
+  describe 'Dev Mode is false',->
+    before () =>
+      setup.startApplication({
+        args: [setup.chiikaPath()],
+        DEV_MODE:false,
+        RUNNING_TESTS: false
+      })
+      .then (startedApp) =>
+          app = startedApp
+
+    after =>
+      setup.stopApplication(app)
+
+    it 'Dev tools should not open', () =>
+      setup.removeAppData().then =>
+        app.client.getWindowCount().should.eventually.equal(2).pause(500)
+
+  #
+  # Two windows are loading, and login.
+  #
+  describe 'Dev mode is true',->
+    before () =>
+      setup.startApplication({
+        args: [setup.chiikaPath()],
+        DEV_MODE:true,
+        RUNNING_TESTS: false
+      })
+      .then (startedApp) =>
+          app = startedApp
+
+    after =>
+      setup.stopApplication(app)
+
+    #
+    # 2 + 2
+    #
+    it 'Dev tools should open', () =>
+      setup.removeAppData().then =>
+        app.client.getWindowCount().should.eventually.equal(4).pause(500)

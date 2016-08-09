@@ -70,8 +70,8 @@ process.on 'uncaughtException',(err) ->
 
 module.exports =
 class Application
-  window: null,
-  loginWindow: null
+  devMode: false
+  runningTests: false
 
 
   #
@@ -79,6 +79,7 @@ class Application
   #
   constructor: () ->
     global.chiika       = this
+    console.log         ("Using electron instance #{require.resolve('electron')}")
     @chiikaHome         = path.join(app.getPath('appData'),"chiika")
 
     @logger             = new Logger("verbose").logger

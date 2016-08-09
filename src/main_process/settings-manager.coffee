@@ -33,10 +33,14 @@ module.exports = class SettingsManager
     #Initialize settings related stuff
     process.env.CHIIKA_HOME = chiika.getAppHome()
 
-    if process.env.TEST_MODE?
-      chiika.testMode = true
-    else
-      chiika.testMode = false
+    if process.env.DEV_MODE? && process.env.DEV_MODE == 'true'
+      chiika.devMode = true
+
+    if process.env.RUNNING_TESTS? && process.env.RUNNING_TESTS == 'true'
+      chiika.runningTests = true
+
+    chiika.logger.info("Dev Mode: #{chiika.devMode}")
+    chiika.logger.info("Running Tests: #{chiika.runningTests}")
 
   initialize: ->
     defer = _when.defer()

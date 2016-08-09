@@ -76,7 +76,6 @@ module.exports = class WindowManager
     if options.loadImmediately
       window.loadURL(options.url)
 
-    window.closeDevTools()
     window
 
 
@@ -94,7 +93,8 @@ module.exports = class WindowManager
 
       _.assign window, { name: options.name }
       @windows.push window
-      window.openDevTools()
+
+      @openDevTools(window)
 
       window.once 'ready-to-show', =>
         window.show()
@@ -154,7 +154,13 @@ module.exports = class WindowManager
     window.loadURL(window.url)
 
   openDevTools: (window) ->
-    window.openDevTools()
+    if chiika.runningTests
+      chiika.logger.warn("Dev Tools has been requested but we're currently in Automated Testing environment.")
+      return
+    if chiika.devMode
+      window.openDevTools()
+    else
+      chiika.logger.warn("Dev Tools has been requested but we're currently not in development environment.")
 
 
   getPosition: (window) ->
