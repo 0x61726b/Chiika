@@ -21,6 +21,7 @@ path                  = require 'path'
 os                    = require 'os'
 rimraf                = require 'rimraf'
 _                     = require 'lodash'
+ncp                   = require 'ncp'
 
 global.before =>
   chai.should()
@@ -39,8 +40,10 @@ module.exports = class Setup
     else
       if process.platform == 'darwin'
         osSpecificDir = process.env.HOME + 'Library/Application Support'
-      else
+      else if process.platform == 'linux'
         osSpecificDir = process.env.HOME + '.config'
+      else
+        osSpecificDir = process.env.APPDATA
 
       process.env.CHIIKA_HOME = path.join(osSpecificDir,"chiika","data")
       process.env.CHIIKA_HOME
@@ -50,15 +53,18 @@ module.exports = class Setup
 
 
   removeAppData: ->
-
     new Promise (resolve) =>
       rimraf @getDataPath(), resolve
+
+  copyTestData: (folder) ->
+    new Promise (resolve) =>
+      ncp path.join(__dirname,folder), path.join(@getDataPath(),".."),resolve
 
   setupTimeout: (test) ->
     if (process.env.CI)
       test.timeout(100000)
     else
-      test.timeout(20000)
+      test.timeout(10000)
 
   startApplication: (options) ->
     options.path = @getElectronPath()
@@ -86,8 +92,6 @@ module.exports = class Setup
     app = new Application(options)
 
     app.start().then =>
-      console.log "Hello?"
-      console.log @getDataPath()
       assert.equal(app.isRunning(), true)
       chaiAsPromised.transferPromiseness = app.transferPromiseness
       app
@@ -106,5 +110,4 @@ module.exports = class Setup
     if (!app || !app.isRunning())
       return
 
-    console.log "Stopping"
     app.stop()

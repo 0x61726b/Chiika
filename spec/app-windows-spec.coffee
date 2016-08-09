@@ -23,27 +23,83 @@ describe 'Application Window Control', ->
   setup = new GlobalSetup()
   setup.setupTimeout(this)
 
-  app = null
+  runApp = =>
+    new Promise (resolve) =>
+      setup.startApplication({
+        args: [path.join(__dirname, '..')]})
+      .then (startedApp) =>
+          resolve(startedApp)
 
-  before () =>
-    console.log "Electron path #{setup.getDataPath()}"
-    setup.startApplication({
-      args: [path.join(__dirname, '..')]})
-    .then (startedApp) =>
-        app = startedApp
-
-  after =>
+  stopApp = (app) =>
     setup.stopApplication(app)
 
   #
   describe 'No AppData First Launch',->
-    it 'launch Chiika', () =>
+    this.timeout(30000)
+    #
+    # Loading window + login window
+    #
+    it 'Should launch login window', () =>
       setup.removeAppData().then =>
-        app.client.getWindowCount().should.eventually.equal(2).pause(500)
-        .then =>
-           app.client.getMainProcessLogs().then (logs) =>
-             _.forEach logs, (v,k) =>
-               console.log v
+        runApp().then (app) =>
+          app.client
+          .waitUntilWindowLoaded()
+          .getWindowCount().should.eventually.equal(2)
+          .windowByIndex(1)
+          .browserWindow.getTitle().should.eventually.be.equal('login')
+          .browserWindow.isVisible().should.eventually.be.true
+          .windowByIndex(0)
+          .browserWindow.getTitle().should.eventually.be.equal('loading')
+          .browserWindow.isVisible().should.eventually.be.false
+          .then =>
+            stopApp(app)
+
+  #
+  describe 'Data exists but there is no user',->
+    this.timeout(30000)
+    #
+    # Loading window + login window
+    #
+    it 'Should launch login window', () =>
+      setup.removeAppData().then =>
+        setup.copyTestData('data_without_user').then =>
+          runApp().then (app) =>
+            app.client
+            .waitUntilWindowLoaded()
+            .getWindowCount().should.eventually.equal(2)
+            .windowByIndex(1)
+            .browserWindow.getTitle().should.eventually.be.equal('login')
+            .browserWindow.isVisible().should.eventually.be.true
+            .windowByIndex(0)
+            .browserWindow.getTitle().should.eventually.be.equal('loading')
+            .browserWindow.isVisible().should.eventually.be.false
+            .then =>
+              stopApp(app)
+
+  describe 'Data exists and there is at least one user', ->
+    this.timeout(30000)
+
+    it 'Should launch main window', ->
+      setup.removeAppData().then =>
+        setup.copyTestData('data_with_user').then =>
+          runApp().then (app) =>
+            app.client
+            .waitUntilWindowLoaded()
+            .getWindowCount().should.eventually.equal(3)
+            .windowByIndex(2)
+            .browserWindow.getTitle().should.eventually.be.equal('main')
+            .browserWindow.isVisible().should.eventually.be.true
+            .windowByIndex(1)
+            .browserWindow.getTitle().should.eventually.be.equal('login')
+            .browserWindow.isVisible().should.eventually.be.false
+            .windowByIndex(0)
+            .browserWindow.getTitle().should.eventually.be.equal('loading')
+            .browserWindow.isVisible().should.eventually.be.false
+            .then =>
+              stopApp(app)
+
+
+
         #  app.client.getWindowCount().should.eventually.equal(2)
         #  .pause(2000)
         #  .then =>

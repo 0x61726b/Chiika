@@ -25,8 +25,8 @@ describe 'General app tests', ->
 
   app = null
 
-  afterEach =>
-    setup.prettyPrintMainProcessLogs(app.client)
+  #afterEach =>
+    #setup.prettyPrintMainProcessLogs(app.client)
 
   after =>
     app = null
@@ -37,20 +37,21 @@ describe 'General app tests', ->
   #
   describe 'Dev mode is true,but running in CI environment',->
     before () =>
-      setup.startApplication({
-        args: [setup.chiikaPath()],
-        DEV_MODE:true,
-        RUNNING_TESTS: true
-      })
-      .then (startedApp) =>
-          app = startedApp
+      setup.removeAppData().then =>
+        setup.startApplication({
+          args: [setup.chiikaPath()],
+          DEV_MODE:true,
+          RUNNING_TESTS: true
+        })
+        .then (startedApp) =>
+            app = startedApp
 
     after =>
       setup.stopApplication(app)
 
     it 'Dev tools should not open', () =>
-      setup.removeAppData().then =>
-        app.client.getWindowCount().should.eventually.equal(2).pause(500)
+      app.client.getWindowCount().should.eventually.equal(2)
+      .browserWindow.isDevToolsOpened().should.eventually.be.false
 
 
   #
@@ -58,33 +59,35 @@ describe 'General app tests', ->
   #
   describe 'Dev Mode is false',->
     before () =>
-      setup.startApplication({
-        args: [setup.chiikaPath()],
-        DEV_MODE:false,
-        RUNNING_TESTS: false
-      })
-      .then (startedApp) =>
-          app = startedApp
+      setup.removeAppData().then =>
+        setup.startApplication({
+          args: [setup.chiikaPath()],
+          DEV_MODE:false,
+          RUNNING_TESTS: false
+        })
+        .then (startedApp) =>
+            app = startedApp
 
     after =>
       setup.stopApplication(app)
 
     it 'Dev tools should not open', () =>
-      setup.removeAppData().then =>
-        app.client.getWindowCount().should.eventually.equal(2).pause(500)
+      app.client.getWindowCount().should.eventually.equal(2)
+      .browserWindow.isDevToolsOpened().should.eventually.be.false
 
   #
   # Two windows are loading, and login.
   #
   describe 'Dev mode is true',->
     before () =>
-      setup.startApplication({
-        args: [setup.chiikaPath()],
-        DEV_MODE:true,
-        RUNNING_TESTS: false
-      })
-      .then (startedApp) =>
-          app = startedApp
+      setup.removeAppData().then =>
+        setup.startApplication({
+          args: [setup.chiikaPath()],
+          DEV_MODE:true,
+          RUNNING_TESTS: false
+        })
+        .then (startedApp) =>
+            app = startedApp
 
     after =>
       setup.stopApplication(app)
@@ -93,5 +96,5 @@ describe 'General app tests', ->
     # 2 + 2
     #
     it 'Dev tools should open', () =>
-      setup.removeAppData().then =>
-        app.client.getWindowCount().should.eventually.equal(4).pause(500)
+      app.client.getWindowCount().should.eventually.equal(4).pause(500)
+      .browserWindow.isDevToolsOpened().should.eventually.be.true

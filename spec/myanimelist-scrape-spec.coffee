@@ -1,6 +1,7 @@
 request           = require 'request'
 xml2js            = require 'xml2js'
 _                 = require 'lodash'
+GlobalSetup               = require './global-setup'
 
 animePageUrl = 'http://myanimelist.net/anime/21'
 
@@ -8,7 +9,9 @@ pageContents = ""
 
 
 describe 'MyAnimelist',->
-  beforeEach (done) =>
+  this.timeout(10000)
+
+  before (done) =>
     if pageContents.length == 0
       request {url: animePageUrl},(error,response,body) =>
         pageContents = body
@@ -28,60 +31,61 @@ describe 'MyAnimelist',->
   voiceActorsAndIdsRegex = /<a href="\/people\/(.*)">(.*)<\/a><br>/g
   vaStep2Image = /\w"><img src="\/images\/spacer.gif"\sdata-src="(.*?)"\s/g
 
-  it 'Find Studio', (done) ->
+  it 'Find Studio', () ->
     studiosMatch = pageContents.match studiosRegex
     if studiosMatch?
       studioName = studiosMatch[3]
       studioIdToBeParsed = studiosMatch[2]
       parseStudioId = studioIdToBeParsed.split('/')
       studioId = parseStudioId[0]
-      expect(studioName).toBe("Toei Animation")
-
-    done()
-
-  it 'Find Source', (done) ->
+      studioName.should.be.equal("Toei Animation")
+  #
+  #
+  it 'Find Source', () ->
     sourceMatch = pageContents.match sourceRegex
     if sourceMatch?
       source = sourceMatch[2]
-      expect(source).toBe("Manga")
-    done()
 
-  it 'Find Japanese', (done) ->
+      source.should.be.equal("Manga")
+
+  #
+  it 'Find Japanese', () ->
     japaneseTranslationMatch = pageContents.match japaneseTranslationRegex
     if japaneseTranslationMatch?
       japaneseTranslation = japaneseTranslationMatch[2]
-      expect(japaneseTranslation).toBe("ONE PIECE")
-    done()
+      japaneseTranslation.should.be.equal("ONE PIECE")
 
-  it 'Find Broadcast', (done) ->
+  #
+  it 'Find Broadcast', () ->
     broadcastMatch = pageContents.match broadcastRegex
     if broadcastMatch?
       broadcast = broadcastMatch[2]
-      expect(broadcast).toBe("Sundays at 09:30 (JST)")
-    done()
+      broadcast.should.be.equal("Sundays at 09:30 (JST)")
 
-  it 'Find Duration', (done) ->
+  #
+  it 'Find Duration', () ->
     durationMatch = pageContents.match durationRegex
     if durationMatch?
       duration = durationMatch[2]
-      expect(duration).toBe("24 min.")
-    done()
+      duration.should.be.equal("24 min.")
 
-  it 'Find Aired', (done) ->
+
+  #
+  it 'Find Aired', () ->
     airedMatch = pageContents.match airedRegex
     if airedMatch?
       aired = airedMatch[2]
-      expect(aired).toBe("Oct 20, 1999 to ?")
-    done()
+      aired.should.be.equal("Oct 20, 1999 to ?")
 
-  it 'Find Synopsis', (done) ->
+  #
+  it 'Find Synopsis', () ->
     synMatch = pageContents.match synopsisRegex
     if synMatch?
       synopsis = synMatch[1]
-      expect(synopsis.length).toBeGreaterThan(5)
-    done()
+      synopsis.length.should.be.at.least(5)
 
-  it 'Find Characters', (done) ->
+  #
+  it 'Find Characters', () ->
     characters = []
     while chMatch = charactersStep1Regex.exec pageContents
       step2Data = chMatch[0]
@@ -116,11 +120,11 @@ describe 'MyAnimelist',->
       _.assign character, { voiceActors: vas }
       characters.push character
 
-    expect(characters.length).toBeGreaterThan(1)
+    characters.length.should.be.at.least(1)
 
     _.forEach characters, (v,k) =>
-      expect(v.voiceActors.length).toBeGreaterThan(0)
-    done()
+      v.voiceActors.length.should.be.at.least(0)
+
 
 
   #

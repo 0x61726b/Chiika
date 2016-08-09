@@ -18,7 +18,7 @@ GlobalSetup               = require './global-setup'
 path                      = require 'path'
 
 
-describe 'application launch', ->
+describe.skip 'application launch', ->
   setup = new GlobalSetup()
   setup.setupTimeout(this)
 
