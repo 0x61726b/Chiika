@@ -46,6 +46,7 @@ module.exports = class Setup
 
 
   removeAppData: ->
+    console.log @getDataPath()
     new Promise (resolve) =>
       rimraf @getDataPath(), resolve
 

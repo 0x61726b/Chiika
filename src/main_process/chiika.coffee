@@ -81,6 +81,7 @@ class Application
     global.chiika       = this
     console.log         ("Using electron instance #{require.resolve('electron')}")
     @chiikaHome         = path.join(app.getPath('appData'),"chiika")
+    console.log @chiikaHome
 
     @logger             = new Logger("verbose").logger
     global.logger       = @logger #Share with renderer
