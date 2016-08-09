@@ -214,7 +214,7 @@ module.exports = class MyAnimelist
           else
             @animelistExtra.push v
 
-      
+
       chiika.logger.script("[yellow](#{@name}) AnimelistExtra data length #{@animelistExtra.length} #{@name}")
 
       mangaListView = @chiika.ui.getUIItem('mangaList_myanimelist')
@@ -471,6 +471,7 @@ module.exports = class MyAnimelist
     source = entry.animeSource ? ""
     duration = entry.animeDuration ? ""
     characters = entry.animeCharacters ? []
+    totalEpisodes = entry.animeTotalEpisodes ? "0"
 
 
     image = entry.animeImage ? "le_default_image"
@@ -539,6 +540,7 @@ module.exports = class MyAnimelist
       genres = genresText
 
     detailsLayout =
+      totalEpisodes: totalEpisodes
       title: title
       genres: genres
       list: true
@@ -607,6 +609,7 @@ module.exports = class MyAnimelist
       anime.animeSynonyms = v.series_synonyms
       anime.animeEpisodes = v.series_episodes
       anime.animeWatchedEpisodes = v.my_watched_episodes
+      anime.animeTotalEpisodes = v.series_episodes
       anime.id = id + 1
       anime.mal_id = v.series_animedb_id
 

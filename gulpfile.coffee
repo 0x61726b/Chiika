@@ -249,7 +249,8 @@ do Your_Application_will_ = () ->
     if argv.pls
       development.Show_CA_Debug_Tools = 'yeah'
     development.version = packageJson.version
-    development.TEST_MODE = true
+    development.DEV_MODE = true
+    development.RUNNING_TESTS = false
 
     if argv.clean
       rimraf = require 'rimraf'

@@ -37,14 +37,14 @@ module.exports = class Setup
     if process.env.CHHIKA_HOME?
       process.env.CHIIKA_HOME
     else
-      osSpecificDir = process.env.APPDATA || (process.platform == 'darwin' ? process.env.HOME + 'Library/Preferences' : '/var/local')
+      osSpecificDir = process.env.APPDATA || (process.platform == 'darwin' ? process.env.HOME + 'Library/Preferences' : process.env.HOME + '.config')
       process.env.CHIIKA_HOME = path.join(osSpecificDir,"chiika","data")
       process.env.CHIIKA_HOME
 
   chiikaPath: ->
     path.join(__dirname, '..')
 
-  
+
   removeAppData: ->
     new Promise (resolve) =>
       rimraf @getDataPath(), resolve
