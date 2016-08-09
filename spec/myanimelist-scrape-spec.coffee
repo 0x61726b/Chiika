@@ -8,7 +8,7 @@ animePageUrl = 'http://myanimelist.net/anime/21'
 pageContents = ""
 
 
-describe 'MyAnimelist',->
+describe 'Myanimelist Anime Page Parsing',->
   this.timeout(10000)
 
   before (done) =>

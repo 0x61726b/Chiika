@@ -103,6 +103,13 @@ MalLogin = React.createClass
     user.css({ "border": "#{color} 1px solid"});
     pass.css({ "border": "#{color} 1px solid"});
 
+    if color == "red"
+      user.addClass("highlightred")
+      pass.addClass("highlightred")
+    else
+      user.addClass("highlightgreen")
+      pass.addClass("highlightgreen")
+
 
   componentDidUpdate: ->
     $("form").
@@ -152,7 +159,6 @@ MalLogin = React.createClass
 
   continueToApp: (e) ->
     @ipcManager.sendMessage 'call-window-method','close'
-    @ipcManager.sendMessage 'window-method',{ method: 'show', window:'main' }
     @ipcManager.sendMessage 'continue-from-login'
 
 
@@ -171,7 +177,7 @@ MalLogin = React.createClass
     (<div className="card" id="login-container" key=key>
         <img src={service.logo} id="mal-logo" style={{width: 200 , height: 200}} alt="" />
         <form className="" id="loginForm-#{service.name}">
-        <label htmlFor="log-usr">User Name</label>
+        <label htmlFor="log-usr" id="usrnmlbl">User Name</label>
         <input type="text" className="text-input" id="userName" placeholder="Will be automatically replaced. If not, type your display name" required autofocus/>
           <label htmlFor="log-usr">Auth Pin</label>
           <input type="text" className="text-input" id="authPin-#{service.name}" required autofocus disabled placeholder="Will be automatically replaced"/>
@@ -188,6 +194,7 @@ MalLogin = React.createClass
       <LoadingScreen />
     else
       <div className="login-body-outer">
+        <div id="test2">hello</div>
         <div className="login-body">
           {
             for i in [0...serviceCount]

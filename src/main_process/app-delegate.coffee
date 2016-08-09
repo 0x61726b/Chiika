@@ -34,42 +34,6 @@ module.exports = class AppDelegate
         defer.resolve()
         chiika.logger.verbose("Electron app is ready")
 
-        loginWindow = chiika.windowManager.createWindowAndOpen({
-          name: 'login',
-          width: 1600,
-          height: 900,
-          title: 'login',
-          icon: "resources/icon.png",
-          url: "file://#{__dirname}/../static/LoginWindow.html",
-          show: false,
-          loadImmediately: true
-          })
-
-        mainWindow = chiika.windowManager.createWindowAndOpen({
-          name: 'main',
-          width: 1400,
-          height: 900,
-          title: 'main',
-          icon: "resources/icon.png",
-          url: "file://#{__dirname}/../static/index.html#Home"
-          show: false,
-          loadImmediately: false
-          })
-
-        loadingWindow = chiika.windowManager.createWindowAndOpen({
-          name: 'loading',
-          width: 600,
-          height: 400,
-          title: 'loading',
-          icon: "resources/icon.png",
-          url: "file://#{__dirname}/../static/LoadingWindow.html",
-          show: true,
-          loadImmediately: true
-          })
-
-        chiika.windowManager.openDevTools(mainWindow)
-        chiika.windowManager.openDevTools(loginWindow)
-
         chiika.settingsManager.applySettings()
     return defer.promise
 

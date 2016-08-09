@@ -112,6 +112,7 @@ class Application
       @dbManager.onLoad =>
         @run()
 
+
   run: ->
     # appDelegate.run() method will open 3 windows when the app is ready
     # loading,main,login (main,login not visible)
@@ -129,8 +130,7 @@ class Application
         @uiManager.preloadUIItems()
                   .then =>
                     chiika.logger.verbose("Preloading UI complete!")
-                    @windowManager.getWindowByName('login').show()
-                    @windowManager.getWindowByName('loading').hide()
+                    chiika.windowManager.createLoginWindow()
 
 
     # If there are no users but there are UI data
@@ -143,8 +143,7 @@ class Application
                   @apiManager.compileUserScripts().then =>
                     @uiManager.checkUIData().then =>
                       @apiManager.postInit()
-                    @windowManager.getWindowByName('login').show()
-                    @windowManager.getWindowByName('loading').hide()
+                    chiika.windowManager.createLoginWindow()
 
     if userCount > 0
       # If there are no UI items
@@ -160,9 +159,7 @@ class Application
                     @apiManager.compileUserScripts().then =>
                       @uiManager.checkUIData().then =>
                         @apiManager.postInit()
-                        @windowManager.getWindowByName('loading').hide()
-                        @windowManager.getWindowByName('main').show()
-                        @windowManager.loadURL(@windowManager.getWindowByName('main'))
+                        chiika.windowManager.createMainWindow()
       else
         #This will probably fail if more than one script is being executed...
         #This means when all scripts are compiled,preload UI items
@@ -170,9 +167,7 @@ class Application
           @uiManager.preloadUIItems()
                     .then =>
                       chiika.logger.verbose("Preloading UI complete!")
-                      @windowManager.getWindowByName('loading').hide()
-                      @windowManager.getWindowByName('main').show()
-                      @windowManager.loadURL(@windowManager.getWindowByName('main'))
+                      chiika.windowManager.createMainWindow()
 
 
 

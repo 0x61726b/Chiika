@@ -147,7 +147,7 @@ module.exports = class IpcManager
         chiika.chiikaApi.emit 'set-user-login',params
 
     @receive 'continue-from-login', (event,args) =>
-      chiika.windowManager.showMainWindow(true)
+      chiika.windowManager.createMainWindow()
       chiika.apiManager.postInit()
 
 

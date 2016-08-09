@@ -143,12 +143,51 @@ module.exports = class WindowManager
       @removeWindow(window)
 
     window.webContents.on 'did-finish-load', =>
-      @emitter.emit 'did-finish-load'
+      @emitter.emit 'did-finish-load',window
       chiika.logger.info("[magenta](Window-Manager) Window has finished loading.")
 
     window.webContents.on 'ready-to-show', =>
-      @emitter.emit 'ready-to-show'
+      @emitter.emit 'ready-to-show',window
       chiika.logger.info("[magenta](Window-Manager) Window has finished loading.")
+
+  createLoginWindow: ->
+    loginWindow = chiika.windowManager.createWindowAndOpen({
+      name: 'login',
+      width: 1600,
+      height: 900,
+      title: 'login',
+      icon: "resources/icon.png",
+      url: "file://#{__dirname}/../static/LoginWindow.html",
+      show: true,
+      loadImmediately: true
+      })
+    @openDevTools(loginWindow)
+
+  createMainWindow: ->
+    mainWindow = chiika.windowManager.createWindowAndOpen({
+      name: 'main',
+      width: 1400,
+      height: 900,
+      title: 'main',
+      icon: "resources/icon.png",
+      url: "file://#{__dirname}/../static/index.html#Home"
+      show: true,
+      loadImmediately: true
+      })
+    @openDevTools(mainWindow)
+
+  createLoadingWindow: ->
+    loadingWindow = chiika.windowManager.createWindowAndOpen({
+      name: 'loading',
+      width: 600,
+      height: 400,
+      title: 'loading',
+      icon: "resources/icon.png",
+      url: "file://#{__dirname}/../static/LoadingWindow.html",
+      show: true,
+      loadImmediately: true
+      })
+    @openDevTools(loadingWindow)
 
   loadURL: (window) ->
     window.loadURL(window.url)

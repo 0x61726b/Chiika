@@ -16,34 +16,84 @@
 
 GlobalSetup               = require './global-setup'
 path                      = require 'path'
+_                         = require 'lodash'
 
 
-describe.skip 'application launch', ->
+describe 'Login window tests', ->
   setup = new GlobalSetup()
   setup.setupTimeout(this)
 
   app = null
 
-  beforeEach () =>
-    console.log "Electron path #{setup.getDataPath()}"
-    setup.startApplication({
-      args: [path.join(__dirname, '..')]})
-    .then (startedApp) =>
-        app = startedApp
+  #afterEach =>
+    #setup.prettyPrintMainProcessLogs(app.client)
 
-  afterEach =>
-    console.log ""
-    #setup.stopApplication(app)
+  after =>
+    app = null
 
 
+  #
+  # Two windows are loading, and login.
+  #
+  describe 'Open login window',->
+    this.timeout(30000)
 
-   it 'opens chiika', () =>
-      it 'launch Chiika', () =>
-        setup.removeAppData().then =>
-           app.client.getWindowCount().should.eventually.equal(3)
-         # .browserWindow.isMinimized().should.eventually.be.false
-         # .browserWindow.isDevToolsOpened().should.eventually.be.false
-         # .browserWindow.isVisible().should.eventually.be.true
-         # .browserWindow.isFocused().should.eventually.be.true
-         # .browserWindow.getBounds().should.eventually.have.property('width').and.be.above(0)
-         # .browserWindow.getBounds().should.eventually.have.property('height').and.be.above(0)
+    setupLogin = (app) ->
+      app.client.addCommand 'setUserName', ->
+        @execute =>
+          document.getElementById('email').value = "chiika_dummyac"
+
+
+      app.client.addCommand 'setPassword', (test) ->
+        @execute =>
+          document.getElementById('password').value = "chiika_dummy"
+
+
+      app.client.addCommand 'setWrongUserName', ->
+        @execute =>
+          document.getElementById('email').value = "chitogebestgirl"
+
+    beforeEach () =>
+      setup.removeAppData().then =>
+        setup.startApplication({
+          args: [setup.chiikaPath()],
+          DEV_MODE:false,
+          RUNNING_TESTS: false
+        })
+        .then (startedApp) =>
+            app = startedApp
+            setupLogin(app)
+
+    afterEach =>
+      setup.stopApplication(app)
+
+
+    it 'type correct user name and password, click verify', () =>
+      app.client.waitUntilWindowLoaded()
+         .windowByIndex(0)
+         .browserWindow.focus()
+         .browserWindow.getTitle().should.eventually.be.equal('login')
+         .browserWindow.isFocused().should.eventually.be.true
+         .pause(3000)
+         .setUserName()
+         .setPassword()
+         .click("#log-btn")
+         .pause(5000)
+         .isExisting("input#email.highlightgreen").should.eventually.be.true
+         .isExisting("input#password.highlightgreen").should.eventually.be.true
+
+    it 'type wrong user name and password, click verify', () =>
+      app.client.waitUntilWindowLoaded()
+         .windowByIndex(0)
+         .browserWindow.focus()
+         .browserWindow.getTitle().should.eventually.be.equal('login')
+         .browserWindow.isFocused().should.eventually.be.true
+         .pause(3000)
+         .setWrongUserName()
+         .setPassword()
+         .click("#log-btn")
+         .pause(5000)
+         .isExisting("input#email.highlightgreen").should.eventually.be.false
+         .isExisting("input#password.highlightgreen").should.eventually.be.false
+         .isExisting("input#email.highlightred").should.eventually.be.true
+         .isExisting("input#password.highlightred").should.eventually.be.true

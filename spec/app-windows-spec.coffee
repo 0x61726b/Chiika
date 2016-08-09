@@ -46,13 +46,10 @@ describe 'Application Window Control', ->
         runApp().then (app) =>
           app.client
           .waitUntilWindowLoaded()
-          .getWindowCount().should.eventually.equal(2)
-          .windowByIndex(1)
+          .getWindowCount().should.eventually.equal(1)
+          .windowByIndex(0)
           .browserWindow.getTitle().should.eventually.be.equal('login')
           .browserWindow.isVisible().should.eventually.be.true
-          .windowByIndex(0)
-          .browserWindow.getTitle().should.eventually.be.equal('loading')
-          .browserWindow.isVisible().should.eventually.be.false
           .then =>
             stopApp(app)
 
@@ -67,13 +64,10 @@ describe 'Application Window Control', ->
         runApp().then (app) =>
           app.client
           .waitUntilWindowLoaded()
-          .getWindowCount().should.eventually.equal(2)
-          .windowByIndex(1)
+          .getWindowCount().should.eventually.equal(1)
+          .windowByIndex(0)
           .browserWindow.getTitle().should.eventually.be.equal('login')
           .browserWindow.isVisible().should.eventually.be.true
-          .windowByIndex(0)
-          .browserWindow.getTitle().should.eventually.be.equal('loading')
-          .browserWindow.isVisible().should.eventually.be.false
           .then =>
             stopApp(app)
 
@@ -85,16 +79,10 @@ describe 'Application Window Control', ->
         runApp().then (app) =>
           app.client
           .waitUntilWindowLoaded()
-          .getWindowCount().should.eventually.equal(3)
-          .windowByIndex(2)
+          .getWindowCount().should.eventually.equal(1)
+          .windowByIndex(0)
           .browserWindow.getTitle().should.eventually.be.equal('main')
           .browserWindow.isVisible().should.eventually.be.true
-          .windowByIndex(1)
-          .browserWindow.getTitle().should.eventually.be.equal('login')
-          .browserWindow.isVisible().should.eventually.be.false
-          .windowByIndex(0)
-          .browserWindow.getTitle().should.eventually.be.equal('loading')
-          .browserWindow.isVisible().should.eventually.be.false
           .then =>
             stopApp(app)
 
