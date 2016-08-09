@@ -37,7 +37,11 @@ module.exports = class Setup
     if process.env.CHHIKA_HOME?
       process.env.CHIIKA_HOME
     else
-      osSpecificDir = process.env.APPDATA || (process.platform == 'darwin' ? process.env.HOME + 'Library/Preferences' : process.env.HOME + '.config')
+      if process.platform == 'darwin'
+        osSpecificDir = process.env.HOME + 'Library/Application Support'
+      else
+        osSpecificDir = process.env.HOME + '.config'
+
       process.env.CHIIKA_HOME = path.join(osSpecificDir,"chiika","data")
       process.env.CHIIKA_HOME
 
