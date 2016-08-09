@@ -26,4 +26,4 @@ test_script:
   - .\node_modules\.bin\gulp compile:scripts:not:watch
   - ls .serve
   - ls .serve/main_process
-  - .\node_modules\.bin\mocha --compilers coffee:coffee-script/register ./spec/app-spec.coffee
+  - .\node_modules\.bin\npm test
