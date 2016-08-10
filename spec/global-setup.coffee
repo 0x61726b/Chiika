@@ -68,36 +68,8 @@ module.exports = class Setup
         if err
           throw err
 
-        async = []
-        defer1 = _when.defer()
-        defer2 = _when.defer()
-        defer3 = _when.defer()
-
-        async.push defer1
-        async.push defer2
-        async.push defer3
-        fsextra.readdir path.join(@getDataPath(),".."), (err,files) =>
-          if err
-            throw err
-          console.log "Files that are in Chiika folder " + path.join(@getDataPath(),"..")
-          console.log files
-          defer1.resolve()
-
-        fsextra.readdir @getDataPath(), (err,files) =>
-          if err
-            throw err
-          console.log "Files that are in data folder " + @getDataPath()
-          console.log files
-          defer2.resolve()
-
-        fsextra.readdir path.join(@getDataPath(),"database"), (err,files) =>
-          if err
-            throw err
-          console.log "Files that are in database folder " + path.join(@getDataPath(),"database")
-          console.log files
-          defer3.resolve()
-
-        _when.all(async).then(resolve)
+        console.log "Success!"
+        resolve()
 
   setupTimeout: (test) ->
     if (process.env.CI)
