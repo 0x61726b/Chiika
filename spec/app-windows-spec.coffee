@@ -46,9 +46,6 @@ describe 'Application Window Control', ->
           app.client
           .waitUntilWindowLoaded()
           .getWindowCount().should.eventually.equal(1)
-          .windowByIndex(0)
-          .then =>
-            setup.prettyPrintMainProcessLogs(app.client)
           .browserWindow.getTitle().should.eventually.be.equal('login')
           .browserWindow.isVisible().should.eventually.be.true
           .then =>
@@ -65,7 +62,6 @@ describe 'Application Window Control', ->
           app.client
           .waitUntilWindowLoaded()
           .getWindowCount().should.eventually.equal(1)
-          .windowByIndex(0)
           .then =>
             setup.prettyPrintMainProcessLogs(app.client)
           .browserWindow.getTitle().should.eventually.be.equal('login')
@@ -81,24 +77,8 @@ describe 'Application Window Control', ->
           app.client
           .waitUntilWindowLoaded()
           .getWindowCount().should.eventually.equal(1)
-          .windowByIndex(0)
           .then =>
             setup.prettyPrintMainProcessLogs(app.client)
           .browserWindow.getTitle().should.eventually.be.equal('main')
           .then =>
             stopApp(app)
-
-
-
-        #  app.client.getWindowCount().should.eventually.equal(2)
-        #  .pause(2000)
-        #  .then =>
-        #    app.client.getMainProcessLogs().then (logs) =>
-        #      _.forEach logs, (v,k) =>
-        #        console.log v
-       # .browserWindow.isMinimized().should.eventually.be.false
-       # .browserWindow.isDevToolsOpened().should.eventually.be.false
-       # .browserWindow.isVisible().should.eventually.be.true
-       # .browserWindow.isFocused().should.eventually.be.true
-       # .browserWindow.getBounds().should.eventually.have.property('width').and.be.above(0)
-       # .browserWindow.getBounds().should.eventually.have.property('height').and.be.above(0)

@@ -18,12 +18,12 @@ install:
   - ps: Install-Product node $env:nodejs_version
   - npm install npm
   - .\node_modules\.bin\npm install
+  - .\node_modules\.bin\npm install
+  - .\node_modules\.bin\npm install
 
 test_script:
   - node --version
   - .\node_modules\.bin\npm --version
   - mkdir .serve
-  - .\node_modules\.bin\gulp compile:scripts:not:watch
-  - ls .serve
-  - ls .serve/main_process
+  - .\node_modules\.bin\npm run preparetesting
   - .\node_modules\.bin\npm test

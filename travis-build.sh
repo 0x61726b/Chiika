@@ -15,5 +15,12 @@ node --version
 npm --version
 
 npm install
-npm run compileScripts
+bower install
+sleep3
+npm install
+sleep 3
+npm install
+sleep 3
+npm install
+npm run preparetesting
 npm test
