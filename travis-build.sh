@@ -15,7 +15,7 @@ node --version
 npm --version
 
 npm install
-bower install
+./node_modules/.bin/bower install
 sleep 3
 npm install
 sleep 3
