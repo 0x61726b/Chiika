@@ -24,4 +24,6 @@ sleep 3
 npm install
 npm install electron-prebuilt
 npm run preparetesting
+ls ./.serve
+ls ./node_modules/.bin
 ./node_modules/.bin/mocha --compilers coffee:coffee-script/register ./spec -g "Should launch login"
