@@ -48,6 +48,8 @@ describe 'Application Window Control', ->
           .getWindowCount().should.eventually.equal(1)
           .then =>
             setup.prettyPrintRendererProcessLogs(app.client)
+          .browserWindow.getTitle().should.eventually.be.equal('login')
+          .browserWindow.isVisible().should.eventually.be.true
           .then =>
             stopApp(app)
 
