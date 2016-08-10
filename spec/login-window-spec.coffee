@@ -46,7 +46,7 @@ describe 'Login window tests', ->
     beforeEach () =>
       setup.removeAppData().then =>
         setup.startApplication({
-          args: [setup.chiikaPath()],
+          args: [setup.chiikaPath()]
         })
         .then (startedApp) =>
             app = startedApp

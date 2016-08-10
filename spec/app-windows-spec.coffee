@@ -31,7 +31,7 @@ describe 'Application Window Control', ->
   runApp = =>
     new Promise (resolve) =>
       setup.startApplication({
-        args: [setup.chiikaPath()],
+        args: [setup.chiikaPath()]
       .then (startedApp) =>
           resolve(startedApp)
 
