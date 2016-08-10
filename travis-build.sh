@@ -16,13 +16,6 @@ npm --version
 
 npm install
 ./node_modules/.bin/bower install
-sleep 3
-npm install
-sleep 3
-npm install
-sleep 3
-npm install
-npm install electron-prebuilt
 npm run preparetesting
 ls ./.serve
 ls ./node_modules/.bin
