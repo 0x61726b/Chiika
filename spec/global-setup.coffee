@@ -21,6 +21,7 @@ path                  = require 'path'
 os                    = require 'os'
 rimraf                = require 'rimraf'
 _                     = require 'lodash'
+_when                 = require 'when'
 ncp                   = require 'ncp'
 fsextra               = require 'fs-extra'
 
@@ -59,7 +60,44 @@ module.exports = class Setup
 
   copyTestData: (folder) ->
     new Promise (resolve) =>
-      fsextra.copy path.join(__dirname,folder), path.join(@getDataPath(),".."),resolve
+      source = path.join(__dirname,folder)
+      dest = path.join(@getDataPath(),"..")
+      console.log "Copying from #{source} to #{dest}"
+
+      fsextra.copy path.join(__dirname,folder), path.join(@getDataPath(),".."), { clobber:true }, (err) =>
+        if err
+          throw err
+
+        async = []
+        defer1 = _when.defer()
+        defer2 = _when.defer()
+        defer3 = _when.defer()
+
+        async.push defer1
+        async.push defer2
+        async.push defer3
+        fsextra.readdir path.join(@getDataPath(),".."), (err,files) =>
+          if err
+            throw err
+          console.log "Files that are in Chiika folder " + path.join(@getDataPath(),"..")
+          console.log files
+          defer1.resolve()
+
+        fsextra.readdir @getDataPath(), (err,files) =>
+          if err
+            throw err
+          console.log "Files that are in data folder " + @getDataPath()
+          console.log files
+          defer2.resolve()
+
+        fsextra.readdir path.join(@getDataPath(),"database"), (err,files) =>
+          if err
+            throw err
+          console.log "Files that are in database folder " + path.join(@getDataPath(),"database")
+          console.log files
+          defer3.resolve()
+
+        _when.all(async).then(resolve)
 
   setupTimeout: (test) ->
     if (process.env.CI)

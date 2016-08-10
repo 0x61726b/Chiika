@@ -180,7 +180,7 @@ class Application
   getAppHome: ->
     @chiikaHome
   getDbHome: ->
-    path.join(@chiikaHome,"Data","Database")
+    path.join(@chiikaHome,"data","database")
 
 
 app = new Application()

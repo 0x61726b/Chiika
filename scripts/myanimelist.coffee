@@ -779,7 +779,7 @@ module.exports = class MyAnimelist
       }
      }
     #Check if view config file exists
-    viewConfig = "Config/DefaultMALAnimeTabGridView.json" #Path relative to app home
+    viewConfig = "config/DefaultMALAnimeTabGridView.json" #Path relative to app home
     exists = @chiika.utility.fileExistsSmart(viewConfig)
     view = {}
     if !exists
@@ -823,7 +823,7 @@ module.exports = class MyAnimelist
         ]
       }
      }
-    viewConfig = "Config/DefaultMALMangaTabGridView.json" #Path relative to app home
+    viewConfig = "config/DefaultMALMangaTabGridView.json" #Path relative to app home
     exists = @chiika.utility.fileExistsSmart(viewConfig)
     view = {}
     if !exists

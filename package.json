@@ -3,7 +3,7 @@
   "version": "0.0.3",
   "description": "Electron boilerplate project with React-coffee",
   "main": "./.serve/main_process/chiika.js",
-  "productName": "Chiika",
+  "productName": "chiika",
   "scripts": {
     "start": "electron .serve/main_process/chiika.js",
     "test": "mocha --compilers coffee:coffee-script/register ./spec/app-windows-spec.coffee",

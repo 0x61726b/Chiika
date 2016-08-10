@@ -17,3 +17,4 @@ npm --version
 npm install
 npm run compileScripts
 npm test
+ls /home/travis/.config/chiika

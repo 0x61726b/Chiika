@@ -81,8 +81,8 @@ describe 'Application Window Control', ->
           .waitUntilWindowLoaded()
           .getWindowCount().should.eventually.equal(1)
           .then =>
-            setup.prettyPrintMainProcessLogs(app.client)
             stopApp(app)
+            #setup.prettyPrintMainProcessLogs(app.client)
 
 
 

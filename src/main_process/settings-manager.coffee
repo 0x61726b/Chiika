@@ -100,12 +100,12 @@ module.exports = class SettingsManager
   createFolders: ->
     chiikaHome = chiika.getAppHome()
     folders = [
-      "Config",
-      "Data",
-      "Scripts",
-      "Cache",
-      "Cache/Scripts",
-      "Data/Images"
+      "config",
+      "data",
+      "scripts",
+      "cache",
+      "cache/scripts",
+      "data/images"
     ]
     promises = []
 
