@@ -45,6 +45,9 @@ module.exports = class WindowManager
       backgroundColor: '#2e2c29'
     }
 
+    if chiika.runningTests
+      windowOptions.frame = true
+
     if options.name == 'main'
       #Get window settings
       winProps = chiika.settingsManager.getOption('WindowProperties')
