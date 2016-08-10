@@ -37,8 +37,8 @@ module.exports = class APIManager
     global.api = this
     @emitter = new Emitter
 
-    @scriptsDir = path.join(chiika.getAppHome(),"Scripts")
-    @scriptsCacheDir = path.join(chiika.getAppHome(),"Cache","Scripts")
+    @scriptsDir = path.join(chiika.getAppHome(),"scripts")
+    @scriptsCacheDir = path.join(chiika.getAppHome(),"cache","scripts")
 
     #@scriptsDirs.push @scriptsDir
     @scriptsDirs.push path.join(process.cwd(),"scripts")

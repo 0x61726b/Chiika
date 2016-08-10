@@ -68,8 +68,7 @@ describe 'Login window tests', ->
          .pause(5000)
          .isExisting("input#email.highlightgreen").should.eventually.be.true
          .isExisting("input#password.highlightgreen").should.eventually.be.true
-         .then =>
-           setup.prettyPrintMainProcessLogs(app.client)
+         
 
     it 'type wrong user name and password, click verify', () =>
       app.client.waitUntilWindowLoaded()

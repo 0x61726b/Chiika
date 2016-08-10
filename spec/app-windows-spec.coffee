@@ -23,8 +23,10 @@ describe 'Application Window Control', ->
   setup = new GlobalSetup()
   setup.setupTimeout(this)
 
-  beforeEach () =>
-    setup.removeAppData()
+  beforeEach (done) =>
+    setup.removeAppData().then =>
+      done()
+    return
 
   runApp = =>
     new Promise (resolve) =>
@@ -45,11 +47,6 @@ describe 'Application Window Control', ->
         runApp().then (app) =>
           app.client
           .waitUntilWindowLoaded()
-          .getWindowCount().should.eventually.equal(1)
-          .then =>
-            setup.prettyPrintRendererProcessLogs(app.client)
-          .browserWindow.getTitle().should.eventually.be.equal('login')
-          .browserWindow.isVisible().should.eventually.be.true
           .then =>
             stopApp(app)
 
@@ -58,14 +55,12 @@ describe 'Application Window Control', ->
     #
     # Loading window + login window
     #
-    xit 'Should launch login window', () =>
+    it 'Should launch login window', () =>
       setup.copyTestData('data_without_user').then =>
         runApp().then (app) =>
           app.client
           .waitUntilWindowLoaded()
           .getWindowCount().should.eventually.equal(1)
-          .then =>
-            setup.prettyPrintMainProcessLogs(app.client)
           .browserWindow.getTitle().should.eventually.be.equal('login')
           .browserWindow.isVisible().should.eventually.be.true
           .then =>
@@ -73,14 +68,12 @@ describe 'Application Window Control', ->
 
   describe 'Data exists and there is at least one user', ->
 
-    xit 'Should launch main window', ->
+    it 'Should launch main window', ->
       setup.copyTestData('data_with_user').then =>
         runApp().then (app) =>
           app.client
           .waitUntilWindowLoaded()
           .getWindowCount().should.eventually.equal(1)
-          .then =>
-            setup.prettyPrintMainProcessLogs(app.client)
           .browserWindow.getTitle().should.eventually.be.equal('main')
           .then =>
             stopApp(app)

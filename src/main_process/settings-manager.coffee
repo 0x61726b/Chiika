@@ -51,7 +51,7 @@ module.exports = class SettingsManager
     #Copy default scripts
 
 
-      @configFilePath = path.join("Config","Chiika.json")
+      @configFilePath = path.join("config","Chiika.json")
       configExists = chiika.utility.fileExistsSmart @configFilePath
 
       #Check if config file exists
