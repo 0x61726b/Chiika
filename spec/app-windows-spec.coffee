@@ -41,7 +41,7 @@ describe 'Application Window Control', ->
     #
     # Loading window + login window
     #
-    xit 'Should launch login window', () =>
+    it 'Should launch login window', () =>
         runApp().then (app) =>
           app.client
           .waitUntilWindowLoaded()
@@ -57,7 +57,7 @@ describe 'Application Window Control', ->
     #
     # Loading window + login window
     #
-    xit 'Should launch login window', () =>
+    it 'Should launch login window', () =>
       setup.copyTestData('data_without_user').then =>
         runApp().then (app) =>
           app.client
@@ -77,8 +77,9 @@ describe 'Application Window Control', ->
           app.client
           .waitUntilWindowLoaded()
           .getWindowCount().should.eventually.equal(1)
+          .windowByIndex(0)
+          .browserWindow.getTitle().should.eventually.be.equal('main')
           .then =>
-            setup.prettyPrintMainProcessLogs(app.client)
             stopApp(app)
 
 

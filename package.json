@@ -1,12 +1,12 @@
 {
   "name": "chiika",
   "version": "0.0.3",
-  "description": "Electron boilerplate project with React-coffee",
+  "description": "The ultimate Anime and Manga scrobbler.",
   "main": "./.serve/main_process/chiika.js",
   "productName": "chiika",
   "scripts": {
     "start": "electron .serve/main_process/chiika.js",
-    "test": "mocha --compilers coffee:coffee-script/register ./spec/app-windows-spec.coffee",
+    "test": "mocha --compilers coffee:coffee-script/register ./spec",
     "compileScripts": "./node_modules/.bin/gulp compile:scripts:not:watch"
   },
   "keywords": [
