@@ -55,6 +55,43 @@ describe 'Login window tests', ->
     afterEach =>
       setup.stopApplication(app)
 
+    it 'login and expect continue button to be disabled after 3 secs it will be re enabled', () =>
+      app.client.waitUntilWindowLoaded()
+         .windowByIndex(0)
+         .browserWindow.focus()
+         .browserWindow.getTitle().should.eventually.be.equal('login')
+         .browserWindow.isFocused().should.eventually.be.true
+         .setLogin('chiika_dummyac','chiika_dummy')
+         .pause(1000)
+         .click("#log-btn")
+         .isExisting("input#continue.is-disabled").should.eventually.be.true
+         .pause(3000)
+         .isExisting("input#continue.is-disabled").should.eventually.be.false
+
+    it 'type empty user name and empty password, expect red/green highlight', () =>
+      app.client.waitUntilWindowLoaded()
+         .windowByIndex(0)
+         .browserWindow.focus()
+         .browserWindow.getTitle().should.eventually.be.equal('login')
+         .browserWindow.isFocused().should.eventually.be.true
+         .setLogin('','')
+         .pause(1000)
+         .click("#log-btn")
+         .isExisting("input#userName.highlightred").should.eventually.be.true
+         .isExisting("input#password.highlightred").should.eventually.be.true
+         .setLogin('chiika','')
+         .pause(1000)
+         .click("#log-btn")
+         .isExisting("input#userName.highlightred").should.eventually.be.false
+         .isExisting("input#password.highlightred").should.eventually.be.true
+         .setLogin('','chiika')
+         .pause(1000)
+         .click("#log-btn")
+         .isExisting("input#userName.highlightred").should.eventually.be.true
+         .isExisting("input#password.highlightred").should.eventually.be.false
+
+
+
 
     it 'type correct user name and password, click verify', () =>
       app.client.waitUntilWindowLoaded()
@@ -66,7 +103,7 @@ describe 'Login window tests', ->
          .pause(1000)
          .click("#log-btn")
          .pause(5000)
-         .isExisting("input#email.highlightgreen").should.eventually.be.true
+         .isExisting("input#userName.highlightgreen").should.eventually.be.true
          .isExisting("input#password.highlightgreen").should.eventually.be.true
 
 
@@ -80,7 +117,7 @@ describe 'Login window tests', ->
          .pause(1000)
          .click("#log-btn")
          .pause(5000)
-         .isExisting("input#email.highlightgreen").should.eventually.be.false
+         .isExisting("input#userName.highlightgreen").should.eventually.be.false
          .isExisting("input#password.highlightgreen").should.eventually.be.false
-         .isExisting("input#email.highlightred").should.eventually.be.true
+         .isExisting("input#userName.highlightred").should.eventually.be.true
          .isExisting("input#password.highlightred").should.eventually.be.true

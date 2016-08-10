@@ -62,13 +62,11 @@ module.exports = class Setup
     new Promise (resolve) =>
       source = path.join(__dirname,folder)
       dest = path.join(@getDataPath(),"..")
-      console.log "Copying from #{source} to #{dest}"
 
       fsextra.copy path.join(__dirname,folder), path.join(@getDataPath(),".."), { clobber:true }, (err) =>
         if err
           throw err
 
-        console.log "Success!"
         resolve()
 
   setupTimeout: (test) ->

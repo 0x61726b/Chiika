@@ -34,6 +34,7 @@ window.$ = window.jQuery            = require('../bundleJs.js')
 MalLogin = React.createClass
   getInitialState: ->
     services: []
+    loggingInTo: null
   componentDidMount: ->
     window.chiika = this
 
@@ -49,7 +50,7 @@ MalLogin = React.createClass
     @ipcManager.receive 'spectron-set-login', (event,args) =>
       console.log "Receiving spectron-set-login"
       console.log args
-      $("#email").val(args.params.userName)
+      $("#userName").val(args.params.userName)
       $("#password").val(args.params.password)
     #
     #
@@ -59,94 +60,99 @@ MalLogin = React.createClass
     @ipcManager.sendReceiveIPC 'get-services',null,(event,defer,args) =>
       if args?
         console.log args
-        @setState { services: args }
-
-        #args.map( (service,i) => $("#verifyBtn-#{service.name}").hide())
-
-        args.map (service,i) =>
-          $("#authPin-#{service.name}").on 'input',=>
-            if _.isEmpty $("#authPin-#{service.name}").val()
-              $("#verifyBtn-#{service.name}").hide()
-              $("#gotoBtn-#{service.name}").show()
-            else
-              $("#verifyBtn-#{service.name}").show()
-              $("#gotoBtn-#{service.name}").hide()
+        @setState { services: args,loggingTo: args[0] }
 
 
 
 
-    #This callback only gets called if error on login
+    # #This callback only gets called if error on login
     ipcRenderer.on 'login-response',(event,response) =>
-      $("#log-btn").prop('disabled',false)
+      @setContinueState(false)
+
       if !response.success
         message = "We couldn't login you with the selected service!"
         window.yuiToast(message,'top',5000,'dark')
         console.log response
 
-        @highlightFormByParent("red","#loginForm-#{response.service} ")
+        @highlightElement("red","userName")
+        @highlightElement("red","password")
       else
         console.log response
-        @highlightFormByParent("green","#loginForm-#{response.service} ")
-      $("#continue").prop("disabled",false)
+        @highlightElement("green","userName")
+        @highlightElement("green","password")
+    #
+    #
+    # ipcRenderer.on 'inform-login-response', (event,response) =>
+    #   console.log response
+    #   if response.status
+    #     $("#authPin-#{response.owner}").val(response.authPin)
+    #
+    #     $("#gotoBtn-#{response.owner}").hide()
+    #     $("#verifyBtn-#{response.owner}").show()
+    #   else
+    #     @highlightFormByParent("red","#authPin-#{response.owner}")
+    #
+    #   $("#continue").prop("disabled",false)
+    #
+    # ipcRenderer.on 'inform-login-set-form-value', (event,response) =>
+    #   parent = "#loginForm-#{response.owner} "
+    #   $(parent + "##{response.target}").val(response.value)
+    #   console.log response
 
+  highlightElement: (color,element) ->
+    e = $("##{element}")
 
-    ipcRenderer.on 'inform-login-response', (event,response) =>
-      console.log response
-      if response.status
-        $("#authPin-#{response.owner}").val(response.authPin)
-
-        $("#gotoBtn-#{response.owner}").hide()
-        $("#verifyBtn-#{response.owner}").show()
-      else
-        @highlightFormByParent("red","#authPin-#{response.owner}")
-
-      $("#continue").prop("disabled",false)
-
-    ipcRenderer.on 'inform-login-set-form-value', (event,response) =>
-      parent = "#loginForm-#{response.owner} "
-      $(parent + "##{response.target}").val(response.value)
-      console.log response
-
-  highlightFormByParent: (color,parent) ->
-    user = $(parent + "#email")
-    pass = $(parent + "#password")
-
-
-    user.css({ "border": "#{color} 1px solid"});
-    pass.css({ "border": "#{color} 1px solid"});
-
-    if color == "red"
-      user.addClass("highlightred")
-      pass.addClass("highlightred")
+    if color == 'clear'
+      e.css({ "border": "1px solid rgba(0,0,0,0.2)"})
+      e.removeClass("highlightred")
+      e.removeClass("highlightgreen")
     else
-      user.addClass("highlightgreen")
-      pass.addClass("highlightgreen")
+      #Fix this
+      e.css({ "border": "#{color} 1px solid"})
 
+      if color == "red"
+        e.addClass("highlightred")
+      else if color == "green"
+        e.addClass("highlightgreen")
+
+  setContinueState: (state) ->
+    if state
+      $("#continue").addClass("is-disabled")
+      $("#continue").prop("disabled",state)
+    else
+      delay = ->
+        $("#continue").prop("disabled",state)
+        $("#continue").removeClass("is-disabled")
+      setTimeout(delay,2000)
 
   componentDidUpdate: ->
-    $("form").
-    filter(->
-      if !_.isUndefined this.id
-        return this.id.match(/loginForm-(.*?)/g))
+    $("#loginForm")
     .submit( (e) =>
       e.preventDefault()
       false
       )
 
   onSubmit: (e) ->
-    parent = "#" + $(e.target).parent().attr('id') + " "
-    user = $(parent + "#email").val()
-    pass = $(parent + "#password").val()
+    user = $("#userName").val()
+    pass = $("#password").val()
 
-    id = $(e.target).parent().attr("id")
-    serviceName = string(id).chompLeft('loginForm-').s
 
-    if _.isEmpty user || _.isEmpty pass
+    if _.isEmpty user
       #Do something here
+      @highlightElement('red','userName')
     else
-      #$(parent + "#log-btn").prop('disabled',true)
+      @highlightElement('clear','userName')
+
+    if _.isEmpty pass
+      @highlightElement('red','password')
+    else
+      @highlightElement('clear','password')
+
+    if (user != "" && pass != "")
       loginData = { user: user, pass: pass }
-      ipcRenderer.send 'set-user-login',{ login: loginData, service: serviceName }
+      console.log loginData
+      ipcRenderer.send 'set-user-login',{ login: loginData, service: @state.loggingTo.name }
+      @setContinueState(true)
 
 
 
@@ -177,9 +183,9 @@ MalLogin = React.createClass
   loginBody: (key,service) ->
     (<div className="card" id="login-container" key=key>
         <img src={service.logo} id="mal-logo" style={{width: 200 , height: 200}} alt="" />
-        <form className="" id="loginForm-#{service.name}">
+        <form className="" id="loginForm">
           <label htmlFor="log-usr">Username</label>
-          <input type="text" className="text-input" id="email" required autofocus/>
+          <input type="text" className="text-input" id="userName" required autofocus/>
           <label htmlFor="log-psw">Password</label>
           <input type="Password" className="text-input" id="password" required />
           <input type="submit" onClick={this.onSubmit} className="button raised indigo log-btn" id="log-btn" value="Verify"/>
