@@ -82,7 +82,12 @@ class Application
     console.log         ("Using electron instance #{require.resolve('electron')}")
     @chiikaHome         = path.join(app.getPath('appData'),"chiika")
     console.log @chiikaHome
-    console.log process.env.HOME
+    if process.platform == "linux"
+      console.log process.env.HOME
+    else if process.platform == "darwin"
+      console.log process.env.HOME + 'Library/Application Support'
+    else
+      console.log process.env.APPDATA
 
     @logger             = new Logger("verbose").logger
     global.logger       = @logger #Share with renderer
