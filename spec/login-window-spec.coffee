@@ -46,7 +46,7 @@ describe 'Login window tests', ->
     beforeEach () =>
       setup.removeAppData().then =>
         setup.startApplication({
-          args: [setup.chiikaPath()]
+          args: [setup.chiikaPath()],
         })
         .then (startedApp) =>
             app = startedApp
@@ -68,7 +68,7 @@ describe 'Login window tests', ->
          .pause(5000)
          .isExisting("input#email.highlightgreen").should.eventually.be.true
          .isExisting("input#password.highlightgreen").should.eventually.be.true
-         
+
 
     it 'type wrong user name and password, click verify', () =>
       app.client.waitUntilWindowLoaded()
