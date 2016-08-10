@@ -47,6 +47,8 @@ describe 'Application Window Control', ->
           .waitUntilWindowLoaded()
           .getWindowCount().should.eventually.equal(1)
           .windowByIndex(0)
+          .then =>
+            setup.prettyPrintMainProcessLogs(app.client)
           .browserWindow.getTitle().should.eventually.be.equal('login')
           .browserWindow.isVisible().should.eventually.be.true
           .then =>
@@ -64,6 +66,8 @@ describe 'Application Window Control', ->
           .waitUntilWindowLoaded()
           .getWindowCount().should.eventually.equal(1)
           .windowByIndex(0)
+          .then =>
+            setup.prettyPrintMainProcessLogs(app.client)
           .browserWindow.getTitle().should.eventually.be.equal('login')
           .browserWindow.isVisible().should.eventually.be.true
           .then =>
@@ -78,6 +82,8 @@ describe 'Application Window Control', ->
           .waitUntilWindowLoaded()
           .getWindowCount().should.eventually.equal(1)
           .windowByIndex(0)
+          .then =>
+            setup.prettyPrintMainProcessLogs(app.client)
           .browserWindow.getTitle().should.eventually.be.equal('main')
           .then =>
             stopApp(app)
