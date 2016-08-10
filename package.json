@@ -6,7 +6,7 @@
   "productName": "Chiika",
   "scripts": {
     "start": "electron .serve/main_process/chiika.js",
-    "test": "mocha --compilers coffee:coffee-script/register ./spec",
+    "test": "mocha --compilers coffee:coffee-script/register ./spec/app-windows-spec.coffee",
     "compileScripts": "./node_modules/.bin/gulp compile:scripts:not:watch"
   },
   "keywords": [

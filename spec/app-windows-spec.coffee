@@ -42,7 +42,7 @@ describe 'Application Window Control', ->
     #
     # Loading window + login window
     #
-    it 'Should launch login window', () =>
+    xit 'Should launch login window', () =>
         runApp().then (app) =>
           app.client
           .waitUntilWindowLoaded()
@@ -59,7 +59,7 @@ describe 'Application Window Control', ->
     #
     # Loading window + login window
     #
-    it 'Should launch login window', () =>
+    xit 'Should launch login window', () =>
       setup.copyTestData('data_without_user').then =>
         runApp().then (app) =>
           app.client
