@@ -80,9 +80,6 @@ describe 'Application Window Control', ->
           app.client
           .waitUntilWindowLoaded()
           .getWindowCount().should.eventually.equal(1)
-          .windowByIndex(0)
-          .browserWindow.getTitle().should.eventually.be.equal('main')
-          .browserWindow.isVisible().should.eventually.be.true
           .then =>
             setup.prettyPrintMainProcessLogs(app.client)
             stopApp(app)
