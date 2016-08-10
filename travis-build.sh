@@ -16,7 +16,7 @@ npm --version
 
 npm install
 bower install
-sleep3
+sleep 3
 npm install
 sleep 3
 npm install

@@ -18,8 +18,10 @@ install:
   - ps: Install-Product node $env:nodejs_version
   - npm install npm
   - .\node_modules\.bin\npm install
+  - .\node_modules\.bin\npm install bower -g
   - .\node_modules\.bin\npm install
   - .\node_modules\.bin\npm install
+  - .\node_modules\.bin\bower install
 
 test_script:
   - node --version
