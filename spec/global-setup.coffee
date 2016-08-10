@@ -37,8 +37,8 @@ module.exports = class Setup
     electronPath
 
   getDataPath: ->
-    if process.env.CHHIKA_HOME?
-      process.env.CHIIKA_HOME
+    if process.env.CHIIKA_DATA_HOME?
+      process.env.CHIIKA_DATA_HOME
     else
       if process.platform == 'darwin'
         osSpecificDir = path.join(process.env.HOME,'Library/Application Support')
@@ -47,8 +47,8 @@ module.exports = class Setup
       else
         osSpecificDir = process.env.APPDATA
 
-      process.env.CHIIKA_HOME = path.join(osSpecificDir,"chiika","data")
-      process.env.CHIIKA_HOME
+      process.env.CHIIKA_DATA_HOME = path.join(osSpecificDir,"chiika","data")
+      process.env.CHIIKA_DATA_HOME
 
   chiikaPath: ->
     path.join(__dirname, '..')
@@ -75,7 +75,7 @@ module.exports = class Setup
     if (process.env.CI)
       test.timeout(100000)
     else
-      test.timeout(10000)
+      test.timeout(20000)
 
   startApplication: (options) ->
     options.path = @getElectronPath()
@@ -87,7 +87,7 @@ module.exports = class Setup
       options.env.CI_MODE = true
       options.startTimeout = 100000
     else
-      options.startTimeout = 10000
+      options.startTimeout = 20000
       options.env.CI_MODE = false
 
     if options.DEV_MODE?

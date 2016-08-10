@@ -38,7 +38,6 @@ describe 'Application Window Control', ->
 
   #
   describe 'No AppData First Launch',->
-    this.timeout(30000)
     #
     # Loading window + login window
     #
@@ -55,7 +54,6 @@ describe 'Application Window Control', ->
 
   #
   describe 'Data exists but there is no user',->
-    this.timeout(30000)
     #
     # Loading window + login window
     #
@@ -72,7 +70,6 @@ describe 'Application Window Control', ->
             stopApp(app)
 
   describe 'Data exists and there is at least one user', ->
-    this.timeout(30000)
 
     it 'Should launch main window', ->
       setup.copyTestData('data_with_user').then =>

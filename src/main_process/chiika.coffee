@@ -85,7 +85,7 @@ class Application
     if process.platform == "linux"
       console.log process.env.HOME
     else if process.platform == "darwin"
-      console.log process.env.HOME + 'Library/Application Support'
+      console.log path.join(process.env.HOME,'Library/Application Support')
     else
       console.log process.env.APPDATA
 
