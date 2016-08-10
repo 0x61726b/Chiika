@@ -103,6 +103,7 @@ module.exports = class Setup
     app = new Application(options)
 
     app.start().then =>
+      console.log "Launched app."
       assert.equal(app.isRunning(), true)
       chaiAsPromised.transferPromiseness = app.transferPromiseness
       app
