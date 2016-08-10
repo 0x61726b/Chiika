@@ -23,4 +23,4 @@ npm install
 sleep 3
 npm install
 npm run preparetesting
-npm test
+./node_modules/.bin/mocha --compilers coffee:coffee-script/register ./spec -g "Should launch login"

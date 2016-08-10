@@ -114,9 +114,9 @@ module.exports = class Setup
         console.log v
 
   prettyPrintRendererProcessLogs: (client) ->
-    client.getRendererProcessLogs().then (logs) =>
+    client.getRenderProcessLogs().then (logs) =>
       _.forEach logs, (v,k) =>
-        console.log v
+        console.log v.message
 
   stopApplication:(app) ->
     if (!app || !app.isRunning())
