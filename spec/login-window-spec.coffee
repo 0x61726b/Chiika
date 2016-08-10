@@ -31,6 +31,10 @@ describe 'Login window tests', ->
   after =>
     app = null
 
+  setupLogin = (app) ->
+    app.client.addCommand 'setLogin', (userName,password) ->
+      this.electron.ipcRenderer.send('spectron.',{ message: 'set-login', windowName: 'login', params: { userName: userName, password: password} })
+
 
   #
   # Two windows are loading, and login.
@@ -38,27 +42,11 @@ describe 'Login window tests', ->
   describe 'Open login window',->
     this.timeout(30000)
 
-    setupLogin = (app) ->
-      app.client.addCommand 'setUserName', ->
-        @execute =>
-          document.getElementById('email').value = "chiika_dummyac"
-
-
-      app.client.addCommand 'setPassword', (test) ->
-        @execute =>
-          document.getElementById('password').value = "chiika_dummy"
-
-
-      app.client.addCommand 'setWrongUserName', ->
-        @execute =>
-          document.getElementById('email').value = "chitogebestgirl"
 
     beforeEach () =>
       setup.removeAppData().then =>
         setup.startApplication({
-          args: [setup.chiikaPath()],
-          DEV_MODE:false,
-          RUNNING_TESTS: false
+          args: [setup.chiikaPath()]
         })
         .then (startedApp) =>
             app = startedApp
@@ -74,13 +62,14 @@ describe 'Login window tests', ->
          .browserWindow.focus()
          .browserWindow.getTitle().should.eventually.be.equal('login')
          .browserWindow.isFocused().should.eventually.be.true
-         .pause(3000)
-         .setUserName()
-         .setPassword()
+         .setLogin('chiika_dummyac','chiika_dummy')
+         .pause(1000)
          .click("#log-btn")
          .pause(5000)
          .isExisting("input#email.highlightgreen").should.eventually.be.true
          .isExisting("input#password.highlightgreen").should.eventually.be.true
+         .then =>
+           setup.prettyPrintMainProcessLogs(app.client)
 
     it 'type wrong user name and password, click verify', () =>
       app.client.waitUntilWindowLoaded()
@@ -88,9 +77,8 @@ describe 'Login window tests', ->
          .browserWindow.focus()
          .browserWindow.getTitle().should.eventually.be.equal('login')
          .browserWindow.isFocused().should.eventually.be.true
-         .pause(3000)
-         .setWrongUserName()
-         .setPassword()
+         .setLogin('chitogebestgirl','getdestroyedkosaki')
+         .pause(1000)
          .click("#log-btn")
          .pause(5000)
          .isExisting("input#email.highlightgreen").should.eventually.be.false

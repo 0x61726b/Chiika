@@ -93,7 +93,7 @@ module.exports = class Setup
     if options.DEV_MODE?
       options.env.DEV_MODE = options.DEV_MODE
     else
-      options.env.DEV_MODE = true
+      options.env.DEV_MODE = false
 
     if options.RUNNING_TESTS?
       options.env.RUNNING_TESTS = options.RUNNING_TESTS

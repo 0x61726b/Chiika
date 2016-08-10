@@ -63,6 +63,8 @@ module.exports = class IpcManager
     @windowMethodByName()
     @detailsLayoutRequest()
 
+    @spectron()
+
   windowMethodByName: ->
     @receive 'window-method', (event,args) =>
       console.log args
@@ -155,6 +157,19 @@ module.exports = class IpcManager
   loginCustom: ->
     @receive 'set-user-auth-pin', (event,args) =>
       chiika.chiikaApi.emitTo args.service,'set-user-auth-pin',{}
+
+
+  spectron: ->
+    @receive 'spectron.', (event,args) =>
+      #message will be for example spectron.set-login
+
+      window = args.windowName
+      params = args.params
+
+      @send(chiika.windowManager.getWindowByName(window),"spectron-#{args.message}",args)
+
+
+
   #
   # When the main window loads , it will request UI data.
   # We send it here..

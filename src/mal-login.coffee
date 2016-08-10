@@ -43,6 +43,18 @@ MalLogin = React.createClass
 
     window.ipcManager = @ipcManager
 
+    #
+    # For testing
+    #
+    @ipcManager.receive 'spectron-set-login', (event,args) =>
+      console.log "Receiving spectron-set-login"
+      console.log args
+      $("#email").val(args.params.userName)
+      $("#password").val(args.params.password)
+    #
+    #
+    #
+
 
     @ipcManager.sendReceiveIPC 'get-services',null,(event,defer,args) =>
       if args?
@@ -194,7 +206,6 @@ MalLogin = React.createClass
       <LoadingScreen />
     else
       <div className="login-body-outer">
-        <div id="test2">hello</div>
         <div className="login-body">
           {
             for i in [0...serviceCount]
