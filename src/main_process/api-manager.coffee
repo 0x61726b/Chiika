@@ -43,7 +43,10 @@ module.exports = class APIManager
     if !chiika.runningTests
       @scriptsDirs.push path.join(process.cwd(),"scripts")
     else
-      @scriptsDirs.push params.dir
+      if params.dir?
+        @scriptsDirs.push params.dir
+      
+      @scriptsDirs.push path.join(process.cwd(),"scripts")
 
   getScriptByName: (name) ->
     instance = _.find @activeScripts, { name: name }

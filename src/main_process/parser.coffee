@@ -35,6 +35,7 @@ module.exports = class Parser
     synopsisRegex = /itemprop="description">([^]+?)(?=<\/span)/
     charactersStep1Regex = /(<div class="picSurround"><a href="\/character\/)([^]+?)(?=\/table>)/g
     charactersStep2Image = /data-src="(.*?)"\s/
+    charactersStep3Image = /\/characters\/(.*)\/(.*).jpg/
     charactersAndIdsRegex = /\s<a href="\/character\/(.*)">(.*)<\/a>/
     voiceActorsAndIdsRegex = /<a href="\/people\/(.*)">(.*)<\/a><br>/g
     vaStep2Image = /\w"><img src="\/images\/spacer.gif"\sdata-src="(.*?)"\s/g
@@ -89,6 +90,12 @@ module.exports = class Parser
 
       chImageMatch = step2Data.match charactersStep2Image
       chImage = chImageMatch[1]
+
+      # Process image further
+      chLargerImageMatch = chImage.match charactersStep3Image
+      if chLargerImageMatch?
+        chImage = "http://cdn.myanimelist.net/images/characters/#{chLargerImageMatch[1]}/#{chLargerImageMatch[2]}.jpg"
+
 
       character = { id: chId, name: characterName, image: chImage }
       vas = []

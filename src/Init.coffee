@@ -23,7 +23,10 @@ Environment              = require '../chiika-environment'
 
 Col                      = require '../custom-column-types'
 
-window.$ = window.jQuery = require '../bundleJs.js'
+window.$ = window.jQuery = require 'jquery'
+Bundle                  = require '../bundleJs.js'
+
+
 $ ->
   loading = ->
     ReactDOM.render(React.createElement(LoadingScreen), document.getElementById('app'))

@@ -21,8 +21,6 @@
 {BrowserWindow, ipcMain,globalShortcut,Tray,Menu,app} = require 'electron'
 
 
-
-
 yargs                             = require 'yargs'
 path                              = require 'path'
 
@@ -53,8 +51,9 @@ AppOptions                        = require './options'
 AppDelegate                       = require './app-delegate'
 
 
-
 process.on 'uncaughtException',(err) ->
+  # chiika.logger.log 'error', 'Fatal uncaught exception crashed cluster', err, (err, level, msg, meta) =>
+  #   process.exit(1);
   console.log err
   # Show a somewhat easily readable text error
   if err && err.stack?

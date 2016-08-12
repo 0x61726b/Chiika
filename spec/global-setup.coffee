@@ -28,9 +28,9 @@ fsextra               = require 'fs-extra'
 
 global.before =>
   chai.should()
-  chai.expect()
+  #chai.expect()
   chai.use(chaiAsPromised)
-  chai.use(spies)
+  #chai.use(spies)
 
 module.exports = class Setup
   getElectronPath: ->
@@ -76,7 +76,8 @@ module.exports = class Setup
 
   removeAppData: ->
     new Promise (resolve) =>
-      rimraf @getAppHome(), resolve
+      rimraf @getDataPath(), =>
+        rimraf path.join(@getAppHome(),'config'), resolve
 
   copyTestData: (folder) ->
     new Promise (resolve) =>

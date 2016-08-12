@@ -17,6 +17,7 @@
 moment = require 'moment'
 winston = require 'winston'
 stringjs = require 'string'
+path = require 'path'
 
 module.exports = class Logger
   logger: null
@@ -26,8 +27,13 @@ module.exports = class Logger
     timestamp: ->  return Date.now(),
     formatter: (options) => @format(options)
     })
+    fileTransport = new (winston.transports.File)({ filename: path.join(chiika.getAppHome(),'chiika.log'), level: 'verbose' })
     @logger = new (winston.Logger)({
-      transports: [transport],
+      transports: [transport,fileTransport],
+      handleExceptions: true,
+      exceptionHandlers: [
+        new winston.transports.File({ filename: path.join(chiika.getAppHome(),'exceptions.log') })
+      ],
       levels: {
         error: 0,
         warn: 1,
@@ -39,6 +45,9 @@ module.exports = class Logger
         silly: 5
       }
     })
+    @logger.transports.file.once 'open', (e) =>
+      @logger.transports.file.flush()
+
     winston.addColors( {
       error: 'red',
       warn: 'yellow',

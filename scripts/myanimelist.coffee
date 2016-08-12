@@ -200,16 +200,9 @@ module.exports = class MyAnimelist
     @on 'reconstruct-ui', (update) =>
       @chiika.logger.script("[yellow](#{@name}) reconstruct-ui #{@name}")
 
-      async = []
       @createViewAnimelist()
       @createViewMangalist()
       @createViewAnimeExtra()
-      # async.push @createMalScrapeView()
-      # async.push @createSearchDataView()
-      # async.push @createSearchExtendedDataView()
-
-
-
 
 
     # This event is called each time the associated view needs to be updated then saved to DB

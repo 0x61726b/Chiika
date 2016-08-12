@@ -20,6 +20,7 @@ _ = require 'lodash'
 
 CardView = require './card-view'
 LoadingMini = require './loading-mini'
+slick       = require 'slick-carousel'
 
 module.exports = React.createClass
   getInitialState: ->
@@ -72,6 +73,15 @@ module.exports = React.createClass
       }
       chart = new Chart(document.getElementById("score-circle"),options)
 
+      $('.characters-images').slick('unslick')
+      $('.characters-images').slick({
+        centerMode: true,
+        centerPadding: '0px',
+        slidesToShow: 2,
+        arrows: false
+      })
+  openProgress: (e) ->
+    $(".statusInteractions").css("animation","openStatus .8s")
   render: ->
     <div className="detailsPage">
       <div className="detailsPage-left">
@@ -84,7 +94,7 @@ module.exports = React.createClass
         {
           if @state.layout.list
             <div>
-              <button type="button" className="button raised lightblue">
+              <button type="button" className="button raised lightblue" onClick={@openProgress}>
                 {
                   if @state.layout.status.user == "1"
                     "Watching"
@@ -98,6 +108,28 @@ module.exports = React.createClass
                     "Plan to Watch"
                 }
               </button>
+              <div className="statusInteractions">
+                <div className="title">
+                  {
+                    if @state.layout.status.user == "1"
+                      "Watching"
+                    else if @state.layout.status.user == "2"
+                      "Completed"
+                    else if @state.layout.status.user == "3"
+                      "On Hold"
+                    else if @state.layout.status.user == "4"
+                      "Dropped"
+                    else if @state.layout.status.user == "6"
+                      "Plan to Watch"
+                  }
+                </div>
+                <div className="interactions">
+                  <div>On Hold</div>
+                  <div>On Hold</div>
+                  <div>On Hold</div>
+                  <div>On Hold</div>
+                </div>
+              </div>
               <div className="progressInteractions">
                 <div className="title">
                   Episode
@@ -116,13 +148,6 @@ module.exports = React.createClass
                 </div>
               </div>
             </div>
-        }
-        {
-          if @state.layout.list
-            @state.layout.actionButtons.map (button,i) =>
-              <button type="button" className="button raised #{button.color}" key={i}> { button.name }</button>
-          else
-            <button type="button" className="button raised yellow">Add to List</button>
         }
       </div>
       <div className="detailsPage-right">
@@ -182,14 +207,13 @@ module.exports = React.createClass
               <h2>Characters</h2>
             </div>
             <div className="card-content">
-              {
-                if @state.layout.characters.length > 0
-                  @state.layout.characters.map (ch,i) =>
-                    <div key={i}>
-                      <img src={ch.image} alt=""></img>
-                      <span>{ch.name}</span>
-                    </div>
-              }
+              <div className="characters-images">
+                 {
+                  if @state.layout.characters.length > 0
+                    @state.layout.characters.map (ch,i) =>
+                      <div key={i}><img src={ch.image} style={{width:175, height: 291}}></img></div>
+                  }
+              </div>
             </div>
           </div>
         </div>

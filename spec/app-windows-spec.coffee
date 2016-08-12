@@ -23,15 +23,18 @@ describe 'Application Window Control', ->
   setup = new GlobalSetup()
   setup.setupTimeout(this)
 
-  beforeEach (done) =>
-    setup.removeAppData().then =>
-      done()
-    return
+  # beforeEach (done) =>
+  #   setup.removeAppData().then =>
+  #     done()
+  #   return
 
   runApp = =>
     new Promise (resolve) =>
       setup.startApplication({
-        args: [setup.chiikaPath()]})
+        args: [setup.chiikaPath()],
+        DEV_MODE:false,
+        RUNNING_TESTS: true
+      })
       .then (startedApp) =>
         resolve(startedApp)
 
@@ -55,7 +58,7 @@ describe 'Application Window Control', ->
     #
     # Loading window + login window
     #
-    xit 'Should launch login window', () =>
+    it 'Should launch login window', () =>
       setup.copyTestData('data_without_user').then =>
         runApp().then (app) =>
           app.client
@@ -68,7 +71,7 @@ describe 'Application Window Control', ->
 
   describe 'Data exists and there is at least one user', ->
 
-    xit 'Should launch main window', ->
+    it 'Should launch main window', ->
       setup.copyTestData('data_with_user').then =>
         runApp().then (app) =>
           app.client
