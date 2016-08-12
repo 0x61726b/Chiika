@@ -21,52 +21,41 @@ View    = require './view'
 {InvalidOperationException,InvalidParameterException} = require './exceptions'
 
 
-module.exports = class SubView extends View
+module.exports = class TabView extends View
   constructor: (params={}) ->
     super params
 
-
   loadData: (data) ->
-    @dataSource = []
-    _.forEach data, (v,k) =>
-      @dataSource.push v
-
-
-  reload: ->
-    new Promise (resolve) =>
-      @dataSource = []
-      chiika.logger.info("Reloading database of subview #{@name}")
-      @db.load().then (data) =>
-        @loadData(data)
-        chiika.logger.info("Reload success! #{@name}")
-        resolve()
+    @dataSource = data
 
   getData: ->
-    @dataSource
+    data = []
+
+    _.forEach @dataSource, (tab) =>
+      _.forEach tab.data, (entry) =>
+        data.push entry
+    data
+
 
   #
-  # Add a single row to the subview
+  #
   #
   # @param {Array} data
   # @return
-  setData: (data,key) ->
+  setData: (data) ->
     new Promise (resolve) =>
       if _.isUndefined data
         throw new InvalidParameterException("You didn't specify data to be added.")
 
-      chiika.logger.info("Setting data for #{@name}")
+      @dataSource = []
+      async = []
+      _.forEach data, (v,k) =>
+        @dataSource.push v
 
-      find = _.find @dataSource, (o) -> o[key] == data[key]
-      index = _.indexOf @dataSource, find
+        deferSave = _when.defer()
+        async.push deferSave.promise
+        onSaved = ->
+          deferSave.resolve()
 
-      if find?
-        chiika.logger.info("Existing row found for #{@name}")
-        @dataSource.splice(index,1,data)
-      else
-        chiika.logger.info("Adding new row for #{@name}")
-        @dataSource.push data
-
-      onSaved = (args) =>
-        chiika.logger.info("Save successful for #{@name}")
-        resolve(args)
-      @db.save data, onSaved
+        @db.save(v,onSaved)
+      _when.all(async).then(resolve)

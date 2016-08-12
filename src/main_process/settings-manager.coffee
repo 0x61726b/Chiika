@@ -93,6 +93,27 @@ module.exports = class SettingsManager
 
     chiika.logger.info("Saving settings...")
 
+  saveConfigFile: (file,config) ->
+    filePath = path.join("config",file + '.json')
+
+    #Open the file for writing
+    cf = chiika.utility.openFileWSmart filePath
+
+    #Write the default options
+    chiika.utility.writeFileSmart filePath, JSON.stringify(config)
+
+    chiika.utility.closeFileSync(cf)
+
+  readConfigFile: (file) ->
+    filePath = path.join("config",file + '.json')
+    configExists = chiika.utility.fileExistsSmart filePath
+
+    if !configExists
+      return null
+    else
+      configFile = chiika.utility.readFileSmart(filePath)
+      JSON.parse(configFile)
+
 
   #
   # Creates necessary folders for the application at the app home. %appdata%/chiika on Windows, /user/ .. etc on linux.

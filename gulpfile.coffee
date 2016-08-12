@@ -282,9 +282,12 @@ do Your_Application_will_ = () ->
     gulp.watch([serveDir + '/main_process/settings-manager.js'], electron.restart)
     gulp.watch([serveDir + '/main_process/window-manager.js'], electron.restart)
     gulp.watch([serveDir + '/main_process/ui-manager.js'], electron.restart)
-    gulp.watch([serveDir + '/main_process/ui-item.js'], electron.restart)
+    gulp.watch([serveDir + '/main_process/view.js'], electron.restart)
     gulp.watch([serveDir + '/main_process/ui-tabView.js'], electron.restart)
     gulp.watch([serveDir + '/main_process/utility.js'], electron.restart)
+    gulp.watch([serveDir + '/main_process/view-manager.js'], electron.restart)
+    gulp.watch([serveDir + '/main_process/app-delegate.js'], electron.restart)
+
   gulp.task 'clean', (done) ->
     del [serveDir, distDir, releaseDir], () -> done()
   gulp.task('default', ['build'])

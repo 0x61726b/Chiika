@@ -82,6 +82,5 @@ module.exports = class UISetup
     # @todo Implement reset
     @on 'reconstruct-ui', (update) =>
       @chiika.logger.script("[yellow](#{@name}) reconstruct-ui")
-      update.defer.resolve()
 
     @on 'view-update', (view) =>

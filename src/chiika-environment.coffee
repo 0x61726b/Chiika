@@ -48,42 +48,6 @@ class ChiikaEnvironment
     @viewManager      = new ViewManager()
     @cardManager      = new CardManager()
 
-    testCard =
-      name: 'typeMiniCard'
-      title: 'Type'
-      content: 'TV'
-      type: 'miniCard'
-
-    seasonCard =
-      name: 'seasonMiniCard'
-      title: 'Season'
-      content: 'Fall 2014'
-      type: 'miniCard'
-
-    episodeCard =
-      name: 'episodeMiniCard'
-      title: 'Episode'
-      content: '6/24'
-      type: 'miniCard'
-
-    studioCard =
-      name: 'studioMiniCard'
-      title: 'Studio'
-      content: 'Feel'
-      type: 'miniCard'
-
-    sourceCard =
-      name: 'sourceMiniCard'
-      title: 'Source'
-      content: 'Manga'
-      type: 'miniCard'
-
-    @cardManager.addCard(testCard)
-    @cardManager.addCard(seasonCard)
-    @cardManager.addCard(episodeCard)
-    @cardManager.addCard(studioCard)
-    @cardManager.addCard(sourceCard)
-
 
 
 
@@ -101,9 +65,10 @@ class ChiikaEnvironment
 
 
   preload: ->
-    defer = _when.defer()
+    waitForUI = _when.defer()
+    waitForViewData = _when.defer()
 
-    async = [ defer.promise ]
+    async = [ waitForUI.promise, waitForViewData.promise ]
 
     @ipc.sendMessage 'get-ui-data'
     @ipc.refreshUIData (args) =>
@@ -112,12 +77,20 @@ class ChiikaEnvironment
 
       infoStr = ''
       for uiData in @uiData
-        infoStr += " #{uiData.displayName} ( #{uiData.displayType} )"
+        infoStr += " #{uiData.display} ( #{uiData.type} )"
 
       chiika.logger.renderer("Current UI items are #{infoStr}")
-      defer.resolve()
+      waitForUI.resolve()
 
       console.log @uiData
+
+    @ipc.sendMessage 'get-view-data'
+    @ipc.getViewData (args) =>
+      @viewData = args
+
+      waitForViewData.resolve()
+
+      console.log @viewData
 
     _when.all(async)
 

@@ -17,38 +17,33 @@
 _         = require 'lodash'
 _when     = require 'when'
 
-module.exports = class UIItem
+module.exports = class View
   name: null
   displayName: null
-  dataSource: []
   db: null
   displayType: null
   needUpdate: false
-  children: []
+  dataSource: []
   constructor: (params={}) ->
     { @name, @displayName,@displayType,@owner, @category } = params
-    @children = []
+
     @needUpdate = false
     @dataSource = []
 
-
-  addChild: (child) ->
-    if child?
-      @children.push child
 
 
   setDatabaseInterface: (db) ->
     @db = db
 
   update: ->
-    chiika.logger.info("Updating UIItem #{@name}")
+    chiika.logger.info("Updating view #{@name}")
 
     defer = _when.defer()
     if @needUpdate
       if @owner?
         chiika.chiikaApi.emit 'view-update',{ calling: @owner, view: this, defer: defer, params: {} }
       else
-        chiika.logger.error("Can't update an item without owner! UI Item: #{@name}")
+        chiika.logger.error("Can't update a view without owner! #{@name}")
         defer.resolve( { success: false })
       @needUpdate = false
     else
@@ -63,5 +58,5 @@ module.exports = class UIItem
       chiika.logger.error("[magenta](#{@name}) - Non-array data source!")
       return
 
-    chiika.logger.verbose("Setting data source for UI item #{@name}. Data Array Length: #{data.length}")
+    chiika.logger.verbose("Setting data source for view #{@name}. Data Array Length: #{data.length}")
     @dataSource = data

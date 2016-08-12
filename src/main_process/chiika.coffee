@@ -21,6 +21,8 @@
 {BrowserWindow, ipcMain,globalShortcut,Tray,Menu,app} = require 'electron'
 
 
+
+
 yargs                             = require 'yargs'
 path                              = require 'path'
 
@@ -44,13 +46,16 @@ WindowManager                     = require './window-manager'
 IpcManager                        = require './ipc-manager'
 Parser                            = require './parser'
 UIManager                         = require './ui-manager'
+ViewManager                       = require './view-manager'
 ChiikaPublicApi                   = require './chiika-public'
 Utility                           = require './utility'
 AppOptions                        = require './options'
 AppDelegate                       = require './app-delegate'
 
 
+
 process.on 'uncaughtException',(err) ->
+  console.log err
   # Show a somewhat easily readable text error
   if err && err.stack?
     error = err.stack.split("\n")
@@ -89,6 +94,7 @@ class Application
     else
       console.log process.env.APPDATA
 
+
     @logger             = new Logger("verbose").logger
     global.logger       = @logger #Share with renderer
 
@@ -99,11 +105,13 @@ class Application
     @dbManager          = new DbManager()
     @requestManager     = new RequestManager()
     @parser             = new Parser()
+    @viewManager        = new ViewManager()
     @uiManager          = new UIManager()
-    @chiikaApi          = new ChiikaPublicApi( { logger: @logger, db: @dbManager, parser: @parser, ui: @uiManager })
+    @chiikaApi          = new ChiikaPublicApi( { logger: @logger, db: @dbManager, parser: @parser, ui: @uiManager, viewManager: @viewManager })
     @windowManager      = new WindowManager()
     @appDelegate        = new AppDelegate()
     @ipcManager         = new IpcManager()
+
 
     @ipcManager.handleEvents()
 
@@ -118,38 +126,47 @@ class Application
       @dbManager.onLoad =>
         @run()
 
-
   run: ->
-    # appDelegate.run() method will open 3 windows when the app is ready
-    # loading,main,login (main,login not visible)
-    # If there are no users, close loading,show login
-    # If there are users, close loading, show main window
-    userCount = @dbManager.usersDb.users.length
-    chiika.logger.verbose("User count #{userCount}")
+    #
+    #
+    #
+    #
+    userCount     = @dbManager.usersDb.users.length
+    viewConfig    = @settingsManager.readConfigFile('view')
+    viewCount     = 0
+    if viewConfig?
+      viewCount     = @settingsManager.readConfigFile('view').views.length
 
-    # If there are no users and UI data
+
+
+    chiika.logger.verbose("User count #{userCount}")
+    chiika.logger.verbose("View count #{viewCount}")
+
+    # If there are no users and view data
     # Compile scripts first
     # Because if there are no UI data, UI Manager will ask scripts to create UI data, so we need scripts compiled
     #
-    if userCount == 0 && @uiManager.getUIItemsCount() == 0
-      @apiManager.compileUserScripts().then =>
-        @uiManager.preloadUIItems()
+    if userCount == 0 && viewCount == 0
+      @apiManager.preCompile().then =>
+        @apiManager.postCompile()
+
+        @viewManager.preload()
                   .then =>
-                    chiika.logger.verbose("Preloading UI complete!")
+                    chiika.logger.verbose("Preloading complete!")
                     chiika.windowManager.createLoginWindow()
 
 
-    # If there are no users but there are UI data
-    # preload UI data first, this way scripts can instantly access UI data without waiting
+    # If there are no users but there are view data
+    # preload view data first, this way scripts can instantly access view data without waiting
     #
-    if userCount == 0 && @uiManager.getUIItemsCount() > 0
-      @uiManager.preloadUIItems()
-                .then =>
-                  chiika.logger.verbose("Preloading UI complete!")
-                  @apiManager.compileUserScripts().then =>
-                    @uiManager.checkUIData().then =>
-                      @apiManager.postInit()
-                    chiika.windowManager.createLoginWindow()
+    if userCount == 0 && viewCount > 0
+      @viewManager.preload().then =>
+        chiika.logger.verbose("Preloading complete!")
+
+        @apiManager.preCompile().then =>
+          @apiManager.postCompile()
+          chiika.windowManager.createLoginWindow()
+
 
     if userCount > 0
       # If there are no UI items
@@ -158,22 +175,14 @@ class Application
       # preload them first so when script is ready, they can access them right of the bat
       # after preload and script compile, check if the views need update
       # if they do, call view-update event so script can respond
-      if @uiManager.getUIItemsCount() > 0
-        @uiManager.preloadUIItems()
-                  .then =>
-                    chiika.logger.verbose("Preloading UI complete!")
-                    @apiManager.compileUserScripts().then =>
-                      @uiManager.checkUIData().then =>
-                        @apiManager.postInit()
-                        chiika.windowManager.createMainWindow()
-      else
-        #This will probably fail if more than one script is being executed...
-        #This means when all scripts are compiled,preload UI items
-        @apiManager.compileUserScripts().then =>
-          @uiManager.preloadUIItems()
-                    .then =>
-                      chiika.logger.verbose("Preloading UI complete!")
-                      chiika.windowManager.createMainWindow()
+
+      @viewManager.preload().then =>
+        chiika.logger.verbose("Preloading UI complete!")
+
+        @apiManager.preCompile().then =>
+          @apiManager.postCompile()
+          chiika.windowManager.createMainWindow()
+
 
 
 

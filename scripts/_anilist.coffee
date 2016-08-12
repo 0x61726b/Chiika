@@ -82,6 +82,9 @@ module.exports = class Anilist
   #
   loginType: "authPin"
 
+  isActive: true
+  isService: true
+
   # Will be called by Chiika with the API object
   # you can do whatever you want with this object
   # See the documentation for this object's methods,properties etc.

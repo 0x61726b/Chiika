@@ -17,6 +17,7 @@
 assert                = require 'assert'
 chai                  = require 'chai'
 chaiAsPromised        = require 'chai-as-promised'
+spies                 = require 'chai-spies'
 path                  = require 'path'
 os                    = require 'os'
 rimraf                = require 'rimraf'
@@ -27,7 +28,9 @@ fsextra               = require 'fs-extra'
 
 global.before =>
   chai.should()
+  chai.expect()
   chai.use(chaiAsPromised)
+  chai.use(spies)
 
 module.exports = class Setup
   getElectronPath: ->
@@ -50,13 +53,30 @@ module.exports = class Setup
       process.env.CHIIKA_DATA_HOME = path.join(osSpecificDir,"chiika","data")
       process.env.CHIIKA_DATA_HOME
 
+  getAppHome: ->
+    if process.env.CHIIKA_HOME?
+      process.env.CHIIKA_HOME
+    else
+      if process.platform == 'darwin'
+        osSpecificDir = path.join(process.env.HOME,'Library/Application Support')
+      else if process.platform == 'linux'
+        osSpecificDir = path.join(process.env.HOME,'.config')
+      else
+        osSpecificDir = process.env.APPDATA
+
+      process.env.CHIIKA_HOME = path.join(osSpecificDir,"chiika")
+      process.env.CHIIKA_HOME
+
+  getDbHome: ->
+    path.join(@getDataPath(),"database")
+
   chiikaPath: ->
     path.join(__dirname, '..')
 
 
   removeAppData: ->
     new Promise (resolve) =>
-      rimraf @getDataPath(), resolve
+      rimraf @getAppHome(), resolve
 
   copyTestData: (folder) ->
     new Promise (resolve) =>

@@ -53,6 +53,8 @@ module.exports = class IpcManager
   handleEvents: ->
     @callWindowMethod()
     @getUIData()
+    @getViewData()
+    @getViewDataByName()
     @getUserData()
     @login()
     @loginCustom()
@@ -119,17 +121,17 @@ module.exports = class IpcManager
   #
   refreshViewByName: ->
     @receive 'refresh-view-by-name', (event,args) =>
-      view = chiika.uiManager.getUIItem(args.viewName)
+      view = chiika.viewManager.getViewByName(args.viewName)
 
       deferUpdate = _when.defer()
       if view?
         chiika.chiikaApi.emit 'view-update',{ calling: args.service,view: view,defer: deferUpdate }
 
         deferUpdate.promise.then () =>
-          uiItems = chiika.uiManager.getUIItems()
+          views = chiika.viewManager.getViews()
 
-          if uiItems.length > 0
-            event.sender.send 'get-ui-data-response',uiItems
+          if views.length > 0
+            event.sender.send 'get-view-data-response',views
 
 
 
@@ -169,7 +171,6 @@ module.exports = class IpcManager
       @send(chiika.windowManager.getWindowByName(window),"spectron-#{args.message}",args)
 
 
-
   #
   # When the main window loads , it will request UI data.
   # We send it here..
@@ -180,6 +181,15 @@ module.exports = class IpcManager
 
       if uiItems.length > 0
         uiItems
+
+  getViewData: ->
+    @receiveAnswer 'get-view-data', (event,args) =>
+      chiika.viewManager.getViews()
+
+  getViewDataByName: ->
+    @receiveAnswer 'get-view-by-name', (event,args) =>
+      view = chiika.viewManager.getViewByName(args.name)
+      view
 
 
   #

@@ -23,12 +23,12 @@ module.exports = class ChiikaPublicApi
   subscriptions: []
 
   constructor: (params={})->
-    @emitter             = new Emitter
-    {@logger, @db,@parser,@ui} = params
-    @users               = @db.usersDb
-    @custom              = @db.customDb
-    @uiDb                = @db.uiDb
-    @utility             = chiika.utility
+    @emitter                                    = new Emitter
+    {@logger, @db,@parser,@ui,@viewManager}     = params
+    @users                                      = @db.usersDb
+    @custom                                     = @db.customDb
+    @uiDb                                       = @db.uiDb
+    @utility                                    = chiika.utility
 
 
   makeGetRequest:(url,headers,callback) ->
@@ -71,7 +71,7 @@ module.exports = class ChiikaPublicApi
     if _.isUndefined params
       params = {}
 
-    view = chiika.uiManager.getUIItem(viewName)
+    view = chiika.viewManager.getViewByName(viewName)
     if view?
       @emit 'view-update', { calling: owner, view: view, defer: defer, params: params }
     else
@@ -98,8 +98,8 @@ module.exports = class ChiikaPublicApi
   on: (receiver,message,callback) ->
     @emitter.on message, (args) =>
       if _.isUndefined args.calling
-        console.log "#{receiver} - #{message}"
-        chiika.logger.error("Emitter has received #{message} but we don't know who to call to #{receiver} != #{args.calling}. Are you sure about this?")
+        # console.log "#{receiver} - #{message}"
+        # chiika.logger.error("Emitter has received #{message} but we don't know who to call to #{receiver} != #{args.calling}. Are you sure about this?")
         # Assume, if no caller call everyone
         callback(args)
       if args.calling == receiver

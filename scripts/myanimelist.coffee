@@ -103,7 +103,7 @@ module.exports = class MyAnimelist
   #
   #
   getAnimelistData: (callback) ->
-    if _.isUndefined @malUser
+    if !@malUser?
       @chiika.logger.error("User can't be retrieved.Aborting anime list request.")
       callback( {success: false })
     else
@@ -169,72 +169,45 @@ module.exports = class MyAnimelist
   # After the constructor run() method will be called immediately after.
   # Use this method to do what you will
   #
-  run: (chiika) ->
-    #This is the first event called here to let user do some initializing
-    @on 'initialize',=>
-      # You may not use an account for Chiika
-      # But to use hummingbird, you need one regardlesss.
+  run: () ->
+    @on 'initialize', =>
       @malUser = @chiika.users.getDefaultUser(@name)
 
       if _.isUndefined @malUser
         @chiika.logger.warn("Default user for myanimelist doesn't exist. If this is the first time launch, you can ignore this.")
+      else
+        @chiika.logger.info("Default user : #{@malUser.realUserName}")
 
+      animelistView   = @chiika.viewManager.getViewByName('myanimelist_animelist')
+      animeExtraView  = @chiika.viewManager.getViewByName('myanimelist_animeextra')
 
-    @on 'post-initialize', =>
-      chiika.logger.script("[yellow](#{@name}) post-initialize #{@name}")
-      animeListView = @chiika.ui.getUIItem('animeList_myanimelist')
-      if animeListView?
-        @animelist = animeListView.getData()
-        chiika.logger.script("[yellow](#{@name}) Animelist data length #{@animelist.length} #{@name}")
+      if animelistView?
+        @animelist = animelistView.getData()
+        @chiika.logger.script("[yellow](#{@name}) Animelist data length #{@animelist.length} #{@name}")
 
-      searchDataView = @chiika.ui.getUIItem('myanimelist_animeSearch')
-      searchExtendedDataView = @chiika.ui.getUIItem('myanimelist_animeSearchExtended')
-      animeScrapeView = @chiika.ui.getUIItem('myanimelist_scrape')
-      if searchDataView?
-        @animelistExtra = searchDataView.getData()
-      if searchExtendedDataView?
-        @extendedData = searchExtendedDataView.getData()
+      if animeExtraView?
+        @animeextra = animeExtraView.getData()
+        @chiika.logger.script("[yellow](#{@name}) AnimeExtra data length #{@animeextra.length} #{@name}")
 
-        _.forEach @extendedData, (v,k) =>
-          findInSearchData = _.find @animelistExtra, (o) -> o.mal_id == v.mal_id
-
-          if findInSearchData?
-            _.assign findInSearchData, v
-          else
-            @animelistExtra.push v
-
-      if animeScrapeView?
-        @scrapeData = animeScrapeView.getData()
-
-        _.forEach @scrapeData, (v,k) =>
-          findInScrapeData = _.find @animelistExtra, (o) -> o.mal_id == v.mal_id
-
-          if findInScrapeData?
-            _.assign findInScrapeData,v
-          else
-            @animelistExtra.push v
-
-
-      chiika.logger.script("[yellow](#{@name}) AnimelistExtra data length #{@animelistExtra.length} #{@name}")
-
-      mangaListView = @chiika.ui.getUIItem('mangaList_myanimelist')
-      if mangaListView?
-        @mangalist = mangaListView.getData()
-        chiika.logger.script("[yellow](#{@name}) Animelist data length #{@mangalist.length} #{@name}")
+        mangalistView = @chiika.viewManager.getViewByName('myanimelist_mangalist')
+        if mangalistView?
+          @mangalist = mangalistView.getData()
+          @chiika.logger.script("[yellow](#{@name}) Mangalist data length #{@mangalist.length} #{@name}")
 
 
     # This method will be called if there are no UI elements in the database
     # or the user wants to refresh the views
     @on 'reconstruct-ui', (update) =>
-      chiika.logger.script("[yellow](#{@name}) reconstruct-ui #{@name}")
+      @chiika.logger.script("[yellow](#{@name}) reconstruct-ui #{@name}")
 
       async = []
-      async.push @createViewAnimelist()
-      async.push @createViewMangalist()
-      async.push @createMalScrapeView()
-      async.push @createSearchDataView()
-      async.push @createSearchExtendedDataView()
-      _when.all(async).then => update.defer.resolve()
+      @createViewAnimelist()
+      @createViewMangalist()
+      @createViewAnimeExtra()
+      # async.push @createMalScrapeView()
+      # async.push @createSearchDataView()
+      # async.push @createSearchExtendedDataView()
+
 
 
 
@@ -245,9 +218,9 @@ module.exports = class MyAnimelist
     # You should update your data here
     # This event will then save the data to the view's local DB to use it locally.
     @on 'view-update', (update) =>
-      chiika.logger.script("[yellow](#{@name}) Updating view for #{update.view.name} - #{@name}")
+      @chiika.logger.script("[yellow](#{@name}) Updating view for #{update.view.name} - #{@name}")
 
-      if update.view.name == 'animeList_myanimelist'
+      if update.view.name == 'myanimelist_animelist'
         #view.setData(@getAnimelistData())
         @getAnimelistData (result) =>
           if result.success
@@ -255,147 +228,33 @@ module.exports = class MyAnimelist
           else
             @chiika.logger.warn("[yellow](#{@name}) view-update has failed.")
             update.defer.resolve({ success: result.success })
-      else if update.view.name == 'mangaList_myanimelist'
+
+
+      else if update.view.name == 'myanimelist_mangalist'
         @getMangalistData (result) =>
           if result.success
             @setMangalistTabViewData(result.library.myanimelist.manga,update.view).then => update.defer.resolve({ success: result.success })
           else
             update.defer.resolve({ success: result.success })
 
-      else if update.view.name == 'myanimelist_scrape'
-        anime = update.params.anime
-
-        if anime?
-          @animePageScrape anime.mal_id, (result) ->
-
-            if result?
-              newAnimeEntry = {}
-              newAnimeEntry.mal_id = anime.mal_id
-              newAnimeEntry.animeStudio = result.studio
-              newAnimeEntry.animeSource = result.source
-              newAnimeEntry.animeJapanese = result.japanese
-              newAnimeEntry.animeBroadcast = result.broadcast
-              newAnimeEntry.animeDuration = result.duration
-              newAnimeEntry.animeAired = result.aired
-              newAnimeEntry.animeCharacters = result.characters
-              update.view.setData(newAnimeEntry,'mal_id').then (args) =>
-                update.defer.resolve({ success: true, entry: newAnimeEntry, updated: args.rows })
-            else
-              update.defer.resolve({ success: false })
-        else
-          update.defer.resolve({ success: false })
-      else if update.view.name == 'myanimelist_animeSearchExtended'
-        anime = update.params.anime
-
-        if anime?
-          @searchExtended 'anime', anime.mal_id, (result) ->
-
-            if result?
-              newAnimeEntry = {}
-              newAnimeEntry.mal_id = anime.mal_id
-              newAnimeEntry.animeGenres = result.genres
-              newAnimeEntry.animeScoreAverage = result.score
-              newAnimeEntry.animeRanked = result.rank
-              newAnimeEntry.animePopularity = result.popularity
-              newAnimeEntry.scoredBy = result.scoredBy
-
-              update.view.setData(newAnimeEntry,'mal_id').then (args) =>
-                update.defer.resolve({ success: true, entry: newAnimeEntry, updated: args.rows })
-            else
-              update.defer.resolve({ success: false, response: "No Entry" })
-        else
-          update.defer.resolve({ success: false })
-
-      else if update.view.name == 'myanimelist_animeSearch'
-        anime = update.params.anime
-
-        if anime?
-          @chiika.logger.script("[yellow](#{@name}) animeList_extra update!")
-          searchMatch = (v) ->
-            newAnimeEntry = {}
-            newAnimeEntry.mal_id = v.id
-            newAnimeEntry.animeEnglish = v.english
-            newAnimeEntry.animeTitle = v.title
-            newAnimeEntry.animeSynonyms = v.synonyms
-            newAnimeEntry.animeType = v.type
-            newAnimeEntry.animeStartDate = v.start_date
-            newAnimeEntry.animeEndDate = v.end_date
-            newAnimeEntry.animeStatus = v.status
-            newAnimeEntry.animeImage = v.image
-            newAnimeEntry.animeScoreAverage = v.score
-            newAnimeEntry.animeSynopsis = v.synopsis
-            newAnimeEntry
-
-          newAnimeEntry = {}
-          @search 'anime',anime.animeTitle, (list) =>
-            isArray = false
-            if _.isArray list
-              isArray = true
-              _.forEach list, (v,k) =>
-                if v.id == anime.mal_id
-                  newAnimeEntry = searchMatch(v)
-                  return false
-            else
-              newAnimeEntry = searchMatch(list)
-
-            if isArray && list.length > 0
-              update.view.setData(newAnimeEntry,'mal_id').then (args) =>
-                update.defer.resolve({ success: true, entry: newAnimeEntry, count: list.length, updated: args.rows })
-            else if _.size(list) > 0
-              update.view.setData(newAnimeEntry,'mal_id').then (args) =>
-                update.defer.resolve({ success: true, entry: newAnimeEntry, updated: args.rows })
-            else
-              update.defer.resolve({ success: false, response: 'No entry.' })
-        else
-          update.defer.resolve({ success: false })
-
 
 
     @on 'details-layout', (args) =>
-      chiika.logger.script("[yellow](#{@name}) Details-Layout #{args.id}")
+      @chiika.logger.script("[yellow](#{@name}) Details-Layout #{args.id}")
 
-      waitSearch = _when.defer()
-      waitSearchExtended = _when.defer()
-      waitScrape = _when.defer()
       id = args.id
 
+      #If its on the list, it will have this entry
       animeEntry = _.find @animelist, (o) -> (o.mal_id) == args.id
-      animeExtraEntry = _.find @animelistExtra, (o) -> (o.mal_id) == args.id
 
-      if animeEntry? && animeExtraEntry?
-        combine = animeEntry
-        _.assign combine,animeExtraEntry
-        args.return(@getDetailsLayout(combine))
+      @handleDetailsRequest id, (response) =>
+        animeExtraView = @chiika.viewManager.getViewByName('myanimelist_animeextra')
+        @animeextra = animeExtraView.getData()
 
+        if response.success && response.updated > 0
+          args.return(@getDetailsLayout(id))
 
-      if animeEntry?
-        waitSearch.promise.then (result) =>
-          if result.updated > 0
-            combine = animeEntry
-            _.assign combine,result.entry
-            args.return(@getDetailsLayout(combine))
-
-        waitSearchExtended.promise.then (result) =>
-          if result.updated > 0
-            combine = animeEntry
-            _.assign combine,result.entry
-            args.return(@getDetailsLayout(combine))
-
-        waitScrape.promise.then (result) =>
-
-          if result.updated > 0
-            combine = animeEntry
-            _.assign combine,result.entry
-            args.return(@getDetailsLayout(combine))
-
-        @chiika.requestViewUpdate('myanimelist_animeSearch',@name, waitSearch,{ anime: animeEntry })
-        @chiika.requestViewUpdate('myanimelist_animeSearchExtended',@name, waitSearchExtended,{ anime: animeEntry })
-        @chiika.requestViewUpdate('myanimelist_scrape',@name, waitScrape,{ anime: animeEntry })
-        #
-        # If there is no extra record,return the raw one
-        #
-        if !animeExtraEntry?
-          args.return(@getDetailsLayout(animeEntry))
+      args.return(@getDetailsLayout(id))
 
     # This function is called from the login window.
     # For example, if you need a token, retrieve it here then store it by calling chiika.custom.addkey
@@ -404,10 +263,10 @@ module.exports = class MyAnimelist
     # Another note is , you MUST call the  'args.return' or the app wont continue executing
     #
     @on 'set-user-login', (args,callback) =>
-      chiika.logger.script("[yellow](#{@name}) Auth in process " + args.user)
+      @chiika.logger.script("[yellow](#{@name}) Auth in process " + args.user)
       onAuthComplete = (error,response,body) =>
         if error?
-          chiika.logger.error(error)
+          @chiika.logger.error(error)
         else
           if response.statusCode == 200 or response.statusCode == 201
             userAdded = =>
@@ -418,25 +277,25 @@ module.exports = class MyAnimelist
               async.push deferUpdate1
               async.push deferUpdate2
 
-              chiika.requestViewUpdate('animeList_myanimelist',@name,deferUpdate1)
-              chiika.requestViewUpdate('mangaList_myanimelist',@name,deferUpdate2)
+              @chiika.requestViewUpdate('myanimelist_animelist',@name,deferUpdate1)
+              @chiika.requestViewUpdate('myanimelist_mangalist',@name,deferUpdate2)
 
               _when.all(async).then =>
                 args.return( { success: true })
 
             newUser = { userName: args.user + "_" + @name,owner: @name, password: args.pass, realUserName: args.user }
 
-            chiika.parser.parseXml(body)
+            @chiika.parser.parseXml(body)
                          .then (xmlObject) =>
-                           @malUser = chiika.users.getUser(args.user + "_" + @name)
+                           @malUser = @chiika.users.getUser(args.user + "_" + @name)
 
                            _.assign newUser, { malID: xmlObject.user.id }
                            if _.isUndefined @malUser
                              @malUser = newUser
-                             chiika.users.addUser @malUser,userAdded
+                             @chiika.users.addUser @malUser,userAdded
                            else
                              _.assign @malUser,newUser
-                             chiika.users.updateUser @malUser,userAdded
+                             @chiika.users.updateUser @malUser,userAdded
 
             #  if chiika.users.getUser(malUser.userName)?
             #    chiika.users.updateUser malUser
@@ -447,48 +306,171 @@ module.exports = class MyAnimelist
             #
             args.return( { success: false, response: response })
 
-      chiika.makePostRequestAuth( authUrl, { userName: args.user, password: args.pass },null, onAuthComplete )
+      @chiika.makePostRequestAuth( authUrl, { userName: args.user, password: args.pass },null, onAuthComplete )
+
+
+  handleDetailsRequest: (animeId,callback) ->
+    @chiika.logger.script("[yellow](#{@name}-Anime-Search) Searching for #{animeId}!")
+
+    animeExtraView = @chiika.viewManager.getViewByName('myanimelist_animeextra')
+
+    animeEntry = _.find @animelist, (o) -> (o.mal_id) == animeId
+
+    #Searching
+    #
+    # For search to occur, we need a title
+    #
+    searchMatch = (v) ->
+      newAnimeEntry = {}
+      newAnimeEntry.mal_id = v.id
+      newAnimeEntry.animeEnglish = v.english
+      newAnimeEntry.animeTitle = v.title
+      newAnimeEntry.animeSynonyms = v.synonyms
+      newAnimeEntry.animeType = v.type
+      newAnimeEntry.animeStartDate = v.start_date
+      newAnimeEntry.animeEndDate = v.end_date
+      newAnimeEntry.animeStatus = v.status
+      newAnimeEntry.animeImage = v.image
+      newAnimeEntry.animeScoreAverage = v.score
+      newAnimeEntry.animeSynopsis = v.synopsis
+      newAnimeEntry
+
+    newAnimeEntry = {}
+    entryFound = false
+
+    if animeEntry?
+      #
+      #
+      # Mal API Search
+      #
+      #
+      @search 'anime',animeEntry.animeTitle, (list) =>
+        isArray = false
+        if _.isArray list
+          isArray = true
+          _.forEach list, (v,k) =>
+            if v.id == animeEntry.mal_id
+              newAnimeEntry = searchMatch(v)
+              entryFound = true
+              return false
+        else
+          if list.id == animeEntry.mal_id
+            newAnimeEntry = searchMatch(list)
+            entryFound = true
+
+
+        if isArray && list.length > 0 && entryFound
+          @chiika.logger.script("[yellow](#{@name}-Anime-Search) Search returned #{list.length} entries")
+          animeExtraView.setData(newAnimeEntry,'mal_id').then (args) =>
+            if args.rows > 0
+              @chiika.logger.script("[yellow](#{@name}-Anime-Search) Updated #{args.rows} entries.")
+              animeExtraView.reload().then =>
+                callback?({ success: true, entry: newAnimeEntry, updated: args.rows })
+        else if _.size(list) > 0 && entryFound
+          @chiika.logger.script("[yellow](#{@name}-Anime-Search) Search returned 1 entry")
+          animeExtraView.setData(newAnimeEntry,'mal_id').then (args) =>
+            if args.rows > 0
+              @chiika.logger.script("[yellow](#{@name}-Anime-Search) Updated #{args.rows} entries.")
+              animeExtraView.reload().then =>
+                callback?({ success: true, entry: newAnimeEntry, updated: args.rows })
+        else if !entryFound
+          callback({ success: false, response: "Search failed.",updated: 0 })
+
+
+      #
+      # http://myanimelist.net/includes/ajax.inc.php?id=id&t=64
+      #
+      @searchExtended 'anime', animeEntry.mal_id, (result) ->
+
+        if result?
+          newAnimeEntry = {}
+          newAnimeEntry.mal_id = animeEntry.mal_id
+          newAnimeEntry.animeGenres = result.genres
+          newAnimeEntry.animeScoreAverage = result.score
+          newAnimeEntry.animeRanked = result.rank
+          newAnimeEntry.animePopularity = result.popularity
+          newAnimeEntry.scoredBy = result.scoredBy
+
+          animeExtraView.setData(newAnimeEntry,'mal_id').then (args) =>
+            @chiika.logger.script("[yellow](#{@name}-Anime-Search-Extended) Updated #{args.rows} entries.")
+            animeExtraView.reload().then =>
+              callback?({ success: true, entry: newAnimeEntry, updated: args.rows, updated: 0 })
+        else
+          callback?({ success: false, response: "No Entry" })
+
+      #
+      # Anime Page Scraping
+      #
+      @animePageScrape animeEntry.mal_id, (result) ->
+
+        if result?
+          newAnimeEntry = {}
+          newAnimeEntry.mal_id = animeEntry.mal_id
+          newAnimeEntry.animeStudio = result.studio
+          newAnimeEntry.animeSource = result.source
+          newAnimeEntry.animeJapanese = result.japanese
+          newAnimeEntry.animeBroadcast = result.broadcast
+          newAnimeEntry.animeDuration = result.duration
+          newAnimeEntry.animeAired = result.aired
+          newAnimeEntry.animeCharacters = result.characters
+          animeExtraView.setData(newAnimeEntry,'mal_id').then (args) =>
+            @chiika.logger.script("[yellow](#{@name}-Anime-Mal-Scrape) Updated #{args.rows} entries.")
+            animeExtraView.reload().then =>
+              callback?({ success: true, entry: newAnimeEntry, updated: args.rows })
+        else
+          callback?({ success: false, response: "No Entry", updated: 0 })
 
 
 
+  getDetailsLayout: (id) ->
+    entry = _.find @animelist, (o) -> o.mal_id == id
+    extra = _.find @animeextra, (o) -> o.mal_id == id
 
-  getDetailsLayout: (animeEntry) ->
-    entry = animeEntry
-    title = entry.animeTitle ? ""
-    score = entry.animeScore ? "0.0"
-    type = entry.animeType ? ""
-    season = entry.animeSeason ? ""
-    score = parseInt(entry.animeScore) ? 0
-    averageScore = (entry.animeScoreAverage) ? "0"
-    popularity = entry.animePopularity ? ""
-    ranked = entry.animeRanked ? ""
-    genres = entry.animeGenres ? ""
-    scoredBy = entry.scoredBy ? "0"
-    studio = entry.animeStudio ? null
-    broadcastDate = entry.animeBroadcast ? ""
-    aired = entry.animeAired ? ""
-    japanese = entry.animeJapanese ? ""
-    source = entry.animeSource ? ""
-    duration = entry.animeDuration ? ""
-    characters = entry.animeCharacters ? []
-    totalEpisodes = entry.animeTotalEpisodes ? "0"
+    if !extra?
+      extra = {}
 
+    if !entry?
+      list = false
+    else
+      list = true
 
-    image = entry.animeImage ? "le_default_image"
-    synonyms = entry.animeSynonyms ? ""
+    title               = entry.animeTitle ? ""                       #MalApi
+    score               = entry.animeScore ? "0.0"                    #MalApi
+    type                = entry.animeType ? ""                        #MalApi
+    season              = entry.animeSeason ? ""                      #MalApi
+    score               = parseInt(entry.animeScore) ? 0              #MalApi
+    totalEpisodes       = entry.animeTotalEpisodes ? "0"              #MalApi
+    watchedEpisodes     = entry.animeWatchedEpisodes ? "0"            #MalApi
+    image               = entry.animeImage ? "le_default_image"       #MalApi
+    synonyms            = entry.animeSynonyms ? ""                    #MalApi
+    userStatus          = entry.animeUserStatus ? "0"                 #MalApi
+    seriesStatus        = entry.animeSeriesStatus ? "0"               #MalApi
+    averageScore        = (extra.animeScoreAverage) ? "0"             #Ajax.inc
+    ranked              = extra.animeRanked ? ""                      #Ajax.inc
+    genres              = extra.animeGenres ? ""                      #Ajax.inc
+    synopsis            = extra.animeSynopsis ? ""                    #Search
+    english             = extra.animeEnglish ? ""                     #Search
+    popularity          = extra.animePopularity ? ""                  #Ajax.inc
+    scoredBy            = extra.scoredBy ? "0"                        #Ajax.inc
+    studio              = extra.animeStudio ? null                    #PageScrape
+    broadcastDate       = extra.animeBroadcast ? ""                   #PageScrape
+    aired               = extra.animeAired ? ""                       #PageScrape
+    japanese            = extra.animeJapanese ? ""                    #PageScrape
+    source              = extra.animeSource ? ""                      #PageScrape
+    duration            = extra.animeDuration ? ""                    #PageScrape
+    characters          = extra.animeCharacters ? []                  #PageScrape
 
     if synonyms?
       synonyms = synonyms.split(";")[0]
     else
       synonyms = ""
 
-    synopsis = entry.animeSynopsis ? ""
-    english = entry.animeEnglish ? ""
-
     if synopsis?
       #Replace html stuff
       synopsis = synopsis.split("[i]").join("<i>")
       synopsis = synopsis.split("[/i]").join("</i>")
+
+
 
     typeCard =
       name: 'typeMiniCard'
@@ -540,10 +522,14 @@ module.exports = class MyAnimelist
       genres = genresText
 
     detailsLayout =
-      totalEpisodes: totalEpisodes
       title: title
       genres: genres
-      list: true
+      list: list
+      status:
+        total: totalEpisodes
+        watched: watchedEpisodes
+        user: userStatus
+        series: seriesStatus
       synopsis: synopsis
       cover: image
       english: english
@@ -610,6 +596,8 @@ module.exports = class MyAnimelist
       anime.animeEpisodes = v.series_episodes
       anime.animeWatchedEpisodes = v.my_watched_episodes
       anime.animeTotalEpisodes = v.series_episodes
+      anime.animeUserStatus = v.my_status
+      anime.animeSeriesStatus = v.series_status
       anime.id = id + 1
       anime.mal_id = v.series_animedb_id
 
@@ -709,51 +697,19 @@ module.exports = class MyAnimelist
     view.setData(mangalistData)
 
 
-  createMalScrapeView: ->
-    new Promise (resolve) =>
-      scrapeData =
-        name: "myanimelist_scrape"
-        owner: @name
-        displayName: 'subview'
-        displayType: 'subview'
-        subview:{}
+  createViewAnimeExtra: ->
+    animeExtraView =
+      name: "myanimelist_animeextra"
+      owner: @name
+      displayName: 'subview'
+      displayType: 'subview'
+      subview:{}
 
-      @chiika.ui.addOrUpdate scrapeData, =>
-        chiika.logger.script("[yellow](#{@name}) added view #{scrapeData.name}")
-        resolve()
-
-  createSearchDataView: ->
-    new Promise (resolve) =>
-      searchData =
-        name: "myanimelist_animeSearch"
-        owner: @name
-        displayName: 'subview'
-        displayType: 'subview'
-        subview:{}
-
-      @chiika.ui.addOrUpdate searchData, =>
-        chiika.logger.script("[yellow](#{@name}) added view #{searchData.name}")
-        resolve()
-
-  createSearchExtendedDataView: ->
-    new Promise (resolve) =>
-      searchExtendedData =
-        name: "myanimelist_animeSearchExtended"
-        owner: @name
-        displayName: 'subview'
-        displayType: 'subview'
-        subview:{}
-
-      @chiika.ui.addOrUpdate searchExtendedData, =>
-        chiika.logger.script("[yellow](#{@name}) added view #{searchExtendedData.name}")
-        resolve()
-
+    @chiika.viewManager.addView animeExtraView
 
   createViewAnimelist: () ->
-    defer = _when.defer()
-
     defaultView = {
-      name: 'animeList_myanimelist',
+      name: 'myanimelist_animelist',
       displayName: 'Anime List',
       displayType: 'TabGridView',
       owner: @name, #Script name, the updates for this view will always be called at 'owner'
@@ -778,28 +734,14 @@ module.exports = class MyAnimelist
         ]
       }
      }
-    #Check if view config file exists
-    viewConfig = "config/DefaultMALAnimeTabGridView.json" #Path relative to app home
-    exists = @chiika.utility.fileExistsSmart(viewConfig)
-    view = {}
-    if !exists
-      @chiika.utility.writeFileSmart(viewConfig,JSON.stringify(defaultView))
-      view = defaultView
-    else
-      view = JSON.parse(@chiika.utility.readFileSmart(viewConfig))
 
-    @chiika.ui.addOrUpdate view,=>
-      @chiika.logger.verbose "Added or updated new view #{view.name}!"
-      defer.resolve()
 
-    defer.promise
+    @chiika.viewManager.addView defaultView
 
 
   createViewMangalist: () ->
-    defer = _when.defer()
-
     defaultView = {
-      name: 'mangaList_myanimelist',
+      name: 'myanimelist_mangalist',
       displayName: 'Manga List',
       displayType: 'TabGridView',
       owner: @name, #Script name, the updates for this view will always be called at 'owner'
@@ -823,16 +765,4 @@ module.exports = class MyAnimelist
         ]
       }
      }
-    viewConfig = "config/DefaultMALMangaTabGridView.json" #Path relative to app home
-    exists = @chiika.utility.fileExistsSmart(viewConfig)
-    view = {}
-    if !exists
-      @chiika.utility.writeFileSmart(viewConfig,JSON.stringify(defaultView))
-      view = defaultView
-    else
-      view = JSON.parse(@chiika.utility.readFileSmart(viewConfig))
-
-    @chiika.ui.addOrUpdate view,=>
-      @chiika.logger.verbose "Added or updated new view #{view.name}!"
-      defer.resolve()
-    defer.promise
+    @chiika.viewManager.addView defaultView

@@ -28,125 +28,6 @@ module.exports = class UIManager
 
 
   #
-  # The purpose of this method is to load UI views and their respective databases
-  # Why 'preload' is, I wanted to delay script compilation before UI is loaded
-  # So scripts can access UI elements without subscribing to a event.
-  # I think it worts the trade off between loading time, which doesn't affect much
-  # @return
-  preloadUIItems: () ->
-    chiika.logger.verbose("[magenta](UI-Manager) Preloading UI items..")
-    defer = _when.defer()
-
-    if chiika.dbManager.uiDb.getUIItems().length == 0
-      chiika.logger.warn("[magenta](UI-Manager) There are no UI items...Calling reconstruct event")
-      scripts = chiika.apiManager.getScripts()
-
-      async = []
-      for script in scripts
-        if script.isActive
-          defer = _when.defer()
-          async.push defer.promise
-          chiika.chiikaApi.emit 'reconstruct-ui',{ defer: defer, calling: script.name }
-      return _when.all(async)
-    else
-      _.forEach(chiika.dbManager.uiDb.getUIItems(), (v,k) => @preloadPromises.push @addOrUpdate(v,null,false) )
-      return _when.all(@preloadPromises)
-
-
-
-  #
-  # Will check if there are empty 'dataSource's. If one is found, we will mark it needUpdate
-  # then update method will call the script and there the script can fill data
-  # If the data source meant to be empty, just ignore the callback on the script end
-  # @return
-  checkUIData: ->
-    requiresUpdate = []
-    _.forEach @uiItems, (v,k) =>
-      dataSource = v.dataSource
-
-      if dataSource? && _.isEmpty dataSource
-        v.needUpdate = true
-        requiresUpdate.push v
-
-    # Sort if necessary
-    # Naah
-    chiika.logger.info("#{requiresUpdate.length} item is waiting to update!")
-
-    async = []
-    requiresUpdate.map (item,i) =>
-      async.push item.update()
-
-
-    _when.all(async)
-
-
-
-  #
-  # Adds a tab view, creates its associated DB interface and tries to load its data from DB
-  #
-  addTabView: (item) ->
-    tabView = (new TabView({ name: item.name,
-    displayName: item.displayName,
-    TabGridView: item.TabGridView,
-    owner: item.owner,
-    category: item.category,
-    displayType: item.displayType
-     }))
-    dbView = chiika.dbManager.createViewDb(item.name)
-    tabView.setDatabaseInterface(dbView)
-    tabView.loadTabData()
-    tabView
-
-  addSubView: (item) ->
-    subview = new SubView({ name: item.name, displayName: item.displayName, displayType: item.displayType, owner: item.owner, category: 'not_display'})
-    dbView = chiika.dbManager.createViewDb(item.name)
-    subview.setDatabaseInterface(dbView)
-    subview.load()
-    subview
-
-
-  #
-  # Adds a UI item respective to their type, then creates a DB view for its data source
-  #
-  # @return {Object} promise Returns a promise
-  addOrUpdate: (item,callback,insert) ->
-    if !insert?
-      insert = true
-
-    #Check if view exists
-    defer = _when.defer()
-    findView = _.find @uiItems, (o) -> o.name == item.name
-    index = _.indexOf @uiItems,findView
-
-
-    if item.displayType == 'subview'
-      if findView?
-        _.assign findView,item
-        @uiItems.splice(index,1,findView)
-      else
-        view = @addSubView(item)
-        @uiItems.push view
-
-    if item.displayType == 'TabGridView'
-      if findView?
-        _.assign findView,item
-        @uiItems.splice(index,1,findView)
-      else
-        tabView = @addTabView(item)
-        @uiItems.push tabView
-        @preloadPromises.push tabView.db.promise
-
-    if insert
-      chiika.dbManager.uiDb.addOrUpdate item, (error) =>
-        if error
-          chiika.logger.error error
-        defer.resolve()
-        callback?(error)
-    else
-      defer.resolve()
-    defer.promise
-
-  #
   # Returns a UI item
   # @param {String} itemName Name of the UI item
   # @return {Object} UI Item
@@ -159,15 +40,23 @@ module.exports = class UIManager
       chiika.logger.error("getUIItem UI item not found #{itemName}")
       return null
 
+  addUIItem: (item) ->
+    instance = _.find @uiItems, { name: item.name }
+    index    = _.indexOf @uiItems, instance
+
+    if index == -1
+      @uiItems.push item
+    else
+      @uiItems.splice(index,1,instance)
+
   #
   # Returns the total number of UI items stored on DB
   # @returm {Integer}
   getUIItemsCount: ->
-    chiika.dbManager.uiDb.uiData.length
+    @uiItems.length
 
   getUIItems: ->
     @uiItems
-
 
 
   removeUIItem: (item) ->

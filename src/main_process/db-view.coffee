@@ -21,6 +21,8 @@ _when         = require('when')
 {InvalidParameterException} = require './exceptions'
 
 module.exports = class DbView extends IDb
+  viewData: []
+
   constructor: (params={}) ->
     @name = 'View_' + params.viewName
     defer = _when.defer()
@@ -29,8 +31,8 @@ module.exports = class DbView extends IDb
     super { dbName: @name,params}
 
     onAll = (data) =>
-      @views = data
-      chiika.logger.debug("[yellow](Database) #{@name} loaded. Data Count #{@views.length} ")
+      @viewData = data
+      chiika.logger.debug("[yellow](Database) #{@name} loaded. Data Count #{@viewData.length} ")
       chiika.logger.info("[yellow](Database) #{@name} has been succesfully loaded.")
 
       defer.resolve()
@@ -44,6 +46,23 @@ module.exports = class DbView extends IDb
     else
       @on 'load', =>
         loadDatabase()
+
+
+  load: ->
+    new Promise (resolve) =>
+      onAll = (data) =>
+        @viewData = data
+        resolve(data)
+
+      loadDatabase = =>
+        @all(onAll)
+
+
+      if @isReady()
+        loadDatabase()
+      else
+        @on 'load', =>
+          loadDatabase()
 
   #
   # Adds user into the database.

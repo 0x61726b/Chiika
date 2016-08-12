@@ -34,7 +34,6 @@ module.exports = React.createClass
         type: 'normal'
         userScore: 0
   componentWillMount: ->
-    console.log "Will mount"
     id = @props.params.id
 
     owner = 'myanimelist'
@@ -85,7 +84,20 @@ module.exports = React.createClass
         {
           if @state.layout.list
             <div>
-              <button type="button" className="button raised lightblue">Watching</button>
+              <button type="button" className="button raised lightblue">
+                {
+                  if @state.layout.status.user == "1"
+                    "Watching"
+                  else if @state.layout.status.user == "2"
+                    "Completed"
+                  else if @state.layout.status.user == "3"
+                    "On Hold"
+                  else if @state.layout.status.user == "4"
+                    "Dropped"
+                  else if @state.layout.status.user == "6"
+                    "Plan to Watch"
+                }
+              </button>
               <div className="progressInteractions">
                 <div className="title">
                   Episode
@@ -95,8 +107,8 @@ module.exports = React.createClass
                     -
                   </button>
                   <div className="number">
-                    <input type="text"name="name" value=""/>
-                    <span>/ 36</span>
+                    <input type="text"name="name" placeholder="#{@state.layout.status.watched}"/>
+                    <span>/ { @state.layout.status.total }</span>
                   </div>
                   <button className="plus">
                     +

@@ -31,77 +31,22 @@ module.exports = class APIManager
   scriptInstances: []
   scriptsDirs: []
   emitter: null
+  activeScripts: []
+  compiledScripts: []
 
-
-  constructor: ->
+  constructor: (params={}) ->
     global.api = this
     @emitter = new Emitter
 
-    @scriptsDir = path.join(chiika.getAppHome(),"scripts")
     @scriptsCacheDir = path.join(chiika.getAppHome(),"cache","scripts")
 
-    #@scriptsDirs.push @scriptsDir
-    @scriptsDirs.push path.join(process.cwd(),"scripts")
-
-    @watchScripts()
-
-
-  #
-  # Script compile event
-  # @param {String} script The path of compiled script
-  # @return
-  onScriptCompiled: (script) ->
-    rScript = require(script)
-    instance = new rScript(chiika.chiikaApi)
-
-    subs = _.where(chiika.chiikaApi.subscriptions,{ receiver: instance.name })
-
-    for sub in subs
-      sub.sub.dispose()
-      _.remove(chiika.chiikaApi.subscriptions, sub)
-
-    instance.run(chiika.chiikaApi)
-
-
-    scriptName = instance.name
-    scriptDesc = instance.displayDescription
-    logo       = instance.logo
-    loginType  = instance.loginType
-    isService  = instance.isService
-    isActive = instance.isActive
-
-    if isService == null or _.isUndefined isService
-      isService = true
-    if !isActive?
-      isActive = true
-
-    localInstance = {
-      name: scriptName,
-      description: scriptDesc,
-      logo: logo,
-      instance: instance,
-      loginType: loginType,
-      isService: isService,
-      isActive: isActive
-    }
-
-
-    if !_.isUndefined @getScriptByName(scriptName)
-      #Script with the same name was compiled before, update it
-      match = _.find(@scriptInstances,localInstance)
-
-      index = _.indexOf @scriptInstances, _.find(@scriptInstances,localInstance)
-      @scriptInstances.splice(index,1,localInstance)
-
-      chiika.logger.info("[magenta](Api-Manager) Updating script instance #{rScript.name}")
+    if !chiika.runningTests
+      @scriptsDirs.push path.join(process.cwd(),"scripts")
     else
-      chiika.logger.info("[magenta](Api-Manager) Adding new script instance #{rScript.name}")
-      @scriptInstances.push localInstance
-
-    @initializeScript(scriptName)
+      @scriptsDirs.push params.dir
 
   getScriptByName: (name) ->
-    instance = _.find @scriptInstances, { name: name }
+    instance = _.find @activeScripts, { name: name }
     if !_.isUndefined instance
       return instance
     else
@@ -109,53 +54,118 @@ module.exports = class APIManager
       return undefined
 
   getScripts: ->
-    @scriptInstances
+    @activeScripts
 
   initializeScript: (name) ->
     chiika.chiikaApi.emit 'initialize', { calling: name }
 
   postInit: () ->
-    chiika.chiikaApi.emit 'post-initialize', {}
+    console.log "Post Init"
+    _.forEach @activeScripts, (script) =>
+      console.log "#{script.name}"
+      @initializeScript(script.name)
 
-  #
-  # Compile user scripts
-  # @return
-  compileUserScripts: ->
-    chiika.logger.info "[magenta](Api-Manager) Compiling user scripts..."
-    #Look for coffee files
-    @promises = []
-    sanityCheck = _when.defer()
-    sanityPromise = sanityCheck.promise
-    @promises.push sanityPromise
+  postCompile: () ->
+    _.forEach @activeScripts, (v,k) =>
+      instance = v
+      index = _.indexOf @activeScripts,_.find @activeScripts, (o) -> o.name == v.name
 
-    processedFileCount = 0
-    scriptCount = 2
+      scriptName = instance.name
+      scriptDesc = instance.displayDescription ? ""
+      logo       = instance.logo ? ""
+      loginType  = instance.loginType ? "default"
+      isService  = instance.isService ? false
+      isActive   = instance.isActive ? false
 
-    for scriptDir in @scriptsDirs
-      fs.readdir scriptDir,(err,files) =>
-        #scriptCount = files.length
-        _.forEach files, (v,k) =>
-          stripExtension = string(v).chompRight('.coffee').s
+      localInstance =
+        name: scriptName
+        description: scriptDesc
+        logo: logo
+        instance: instance
+        loginType: loginType
+        isService: isService
+        isActive: isActive
+        instance: instance
 
-          if stripExtension[0] == "_"
-            chiika.logger.info "[magenta](Api-Manager) Skipping disabled script " + stripExtension.substring(1,stripExtension.length)
-            return
-          chiika.logger.info "[magenta](Api-Manager) Compiling " + v
+      @activeScripts.splice(index,1,localInstance)
 
-          defer = _when.defer()
-          @promises.push defer.promise
+    if !chiika.runningTests
+      @runScripts()
+
+    if chiika.chiikaApi
+      _.forEach @activeScripts, (script) =>
+        @initializeScript(script.name)
+
+  runScript: (run) ->
+    run()
+
+  runScripts: () ->
+    _.forEach @activeScripts, (v,k) =>
+      instance = v
+      instance.instance.run()
+
+  clearScripts: ->
+    @activeScripts = []
+    @compiledScripts = []
 
 
-          fs.readFile path.join(scriptDir,v),'utf-8', (err,data) =>
-            jsCode = data
 
-            @compileScript jsCode,v,true, =>
-              defer.resolve()
-              processedFileCount++
+  # Compile everything
+  # then filter out
+  preCompile: ->
+    new Promise (resolve) =>
+      chiika.logger.info "[magenta](Api-Manager) Pre-Compiling user scripts..."
 
-              if processedFileCount == scriptCount
-                sanityCheck.resolve()
-    _when.all(@promises)
+      @activeScripts = []
+      processedFiles = 0
+
+      for scriptDir in @scriptsDirs
+        fs.readdir scriptDir,(err,files) =>
+          fileCount = files.length
+
+          _.forEach files, (v,k) =>
+            disabled = false
+
+            stripExtension = string(v).chompRight('.coffee').s
+
+            if stripExtension[0] == "_"
+              disabled = true
+
+            fs.readFile path.join(scriptDir,v),'utf-8', (err,data) =>
+              jsCode = data
+
+              if err
+                defer.resolve()
+                throw err
+
+              @compileScript jsCode,v,true, (err,script) =>
+                processedFiles = processedFiles + 1
+                if err
+                  resolve()
+                  throw err
+
+                rScript = require(script)
+                try
+                  instance = new rScript(chiika.chiikaApi)
+                catch error
+                  chiika.logger.error("There is a problem with script #{script}")
+
+                  if processedFiles == fileCount
+                    resolve()
+                  return false
+
+                isService  = instance.isService
+                isActive = instance.isActive
+
+                if isActive && !disabled
+                  @activeScripts.push instance
+
+                if !disabled
+                  @compiledScripts.push instance
+
+                if processedFiles == fileCount
+                  resolve()
+
 
 
   #
@@ -168,42 +178,28 @@ module.exports = class APIManager
       chiika.logger.info "[magenta](Api-Manager) Compiled " + file
     catch e
       chiika.logger.error("[magenta](Api-Manager) Error compiling user-script " + file)
-
+      callback(e)
       throw e
 
     cachedScriptPath = path.join(@scriptsCacheDir,stripExtension + moment().valueOf() + '.chiikaJS')
     if cache
       fs.writeFile cachedScriptPath,compiledString, (err) =>
         if err
-          chiika.error "[magenta](Api-Manager) Error occured while writing compiled script to the file."
+          chiika.logger.error "[magenta](Api-Manager) Error occured while writing compiled script to the file."
+          chiika.logger.error "#{cachedScriptPath}"
+          callback(err,cachedScriptPath)
           throw err
         chiika.logger.verbose("[magenta](Api-Manager) Cached " + file + " " + moment().format('DD/MM/YYYY HH:mm'))
 
-        @onScriptCompiled cachedScriptPath
-        callback()
+        callback(null,cachedScriptPath)
 
-
-
-  #
-  # Watch the changes of the scripts and recompile
-  #
-  watchScripts: ->
-    fs.readdir @scriptsDir,(err,files) =>
-      _.forEach files, (v,k) =>
-        fs.watchFile path.join(@scriptsDir,v), (eventType,filename) =>
-          chiika.logger.info "[magenta](Api-Manager) Recompiling..."
-
-          #Move this to utility
-          stripExtension = string(v).chompRight('.coffee').s
-
-          fs.readFile path.join(@scriptsDir,v),'utf-8', (err,data) =>
-            jsCode = data
-            @compileScript(jsCode,v,true, -> )
 
   clearCache: ->
-    rimraf = require 'rimraf'
-    rimraf @scriptsCacheDir,{ }, ->
-      chiika.logger.info("[magenta](Api-Manager) Cleared scripts cache.")
+    new Promise (resolve) =>
+      rimraf = require 'rimraf'
+      rimraf @scriptsCacheDir,{ }, ->
+        chiika.logger.info("[magenta](Api-Manager) Cleared scripts cache.")
+        resolve()
 
 
 

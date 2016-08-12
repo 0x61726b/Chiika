@@ -67,12 +67,6 @@ SideMenu = React.createClass
       _.forEach menuItems, (v,k) =>
         #Add category
 
-        if v.displayType == 'TabGridView' && v.children.length == 0
-          return
-
-        if v.displayType != 'TabGridView'
-          return
-
         if _.indexOf(@pendingCategories, _.find(@pendingCategories, (o) -> return o == v.category )) == -1
           @pendingCategories.push v.category
 
@@ -91,7 +85,7 @@ SideMenu = React.createClass
     if "/" + path == currentPath
       'active'
   renderMenuItem: (item,i) ->
-    <Link className="side-menu-link #{@isMenuItemActive(item.name)}" to="#{item.name}" key={i}><li className="side-menu-li" key={i}>{item.displayName}</li></Link>
+    <Link className="side-menu-link #{@isMenuItemActive(item.name)}" to="#{item.name}" key={i}><li className="side-menu-li" key={i}>{item.display}</li></Link>
 
   renderMenuItems: (category) ->
     menuItemsOfThisCategory = _.filter(@state.uiItems, (o) ->

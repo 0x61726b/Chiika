@@ -45,6 +45,10 @@ module.exports = class ChiikaIPC
     @receive 'get-ui-data-response',(event,args) =>
       callback(args)
 
+  getViewData: (callback) ->
+    @receive 'get-view-data-response', (event,args) =>
+      callback(args)
+
   getUIData: ->
     @preloadPromises.push @sendReceiveIPC 'get-ui-data',{}, (event,defer,args) =>
       defer.resolve()
@@ -64,8 +68,8 @@ module.exports = class ChiikaIPC
     disposable = @receive 'details-layout-request-response', (event,args) =>
       callback(args)
 
-  refreshViewByName: (name) ->
-    @sendReceiveIPC 'refresh-view-by-name',name, (event,args,defer) =>
+  refreshViewByName: (view,service) ->
+    @sendReceiveIPC 'refresh-view-by-name',{ viewName: view, service: service }, (event,args,defer) =>
       console.log "refresh-view-by-name hello"
 
 

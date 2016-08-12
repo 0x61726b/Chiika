@@ -18,51 +18,68 @@ React                                   = require('react')
 
 _                                       = require 'lodash'
 {ReactTabs,Tab,Tabs,TabList,TabPanel}   = require 'react-tabs'
+LoadingScreen = require './loading-screen'
 #Views
 
 module.exports = React.createClass
   getInitialState: ->
     tabList: []
-    tabDataSourceLenghts: []
-    gridColumnList: []
-    gridColumnData: []
+    tabLenghts:[]
+    viewName: ""
     currentTabIndex: 0
-    scrollData: []
-    view: {name: ''}
+    lastTabIndex: 0
 
   currentGrid: null
   scrollPending: false
   componentWillReceiveProps: (props) ->
-    tabCache = chiika.viewManager.getTabSelectedIndexByName(props.route.view.name)
-    if @state.view.name != props.route.view.name
+    tabCache = chiika.viewManager.getTabSelectedIndexByName(props.route.viewName)
+    if @state.viewName != props.route.viewName
       @state.currentTabIndex = tabCache.index
 
     dataSourceLengths = []
 
-    _.forEach props.route.view.TabGridView.tabList, (v,k) ->
-      name =  v.name
-
-      findInDataSource = _.find(props.route.view.children, (o) -> o.name == name + "_grid")
-      dataSourceLengths.push findInDataSource.dataSource.length
-
     # console.log "Hello -------- "
     # console.log props.route.view.children[0].dataSource[3]
+    uiItem = _.find chiika.uiData, (o) => o.name == props.route.viewName
 
-    @setState {
-      tabList: props.route.view.TabGridView.tabList,
-      gridColumnData: props.route.view.children,
-      view: props.route.view,
-      tabDataSourceLenghts: dataSourceLengths }
+    _.forEach uiItem.tabList, (v,k) ->
+      viewData = _.find(chiika.viewData, (o) => o.name == props.route.viewName)
+      gridData = _.find(viewData.dataSource, (o) => o.name == v.name)
+
+      dataSourceLengths.push gridData.data.length
+
+
+    @setState { viewName: props.route.viewName, tabList: uiItem.tabList, columns: uiItem.columns, tabLenghts: dataSourceLengths }
+
+
+
+
   componentDidUpdate: ->
-    @updateGrid(@state.tabList[@state.currentTabIndex].name + "_grid")
 
-    scroll = chiika.viewManager.getTabScrollAmount(@state.view.name,@state.currentTabIndex)
+    #Get UI item
+    @updateGrid(@state.tabList[@state.currentTabIndex].name)
+    #
+    scroll = chiika.viewManager.getTabScrollAmount(@state.viewName,@state.currentTabIndex)
     $(".objbox").scrollTop(scroll)
 
-
+  componentDidMount: ->
+    # console.log @state.viewName
+    # console.log @props.route.viewName
+    # if @props.route.viewName != @state.viewName
+    #   console.log "Hello"
+    #   uiItem = _.find chiika.uiData, (o) => o.name == @props.route.viewName
+    #
+    #   dataSourceLengths = []
+    #
+    #   _.forEach uiItem.tabList, (v,k) =>
+    #     viewData = _.find(chiika.viewData, (o) => o.name == @props.route.viewName)
+    #     gridData = _.find(viewData.dataSource, (o) => o.name == v.name)
+    #
+    #     dataSourceLengths.push gridData.data.length
+    #   @setState { viewName: @props.route.viewName, tabList: uiItem.tabList, columns: uiItem.columns,tabLenghts: dataSourceLengths }
   onSelect: (index,last) ->
     @setState { currentTabIndex: index, lastTabIndex: last }
-    chiika.viewManager.onTabSelect(@state.view.name,index,last)
+    chiika.viewManager.onTabSelect(@state.viewName,index,last)
 
 
   updateGrid: (name) ->
@@ -71,7 +88,7 @@ module.exports = React.createClass
       @currentGrid = null
     @currentGrid = new dhtmlXGridObject(name)
 
-    columnList = @state.view.TabGridView.gridColumnList
+    columnList = @state.columns
 
     columnIdsForDhtml = ""
     columnTextForDhtml = ""
@@ -81,7 +98,6 @@ module.exports = React.createClass
     headerAligns = []
 
     if $(".objbox").scrollHeight > $(".objbox").height()
-      console.log "There is scrollbar"
       totalArea = $(".objbox").width() - 20
     else
       totalArea = $(".objbox").width()
@@ -127,9 +143,10 @@ module.exports = React.createClass
 
     @currentGrid.enableMultiselect(true)
 
-    gridData = _.find(@state.gridColumnData, (o) -> o.name == name)
+    viewData = _.find(chiika.viewData, (o) => o.name == @state.viewName)
+    gridData = _.find(viewData.dataSource, (o) => o.name == name)
 
-    gridConf = { data: gridData.dataSource }
+    gridConf = { data: gridData.data }
 
     @currentGrid.init()
     @currentGrid.parse gridConf,"js"
@@ -158,14 +175,14 @@ module.exports = React.createClass
           totalArea = $(".objbox").width()
         fixedColumnsTotal = 0
 
-        _.forEach @state.view.TabGridView.gridColumnList, (v,k) =>
+        _.forEach @state.columns, (v,k) =>
           if v.width? && !v.hidden
             fixedColumnsTotal += parseInt(v.width)
 
         diff = totalArea - fixedColumnsTotal
 
-        for i in [0...@state.view.TabGridView.gridColumnList.length]
-          v = @state.view.TabGridView.gridColumnList[i]
+        for i in [0...@state.columns.length]
+          v = @state.columns[i]
           if !v.hidden
             width = 0
             if v.widthP?
@@ -177,9 +194,9 @@ module.exports = React.createClass
     $(window).trigger('resize')
 
   componentWillUnmount: ->
-    #chiika.viewManager.onTabSelect(@props.route.view.name,@state.currentTabIndex)
-    chiika.viewManager.onTabViewUnmount(@state.view.name,@state.currentTabIndex)
-    scroll = chiika.viewManager.getTabScrollAmount(@state.view.name,@state.currentTabIndex)
+    chiika.viewManager.onTabSelect(@state.viewName,@state.currentTabIndex)
+    chiika.viewManager.onTabViewUnmount(@state.viewName,@state.currentTabIndex)
+    scroll = chiika.viewManager.getTabScrollAmount(@state.viewName,@state.currentTabIndex)
 
     if @currentGrid?
       $(".form-control").off 'input'
@@ -189,13 +206,13 @@ module.exports = React.createClass
     <Tabs selectedIndex={@state.currentTabIndex} onSelect={@onSelect}>
         <TabList>
           {@state.tabList.map((tab, i) =>
-                <Tab key={i}>{tab.display} <span className="label raised theme-accent">{@state.tabDataSourceLenghts[i]}</span></Tab>
+                <Tab key={i}>{tab.display} <span className="label raised theme-accent">{ @state.tabLenghts[i]}</span></Tab>
                 )}
         </TabList>
         {
           @state.tabList.map (tab,i) =>
             <TabPanel key={i}>
-              <div id="#{tab.name}_grid" className="listCommon"></div>
+              <div id="#{tab.name}" className="listCommon"></div>
             </TabPanel>
         }
       </Tabs>
