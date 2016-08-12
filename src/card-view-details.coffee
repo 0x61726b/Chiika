@@ -47,6 +47,10 @@ module.exports = React.createClass
     chiika.ipc.disposeListeners('details-layout-request-response')
   componentDidMount: ->
     console.log "Mount"
+
+    $('.fab-main').click ->
+      $('.fab-container').toggleClass 'active'
+
   componentDidUpdate: ->
     scoring = @state.layout.scoring
 
@@ -80,11 +84,16 @@ module.exports = React.createClass
         slidesToShow: 2,
         arrows: false
       })
-  openProgress: (e) ->
-    $(".statusInteractions").css("animation","openStatus .8s")
+
+
+
   render: ->
     <div className="detailsPage">
       <div className="detailsPage-left">
+        <div className="detailsPage-back">
+          <i className="mdi mdi-arrow-left"></i>
+          Back
+        </div>
       {
         if @state.layout.cover?
           <img src="#{@state.layout.cover}" onClick={yuiModal} width="150" height="225" alt="" />
@@ -218,7 +227,18 @@ module.exports = React.createClass
           </div>
         </div>
       </div>
-      <div className="fab">
-        >
+      <div className="fab-container">
+        <div className="fab fab-main">
+          <i className="mdi mdi-menu"></i>
+        </div>
+        <div className="fab fab-little">
+          <i className="mdi mdi-folder"></i>
+        </div>
+        <div className="fab fab-little">
+          <i className="mdi mdi-rss"></i>
+        </div>
+        <div className="fab fab-little">
+          <i className="mdi mdi-play"></i>
+        </div>
       </div>
     </div>
