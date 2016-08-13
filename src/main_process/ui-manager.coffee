@@ -16,9 +16,6 @@
 
 _               = require 'lodash'
 _when           = require 'when'
-UIItem          = require './ui-item'
-TabView         = require './ui-tabView'
-SubView         = require './view-subview'
 
 
 

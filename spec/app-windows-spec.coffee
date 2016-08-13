@@ -19,7 +19,7 @@ path                      = require 'path'
 _                         = require 'lodash'
 
 
-describe.skip 'Application Window Control', ->
+describe 'Application Window Control', ->
   setup = new GlobalSetup()
   setup.setupTimeout(this)
 

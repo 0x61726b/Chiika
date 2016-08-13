@@ -57,7 +57,7 @@ describe 'General app tests', ->
   #
   # Two windows are loading, and login.
   #
-  describe.skip 'Dev Mode is false',->
+  describe 'Dev Mode is false',->
     before () =>
       setup.removeAppData().then =>
         setup.startApplication({
@@ -71,14 +71,14 @@ describe 'General app tests', ->
     after =>
       setup.stopApplication(app)
 
-    xit 'Dev tools should not open', () =>
+    it 'Dev tools should not open', () =>
       app.client.getWindowCount().should.eventually.equal(1)
       .browserWindow.isDevToolsOpened().should.eventually.be.false
 
   #
   # Two windows are loading, and login.
   #
-  describe.skip 'Dev mode is true',->
+  describe 'Dev mode is true',->
     before () =>
       setup.removeAppData().then =>
         setup.startApplication({
@@ -95,6 +95,6 @@ describe 'General app tests', ->
     #
     # 2 + 2
     #
-    xit 'Dev tools should open', () =>
+    it 'Dev tools should open', () =>
       app.client.getWindowCount().should.eventually.equal(2).pause(500)
       .browserWindow.isDevToolsOpened().should.eventually.be.true

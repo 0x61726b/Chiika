@@ -25,7 +25,7 @@ sleep 3
 npm run preparetesting
 ls ./.serve
 ls ./node_modules/.bin
-./node_modules/.bin/electron .
+#./node_modules/.bin/electron .
 npm test
 ls /home/travis/.config/chiika
 sleep 5

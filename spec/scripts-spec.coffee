@@ -28,7 +28,7 @@ expect                    = chai.expect
 
 
 
-describe.skip 'Script Compiler and API Manager', ->
+describe 'Script Compiler and API Manager', ->
   setup = new GlobalSetup()
   utility = new Utility()
 
