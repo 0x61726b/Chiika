@@ -38,10 +38,17 @@ If you'd like to help us develop Chiika, send me an email.
 
 #Some Screenshots
 
-![](http://i.imgur.com/MATNWll.jpg)
-![Screenshot - Anime List](http://i.imgur.com/lK4llMI.png)
-![Details](http://i.imgur.com/r6KHf7T.png)
+![](http://i.imgur.com/nUGQzRb.png)
 ![Scrobbler](http://i.imgur.com/gsAtn1L.png)
+
+#Testing
+
+Chiika uses [Spectron](https://github.com/electron/spectron) and [Mocha](https://mochajs.org) to run tests on Continous Integration environment.
+To run tests just type ```npm test```.
+
+
+![](http://i.imgur.com/2ZB21Dp.png)
+![](http://i.imgur.com/jVTHOYO.png)
 
 #License
 

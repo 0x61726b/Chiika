@@ -119,6 +119,7 @@ class Application
     app.commandLine.appendSwitch('--disable-2d-canvas-image-chromium');
     app.commandLine.appendSwitch('--disable-accelerated-2d-canvas');
     app.commandLine.appendSwitch('--disable-gpu');
+    app.commandLine.appendSwitch('--enable-experimental-web-platform-features')
 
     @appDelegate.run()
 
