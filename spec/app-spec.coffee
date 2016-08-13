@@ -71,7 +71,7 @@ describe 'General app tests', ->
     after =>
       setup.stopApplication(app)
 
-    it 'Dev tools should not open', () =>
+    xit 'Dev tools should not open', () =>
       app.client.getWindowCount().should.eventually.equal(1)
       .browserWindow.isDevToolsOpened().should.eventually.be.false
 
@@ -95,6 +95,6 @@ describe 'General app tests', ->
     #
     # 2 + 2
     #
-    it 'Dev tools should open', () =>
+    xit 'Dev tools should open', () =>
       app.client.getWindowCount().should.eventually.equal(2).pause(500)
       .browserWindow.isDevToolsOpened().should.eventually.be.true

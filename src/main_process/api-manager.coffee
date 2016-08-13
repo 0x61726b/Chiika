@@ -58,9 +58,7 @@ module.exports = class APIManager
     chiika.chiikaApi.emit 'initialize', { calling: name }
 
   postInit: () ->
-    console.log "Post Init"
     _.forEach @activeScripts, (script) =>
-      console.log "#{script.name}"
       @initializeScript(script.name)
 
   postCompile: () ->
