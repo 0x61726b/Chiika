@@ -49,10 +49,17 @@ describe 'Script Compiler and API Manager', ->
   chiika.logger = new Logger("verbose").logger
 
   describe "Active scripts and disabled scripts", ->
-    apiManager = new APIManager()
-    settings   = new SettingsManager()
+    apiManager = null
+    settings   = null
+    
+    beforeEach =>
+      apiManager = new APIManager()
+      settings   = new SettingsManager()
 
-    apiManager.scriptsDirs = [ path.join(__dirname,'scripts') ]
+      apiManager.scriptsDirs = [ path.join(__dirname,'scripts') ]
+
+      apiManager.clearScripts()
+      setup.removeAppData()
 
     this.timeout(5000)
 
@@ -70,9 +77,6 @@ describe 'Script Compiler and API Manager', ->
           settings = null
           resolve()
 
-    beforeEach =>
-      apiManager.clearScripts()
-      setup.removeAppData()
 
     it 'getScriptByName returns undefined for non-existent scripts', ->
       settings.initialize().then =>

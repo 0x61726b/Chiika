@@ -20,3 +20,6 @@ npm run preparetesting
 ls ./.serve
 ls ./node_modules/.bin
 npm test
+ls /home/travis/.config/chiika
+sleep 5
+cat /home/travis/.config/chiika/chiika.log
