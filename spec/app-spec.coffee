@@ -57,7 +57,7 @@ describe 'General app tests', ->
   #
   # Two windows are loading, and login.
   #
-  describe 'Dev Mode is false',->
+  describe.skip 'Dev Mode is false',->
     before () =>
       setup.removeAppData().then =>
         setup.startApplication({
@@ -78,7 +78,7 @@ describe 'General app tests', ->
   #
   # Two windows are loading, and login.
   #
-  describe 'Dev mode is true',->
+  describe.skip 'Dev mode is true',->
     before () =>
       setup.removeAppData().then =>
         setup.startApplication({

@@ -28,7 +28,7 @@ expect                    = chai.expect
 
 
 
-describe 'Script Compiler and API Manager', ->
+describe.skip 'Script Compiler and API Manager', ->
   setup = new GlobalSetup()
   utility = new Utility()
 
@@ -51,7 +51,7 @@ describe 'Script Compiler and API Manager', ->
   describe "Active scripts and disabled scripts", ->
     apiManager = null
     settings   = null
-    
+
     beforeEach =>
       apiManager = new APIManager()
       settings   = new SettingsManager()
