@@ -13,7 +13,6 @@
 #authors: arkenthera
 #Description:
 #----------------------------------------------------------------------------
-{BrowserWindow,ipcMain,globalShortcut,Tray,Menu} = require 'electron'
 
 
 _                   = require 'lodash'
@@ -140,7 +139,7 @@ module.exports = class Utility
         throw err
 
   getScreenResolution: ->
-    {width, height} = electron.screen.getPrimaryDisplay().workAreaSize
+    {width, height} = require('electron').screen.getPrimaryDisplay().workAreaSize
     return { width: width, height: height}
 
   calculateWindowSize: ->
