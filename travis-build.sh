@@ -16,6 +16,12 @@ npm --version
 
 npm install
 ./node_modules/.bin/bower install
+npm install
+sleep 3
+npm install
+sleep 3
+npm install
+sleep 3
 npm run preparetesting
 ls ./.serve
 ls ./node_modules/.bin
