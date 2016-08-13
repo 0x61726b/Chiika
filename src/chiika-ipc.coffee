@@ -68,6 +68,13 @@ module.exports = class ChiikaIPC
     disposable = @receive 'details-layout-request-response', (event,args) =>
       callback(args)
 
+  spectron: ->
+    @receive 'spectron-scrollgrid', (event,args) =>
+      scrollAmount = args.params.scrollAmount
+      $(".objbox").scrollTop(scrollAmount)
+      console.log "spectron-scrollgrid"
+      console.log scrollAmount
+
   refreshViewByName: (view,service) ->
     @sendReceiveIPC 'refresh-view-by-name',{ viewName: view, service: service }, (event,args,defer) =>
       console.log "refresh-view-by-name hello"
@@ -77,9 +84,13 @@ module.exports = class ChiikaIPC
     @sendMessage 'window-method',{ method: 'show', window:'login' }
 
 
-
   reconstructUI: () ->
     @sendMessage 'reconstruct-ui'
+
+  detailsAction: (action,layout,params) ->
+    if !params?
+      params = {}
+    @sendMessage 'details-action', { action:action, layout: layout, params: params }
 
   onReconstructUI: ->
     @receive 'reconstruct-ui-response', (event,args) =>

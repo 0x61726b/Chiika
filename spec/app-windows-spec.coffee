@@ -79,6 +79,7 @@ describe 'Application Window Control', ->
           app.client
           .waitUntilWindowLoaded()
           .getWindowCount().should.eventually.equal(1)
-          .browserWindow.getTitle().should.eventually.be.equal('main')
+          .pause(2000)
+          .browserWindow.getTitle().should.eventually.be.equal('Home')
           .then =>
             stopApp(app)

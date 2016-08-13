@@ -34,6 +34,11 @@ module.exports = React.createClass
       scoring:
         type: 'normal'
         userScore: 0
+
+
+  #
+  #
+  #
   componentWillMount: ->
     id = @props.params.id
 
@@ -43,14 +48,24 @@ module.exports = React.createClass
       @setState { layout: args }
       console.log @state.layout
 
+
+  #
+  #
+  #
   componentWillUnmount:->
     chiika.ipc.disposeListeners('details-layout-request-response')
-  componentDidMount: ->
-    console.log "Mount"
 
+  #
+  #
+  #
+  componentDidMount: ->
     $('.fab-main').click ->
       $('.fab-container').toggleClass 'active'
 
+
+  #
+  #
+  #
   componentDidUpdate: ->
     scoring = @state.layout.scoring
 
@@ -77,24 +92,25 @@ module.exports = React.createClass
       }
       chart = new Chart(document.getElementById("score-circle"),options)
 
-      # $('.characters-images').slick({
-      #   centerMode: true,
-      #   centerPadding: '0px',
-      #   slidesToShow: 4
-      # })
 
+  onAction: (action,params) ->
+    chiika.ipc.detailsAction(action,@state.layout,params)
 
+  onCoverClick: ->
+    @onAction('cover-click')
 
+  onCharacterClick: (e) ->
+    @onAction('character-click',{ id: $(e.target).parent().attr("data-character") })
   render: ->
     <div className="detailsPage">
       <div className="detailsPage-left">
-        <div className="detailsPage-back">
+        <div className="detailsPage-back" onClick={this.props.history.goBack}>
           <i className="mdi mdi-arrow-left"></i>
           Back
         </div>
       {
         if @state.layout.cover?
-          <img src="#{@state.layout.cover}" onClick={yuiModal} width="150" height="225" alt="" />
+          <img src="#{@state.layout.cover}" onClick={@onCoverClick} width="150" height="225" alt="" />
         else
           <LoadingMini />
       }
@@ -218,7 +234,7 @@ module.exports = React.createClass
                  {
                   if @state.layout.characters.length > 0
                     @state.layout.characters.map (ch,i) =>
-                      <div key={i}>
+                      <div key={i} data-character={ch.id} onClick={@onCharacterClick}>
                         <img src={ch.image}></img>
                         <p>{ch.name}</p>
                       </div>

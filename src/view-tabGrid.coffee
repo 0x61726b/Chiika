@@ -16,6 +16,7 @@
 
 React                                   = require('react')
 
+
 _                                       = require 'lodash'
 {ReactTabs,Tab,Tabs,TabList,TabPanel}   = require 'react-tabs'
 LoadingScreen = require './loading-screen'
@@ -32,6 +33,10 @@ module.exports = React.createClass
   currentGrid: null
   scrollPending: false
   componentWillReceiveProps: (props) ->
+    document.title = @props.route.viewName  + "##{@state.currentTabIndex}"
+
+    # Attach scroll position to HEAD
+
     tabCache = chiika.viewManager.getTabSelectedIndexByName(props.route.viewName)
     if @state.viewName != props.route.viewName
       @state.currentTabIndex = tabCache.index
@@ -62,24 +67,25 @@ module.exports = React.createClass
     scroll = chiika.viewManager.getTabScrollAmount(@state.viewName,@state.currentTabIndex)
     $(".objbox").scrollTop(scroll)
 
+    if $('scrollPosition').length == 0
+      $('head').append("<scrollPosition value='#{scroll}' />")
+    else
+      $('scrollPosition').attr('value',scroll)
+
   componentDidMount: ->
-    # console.log @state.viewName
-    # console.log @props.route.viewName
-    # if @props.route.viewName != @state.viewName
-    #   console.log "Hello"
-    #   uiItem = _.find chiika.uiData, (o) => o.name == @props.route.viewName
-    #
-    #   dataSourceLengths = []
-    #
-    #   _.forEach uiItem.tabList, (v,k) =>
-    #     viewData = _.find(chiika.viewData, (o) => o.name == @props.route.viewName)
-    #     gridData = _.find(viewData.dataSource, (o) => o.name == v.name)
-    #
-    #     dataSourceLengths.push gridData.data.length
-    #   @setState { viewName: @props.route.viewName, tabList: uiItem.tabList, columns: uiItem.columns,tabLenghts: dataSourceLengths }
+    # Bad solution
+    # Leave it for now
+    # The reason for this,when navigated through goBack() or manually refresh , React wont feed the component with props
+    # So the page appears blank
+    @componentWillReceiveProps(@props)
+
+    document.title = @props.route.viewName  + "##{@state.currentTabIndex}"
+
   onSelect: (index,last) ->
     @setState { currentTabIndex: index, lastTabIndex: last }
     chiika.viewManager.onTabSelect(@state.viewName,index,last)
+
+    document.title = @state.viewName  + "##{index}"
 
 
   updateGrid: (name) ->
@@ -161,11 +167,11 @@ module.exports = React.createClass
     $(".form-control").on 'input', (e) =>
       @currentGrid.filterBy(1,e.target.value)
 
-    @currentGrid.attachEvent 'onRowDblClicked', (rId,cInd) ->
+    @currentGrid.attachEvent 'onRowDblClicked', (rId,cInd) =>
       for i in  [0...gridConf.data.length]
         if i == rId - 1
           find = gridConf.data[i]
-          window.location = "#details/#{find.mal_id}"
+          window.location = "##{@state.viewName}_details/#{find.mal_id}"
 
     $(window).resize( =>
       if @currentGrid?

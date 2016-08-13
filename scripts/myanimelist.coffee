@@ -37,6 +37,7 @@ getSearchExtendedUrl = (type,id) ->
 _       = require process.cwd() + '/node_modules/lodash'
 _when   = require process.cwd() + '/node_modules/when'
 string  = require process.cwd() + '/node_modules/string'
+{shell}   = require('electron')
 
 
 module.exports = class MyAnimelist
@@ -248,6 +249,36 @@ module.exports = class MyAnimelist
           args.return(@getDetailsLayout(id))
 
       args.return(@getDetailsLayout(id))
+
+    @on 'details-action', (args) =>
+      action = args.action
+      layout = args.layout
+      params = args.params
+
+      @chiika.logger.script("Receiving details-action - #{action} for #{@name}")
+
+      onActionError = (error) =>
+        @chiika.logger.script("Could not perform action #{action}")
+        if error?
+          @chiika.logger.script(error)
+
+        args.return({ success: false, error: error })
+
+      switch action
+        when 'cover-click'
+          id = layout.id
+          if id?
+            result = shell.openExternal("http://myanimelist.net/anime/#{id}")
+            args.return({ success:result })
+          else
+            @onActionError("Need ID for cover-click")
+
+        when 'character-click'
+          if !params.id?
+            onActionError("Need ID for character-click")
+          else
+            result = shell.openExternal("http://myanimelist.net/character/#{params.id}")
+            args.return({ success:result })
 
     # This function is called from the login window.
     # For example, if you need a token, retrieve it here then store it by calling chiika.custom.addkey
@@ -515,6 +546,7 @@ module.exports = class MyAnimelist
       genres = genresText
 
     detailsLayout =
+      id: id
       title: title
       genres: genres
       list: list
@@ -528,6 +560,7 @@ module.exports = class MyAnimelist
       english: english
       voted: scoredBy
       characters: characters
+      owner: @name
       actionButtons: [
         { name: 'Torrent', action: 'torrent',color: 'lightblue' },
         { name: 'Library', action: 'library',color: 'purple' }

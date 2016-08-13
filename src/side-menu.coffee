@@ -82,7 +82,10 @@ SideMenu = React.createClass
 
   isMenuItemActive: (path) ->
     currentPath = @props.props.location.pathname
+
     if "/" + path == currentPath
+      'active'
+    else if currentPath.indexOf(path) != -1
       'active'
   renderMenuItem: (item,i) ->
     <Link className="side-menu-link #{@isMenuItemActive(item.name)}" to="#{item.name}" key={i}><li className="side-menu-li" key={i}>{item.display}</li></Link>

@@ -128,6 +128,8 @@ module.exports = class Parser
        aired: aired
        characters: characters }
     animeDetails
+
+    
   parseMyAnimelistExtendedSearch: (body) ->
     genreRegexp = /(Genres:<\/span> )(.*)(<br \/>)/
     scoreExp = /Score:<\/span>\s(.*)\s<small>/

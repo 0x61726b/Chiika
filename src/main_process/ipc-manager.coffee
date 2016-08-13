@@ -64,6 +64,7 @@ module.exports = class IpcManager
     @reconstructUI()
     @windowMethodByName()
     @detailsLayoutRequest()
+    @detailsAction()
 
     @spectron()
 
@@ -132,6 +133,29 @@ module.exports = class IpcManager
 
           if views.length > 0
             event.sender.send 'get-view-data-response',views
+
+  #
+  #
+  #
+  detailsAction: ->
+    @receive 'details-action', (event,args) =>
+      action = args.action
+      layout = args.layout
+      params = args.params
+
+      if !action?
+        chiika.logger.error("Can't perform action without action itself you baka!")
+
+      if !layout?
+        chiika.logger.error("Can't perform action without details layout")
+
+      if !layout.owner?
+        chiika.logger.error("Can't perform action knowing who to call")
+
+      returnFromScript = (args) =>
+        chiika.logger.verbose("Action performed for #{layout.owner} - #{action}")
+
+      chiika.chiikaApi.emit 'details-action', { calling: layout.owner, action: action, layout: layout, params: params, return: returnFromScript }
 
 
 

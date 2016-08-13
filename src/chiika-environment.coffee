@@ -13,20 +13,20 @@
 #authors: arkenthera
 #Description:
 #----------------------------------------------------------------------------
-{Emitter} = require 'event-kit'
-{BrowserWindow, ipcRenderer,remote} = require 'electron'
+{Emitter}                                 = require 'event-kit'
+{BrowserWindow, ipcRenderer,remote,shell} = require 'electron'
 
 
-_                     = require 'lodash'
-fs                    = require 'fs'
-path                  = require 'path'
+_                                         = require 'lodash'
+fs                                        = require 'fs'
+path                                      = require 'path'
 
-_when                 = require 'when'
-Logger                = require './main_process/logger'
+_when                                     = require 'when'
+Logger                                    = require './main_process/logger'
 
-ChiikaIPC             = require './chiika-ipc'
-ViewManager           = require './view-manager'
-CardManager           = require './card-manager'
+ChiikaIPC                                 = require './chiika-ipc'
+ViewManager                               = require './view-manager'
+CardManager                               = require './card-manager'
 
 class ChiikaEnvironment
   emitter: null
@@ -53,16 +53,7 @@ class ChiikaEnvironment
 
 
     @ipc.onReconstructUI()
-
-    # @ipc.getUsers()
-    # @ipc.preload()
-
-    #
-    # @ipc.refreshUIData (args) =>
-    #   @uiData = args
-    #   console.log "Hello"
-
-
+    @ipc.spectron()
 
   preload: ->
     waitForUI = _when.defer()
@@ -102,6 +93,9 @@ class ChiikaEnvironment
 
       @preload().then =>
         setTimeout(main,args.delay)
+
+  openShellUrl: (url) ->
+    shell.openExternal(url)
 
   sendNotification: (title,body,icon) ->
     if !icon?

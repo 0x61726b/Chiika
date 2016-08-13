@@ -63,11 +63,17 @@ ChiikaRouter = React.createClass
   getRoutes: (uiData) ->
     routes = []
     uiData.map (route,i) =>
-      if route.type == "side-menu-item"
+      if route.type == "side-menu-item" && route.displayType == "TabGridView"
         routes.push {
         name: "/#{route.name}"
         path: "/#{route.name}"
         component:require(chiika.viewManager.getComponent(route.displayType))
+        viewName: route.name
+        onEnter: @onEnter}
+        routes.push {
+        name: "/#{route.name}_details"
+        path: "/#{route.name}_details/:id"
+        component:DetailsCardView
         viewName: route.name
         onEnter: @onEnter}
 
@@ -83,34 +89,16 @@ ChiikaRouter = React.createClass
     for route in routes
       routerConfig.childRoutes.push route
     routerConfig
-  # componentDidMount: ->
-  #   @setState { routerConfig: @getRoutes(chiika.uiData) }
-
-
-    # chiika.ipc.refreshUIData (args) =>
-    #   routerConfig = @state.routerConfig
-    #   #routerConfig = @getRoutes(chiika.uiData)
-    #   _.forEach args, (v,k) =>
-    #     findChildRoute = _.find(routerConfig.childRoutes, (o) -> o.name == '/' + v.name)
-    #
-    #     if findChildRoute?
-    #       findChildRoute.view = v
-    #   @setState { routerConfig: routerConfig }
-    #
-    # routerConfig = @state.routerConfig
-    # _.forEach @state.uiData, (v,k) =>
-    #   findChildRoute = _.find(routerConfig.childRoutes, (o) -> o.name == @currentRouteName)
-    #
-    #   if findChildRoute?
-    #     findChildRoute.view = v
-    # @setState { routerConfig: routerConfig }
-
 
   onEnter:(nextState) ->
     path = nextState.routes[1].name
     routerConfig = @state.routerConfig
 
     @currentRouteName = nextState.location.pathname
+
+    # For testing purposes
+    # We will get the current route from title when running tests
+    document.title = @currentRouteName.replace('/','')
 
 
 
