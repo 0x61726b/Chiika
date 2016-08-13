@@ -252,6 +252,7 @@ do Your_Application_will_ = () ->
     development.version = packageJson.version
     development.DEV_MODE = true
     development.RUNNING_TESTS = false
+    development.SCRIPTS_PATHS = [ path.join(__dirname,'scripts')]
 
     if argv.clean
       rimraf = require 'rimraf'

@@ -23,10 +23,10 @@ describe 'Application Window Control', ->
   setup = new GlobalSetup()
   setup.setupTimeout(this)
 
-  # beforeEach (done) =>
-  #   setup.removeAppData().then =>
-  #     done()
-  #   return
+  beforeEach (done) =>
+    setup.removeAppData().then =>
+      done()
+    return
 
   runApp = =>
     new Promise (resolve) =>
@@ -50,6 +50,8 @@ describe 'Application Window Control', ->
         runApp().then (app) =>
           app.client
           .waitUntilWindowLoaded()
+          .getWindowCount().should.eventually.equal(1)
+          .browserWindow.getTitle().should.eventually.be.equal('login')
           .then =>
             stopApp(app)
 

@@ -77,13 +77,11 @@ module.exports = React.createClass
       }
       chart = new Chart(document.getElementById("score-circle"),options)
 
-      $('.characters-images').slick('unslick')
-      $('.characters-images').slick({
-        centerMode: true,
-        centerPadding: '0px',
-        slidesToShow: 2,
-        arrows: false
-      })
+      # $('.characters-images').slick({
+      #   centerMode: true,
+      #   centerPadding: '0px',
+      #   slidesToShow: 4
+      # })
 
 
 
@@ -220,7 +218,10 @@ module.exports = React.createClass
                  {
                   if @state.layout.characters.length > 0
                     @state.layout.characters.map (ch,i) =>
-                      <div key={i}><img src={ch.image} style={{width:175, height: 291}}></img></div>
+                      <div key={i}>
+                        <img src={ch.image}></img>
+                        <p>{ch.name}</p>
+                      </div>
                   }
               </div>
             </div>
@@ -231,13 +232,13 @@ module.exports = React.createClass
         <div className="fab fab-main">
           <i className="mdi mdi-menu"></i>
         </div>
-        <div className="fab fab-little">
+        <div className="fab fab-little" title="Open Folder">
           <i className="mdi mdi-folder"></i>
         </div>
-        <div className="fab fab-little">
+        <div className="fab fab-little" title="Torrent">
           <i className="mdi mdi-rss"></i>
         </div>
-        <div className="fab fab-little">
+        <div className="fab fab-little" title="Play Next Episode">
           <i className="mdi mdi-play"></i>
         </div>
       </div>

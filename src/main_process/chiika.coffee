@@ -77,6 +77,8 @@ class Application
   devMode: false
   runningTests: false
 
+  scriptsPaths: []
+
 
   #
   # Entry point of Chiika

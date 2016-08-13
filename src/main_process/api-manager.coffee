@@ -34,19 +34,14 @@ module.exports = class APIManager
   activeScripts: []
   compiledScripts: []
 
-  constructor: (params={}) ->
+  constructor: () ->
     global.api = this
     @emitter = new Emitter
 
     @scriptsCacheDir = path.join(chiika.getAppHome(),"cache","scripts")
 
-    if !chiika.runningTests
-      @scriptsDirs.push path.join(process.cwd(),"scripts")
-    else
-      if params.dir?
-        @scriptsDirs.push params.dir
-      
-      @scriptsDirs.push path.join(process.cwd(),"scripts")
+
+    @scriptsDirs.push path.join(process.cwd(),"scripts")
 
   getScriptByName: (name) ->
     instance = _.find @activeScripts, { name: name }
@@ -138,7 +133,7 @@ module.exports = class APIManager
               jsCode = data
 
               if err
-                defer.resolve()
+                resolve()
                 throw err
 
               @compileScript jsCode,v,true, (err,script) =>

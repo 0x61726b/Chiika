@@ -19,7 +19,7 @@ path                      = require 'path'
 _                         = require 'lodash'
 
 
-describe 'Login window tests', ->
+describe.skip 'Login window tests', ->
   setup = new GlobalSetup()
   setup.setupTimeout(this)
 

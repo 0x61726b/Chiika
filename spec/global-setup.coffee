@@ -119,6 +119,11 @@ module.exports = class Setup
     else
       options.env.RUNNING_TESTS = true
 
+    if options.SCRIPTS_PATHS?
+      options.env.SCRIPTS_PATHS = options.SCRIPTS_PATHS
+    else
+      options.env.SCRIPTS_PATHS = [ path.join(__dirname,'..','scripts')]
+
     app = new Application(options)
 
     app.start().then =>

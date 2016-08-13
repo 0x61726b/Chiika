@@ -38,18 +38,21 @@ describe 'Script Compiler and API Manager', ->
   #
   # Api Manager depends on global chiika object
   global.chiika = {
-    logger: new Logger("verbose").logger
     utility: utility
     runningTests: true
+    scriptsPaths: [path.join(__dirname,"scripts")]
     getAppHome: ->
       setup.getAppHome()
     getDbHome: ->
       setup.getDbHome()
   }
+  chiika.logger = new Logger("verbose").logger
 
   describe "Active scripts and disabled scripts", ->
-    apiManager = new APIManager({ dir: path.join(__dirname,"scripts") })
+    apiManager = new APIManager()
     settings   = new SettingsManager()
+
+    apiManager.scriptsDirs = [ path.join(__dirname,'scripts') ]
 
     this.timeout(5000)
 
