@@ -7,27 +7,11 @@
   -webkit-user-select: all;
   -webkit-app-region: drag;
 }
-.login-body-outer {
-  flex-direction: column;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  -webkit-user-select: all;
-  -webkit-app-region: drag;
-  height: 100vh;
-  background-image: url("./../assets/images/login-bg.jpg");
-}
+
 #mal-logo {
   margin-bottom: 16px;
 }
-#login-container {
-  background-color: white;
-  display: flex;
-  justify-content: center;
-  flex-direction: column;
-  align-items: center;
-  -webkit-app-region: no-drag;
-}
+
 .log-btn {
   margin-top: 16px;
   display: block;

@@ -1,0 +1,75 @@
+.login-body-outer {
+  height: 100vh;
+  background-image: url("./../assets/images/login-sakura.jpg");
+  background-size: cover;
+}
+#fullpage h1 {
+  color: white;
+  text-shadow: 1px 1px 2px black;
+  text-align: center;
+  font-size: 48px;
+  left: 50%;
+}
+#fullpage .divider {
+  width: 25%;
+  height: 1px;
+  background: white;
+  position: absolute;
+  top: 50%;
+}
+.divider.right {
+  right: 0;
+}
+#fullpage .nextPage {
+  width: 50px;
+  height: 50px;
+  border-right: 1px solid white;
+  border-bottom: 1px solid white;
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%);
+  transform: rotate(45deg);
+  bottom: 5%;
+}
+.serviceProviders {
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.serviceProviders .provider {
+  margin: 8px;
+  display: inline-flex;
+  background-color: rgba(255, 255, 255, 0.5);
+  width: 200px;
+  height: 200px;
+  border-radius: 4px;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+}
+
+#login-container {
+  width: 60%;
+  margin: 0 auto;
+  padding: 16px 8px 32px 8px;
+  border-radius: 4px;
+}
+#login-container form {
+  -webkit-app-region: no-drag;
+  margin: 0 auto;
+}
+#login-container form label {
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);;
+}
+#login-container {
+}
+#login-container .light {
+  border: 1px solid rgba(235, 235, 235, 0.5);
+}
+#login-container input[type=submit]{
+  width: 100%;
+  margin-top: 8px;
+}

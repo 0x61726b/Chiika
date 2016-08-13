@@ -29,7 +29,7 @@ string                              = require 'string'
 #Views
 
 
-window.$ = window.jQuery            = require('../bundleJs.js')
+window.$ = window.jQuery            = require('jquery')
 
 MalLogin = React.createClass
   getInitialState: ->
@@ -39,6 +39,10 @@ MalLogin = React.createClass
     window.chiika = this
 
     @logger = remote.getGlobal('logger')
+
+    fullpage = require('fullpage.js')
+
+    $("#fullpage").fullpage()
 
     @ipcManager = new IPC()
 
@@ -204,24 +208,37 @@ MalLogin = React.createClass
         </form>
       </div>)
   render: () ->
-    if @state.services?
-      serviceCount = @state.services.length
-    else
-      serviceCount = 0
-    if serviceCount == 0
-      <LoadingScreen />
-    else
-      <div className="login-body-outer">
-        <div className="login-body">
-          {
-            for i in [0...serviceCount]
-              if @state.services[i].loginType == 'authPin'
-                @authPinBody i,@state.services[i]
-              else
-                @loginBody(i,@state.services[i])
-          }
+    <div className="login-body-outer">
+      <div id="fullpage">
+        <div className="section">
+          <span className="divider left"></span>
+          <span className="divider right"></span>
+          <h1>Welcome To Chiika</h1>
+          <span className="nextPage"></span>
         </div>
-        <input type="submit" onClick={this.continueToApp} className="button raised indigo log-btn-contiue" id="continue" value="Continue to Chiika"/>
+        <div className="section">
+        <h1>Please Select a Service Provider</h1>
+          <div className="serviceProviders">
+            <div className="provider">
+              <img src="icon.png" width="140" height="140" alt="" />
+              <h2>Myanimelist</h2>
+            </div>
+          </div>
+        </div>
+        <div className="section">
+          <div id="login-container">
+            <form className="" id="loginForm">
+              <img src="icon.png" width="250" height="250" alt="" />
+              <label htmlFor="log-usr">Username</label>
+              <input type="text" className="text-input light" id="userName" required autofocus/>
+              <label htmlFor="log-psw">Password</label>
+              <input type="Password" className="text-input light" id="password" required />
+              <input type="submit" onClick={this.onSubmit} className="button raised indigo log-btn" id="log-btn" value="Verify" />
+            </form>
+          </div>
+        </div>
       </div>
+    </div>
+
 
 ReactDOM.render(React.createElement(MalLogin), document.getElementById('app'))
