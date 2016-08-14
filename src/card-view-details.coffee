@@ -132,6 +132,9 @@ module.exports = React.createClass
   onCharacterClick: (e) ->
     @onAction('character-click',{ id: $(e.target).parent().attr("data-character") })
 
+  openProgress: (e) ->
+    $('.userStatus').toggleClass('open')
+    $('.userStatusButton').toggleClass('open')
 
   onProgressValueChange: (e) ->
     itemTitle = $(e.target).parent().parent().parent().attr("data-item")
@@ -265,11 +268,18 @@ module.exports = React.createClass
         {
           if @state.layout.list
             <div>
-              <button type="button" className="button raised lightblue" onClick={@openProgress}>
+              <button type="button" className="button raised lightblue userStatusButton" onClick={@openProgress}>
                 {
                   @state.layout.status.defaultAction
                 }
               </button>
+              <div className="userStatus">
+                <div className="status">Not Watching</div>
+                <div className="status">Not Watching</div>
+                <div className="status">Not Watching</div>
+                <div className="status">Not Watching</div>
+                <div className="status current">Watching</div>
+              </div>
               {
                 @state.layout.status.items.map (item,i) =>
                   <div className="progressInteractions" key={i} data-item={item.title}>
