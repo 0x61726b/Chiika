@@ -24,11 +24,77 @@ module.exports = class Parser
         if result
           resolve result
 
+  parseMangaDetailsMalPage: (arg) ->
+    #Parse MAL anime page myanimelist.net/anime/<ID>
+    publishedRegex = /(Published:<\/span>\s*)(.*)\s*<\/div>/
+    authorsRegex = /(Authors:<\/span>\s*)(.*?)\/people\/(.+?)\/(.*?)">(.*?)</
+    serializationRegex = /(Serialization:<\/span>\s*.*\stitle=")(.*)\s*">/
+    japaneseTranslationRegex = /(Japanese:<\/span>\s*)(.*?)\s*<\/div>/
+
+    charactersStep1Regex = /(<div class="picSurround"><a href="\/character\/)([^]+?)(?=\/table>)/g
+    charactersStep2Image = /data-src="(.*?)"\s/
+    charactersStep3Image = /\/characters\/(.*)\/(.*).jpg/
+    charactersAndIdsRegex = /\s<a href="\/character\/(.*)">(.*)<\/a>/
+
+
+    publishedMatch = arg.match publishedRegex
+    serializationMatch = arg.match serializationRegex
+    japaneseMatch = arg.match japaneseTranslationRegex
+
+    if publishedMatch?
+      published = publishedMatch[2]
+
+    if serializationMatch?
+      serialization = serializationMatch[2]
+
+    if japaneseMatch?
+      japanese = japaneseMatch[2]
+
+    authorsMatch = authorsRegex.exec arg
+
+    author = {}
+    if authorsMatch?
+      author = { id: authorsMatch[3], name: authorsMatch[5] }
+
+
+    characters = []
+    while chMatch = charactersStep1Regex.exec arg
+      step2Data = chMatch[0]
+
+      chIdLinkMatch = step2Data.match charactersAndIdsRegex
+      chIdLink = chIdLinkMatch[1] #Format : /ID/Char_name_shortened , for use in directing to myanimelist.net/character/ID/Char_name
+      characterName = chIdLinkMatch[2]
+
+      chId = (chIdLink.split('/'))[0]
+
+      chImageMatch = step2Data.match charactersStep2Image
+      chImage = chImageMatch[1]
+
+      # Process image further
+      chLargerImageMatch = chImage.match charactersStep3Image
+      if chLargerImageMatch?
+        chImage = "http://cdn.myanimelist.net/images/characters/#{chLargerImageMatch[1]}/#{chLargerImageMatch[2]}.jpg"
+
+
+      character = { id: chId, name: characterName, image: chImage }
+      characters.push character
+
+    mangaDetails =
+      published: published
+      serialization: serialization
+      japanese: japanese
+      author: author
+      characters: characters
+    mangaDetails
+
+
+
+
   parseAnimeDetailsMalPage: (arg) ->
     #Parse MAL anime page myanimelist.net/anime/<ID>
     studiosRegex = /(Studios:<\/span>\s*).*f="\/anime\/producer\/(.*"\s)title="(.*)">/
     sourceRegex = /(Source:<\/span>\s*)(.*)\s*<\/div>/
-    japaneseTranslationRegex = /(Japanese:<\/span>\s*)(.*)\s*<\/div>/
+    japaneseTranslationRegex = /(Japanese:<\/span>\s*)(.*?)\s*<\/div>/
     broadcastRegex = /(Broadcast:<\/span>\s*)(.*)\s*<\/div>/
     durationRegex = /(Duration:<\/span>\s*)(.*)\s*<\/div>/
     airedRegex = /(Aired:<\/span>\s*)(.*)\s*<\/div>/
@@ -129,13 +195,69 @@ module.exports = class Parser
        characters: characters }
     animeDetails
 
-    
+
   parseMyAnimelistExtendedSearch: (body) ->
     genreRegexp = /(Genres:<\/span> )(.*)(<br \/>)/
     scoreExp = /Score:<\/span>\s(.*)\s<small>/
     rankExp = /Ranked:<\/span>\s#(.*)<br \/>/
     popularityExp = /Popularity:<\/span>\s#(.*)<br \/>/
     synopsisExp = /margin-bottom: 10px;">(.*)<a href=/
+    scoredByExp = /scored\sby\s(.*[0-9])/
+
+    genreMatch = body.match genreRegexp
+    if genreMatch?
+      genre = (body.match genreRegexp)[2]
+    else
+      genre = "Unknown"
+    #application.logDebug "Genre: " + genre
+    scoreMatch = body.match scoreExp
+    if scoreMatch?
+      score = (body.match scoreExp)[1]
+    else
+      score = "-"
+    #application.logDebug "Score: " + score
+    rankMatch = body.match rankExp
+    if rankMatch?
+      rank = rankMatch[1]
+    else
+      rank = "Unknown"
+    #application.logDebug "Rank: " + rank
+    popularityMatch = body.match popularityExp
+    if popularityMatch?
+      popularity = popularityMatch[1]
+    else
+      popularity = "Unknown"
+    #application.logDebug "Popularity: " + popularity
+    synopsisMatch = body.match synopsisExp
+    if synopsisMatch?
+      synopsis = synopsisMatch[1]
+    else
+      synopsis = "-"
+
+    scoredByMatch = body.match scoredByExp
+    if scoredByMatch?
+      scoredBy = scoredByMatch[1]
+    else
+      scoredBy = "0"
+    #application.logDebug "Syn: " + synopsis
+
+    animeDetails =
+      genres: genre.split(',').map((str) => S(str).trimLeft().s)
+      score: score
+      rank: rank
+      popularity: popularity
+      synopsis: synopsis
+      scoredBy: scoredBy
+
+    animeDetails
+
+
+  parseMyAnimelistMangaExtendedSearch: (body) ->
+    genreRegexp = /(Genres:<\/span> )(.*)(<\/div>)/
+    scoreExp = /Score:<\/span>\s(.*)\s<small>/
+    rankExp = /Ranked:<\/span>\s#(.*)<\/div>/
+    popularityExp = /Popularity:<\/span>\s#(.*)<\/div>/
+    synopsisExp = /margin-top: 8px;">(.*)<a href=/
     scoredByExp = /scored\sby\s(.*[0-9])/
 
     genreMatch = body.match genreRegexp

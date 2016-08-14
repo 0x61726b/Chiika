@@ -20,9 +20,9 @@
 #--------------------
 {BrowserWindow, ipcMain,globalShortcut,Tray,Menu,app} = require 'electron'
 
-
 yargs                             = require 'yargs'
 path                              = require 'path'
+
 
 fs                                = require 'fs'
 mkdirp                            = require 'mkdirp'
@@ -49,6 +49,7 @@ ChiikaPublicApi                   = require './chiika-public'
 Utility                           = require './utility'
 AppOptions                        = require './options'
 AppDelegate                       = require './app-delegate'
+
 
 
 process.on 'uncaughtException',(err) ->
@@ -112,7 +113,6 @@ class Application
     @windowManager      = new WindowManager()
     @appDelegate        = new AppDelegate()
     @ipcManager         = new IpcManager()
-
 
     @ipcManager.handleEvents()
 

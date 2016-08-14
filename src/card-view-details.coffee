@@ -42,9 +42,11 @@ module.exports = React.createClass
   componentWillMount: ->
     id = @props.params.id
 
-    owner = 'myanimelist'
+    owner = @props.route.owner
 
-    chiika.ipc.getDetailsLayout id,owner, (args) =>
+    console.log @props
+
+    chiika.ipc.getDetailsLayout id,@props.route.viewName,owner, (args) =>
       @setState { layout: args }
       console.log @state.layout
 
@@ -119,57 +121,29 @@ module.exports = React.createClass
             <div>
               <button type="button" className="button raised lightblue" onClick={@openProgress}>
                 {
-                  if @state.layout.status.user == "1"
-                    "Watching"
-                  else if @state.layout.status.user == "2"
-                    "Completed"
-                  else if @state.layout.status.user == "3"
-                    "On Hold"
-                  else if @state.layout.status.user == "4"
-                    "Dropped"
-                  else if @state.layout.status.user == "6"
-                    "Plan to Watch"
+                  @state.layout.status.defaultAction
                 }
               </button>
-              <div className="statusInteractions">
-                <div className="title">
-                  {
-                    if @state.layout.status.user == "1"
-                      "Watching"
-                    else if @state.layout.status.user == "2"
-                      "Completed"
-                    else if @state.layout.status.user == "3"
-                      "On Hold"
-                    else if @state.layout.status.user == "4"
-                      "Dropped"
-                    else if @state.layout.status.user == "6"
-                      "Plan to Watch"
-                  }
-                </div>
-                <div className="interactions">
-                  <div>On Hold</div>
-                  <div>On Hold</div>
-                  <div>On Hold</div>
-                  <div>On Hold</div>
-                </div>
-              </div>
-              <div className="progressInteractions">
-                <div className="title">
-                  Episode
-                </div>
-                <div className="interactions">
-                  <button className="minus">
-                    -
-                  </button>
-                  <div className="number">
-                    <input type="text"name="name" placeholder="#{@state.layout.status.watched}"/>
-                    <span>/ { @state.layout.status.total }</span>
+              {
+                @state.layout.status.items.map (item,i) =>
+                  <div className="progressInteractions" key={i}>
+                    <div className="title">
+                      { item.title }
+                    </div>
+                    <div className="interactions">
+                      <button className="minus">
+                        -
+                      </button>
+                      <div className="number">
+                        <input type="text"name="name" placeholder="#{item.current}"/>
+                        <span>/ { item.total }</span>
+                      </div>
+                      <button className="plus">
+                        +
+                      </button>
+                    </div>
                   </div>
-                  <button className="plus">
-                    +
-                  </button>
-                </div>
-              </div>
+              }
             </div>
         }
       </div>

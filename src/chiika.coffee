@@ -75,6 +75,7 @@ ChiikaRouter = React.createClass
         path: "/#{route.name}_details/:id"
         component:DetailsCardView
         viewName: route.name
+        owner: route.owner
         onEnter: @onEnter}
 
 

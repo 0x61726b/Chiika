@@ -61,8 +61,8 @@ module.exports = class ChiikaIPC
       console.log args
 
 
-  getDetailsLayout: (id,owner,callback) ->
-    @sendMessage 'details-layout-request', { id: id , owner: owner }
+  getDetailsLayout: (id,viewName,owner,callback) ->
+    @sendMessage 'details-layout-request', { id: id , viewName:viewName, owner: owner }
 
 
     disposable = @receive 'details-layout-request-response', (event,args) =>

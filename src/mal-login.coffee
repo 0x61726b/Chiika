@@ -81,9 +81,10 @@ MalLogin = React.createClass
         @highlightElement("red","userName")
         @highlightElement("red","password")
       else
-        console.log response
         @highlightElement("green","userName")
         @highlightElement("green","password")
+
+        @continueToApp()
     #
     #
     # ipcRenderer.on 'inform-login-response', (event,response) =>
@@ -179,7 +180,7 @@ MalLogin = React.createClass
 
     $("#continue").prop('disabled',true)
 
-  continueToApp: (e) ->
+  continueToApp: () ->
     @ipcManager.sendMessage 'call-window-method','close'
     @ipcManager.sendMessage 'continue-from-login'
 

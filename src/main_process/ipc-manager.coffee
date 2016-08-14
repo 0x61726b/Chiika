@@ -68,12 +68,20 @@ module.exports = class IpcManager
 
     @spectron()
 
+
+  #
+  #
+  #
   windowMethodByName: ->
     @receive 'window-method', (event,args) =>
       console.log args
       win = chiika.windowManager.getWindowByName(args.window)
       win[args.method]()
 
+
+  #
+  #
+  #
   callWindowMethod: ->
     @receive 'call-window-method', (event,method) =>
       console.log method
@@ -81,14 +89,20 @@ module.exports = class IpcManager
       win[method]()
 
 
+  #
+  #
+  #
   detailsLayoutRequest: ->
     @receive 'details-layout-request', (event,args) =>
       returnFromScript = (layout) ->
         event.sender.send 'details-layout-request-response',layout
 
-      params = { calling: args.owner, id: args.id, return: returnFromScript }
+      params = { calling: args.owner, id: args.id,viewName: args.viewName, return: returnFromScript }
       chiika.chiikaApi.emit 'details-layout', params
 
+  #
+  #
+  #
   reconstructUI: ->
     @receive 'reconstruct-ui', (event,args) =>
       #
@@ -103,6 +117,9 @@ module.exports = class IpcManager
         event.sender.send 'reconstruct-ui-response'
 
 
+  #
+  #
+  #
   modalWindowJsEval: ->
     @receive 'modal-window-message', (event,args) =>
       #Args must have the 'windowName' property or the script will never receive the callback

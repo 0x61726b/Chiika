@@ -22,8 +22,9 @@ getLibraryUrl = (type,user) ->
   return "http://myanimelist.net/malappinfo.php?u=#{user}&type=#{type}&status=all"
 
 
-authUrl = 'http://myanimelist.net/api/account/verify_credentials.xml'
-animePageUrl = 'http://myanimelist.net/anime/'
+authUrl                       = 'http://myanimelist.net/api/account/verify_credentials.xml'
+animePageUrl                  = 'http://myanimelist.net/anime/'
+mangaPageUrl                  = 'http://myanimelist.net/manga/'
 
 getSearchUrl = (type,keywords) ->
   "http://myanimelist.net/api/#{type}/search.xml?q=#{keywords}"
@@ -143,9 +144,13 @@ module.exports = class MyAnimelist
      onSearchComplete = (error,response,body) =>
        @chiika.parser.parseXml(body)
                      .then (result) =>
-                       callback(result.anime.entry)
+                       if type == 'anime'
+                         callback(result.anime.entry)
+                       else if type == 'manga'
+                         callback(result.manga.entry)
 
      @chiika.makeGetRequestAuth getSearchUrl(type,keywords.split(" ").join("+")),{ userName: @malUser.realUserName, password: @malUser.password },null, onSearchComplete
+
 
 
   #
@@ -153,7 +158,10 @@ module.exports = class MyAnimelist
   #
   searchExtended: (type,id,callback) ->
     onSearchComplete = (error,response,body) =>
-      callback(@chiika.parser.parseMyAnimelistExtendedSearch(body))
+      if type == 'anime'
+        callback(@chiika.parser.parseMyAnimelistExtendedSearch(body))
+      else if type == 'manga'
+        callback(@chiika.parser.parseMyAnimelistMangaExtendedSearch(body))
 
     @chiika.makeGetRequest getSearchExtendedUrl(type,id),null, onSearchComplete
 
@@ -165,6 +173,11 @@ module.exports = class MyAnimelist
     @chiika.makeGetRequest animePageUrl + id,null,onRequest
 
 
+  mangaPageScrape: (id,callback) ->
+    onRequest = (error,response,body) =>
+      callback(@chiika.parser.parseMangaDetailsMalPage(body))
+
+    @chiika.makeGetRequest mangaPageUrl + id,null,onRequest
 
 
   # After the constructor run() method will be called immediately after.
@@ -182,19 +195,25 @@ module.exports = class MyAnimelist
       animelistView   = @chiika.viewManager.getViewByName('myanimelist_animelist')
       animeExtraView  = @chiika.viewManager.getViewByName('myanimelist_animeextra')
 
+      mangalistView = @chiika.viewManager.getViewByName('myanimelist_mangalist')
+      mangaExtraView  = @chiika.viewManager.getViewByName('myanimelist_mangaextra')
+
       if animelistView?
         @animelist = animelistView.getData()
         @chiika.logger.script("[yellow](#{@name}) Animelist data length #{@animelist.length} #{@name}")
+
+      if mangalistView?
+        @mangalist = mangalistView.getData()
+        @chiika.logger.script("[yellow](#{@name}) Mangalist data length #{@mangalist.length} #{@name}")
+
 
       if animeExtraView?
         @animeextra = animeExtraView.getData()
         @chiika.logger.script("[yellow](#{@name}) AnimeExtra data length #{@animeextra.length} #{@name}")
 
-        mangalistView = @chiika.viewManager.getViewByName('myanimelist_mangalist')
-        if mangalistView?
-          @mangalist = mangalistView.getData()
-          @chiika.logger.script("[yellow](#{@name}) Mangalist data length #{@mangalist.length} #{@name}")
-
+      if mangaExtraView?
+        @mangaextra = mangaExtraView.getData()
+        @chiika.logger.script("[yellow](#{@name}) MangaExtra data length #{@mangaextra.length} #{@name}")
 
     # This method will be called if there are no UI elements in the database
     # or the user wants to refresh the views
@@ -204,6 +223,7 @@ module.exports = class MyAnimelist
       @createViewAnimelist()
       @createViewMangalist()
       @createViewAnimeExtra()
+      @createViewMangaExtra()
 
 
     # This event is called each time the associated view needs to be updated then saved to DB
@@ -236,19 +256,34 @@ module.exports = class MyAnimelist
     @on 'details-layout', (args) =>
       @chiika.logger.script("[yellow](#{@name}) Details-Layout #{args.id}")
 
-      id = args.id
+      id        = args.id
+      viewName  = args.viewName
 
-      #If its on the list, it will have this entry
-      animeEntry = _.find @animelist, (o) -> (o.mal_id) == args.id
+      if viewName == 'myanimelist_animelist'
+        #If its on the list, it will have this entry
+        animeEntry = _.find @animelist, (o) -> (o.mal_id) == args.id
 
-      @handleDetailsRequest id, (response) =>
-        animeExtraView = @chiika.viewManager.getViewByName('myanimelist_animeextra')
-        @animeextra = animeExtraView.getData()
+        @handleAnimeDetailsRequest id, (response) =>
+          animeExtraView = @chiika.viewManager.getViewByName('myanimelist_animeextra')
+          @animeextra = animeExtraView.getData()
 
-        if response.success && response.updated > 0
-          args.return(@getDetailsLayout(id))
+          if response.success && response.updated > 0
+            args.return(@getAnimeDetailsLayout(id))
 
-      args.return(@getDetailsLayout(id))
+        args.return(@getAnimeDetailsLayout(id))
+
+      if viewName == 'myanimelist_mangalist'
+        #
+
+        @handleMangaDetailsRequest id, (response) =>
+          mangaExtraView = @chiika.viewManager.getViewByName('myanimelist_mangaextra')
+          @mangaextra = mangaExtraView.getData()
+
+          if response.success && response.updated > 0
+            args.return(@getMangaDetailsLayout(id))
+
+
+        args.return(@getMangaDetailsLayout(id))
 
     @on 'details-action', (args) =>
       action = args.action
@@ -333,7 +368,7 @@ module.exports = class MyAnimelist
       @chiika.makePostRequestAuth( authUrl, { userName: args.user, password: args.pass },null, onAuthComplete )
 
 
-  handleDetailsRequest: (animeId,callback) ->
+  handleAnimeDetailsRequest: (animeId,callback) ->
     @chiika.logger.script("[yellow](#{@name}-Anime-Search) Searching for #{animeId}!")
 
     animeExtraView = @chiika.viewManager.getViewByName('myanimelist_animeextra')
@@ -445,8 +480,251 @@ module.exports = class MyAnimelist
           callback?({ success: false, response: "No Entry", updated: 0 })
 
 
+  handleMangaDetailsRequest: (mangaId,callback) ->
+    @chiika.logger.script("[yellow](#{@name}-Manga-Search) Searching for #{mangaId}!")
 
-  getDetailsLayout: (id) ->
+    mangaExtraView = @chiika.viewManager.getViewByName('myanimelist_mangaextra')
+
+    mangaEntry = _.find @mangalist, (o) -> (o.mal_id) == mangaId
+
+    #Searching
+    #
+    # For search to occur, we need a title
+    #
+    searchMatch = (v) ->
+      newMangaEntry = {}
+      newMangaEntry.mal_id = v.id
+      newMangaEntry.mangaEnglish = v.english
+      newMangaEntry.mangaTitle = v.title
+      newMangaEntry.mangaSynonyms = v.synonyms
+      newMangaEntry.mangaType = v.type
+      newMangaEntry.mangaStartDate = v.start_date
+      newMangaEntry.mangaEndDate = v.end_date
+      newMangaEntry.mangaImage = v.image
+      newMangaEntry.mangaScoreAverage = v.score
+      newMangaEntry.mangaSynopsis = v.synopsis
+      newMangaEntry
+
+    newMangaEntry = {}
+    entryFound = false
+
+    if mangaEntry?
+      #
+      #
+      # Mal API Search
+      #
+      #
+      @search 'manga',mangaEntry.mangaTitle, (list) =>
+        isArray = false
+        if _.isArray list
+          isArray = true
+          _.forEach list, (v,k) =>
+            if v.id == mangaEntry.mal_id
+              newMangaEntry = searchMatch(v)
+              entryFound = true
+              return false
+        else
+          if list.id == mangaEntry.mal_id
+            newMangaEntry = searchMatch(list)
+            entryFound = true
+
+
+        if isArray && list.length > 0 && entryFound
+          @chiika.logger.script("[yellow](#{@name}-Manga-Search) Search returned #{list.length} entries")
+          mangaExtraView.setData(newMangaEntry,'mal_id').then (args) =>
+            if args.rows > 0
+              @chiika.logger.script("[yellow](#{@name}-Manga-Search) Updated #{args.rows} entries.")
+              mangaExtraView.reload().then =>
+                callback?({ success: true, entry: newMangaEntry, updated: args.rows })
+        else if _.size(list) > 0 && entryFound
+          @chiika.logger.script("[yellow](#{@name}-Manga-Search) Search returned 1 entry")
+          mangaExtraView.setData(newMangaEntry,'mal_id').then (args) =>
+            if args.rows > 0
+              @chiika.logger.script("[yellow](#{@name}-Manga-Search) Updated #{args.rows} entries.")
+              mangaExtraView.reload().then =>
+                callback?({ success: true, entry: newMangaEntry, updated: args.rows })
+        else if !entryFound
+          callback({ success: false, response: "Search failed.",updated: 0 })
+
+
+      #
+      # http://myanimelist.net/includes/ajax.inc.php?id=id&t=64
+      #
+      @searchExtended 'manga', mangaEntry.mal_id, (result) ->
+
+        if result?
+          newMangaEntry = {}
+          newMangaEntry.mal_id = mangaEntry.mal_id
+          newMangaEntry.mangaGenres = result.genres
+          newMangaEntry.mangaScoreAverage = result.score
+          newMangaEntry.mangaRanked = result.rank
+          newMangaEntry.mangaPopularity = result.popularity
+          newMangaEntry.scoredBy = result.scoredBy
+
+          mangaExtraView.setData(newMangaEntry,'mal_id').then (args) =>
+            @chiika.logger.script("[yellow](#{@name}-Anime-Search-Extended) Updated #{args.rows} entries.")
+            mangaExtraView.reload().then =>
+              callback?({ success: true, entry: newMangaEntry, updated: args.rows})
+        else
+          callback?({ success: false, response: "No Entry" })
+
+      #
+      # Manga Page Scraping
+      #
+      @mangaPageScrape mangaEntry.mal_id, (result) ->
+
+        if result?
+          newMangaEntry = {}
+          newMangaEntry.mal_id = mangaEntry.mal_id
+          newMangaEntry.mangaJapanese = result.japanese
+          newMangaEntry.mangaPublished = result.published
+          newMangaEntry.mangaCharacters = result.characters
+          newMangaEntry.mangaSerialization = result.serialization
+          newMangaEntry.mangaAuthor = result.author
+
+          mangaExtraView.setData(newMangaEntry,'mal_id').then (args) =>
+            @chiika.logger.script("[yellow](#{@name}-Manga-Mal-Scrape) Updated #{args.rows} entries.")
+            mangaExtraView.reload().then =>
+              callback?({ success: true, entry: newMangaEntry, updated: args.rows })
+        else
+          callback?({ success: false, response: "No Entry", updated: 0 })
+
+
+
+  getMangaDetailsLayout: (id) ->
+    entry = _.find @mangalist, (o) -> o.mal_id == id
+    extra = _.find @mangaextra, (o) -> o.mal_id == id
+
+    if !extra?
+      extra = {}
+
+    if !entry?
+      list = false
+    else
+      list = true
+
+    title               = entry.mangaTitle ? ""                       #MalApi
+    score               = entry.mangaScore ? "0.0"                    #MalApi
+    type                = entry.mangaType ? ""                        #MalApi
+    score               = parseInt(entry.mangaScore) ? 0              #MalApi
+    volumes             = entry.mangaSeriesVolumes ? "0"              #MalApi
+    chapters            = entry.mangaSeriesVolumes ? "0"              #MalApi
+    readVolumes         = entry.mangaUserReadVolumes ? "0"            #MalApi
+    readChapters        = entry.mangaUserReadChapters ? "0"           #MalApi
+    image               = entry.mangaImage ? "le_default_image"       #MalApi
+    synonyms            = entry.mangaSynonyms ? ""                    #MalApi
+    userStatus          = entry.mangaUserStatus ? "0"                 #MalApi
+    seriesStatus        = entry.mangaSeriesStatus ? "0"               #MalApi
+    averageScore        = extra.mangaScoreAverage ? "0"               #Ajax.inc
+    ranked              = extra.mangaRanked ? ""                      #Ajax.inc
+    genres              = extra.mangaGenres ? ""                      #Ajax.inc
+    popularity          = extra.mangaPopularity ? ""                  #Ajax.inc
+    scoredBy            = extra.scoredBy ? "0"                        #Ajax.inc
+    synopsis            = extra.mangaSynopsis ? ""                    #Search
+    english             = extra.mangaEnglish ? ""                     #Search
+    serialization       = extra.mangaSerialization ? ""               #PageScrape
+    published           = extra.mangaPublished ? ""                   #PageScrape
+    japanese            = extra.mangaJapanese ? ""                    #PageScrape
+    author              = extra.mangaAuthor ? ""                      #PageScrape
+    characters          = extra.mangaCharacters ? []                  #PageScrape
+
+
+    if synonyms?
+      synonyms = synonyms.split(";")[0]
+    else
+      synonyms = ""
+
+    if genres == ""
+      genres = synonyms
+    else
+      genresText = ""
+      genres.map (genre,i) => genresText += genre + ","
+      genres = genresText
+
+    typeCard =
+      name: 'typeMiniCard'
+      title: 'Type'
+      content: type
+      type: 'miniCard'
+
+    serializationCard =
+      name: 'serializationMiniCard'
+      title: 'Serialization'
+      content: serialization
+      type: 'miniCard'
+
+    authorMiniCard =
+      name: 'authorMiniCard'
+      title: 'Author'
+      content: author.name
+      type: 'miniCard'
+
+    cards = [typeCard]
+
+    if serialization?
+      cards.push serializationCard
+
+    if author?
+      cards.push authorMiniCard
+
+    userStatusText = ""
+    if userStatus == "1"
+      userStatusText = "Reading"
+    else if userStatus == "2"
+      userStatusText = "Completed"
+    else if userStatus == "3"
+      userStatusText = "On Hold"
+    else if userStatus == "4"
+      userStatusText = "Dropped"
+    else if userStatus == "6"
+      userStatusText = "Plan to Read"
+
+    detailsLayout =
+      id: id
+      title: title
+      genres: genres
+      list: list
+      status:
+        items:
+          [
+            { title: 'Chapters', current: readChapters, total: chapters },
+            { title: 'Volumes', current: readVolumes, total: volumes }
+          ]
+        user: userStatus
+        series: seriesStatus
+        defaultAction: userStatusText
+        actions:[
+          { name: 'Reading', action: 'status-action-reading' },
+          { name: 'Completed', action: 'status-action-completed' }
+          { name: 'Plan to Read', action: 'status-action-ptr' },
+          { name: 'On Hold', action: 'status-action-onhold' },
+          { name: 'Dropped', action: 'status-action-dropped' }
+        ]
+      synopsis: synopsis
+      cover: image
+      english: english
+      voted: scoredBy
+      characters: characters
+      japanese: japanese
+      params:
+        author: author
+        serialization: serialization
+        published: published
+      owner: @name
+      actionButtons: [
+        { name: 'Torrent', action: 'torrent',color: 'lightblue' },
+        { name: 'Library', action: 'library',color: 'purple' }
+        { name: 'Play Next', action: 'playnext',color: 'teal' }
+        { name: 'Search', action: 'search',color: 'green' }
+      ]
+      scoring:
+        type: 'normal'
+        userScore: score
+        average: averageScore
+      miniCards: cards
+
+
+  getAnimeDetailsLayout: (id) ->
     entry = _.find @animelist, (o) -> o.mal_id == id
     extra = _.find @animeextra, (o) -> o.mal_id == id
 
@@ -545,16 +823,39 @@ module.exports = class MyAnimelist
       genres.map (genre,i) => genresText += genre + ","
       genres = genresText
 
+
+    userStatusText = ""
+    if userStatus == "1"
+      userStatusText = "Watching"
+    else if userStatus == "2"
+      userStatusText = "Completed"
+    else if userStatus == "3"
+      userStatusText = "On Hold"
+    else if userStatus == "4"
+      userStatusText = "Dropped"
+    else if userStatus == "6"
+      userStatusText = "Plan to Watch"
+
     detailsLayout =
       id: id
       title: title
       genres: genres
       list: list
       status:
-        total: totalEpisodes
-        watched: watchedEpisodes
+        items:
+          [
+            { title: 'Episodes', current: watchedEpisodes, total: totalEpisodes },
+          ]
         user: userStatus
         series: seriesStatus
+        defaultAction: userStatusText
+        actions:[
+          { name: 'Watching', action: 'status-action-watching' },
+          { name: 'Completed', action: 'status-action-completed' }
+          { name: 'Plan to Watch', action: 'status-action-ptw' },
+          { name: 'On Hold', action: 'status-action-onhold' },
+          { name: 'Dropped', action: 'status-action-dropped' }
+        ]
       synopsis: synopsis
       cover: image
       english: english
@@ -685,19 +986,32 @@ module.exports = class MyAnimelist
       if v.series_type == "6"
         type = "Manhua"
 
-      manga.mangaType = type
       seriesChapters = v.series_chapters
 
       if seriesChapters != "0"
         manga.mangaProgress = (parseInt(v.my_read_chapters) / parseInt(v.series_chapters)) * 100
       else
         manga.mangaProgress = 0
-      manga.mangaTitle = v.series_title
-      manga.mangaScore = v.my_score
-      manga.mangaScoreAverage = "0"
-      manga.mangaLastUpdated = "0"
+
+      manga.mal_id                      = v.series_mangadb_id
+      manga.mangaTitle                  = v.series_title
+      manga.mangaSynonyms               = v.series_synonyms
+      manga.mangaSeriesType             = v.series_type
+      manga.mangaSeriesStatus           = v.series_status
+      manga.mangaType                   = type
+      manga.mangaSeriesChapters         = v.series_chapters
+      manga.mangaSeriesVolumes          = v.series_volumes
+      manga.mangaSeriesStart            = v.series_start
+      manga.mangaSeriesEnd              = v.series_end
+      manga.mangaImage                  = v.series_image
+      manga.mangaUserReadChapters       = v.my_read_chapters
+      manga.mangaUserReadVolumes        = v.my_read_volumes
+      manga.mangaUserStartDate          = v.my_start_date
+      manga.mangaUserStartDate          = v.my_finish_date
+      manga.mangaScore                  = v.my_score
+      manga.mangaUserStatus             = v.my_status
+      manga.mangaLastUpdated            = v.my_last_updated
       manga.id = id + 1
-      manga.mal_id = v.series_mangadb_id
       manga
 
     _.forEach mangaList, (v,k) =>
@@ -732,6 +1046,16 @@ module.exports = class MyAnimelist
       subview:{}
 
     @chiika.viewManager.addView animeExtraView
+
+  createViewMangaExtra: ->
+    mangaExtraView =
+      name: "myanimelist_mangaextra"
+      owner: @name
+      displayName: 'subview'
+      displayType: 'subview'
+      subview:{}
+
+    @chiika.viewManager.addView mangaExtraView
 
   createViewAnimelist: () ->
     defaultView = {

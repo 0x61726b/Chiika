@@ -121,6 +121,7 @@ module.exports = class ViewManager
         type: 'side-menu-item'
         category: view.category
         display: view.displayName
+        owner: view.owner
         displayType: 'TabGridView'
         tabList: view.TabGridView.tabList
         columns: view.TabGridView.gridColumnList
