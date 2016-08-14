@@ -56,6 +56,9 @@ module.exports = React.createClass
   #
   componentWillUnmount:->
     chiika.ipc.disposeListeners('details-layout-request-response')
+    chiika.ipc.disposeListeners('details-action-response')
+
+    @chart.destroy()
 
   #
   #
@@ -92,17 +95,160 @@ module.exports = React.createClass
           labels: ["Average","y"]
         }
       }
-      chart = new Chart(document.getElementById("score-circle"),options)
+      @chart = new Chart(document.getElementById("score-circle"),options)
 
 
-  onAction: (action,params) ->
+      # jQuery stuff
+      $("#scoreSelect option[value=#{@state.layout.scoring.userScore}]").attr('selected','selected')
+
+      $(".number input").bind 'keypress', (e) =>
+        if e.keyCode == 13 #Enter
+          @onProgressValueChange(e)
+
+      $(".number input").focus ->
+        $(this).val("")
+
+
+  #
+  #
+  #
+  onAction: (action,params,returnCallback) ->
     chiika.ipc.detailsAction(action,@state.layout,params)
 
-  onCoverClick: ->
-    @onAction('cover-click')
+    chiika.ipc.detailsActionResponse action,(args) =>
+      chiika.ipc.disposeListeners('details-action-response')
+      returnCallback(args)
 
+  #
+  #
+  #
+  onCoverClick: ->
+    @onAction('cover-click', { viewName: @props.route.viewName })
+
+
+  #
+  #
+  #
   onCharacterClick: (e) ->
     @onAction('character-click',{ id: $(e.target).parent().attr("data-character") })
+
+
+  onProgressValueChange: (e) ->
+    itemTitle = $(e.target).parent().parent().parent().attr("data-item")
+
+    findItem = _.find @state.layout.status.items, (o) -> o.title == itemTitle
+
+    if findItem?
+      currentOld = parseInt(findItem.current)
+      current = parseInt($(e.target).val())
+      total = parseInt(findItem.total)
+
+      if current == currentOld
+        return
+
+      if current >= 0 && current <= total
+        console.log "Updating from #{currentOld} to #{current}"
+
+        findItem.current = current
+        @onAction('progress-update',{ item: { current: current, total: total },viewName: @props.route.viewName },@onUpdate)
+
+        # Update input
+        $($(e.target).next()).find('input').attr('placeholder',current)
+        $($(e.target)).attr('placeholder',current)
+      else if current > total
+        @onActionError("You thought you could do that,didnt you?")
+      else if current < 0
+        @onActionError("Baka.")
+    else
+      @onActionError("There was a problem updating the progress.")
+
+  #
+  #
+  #
+  onMinus: (e) ->
+    itemTitle = $(e.target).parent().parent().attr("data-item")
+
+    findItem = _.find @state.layout.status.items, (o) -> o.title == itemTitle
+
+    if findItem?
+      current = parseInt(findItem.current)
+      total = parseInt(findItem.total)
+
+      if current > 0 && current <= total
+        current--
+        console.log "Updating from #{current+1} to #{current}"
+
+        findItem.current = current
+        @onAction('progress-update',{ item: { current: current, total: total },viewName: @props.route.viewName },@onUpdate)
+
+        # Update input
+        $($(e.target).next()).find('input').attr('placeholder',current)
+    else
+      @onActionError("There was a problem updating the progress.")
+
+  #
+  #
+  #
+  onPlus: (e) ->
+    itemTitle = $(e.target).parent().parent().attr("data-item")
+
+    findItem = _.find @state.layout.status.items, (o) -> o.title == itemTitle
+
+    if findItem?
+      current = parseInt(findItem.current)
+      total = parseInt(findItem.total)
+
+      if current >= 0 && current <= total
+        current++
+        console.log "Updating from #{current-1} to #{current}"
+
+        findItem.current = current
+        @onAction('progress-update',{ item: { current: current, total: total },viewName: @props.route.viewName },@onUpdate)
+
+        # Update input
+        $($(e.target).prev()).find('input').attr('placeholder',current)
+    else
+      @onActionError("There was a problem updating the progress.")
+
+  #
+  #
+  #
+  onScoreChange: (e) ->
+    value = $(e.target).val()
+    console.log $("#scoreSelect option[value=#{value}]")
+    $("#scoreSelect option[value=#{value}]").attr('selected','selected');
+
+    @chart.data.datasets[0].data[0] = parseInt($(e.target).val())
+    @chart.data.datasets[0].data[1] = 10 - parseInt($(e.target).val())
+    @chart.update()
+
+
+    @onAction('score-update',{ item: { current: parseInt(value) },viewName: @props.route.viewName },@onUpdate)
+  #
+  #
+  #
+  onUpdate: (result) ->
+    console.log result
+    if result.args.success
+      @onActionSuccess("Updated!")
+
+      #Refresh view data
+      chiika.ipc.sendMessage 'get-view-data'
+    else
+      @onActionError("Whoops..Something went wrong.")
+
+  #
+  #
+  #
+  onActionError: (error) ->
+    window.yuiToast(error,'top',5000,'dark')
+
+  #
+  #
+  #
+  onActionSuccess: (message) ->
+    window.yuiToast(message,'top',2500,'dark')
+
   render: ->
     <div className="detailsPage">
       <div className="detailsPage-left">
@@ -126,19 +272,19 @@ module.exports = React.createClass
               </button>
               {
                 @state.layout.status.items.map (item,i) =>
-                  <div className="progressInteractions" key={i}>
+                  <div className="progressInteractions" key={i} data-item={item.title}>
                     <div className="title">
                       { item.title }
                     </div>
                     <div className="interactions">
-                      <button className="minus">
+                      <button className="minus" onClick={@onMinus}>
                         -
                       </button>
                       <div className="number">
-                        <input type="text"name="name" placeholder="#{item.current}"/>
+                        <input type="number" name="name" placeholder="#{item.current}"/>
                         <span>/ { item.total }</span>
                       </div>
-                      <button className="plus">
+                      <button className="plus" onClick={@onPlus}>
                         +
                       </button>
                     </div>
@@ -171,7 +317,7 @@ module.exports = React.createClass
               <h5>Your Score</h5>
               {
                 if @state.layout.scoring.type == "normal"
-                  <select className="button lightblue" name="" value={@state.layout.scoring.userScore}>
+                  <select id="scoreSelect" className="button lightblue" name="" onChange={@onScoreChange}>
                   {
                     [0,1,2,3,4,5,6,7,8,9,10].map (score,i) =>
                       <option value={score} key={i}>{score}</option>

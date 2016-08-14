@@ -25,6 +25,8 @@ getLibraryUrl = (type,user) ->
 authUrl                       = 'http://myanimelist.net/api/account/verify_credentials.xml'
 animePageUrl                  = 'http://myanimelist.net/anime/'
 mangaPageUrl                  = 'http://myanimelist.net/manga/'
+updateAnime                   = 'http://myanimelist.net/api/animelist/update/'
+updateManga                   = 'http://myanimelist.net/api/mangalist/update/'
 
 getSearchUrl = (type,keywords) ->
   "http://myanimelist.net/api/#{type}/search.xml?q=#{keywords}"
@@ -38,6 +40,7 @@ getSearchExtendedUrl = (type,id) ->
 _       = require process.cwd() + '/node_modules/lodash'
 _when   = require process.cwd() + '/node_modules/when'
 string  = require process.cwd() + '/node_modules/string'
+xml2js  = require process.cwd() + '/node_modules/xml2js'
 {shell}   = require('electron')
 
 
@@ -52,7 +55,7 @@ module.exports = class MyAnimelist
 
   # Logo which will be seen at the login screen
   #
-  logo: '../assets/images/my.png'
+  logo: '../assets/images/login/mal1.png'
 
   # Chiika lets you define multiple users
   # In the methods below you can use whatever user you want
@@ -83,7 +86,7 @@ module.exports = class MyAnimelist
     @chiika.on @name,event,args...
 
 
-  # Hummingbird https://github.com/hummingbird-me/hummingbird/wiki/API-v1-Methods#library--get-all-entries
+  # myanimelist.net/malappinfo.php?u=#user&type=anime&status=all
   # Retrieves library
   # @param type {String} anime-manga
   retrieveLibrary: (type,userName,callback) ->
@@ -132,6 +135,30 @@ module.exports = class MyAnimelist
            @chiika.users.updateUser @malUser
 
            callback(result)
+
+
+  authorizedPost: (url,body,callback) ->
+    onAuthorizedPostComplete = (error,response,body) =>
+      if error
+        callback( { success: false , response: body })
+
+      else if response.statusCode != 200
+        callback( { success: false , response: body })
+
+      else
+        callback( { success: true, response: body })
+
+    @chiika.makePostRequestAuth( url, { userName: @malUser.realUserName, password: @malUser.password },null,body, onAuthorizedPostComplete )
+
+  updateAnime: (anime,callback) ->
+    data = @buildAnimeXmlForUpdating(anime)
+    @authorizedPost "#{updateAnime}#{anime.mal_id}.xml",data,(result) =>
+      if result.success && result.response == "Updated"
+        callback(result)
+      else
+        # It can return status code 200 but if the body isn't updated,it failed.
+        result.success = false
+        callback(result)
 
   #
   # Searches animelist either manga or anime
@@ -300,10 +327,27 @@ module.exports = class MyAnimelist
         args.return({ success: false, error: error })
 
       switch action
+        when 'progress-update'
+          item = params.item
+          if params.viewName == 'myanimelist_animelist'
+            @updateProgress layout.id,'anime',item.current, (result) =>
+              args.return(result)
+
+        when 'score-update'
+          item = params.item
+          if params.viewName == 'myanimelist_animelist'
+            @updateScore layout.id,'anime',item.current, (result) =>
+              args.return(result)
+
+
         when 'cover-click'
           id = layout.id
           if id?
-            result = shell.openExternal("http://myanimelist.net/anime/#{id}")
+            console.log params
+            if params.viewName == 'myanimelist_animelist'
+              result = shell.openExternal("http://myanimelist.net/anime/#{id}")
+            else
+              result = shell.openExternal("http://myanimelist.net/manga/#{id}")
             args.return({ success:result })
           else
             @onActionError("Need ID for cover-click")
@@ -333,8 +377,8 @@ module.exports = class MyAnimelist
 
               deferUpdate1 = _when.defer()
               deferUpdate2 = _when.defer()
-              async.push deferUpdate1
-              async.push deferUpdate2
+              async.push deferUpdate1.promise
+              async.push deferUpdate2.promise
 
               @chiika.requestViewUpdate('myanimelist_animelist',@name,deferUpdate1)
               @chiika.requestViewUpdate('myanimelist_mangalist',@name,deferUpdate2)
@@ -365,9 +409,86 @@ module.exports = class MyAnimelist
             #
             args.return( { success: false, response: response })
 
-      @chiika.makePostRequestAuth( authUrl, { userName: args.user, password: args.pass },null, onAuthComplete )
+      @chiika.makePostRequestAuth( authUrl, { userName: args.user, password: args.pass },null,null, onAuthComplete )
 
 
+
+  #
+  #
+  #
+  updateViewAndRefresh: (viewName,newEntry,key,callback) ->
+    view = @chiika.viewManager.getViewByName(viewName)
+    view.setDataSingle(newEntry,'mal_id').then =>
+      callback?({ success: true,updated: 1 })
+
+  #
+  #
+  #
+  updateProgress:(id,type,newProgress,callback) ->
+    @chiika.logger.script("Updating #{type} progress - #{id} - to #{newProgress}")
+    switch type
+      when 'anime'
+        animeEntry = _.find @animelist, (o) -> (o.mal_id) == id
+        if animeEntry?
+          animeEntry.animeWatchedEpisodes = newProgress
+          animeEntry.animeProgress = (animeEntry.animeWatchedEpisodes / parseInt(animeEntry.animeTotalEpisodes)) * 100
+          @updateAnime animeEntry, (result) =>
+            if result.success
+              @updateViewAndRefresh 'myanimelist_animelist',animeEntry,'mal_id', (result) =>
+                if result.updated > 0
+                  callback({ success: true, updated: result.updated })
+                else
+                  callback({ success: false, updated: result.updated, error:"Update request has failed.", errorDetailed: "Something went wrong when saving to database." })
+            else
+              callback({ success: false, updated: 0, error: "Update request has failed.",errorDetailed: "Something went wrong with the http request. #{result.response}" })
+      # when 'manga'
+      #   @authorizedPost(updateManga,data)
+
+
+  #
+  #
+  #
+  updateScore:(id,type,newScore,callback) ->
+    @chiika.logger.script("Updating #{type} score - #{id} - to #{newScore}")
+    switch type
+      when 'anime'
+        animeEntry = _.find @animelist, (o) -> (o.mal_id) == id
+        if animeEntry?
+          animeEntry.animeScore = newScore
+          @updateAnime animeEntry, (result) =>
+            if result.success
+              @updateViewAndRefresh 'myanimelist_animelist',animeEntry,'mal_id', (result) =>
+                if result.updated > 0
+                  callback({ success: true, updated: result.updated })
+                else
+                  callback({ success: false, updated: result.updated, error:"Update request has failed.", errorDetailed: "Something went wrong when saving to database." })
+            else
+              callback({ success: false, updated: 0, error: "Update request has failed.",errorDetailed: "Something went wrong with the http request. #{result.response}" })
+      # when 'manga'
+      #   @authorizedPost(updateManga,data)
+
+  buildAnimeXmlForUpdating: (animeEntry) ->
+    entry =
+      entry:
+        episode: animeEntry.animeWatchedEpisodes
+        status: animeEntry.animeUserStatus
+        score: animeEntry.animeScore
+        storage_type: ""
+        storage_value: ""
+        times_rewatched: ""
+        rewatch_value:""
+        date_start: ""
+        date_finish: ""
+        priority: ""
+        enable_discussion: ""
+        enable_rewatching:""
+        comments:""
+        fansub_group: ""
+        tags:""
+
+    builder = new xml2js.Builder({xmlDec: { standalone: false }})
+    buildXml = builder.buildObject(entry)
+    buildXml
   handleAnimeDetailsRequest: (animeId,callback) ->
     @chiika.logger.script("[yellow](#{@name}-Anime-Search) Searching for #{animeId}!")
 
@@ -909,11 +1030,6 @@ module.exports = class MyAnimelist
       anime.animeType = type
       seriesEpisodes = v.series_episodes
 
-      if seriesEpisodes != "0"
-        anime.animeProgress = (parseInt(v.my_watched_episodes) / parseInt(v.series_episodes)) * 100
-      else
-        anime.animeProgress = 0
-      anime.animeProgress = parseInt(anime.animeProgress)
       anime.animeTitle = v.series_title
       anime.animeScore = parseInt(v.my_score)
       anime.animeScoreAverage = "0"
@@ -924,6 +1040,7 @@ module.exports = class MyAnimelist
       anime.animeEpisodes = v.series_episodes
       anime.animeWatchedEpisodes = v.my_watched_episodes
       anime.animeTotalEpisodes = v.series_episodes
+      anime.animeProgress = (parseInt(anime.animeWatchedEpisodes) / parseInt(anime.animeTotalEpisodes)) * 100
       anime.animeUserStatus = v.my_status
       anime.animeSeriesStatus = v.series_status
       anime.id = id + 1
@@ -953,8 +1070,6 @@ module.exports = class MyAnimelist
     animelistData.push { name: 'onhold',data: onhold }
     animelistData.push { name: 'completed',data: completed }
     view.setData(animelistData)
-
-
   #
   # In the @createViewAnimelist, we created 5 tab
   # Here we supply the data of the tabs

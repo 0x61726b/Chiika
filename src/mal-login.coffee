@@ -34,7 +34,8 @@ window.$ = window.jQuery            = require('jquery')
 MalLogin = React.createClass
   getInitialState: ->
     services: []
-    loggingInTo: null
+    bgs: []
+    loggingInTo: { loginType: 'default' }
   componentDidMount: ->
     window.chiika = this
 
@@ -43,6 +44,7 @@ MalLogin = React.createClass
     fullpage = require('fullpage.js')
 
     $("#fullpage").fullpage()
+    $.fn.fullpage.setAllowScrolling(false)
 
     @ipcManager = new IPC()
 
@@ -64,14 +66,23 @@ MalLogin = React.createClass
     @ipcManager.sendReceiveIPC 'get-services',null,(event,defer,args) =>
       if args?
         console.log args
-        @setState { services: args,loggingTo: args[0] }
+        @setState { services: args,loggingInTo: args[0] }
 
+    @ipcManager.sendReceiveIPC 'get-login-backgrounds',null, (event,defer,args) =>
+      if args?
+        @setState { bgs: args }
+
+        crossfade = =>
+          length = @state.bgs.length
+          random = Math.floor(Math.random()*length)
+
+          $(".login-body-outer").css("background-image","url(#{@state.bgs[random]})")
+        #setInterval(crossfade,10000)
 
 
 
     # #This callback only gets called if error on login
     ipcRenderer.on 'login-response',(event,response) =>
-      @setContinueState(false)
 
       if !response.success
         message = "We couldn't login you with the selected service!"
@@ -120,15 +131,6 @@ MalLogin = React.createClass
       else if color == "green"
         e.addClass("highlightgreen")
 
-  setContinueState: (state) ->
-    if state
-      $("#continue").addClass("is-disabled")
-      $("#continue").prop("disabled",state)
-    else
-      delay = ->
-        $("#continue").prop("disabled",state)
-        $("#continue").removeClass("is-disabled")
-      setTimeout(delay,2000)
 
   componentDidUpdate: ->
     $("#loginForm")
@@ -156,8 +158,7 @@ MalLogin = React.createClass
     if (user != "" && pass != "")
       loginData = { user: user, pass: pass }
       console.log loginData
-      ipcRenderer.send 'set-user-login',{ login: loginData, service: @state.loggingTo.name }
-      @setContinueState(true)
+      ipcRenderer.send 'set-user-login',{ login: loginData, service: @state.loggingInTo.name }
 
 
 
@@ -184,18 +185,34 @@ MalLogin = React.createClass
     @ipcManager.sendMessage 'call-window-method','close'
     @ipcManager.sendMessage 'continue-from-login'
 
+  goDown: ->
+    $.fn.fullpage.moveSectionDown()
 
-  loginBody: (key,service) ->
-    (<div className="card" id="login-container" key=key>
-        <img src={service.logo} id="mal-logo" style={{width: 200 , height: 200}} alt="" />
-        <form className="" id="loginForm">
-          <label htmlFor="log-usr">Username</label>
-          <input type="text" className="text-input" id="userName" required autofocus/>
-          <label htmlFor="log-psw">Password</label>
-          <input type="Password" className="text-input" id="password" required />
-          <input type="submit" onClick={this.onSubmit} className="button raised indigo log-btn" id="log-btn" value="Verify"/>
-        </form>
-      </div>)
+  selectProvider: (e) ->
+    provider = $(e.target).attr("data-provider")
+
+    if _.isUndefined provider
+      provider = $(e.target).parent().attr("data-provider")
+
+    #Find service
+
+    findService = _.find @state.services, (o) -> o.name == provider
+
+    if findService?
+      @setState { loggingInTo: findService }
+      @goDown()
+
+  loginBody: () ->
+    <div id="login-container">
+      <form className="" id="loginForm">
+        <img src="#{@state.loggingInTo.logo}" width="250" height="250" alt="" />
+        <label htmlFor="log-usr">Username</label>
+        <input type="text" className="text-input light" id="userName" required autofocus/>
+        <label htmlFor="log-psw">Password</label>
+        <input type="Password" className="text-input light" id="password" required />
+        <input type="submit" onClick={this.onSubmit} className="button raised indigo log-btn" id="log-btn" value="Verify" />
+      </form>
+    </div>
   authPinBody: (key,service) ->
     (<div className="card" id="login-container" key=key>
         <img src={service.logo} id="mal-logo" style={{width: 200 , height: 200}} alt="" />
@@ -215,28 +232,31 @@ MalLogin = React.createClass
           <span className="divider left"></span>
           <span className="divider right"></span>
           <h1>Welcome To Chiika</h1>
-          <span className="nextPage"></span>
+          <span className="nextPage" onClick={@goDown}></span>
         </div>
         <div className="section">
         <h1>Please Select a Service Provider</h1>
           <div className="serviceProviders">
-            <div className="provider">
-              <img src="icon.png" width="140" height="140" alt="" />
-              <h2>Myanimelist</h2>
-            </div>
+          {
+            @state.services.map (service,i) =>
+              <div className="provider" onClick={@selectProvider} data-provider="#{service.name}" key={i}>
+                <img src="./../assets/images/login/mal1.png" width="140" height="140" alt="" />
+                <h2>{ service.description }</h2>
+              </div>
+          }
+          <div className="provider" onClick={@selectProvider} data-provider="noaccount" key={i}>
+            <img src="./../assets/images/chiika.png" width="140" height="140" alt="" />
+            <h2>No Account</h2>
+          </div>
           </div>
         </div>
         <div className="section">
-          <div id="login-container">
-            <form className="" id="loginForm">
-              <img src="icon.png" width="250" height="250" alt="" />
-              <label htmlFor="log-usr">Username</label>
-              <input type="text" className="text-input light" id="userName" required autofocus/>
-              <label htmlFor="log-psw">Password</label>
-              <input type="Password" className="text-input light" id="password" required />
-              <input type="submit" onClick={this.onSubmit} className="button raised indigo log-btn" id="log-btn" value="Verify" />
-            </form>
-          </div>
+        {
+          if @state.loggingInTo.loginType == 'default'
+            @loginBody()
+          else
+            @authPinBody()
+        }
         </div>
       </div>
     </div>

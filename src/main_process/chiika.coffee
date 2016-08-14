@@ -128,6 +128,7 @@ class Application
       @dbManager.onLoad =>
         @run()
 
+
   run: ->
     #
     #

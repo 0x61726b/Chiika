@@ -30,31 +30,40 @@ module.exports = class ChiikaPublicApi
     @uiDb                                       = @db.uiDb
     @utility                                    = chiika.utility
 
-
+  #
+  #
+  #
   makeGetRequest:(url,headers,callback) ->
     if _.isUndefined callback
       throw new InvalidParameterException("You have to supply a callback to 'makeGetRequest' method.")
     chiika.requestManager.makeGetRequest(url,headers,callback)
 
 
-
-  makePostRequest:(url,headers,callback) ->
+  #
+  #
+  #
+  makePostRequest:(url,headers,body,callback) ->
     if _.isUndefined callback
       throw new InvalidParameterException("You have to supply a callback to 'makePostRequest' method.")
-    chiika.requestManager.makePostRequest(url,headers,callback)
+    chiika.requestManager.makePostRequest(url,headers,body,callback)
 
 
 
+  #
+  #
+  #
   makeGetRequestAuth:(url,user,headers,callback) ->
     if _.isUndefined callback
       throw new InvalidParameterException("You have to supply a callback to 'makeGetRequestAuth' method.")
     chiika.requestManager.makeGetRequestAuth(url,user,headers,callback)
 
 
-  makePostRequestAuth:(url,user,headers,callback) ->
+  makePostRequestAuth:(url,user,headers,body,callback) ->
     if _.isUndefined callback
       throw new InvalidParameterException("You have to supply a callback to 'makePostRequestAuth' method.")
-    chiika.requestManager.makePostRequestAuth(url,user,headers,callback)
+    chiika.requestManager.makePostRequestAuth(url,user,headers,body,callback)
+
+
 
 
   sendMessageToWindow: (windowName,message,args) ->

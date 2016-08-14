@@ -110,17 +110,25 @@ module.exports = class RequestManager
 
 
 
-  makePostRequestAuth: (url,user,headers,callback) ->
+  makePostRequestAuth: (url,user,headers,body,callback) ->
     form = { username: user.userName, password: user.password }
     auth = { user: user.userName, password: user.password }
 
+    defaultHeaders = {
+      'User-Agent': 'ChiikaDesktopApplication',
+      'Content-Type' : 'application/x-www-form-urlencoded'
+    }
+
+    if body?
+      contentLength = Buffer.byteLength(body)
+      _.assign form, { data: body }
+      _.assign defaultHeaders, { 'Content-Length', contentLength }
+
+
     if _.isUndefined headers
-      headers = {
-        'User-Agent': 'ChiikaDesktopApplication',
-        'Content-Type' : 'application/x-www-form-urlencoded'
-      }
+      headers = defaultHeaders
     else
-      _.assign headers, { 'User-Agent': 'ChiikaDesktopApplication','Content-Type' : 'application/x-www-form-urlencoded' }
+      _.assign headers, defaultHeaders
 
     onRequestReturn = (error,response,body) ->
       if error
@@ -135,4 +143,7 @@ module.exports = class RequestManager
           chiika.logger.error("Somehow response is null. WTF ?")
           chiika.logger.error(body)
       callback(error,response,body)
+    chiika.logger.info("Creating a POSTAUTH request to URL #{url}")
+    chiika.logger.debug("Creating a POSTAUTH request to URL #{url} - #{user.userName} - #{user.password} - Content length #{contentLength}")
+
     request.post { url: url, form: form, headers:headers, auth: auth }, onRequestReturn

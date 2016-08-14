@@ -56,9 +56,10 @@ module.exports = class IpcManager
     @getViewData()
     @getViewDataByName()
     @getUserData()
+    @getLoginBackgrounds()
+    @getServices()
     @login()
     @loginCustom()
-    @getServices()
     @refreshViewByName()
     @modalWindowJsEval()
     @reconstructUI()
@@ -117,6 +118,7 @@ module.exports = class IpcManager
         event.sender.send 'reconstruct-ui-response'
 
 
+
   #
   #
   #
@@ -151,6 +153,7 @@ module.exports = class IpcManager
           if views.length > 0
             event.sender.send 'get-view-data-response',views
 
+
   #
   #
   #
@@ -171,9 +174,9 @@ module.exports = class IpcManager
 
       returnFromScript = (args) =>
         chiika.logger.verbose("Action performed for #{layout.owner} - #{action}")
+        event.sender.send 'details-action-response', { action: action, args: args }
 
       chiika.chiikaApi.emit 'details-action', { calling: layout.owner, action: action, layout: layout, params: params, return: returnFromScript }
-
 
 
   #
@@ -255,5 +258,24 @@ module.exports = class IpcManager
 
       if services.length > 0
         return services
+      else
+        return undefined
+
+  #
+  #
+  #
+  getLoginBackgrounds: ->
+    @receiveAnswer 'get-login-backgrounds', (event,args) =>
+      scripts = chiika.apiManager.getScripts()
+
+
+
+      bgs = []
+      for script in scripts
+        if script.instance.loginBackgrounds?
+          bgs = script.instance.loginBackgrounds
+
+      if bgs.length > 0
+        return bgs
       else
         return undefined

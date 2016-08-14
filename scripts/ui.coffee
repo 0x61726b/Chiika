@@ -27,6 +27,15 @@ module.exports = class UISetup
   displayDescription: "UI Setup"
   isService: false
   isActive: true
+
+  loginBackgrounds:[
+    './../assets/images/login-sakura.jpg',
+    './../assets/images/login/bg1.jpg',
+    './../assets/images/login/bg2.jpg',
+    './../assets/images/login/bg3.jpg',
+    './../assets/images/login/bg4.jpg',
+    './../assets/images/login/bg5.png'
+  ]
   # Will be called by Chiika with the API object
   # you can do whatever you want with this object
   # See the documentation for this object's methods,properties etc.
