@@ -227,6 +227,21 @@ module.exports = React.createClass
 
 
     @onAction('score-update',{ item: { current: parseInt(value) },viewName: @props.route.viewName },@onUpdate)
+
+  #
+  #
+  #
+  onStatusChange: (e) ->
+    action = $(e.target).attr('data-action')
+    $(".userStatus .current").removeClass('current')
+    $(e.target).addClass('current')
+
+
+    @state.layout.status.defaultAction = $(e.target).text()
+    $(".userStatusButton").html($(e.target).text())
+    $('.userStatus').toggleClass('open')
+
+    @onAction('status-update',{ item: { identifier: action },viewName: @props.route.viewName },@onUpdate)
   #
   #
   #
@@ -274,11 +289,13 @@ module.exports = React.createClass
                 }
               </button>
               <div className="userStatus">
-                <div className="status">Not Watching</div>
-                <div className="status">Not Watching</div>
-                <div className="status">Not Watching</div>
-                <div className="status">Not Watching</div>
-                <div className="status current">Watching</div>
+              {
+                @state.layout.status.actions.map (action,i) =>
+                  if action.name == @state.layout.status.defaultAction
+                    <div className="status current" key={i} onClick={@onStatusChange} data-action={action.identifier}>{action.name}</div>
+                  else
+                    <div className="status" key={i} onClick={@onStatusChange} data-action={action.identifier}>{action.name}</div>
+              }
               </div>
               {
                 @state.layout.status.items.map (item,i) =>

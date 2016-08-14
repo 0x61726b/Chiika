@@ -36,6 +36,9 @@ module.exports = class TabView extends View
         data.push entry
     data
 
+  getRawData: ->
+    @dataSource
+
   #
   # Update a single element in any of the tabs
   #
@@ -46,28 +49,30 @@ module.exports = class TabView extends View
 
       chiika.logger.info("Setting data for #{@name}")
 
-      updated = false
-      updatedTab = ""
-
       _.forEach @dataSource, (tab) =>
-        find = _.find tab.data, (o) -> o[key] == data[key]
-        index = _.indexOf tab.data, find
+        # if tab.name == updatedTab
+        onSaved = ->
+          resolve()
+        chiika.logger.info("Updating tab data #{tab.name}")
+        @db.save(tab,onSaved)
 
-        if index != -1
-          tab.data.splice(index,1,find)
-          chiika.logger.info("Existing row found for #{@name} at #{tab.name} - #{index}")
-          updated = true
-          updatedTab = tab.name
-          return false
+      # updated = false
+      # updatedTab = ""
+      #
+      # _.forEach @dataSource, (tab) =>
+      #   find = _.find tab.data, (o) -> o[key] == data[key]
+      #   index = _.indexOf tab.data, find
+      #
+      #   if index != -1
+      #     tab.data.splice(index,1,data)
+      #     chiika.logger.info("Existing row found for #{@name} at #{tab.name} - #{index}")
+      #     updated = true
+      #     updatedTab = tab.name
+      #     return false
+      #
+      #
+      # if updated
 
-
-      if updated
-        _.forEach @dataSource, (tab) =>
-          if tab.name == updatedTab
-            onSaved = ->
-              resolve()
-            chiika.logger.info("Updating tab data #{updatedTab} - #{tab.name}")
-            @db.save(tab,onSaved)
 
   #
   #

@@ -159,6 +159,8 @@ module.exports = React.createClass
 
     @currentGrid.filterBy(1,$(".form-control").val())
 
+    #@currentGrid.sortRows(1)
+
     for i in [0...columnList.length]
       column = columnList[i]
       if !column.hidden && column.customSort?

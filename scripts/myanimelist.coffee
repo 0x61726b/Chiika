@@ -290,12 +290,12 @@ module.exports = class MyAnimelist
         #If its on the list, it will have this entry
         animeEntry = _.find @animelist, (o) -> (o.mal_id) == args.id
 
-        @handleAnimeDetailsRequest id, (response) =>
-          animeExtraView = @chiika.viewManager.getViewByName('myanimelist_animeextra')
-          @animeextra = animeExtraView.getData()
-
-          if response.success && response.updated > 0
-            args.return(@getAnimeDetailsLayout(id))
+        # @handleAnimeDetailsRequest id, (response) =>
+        #   animeExtraView = @chiika.viewManager.getViewByName('myanimelist_animeextra')
+        #   @animeextra = animeExtraView.getData()
+        #
+        #   if response.success && response.updated > 0
+        #     args.return(@getAnimeDetailsLayout(id))
 
         args.return(@getAnimeDetailsLayout(id))
 
@@ -339,6 +339,10 @@ module.exports = class MyAnimelist
             @updateScore layout.id,'anime',item.current, (result) =>
               args.return(result)
 
+        when 'status-update'
+          item = params.item
+          @updateStatus layout.id,'anime',item.identifier, (result) =>
+            args.return(result)
 
         when 'cover-click'
           id = layout.id
@@ -467,6 +471,95 @@ module.exports = class MyAnimelist
       # when 'manga'
       #   @authorizedPost(updateManga,data)
 
+  updateStatus:(id,type,newStatus,callback) ->
+    @chiika.logger.script("Updating #{type} status - #{id} - to #{newStatus}")
+
+    entry = { }
+    newTabName = ""
+    oldTabName = ""
+
+    switch type
+      when 'anime'
+        entry = _.find @animelist, (o) -> (o.mal_id) == id
+        newTabName = @animeStatusToTabName(newStatus)
+        oldTabName = @animeStatusToTabName(entry.animeUserStatus)
+      when 'manga'
+        entry = _.find @mangalist, (o) -> (o.mal_id) == id
+        newTabName = @mangaStatusToTabName(newStatus)
+        oldTabName = @mangaStatusToTabName(entry.animeUserStatus)
+
+    switch type
+      when 'anime'
+        if entry?
+          # Update the entry's status
+          entry.animeUserStatus = newStatus
+
+
+          # If it goes from for example, watching to onhold
+          # update the tab data accordingly
+          if oldTabName != newTabName
+            view = @chiika.viewManager.getViewByName('myanimelist_animelist')
+            tabData = view.getRawData()
+
+            findInTabData = _.find tabData, (o) -> o.name == oldTabName
+            findAnimeInTabData = _.find findInTabData.data, (o) -> o.mal_id == id
+            indexAnimeInTabData = _.indexOf findInTabData.data,findAnimeInTabData
+
+            if indexAnimeInTabData != -1
+              findInTabData.data.splice(indexAnimeInTabData,1)
+
+              findInNewTabData = _.find tabData, (o) -> o.name == newTabName
+              findInNewTabData.data.push entry
+
+              counter = 0
+              _.forEach findInNewTabData.data, (v,k) =>
+                v.id = counter + 1
+                counter++
+
+              counter = 0
+              _.forEach findInTabData.data, (v,k) =>
+                v.id = counter + 1
+                counter++
+
+          @updateAnime entry, (result) =>
+            if result.success
+              @updateViewAndRefresh 'myanimelist_animelist',entry,'mal_id', (result) =>
+                if result.updated > 0
+                  callback({ success: true, updated: result.updated })
+                else
+                  callback({ success: false, updated: result.updated, error:"Update request has failed.", errorDetailed: "Something went wrong when saving to database." })
+            else
+              callback({ success: false, updated: 0, error: "Update request has failed.",errorDetailed: "Something went wrong with the http request. #{result.response}" })
+
+  animeStatusToTabName: (status) ->
+    newStatusTab = ""
+    if status == "1"
+      newStatusTab = "watching"
+    if status == "2"
+      newStatusTab = "completed"
+    if status == "3"
+      newStatusTab = "onhold"
+    if status == "4"
+      newStatusTab = "dropped"
+    if status == "6"
+      newStatusTab = "ptw"
+    newStatusTab
+
+
+  mangaStatusToTabName: (status) ->
+    newStatusTab = ""
+    if status == "1"
+      newStatusTab = "reading"
+    if status == "2"
+      newStatusTab = "completed"
+    if status == "3"
+      newStatusTab = "onhold"
+    if status == "4"
+      newStatusTab = "dropped"
+    if status == "6"
+      newStatusTab = "ptr"
+    newStatusTab
+
   buildAnimeXmlForUpdating: (animeEntry) ->
     entry =
       entry:
@@ -489,6 +582,7 @@ module.exports = class MyAnimelist
     builder = new xml2js.Builder({xmlDec: { standalone: false }})
     buildXml = builder.buildObject(entry)
     buildXml
+
   handleAnimeDetailsRequest: (animeId,callback) ->
     @chiika.logger.script("[yellow](#{@name}-Anime-Search) Searching for #{animeId}!")
 
@@ -972,11 +1066,11 @@ module.exports = class MyAnimelist
         series: seriesStatus
         defaultAction: userStatusText
         actions:[
-          { name: 'Watching', action: 'status-action-watching' },
-          { name: 'Completed', action: 'status-action-completed' }
-          { name: 'Plan to Watch', action: 'status-action-ptw' },
-          { name: 'On Hold', action: 'status-action-onhold' },
-          { name: 'Dropped', action: 'status-action-dropped' }
+          { name: 'Watching', action: 'status-action-watching', identifier:"1" },
+          { name: 'Completed', action: 'status-action-completed', identifier:"2" }
+          { name: 'Plan to Watch', action: 'status-action-ptw',identifier:"6" },
+          { name: 'On Hold', action: 'status-action-onhold',identifier:"3" },
+          { name: 'Dropped', action: 'status-action-dropped',identifier:"4" }
         ]
       synopsis: synopsis
       cover: image
