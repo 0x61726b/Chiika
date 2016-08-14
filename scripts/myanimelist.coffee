@@ -682,6 +682,7 @@ module.exports = class MyAnimelist
     detailsLayout =
       id: id
       title: title
+      author: author.name
       genres: genres
       list: list
       status:

@@ -56,8 +56,13 @@
   display: inline-block;
   padding-bottom: 8px;
 }
-.detailsPage-row > h1 {
+.detailsPage-row > h1,
+.detailsPage-row > h2 {
   margin-bottom: 2px;
+}
+.detailsPage-row > h2 {
+  font-size: 20px;
+  opacity: 0.87;
 }
 .detailsPage-genre > ul {
   margin: 0;
@@ -257,14 +262,15 @@
 }
 .characters-images {
   display: flex;
-  justify-content: space-around;
+  overflow-x: auto;
 }
 .characters-images > div {
   transition: all .3s;
+  cursor: pointer;
 }
 
 .characters-images > div:hover {
-  transform: scale(1.1);
+//  transform: scale(1.1);
 }
   .characters-images img {
     width: 100%;
@@ -282,7 +288,7 @@
 /*fab*/
 .fab-container {
   width: 60px;
-  left: 290px;
+  left: 294px;
   bottom: 25px;
   position: fixed;
   display: flex;
@@ -327,10 +333,11 @@
   color: white;
   padding: 4px;
   font-size: 14px;
-  left: 50px;
+  right: 50px;
   border-radius: 4px;
   width: auto;
   white-space: nowrap;
+  top: 8px;
 }
 .fab-container.active .fab-little {
   transform: scale(1);

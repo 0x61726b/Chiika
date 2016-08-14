@@ -150,6 +150,7 @@ module.exports = React.createClass
       <div className="detailsPage-right">
         <div className="detailsPage-row">
           <h1>{ @state.layout.title }</h1>
+          <h2>{ @state.layout.author }</h2>
           <span className="detailsPage-genre">
             <ul>
               {
