@@ -1,5 +1,5 @@
 .listCommon {
-  width:100% !important;
+  width: 100% !important;
   height: 100%;
 }
 /****************************************/
@@ -17,11 +17,6 @@ div.gridbox_material.gridbox table.obj tr td {
   padding-right: 4px;
   padding-left: 4px;
   overflow: hidden;
-}
-div.gridbox_material.gridbox table.hdr td div.hdrcell {
-  overflow: hidden;
-  width: auto;
-  padding-left: 4px;
 }
 div.gridbox_material.gridbox table.hdr td {
   border-bottom: 1px solid $grey-0;
@@ -91,11 +86,11 @@ div.gridbox_material.gridbox table.obj tr.rowselected td:first-child {
 }
 div.gridbox_material.gridbox table.obj.row20px tr.rowselected td {
   border-right-color: #eee;
-  background-color: $grey-2;
+  background-color: $grey-1;
   color: $main-text;
 }
 div.gridbox_material.gridbox table.obj tr td.cellselected {
-  background-color: $grey-2;
+  background-color: $grey-1;
   color: $main-text;
 }
 div.gridbox_material.gridbox .odd_material {
@@ -117,20 +112,28 @@ div.gridbox_material.gridbox .ev_material {
   width: 0;
   height: 0;
 }
-div.gridbox_material.gridbox table.hdr td.dhxgrid_sort_asc_col,
-div.gridbox_material.gridbox table.hdr td.dhxgrid_sort_desc_col {
-  //background-image: url("imgs/dhxgrid_material/sort_desc.gif");
-  background-position: 3px 7px;
-  background-repeat: no-repeat;
+div.gridbox_material.gridbox table.hdr td div.hdrcell {
+  overflow: hidden;
+  width: auto;
+  padding-left: 4px;
+  font-size: 12px;
+  font-family: Montserrat, 'sans-serif';
+  padding-top: 1px;
+  padding-bottom: 1px;
 }
+div.gridbox_material.gridbox table.hdr td.dhxgrid_sort_asc_col,
+div.gridbox_material.gridbox table.hdr td.dhxgrid_sort_desc_col,{
+  padding-right: 0;
+  background: none;
+  color: $accent;
+  position: relative;
+}
+
 div.gridbox_material.gridbox table.hdr td.dhxgrid_sort_asc_col div,
 div.gridbox_material.gridbox table.hdr td.dhxgrid_sort_desc_col div {
-  padding-left: 18px;
-  padding-right: 14px;
+  padding-right: 0px;
 }
-div.gridbox_material.gridbox table.hdr td.dhxgrid_sort_asc_col {
-  //background-image: url("imgs/dhxgrid_material/sort_asc.gif");
-}
+
 div.gridbox_material.gridbox table.obj.row20px tr td img {
   display: block;
 }
@@ -139,8 +142,26 @@ div.gridbox_material.gridbox table.obj.row20px tr td.group_row img {
   display: inline;
 }
 div.gridbox_material.gridbox table.obj tr:hover td {
-  background-color: $grey-1;
+  background-color: $grey-0;
 }
+/*****************************************************/
+.list-last-updated,
+.list-season {
+  text-align: right;
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: 12px!important;
+}
+.list-score.not-scored {
+  opacity: 0.6;
+}
+.list-last-updated span {
+  font-size: 12px!important;
+}
+.list-last-updated span,
+.list-score {
+  font-weight: 500;
+};
 /*****************************************************/
 #gridWatchingList {}
 #gridPlantoWatchList {}
@@ -185,8 +206,7 @@ div.gridbox_material.gridbox table.obj tr:hover td {
   color: $main-text;
   border: none;
 }
-.react-tabs [role=tab][aria-disabled=true] {}
-,
+
 .react-tabs [role=tab]:focus,
 .react-tabs [role=tab][aria-disabled=true]:focus,
 .react-tabs [role=tab][aria-selected=false]:focus,

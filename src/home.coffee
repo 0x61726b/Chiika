@@ -60,6 +60,8 @@ module.exports = React.createClass
 
     window.$ = require 'jquery'
 
+    $('.card.image-card').click ->
+      $('.card.image-card').toggleClass "expanded"
     #$.bridget 'sortable',require('D:/Arken/C++/ElectronProjects/Chiika/Sortable.js')
     # $.bridget 'draggabilly',draggabilly
     #

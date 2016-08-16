@@ -69,6 +69,7 @@ eXcell_typeWithIcon = (cell)->
     if val == 'Manhua'
       val = ''
 
+    this.cell.classList.add "list-type"
     @setCValue('<i class="'+val+'"></i>')
   @baka = 42
     #
@@ -99,6 +100,7 @@ eXcell_lastUpdated = (cell)->
     dateValue = val.substring(indexOfDash + 2, val.length)
     text = val.substring(0,indexOfDash)
     @setCValue("<span sort-data=#{dateValue}>#{text}</span>")
+    this.cell.firstChild.parentNode.classList.add 'list-last-updated'
   @getValue = ->
     parseInt(this.cell.firstChild.getAttribute('sort-data'))
   @baka = 42
@@ -147,6 +149,7 @@ eXcell_generic = (cell)->
   @isDisabled = ->
     return true
   @setValue = (val) ->
+    this.cell.classList.add "list-score"
     @setCValue(val)
   @baka = 42
     #
@@ -181,6 +184,7 @@ eXcell_animeProgress = (cell)->
     @setCValue("<div class='progress-bar thin' sort-data=#{val}>
     <div class='indigo' style=width:#{val}%; />
     </div>",val)
+    this.cell.classList.add "list-progress-bar"
   @getValue = ->
     parseInt(this.cell.firstChild.getAttribute('sort-data'))
   @baka = 42
@@ -224,6 +228,7 @@ eXcell_title = (cell)->
     return true
   @setValue = (val) ->
     @setCValue(val)
+    this.cell.classList.add "list-title"
   @baka = 42
     #
 window.eXcell_animeTitle = eXcell_title
@@ -249,6 +254,7 @@ eXcell_season = (cell)->
     return true
   @setValue = (val) ->
     @setCValue(val)
+    this.cell.classList.add "list-season"
   @baka = 42
     #
 window.eXcell_animeSeason = eXcell_season
