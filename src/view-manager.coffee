@@ -25,6 +25,12 @@ module.exports = class ViewManager
   #
   tabViewTabIndexCounter: []
 
+  #
+  # Records the tab index of a sorted column with sort type/dir
+  #
+  tabViewSortInfo: []
+
+
   scrollData: []
 
   getComponent: (name) ->
@@ -44,6 +50,26 @@ module.exports = class ViewManager
     if @scrollData[viewName]?
       @scrollData[viewName].scrollData[index] = $(".objbox").scrollTop()
 
+
+  onTabSorted: (viewName,tabIndex,sortedColumn,type,direction) ->
+    oldData = _.find @tabViewSortInfo, (o) -> o.viewName == viewName && o.tabIndex == tabIndex
+    index   = _.indexOf @tabViewSortInfo, oldData
+
+    if oldData?
+      oldData.column = sortedColumn
+      oldData.direction = direction
+      @tabViewSortInfo.splice(index,1,oldData)
+    else
+      sortInfo = { viewName: viewName, tabIndex: tabIndex, column: sortedColumn, type: type, direction: direction }
+      @tabViewSortInfo.push sortInfo
+
+  getTabSortInfo: (viewName,tabIndex) ->
+    sortInfo = _.find @tabViewSortInfo, (o) -> o.viewName == viewName && o.tabIndex == tabIndex
+
+    if sortInfo?
+      sortInfo
+    else
+      null
   getTabScrollAmount: (viewName,index) ->
     if @scrollData[viewName]?
       scroll = @scrollData[viewName].scrollData[index]

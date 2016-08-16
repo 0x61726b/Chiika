@@ -18,6 +18,9 @@
 #--------------------
 #
 #--------------------
+
+
+
 {BrowserWindow, ipcMain,globalShortcut,Tray,Menu,app} = require 'electron'
 
 yargs                             = require 'yargs'
@@ -51,7 +54,6 @@ AppOptions                        = require './options'
 AppDelegate                       = require './app-delegate'
 
 
-
 process.on 'uncaughtException',(err) ->
   # chiika.logger.log 'error', 'Fatal uncaught exception crashed cluster', err, (err, level, msg, meta) =>
   #   process.exit(1);
@@ -72,6 +74,7 @@ process.on 'uncaughtException',(err) ->
   else
     chiika.logger.error("Hmm....")
     chiika.logger.error(err)
+
 
 module.exports =
 class Application
@@ -130,6 +133,7 @@ class Application
 
 
 
+
   run: ->
     #
     #
@@ -172,6 +176,7 @@ class Application
           chiika.windowManager.createLoginWindow()
 
 
+
     if userCount > 0
       # If there are no UI items
       # compile scripts first
@@ -179,12 +184,12 @@ class Application
       # preload them first so when script is ready, they can access them right of the bat
       # after preload and script compile, check if the views need update
       # if they do, call view-update event so script can respond
+      @apiManager.preCompile().then =>
+        @apiManager.postCompile()
 
-      @viewManager.preload().then =>
-        chiika.logger.verbose("Preloading UI complete!")
-
-        @apiManager.preCompile().then =>
-          @apiManager.postCompile()
+        @viewManager.preload().then =>
+          chiika.logger.verbose("Preloading UI complete!")
+          @apiManager.postInit()
           chiika.windowManager.createMainWindow()
 
 

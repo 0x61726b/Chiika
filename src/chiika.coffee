@@ -17,6 +17,7 @@
 React = require('react')
 {Router,Route,BrowserHistory} = require('react-router')
 
+Modal = require 'react-modal'
 
 SideMenu = require './side-menu'
 Titlebar = require './titlebar'
@@ -33,7 +34,9 @@ DetailsCardView = require './card-view-details'
 
 Content = React.createClass
   componentDidMount: ->
-
+    console.log "hello"
+    chiika.emitter.on 'open-modal', (args) =>
+      @openModal(args)
   render: () ->
     (<div className="main">
       <div id="titleBar">
@@ -42,14 +45,47 @@ Content = React.createClass
       <div className="content">
         {this.props.props.children}
       </div>
-      <div id="settings">
-        <Settings />
+      <div>
       </div>
     </div>)
 
 RouterContainer = React.createClass
   render: ->
     <div id="appMain"><SideMenu props={this.props} /><Content props={this.props}/></div>
+
+SettingsComponent = React.createClass
+  getInitialState: ->
+    modalOpen: true
+    openModalName: ''
+
+  openModal: (name) ->
+    @setState { modalOpen: true, openModalName: name }
+
+  closeModal: ->
+    @setState { modalOpen: false }
+  render: ->
+    <div>
+      <Modal isOpen={@state.modalOpen}
+      onRequestClose={this.closeModal}
+      shouldCloseOnOverlayClick=true
+      style={{
+        overlay: {
+        },
+        content: {
+          position: 'fixed'
+          right: 0
+          left: 0
+          marginRight: 'auto'
+          marginLeft: 'auto'
+          width: '85%'
+          minHeight: '10em'
+        }
+        }}
+      >
+      <div>hello</div>
+      </Modal>
+    </div>
+
 
 
 ChiikaRouter = React.createClass
@@ -84,7 +120,8 @@ ChiikaRouter = React.createClass
         component: RouterContainer,
         childRoutes: [
           { name:'Home', path: '/Home', component: Home, onEnter: @onEnter },
-          { name:'Details', path: '/details/:id', component: DetailsCardView, onEnter: @onEnter },
+          { name:'Details', path: '/details/:id', component: DetailsCardView, onEnter: @onEnter }
+          { name:'Settings', path: '/Settings', component: SettingsComponent, onEnter: @onEnter }
         ]
     }
     for route in routes
@@ -96,7 +133,6 @@ ChiikaRouter = React.createClass
     routerConfig = @state.routerConfig
 
     @currentRouteName = nextState.location.pathname
-
     # For testing purposes
     # We will get the current route from title when running tests
     document.title = @currentRouteName.replace('/','')

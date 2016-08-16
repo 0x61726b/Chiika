@@ -88,6 +88,7 @@ module.exports = React.createClass
     document.title = @state.viewName  + "##{index}"
 
 
+
   updateGrid: (name) ->
     if @currentGrid?
       @currentGrid.clearAll()
@@ -157,24 +158,44 @@ module.exports = React.createClass
     @currentGrid.init()
     @currentGrid.parse gridConf,"js"
 
+
+    # Filter according to whats inside the search box
     @currentGrid.filterBy(1,$(".form-control").val())
 
-    #@currentGrid.sortRows(1)
+    # Sort rows based on the recorded sort info
+
+    sortInfo = chiika.viewManager.getTabSortInfo(@state.viewName,@state.currentTabIndex)
+    if sortInfo?
+      @currentGrid.sortRows(sortInfo.column,sortInfo.type,sortInfo.direction)
 
     for i in [0...columnList.length]
       column = columnList[i]
       if !column.hidden && column.customSort?
         @currentGrid.setCustomSorting(window.sortFunctions[v.customSort],i)
 
+    #
+    #
+    #
     $(".form-control").on 'input', (e) =>
       @currentGrid.filterBy(1,e.target.value)
 
+
+    #
+    # After sorting, remember the sort preference of a particular tab
+    #
+    @currentGrid.attachEvent 'onAfterSorting', (index,type,direction) =>
+      chiika.viewManager.onTabSorted(@state.viewName,@state.currentTabIndex,index,type,direction)
+
+
+    # When clicked, go to details
     @currentGrid.attachEvent 'onRowDblClicked', (rId,cInd) =>
       for i in  [0...gridConf.data.length]
         if i == rId - 1
           find = gridConf.data[i]
           window.location = "##{@state.viewName}_details/#{find.mal_id}"
 
+
+    # Respect to the container size
     $(window).resize( =>
       if @currentGrid?
         if $(".objbox")[0].scrollHeight > $(".objbox").height()

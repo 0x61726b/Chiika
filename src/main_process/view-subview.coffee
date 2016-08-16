@@ -44,6 +44,23 @@ module.exports = class SubView extends View
   getData: ->
     @dataSource
 
+  setDataArray: (data) ->
+    new Promise (resolve) =>
+      if _.isUndefined data
+        throw new InvalidParameterException("You didn't specify data to be added.")
+
+      chiika.logger.info("Setting data for #{@name}")
+
+      @dataSource = data
+
+      for i in [0...@dataSource.length]
+        if i == @dataSource.length - 1
+          onSaved = (args) =>
+            resolve(args)
+          @db.save @dataSource[i], onSaved
+        else
+          @db.save @dataSource[i], null
+
   #
   # Add a single row to the subview
   #

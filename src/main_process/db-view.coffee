@@ -80,9 +80,9 @@ module.exports = class DbView extends IDb
         if result.exists
           @updateRecords data, (args) =>
             if !_.isUndefined callback
-              callback(args)
+              callback?(args)
         else
-          callback( {rows: 1 })
+          callback?( {rows: 1 })
 
 
     if !@isReady()

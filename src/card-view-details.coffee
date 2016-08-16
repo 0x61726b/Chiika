@@ -47,8 +47,12 @@ module.exports = React.createClass
     console.log @props
 
     chiika.ipc.getDetailsLayout id,@props.route.viewName,owner, (args) =>
-      @setState { layout: args }
+      @setState { layout: args.layout }
       console.log @state.layout
+
+      if args.updated
+        #Refresh view data
+        chiika.ipc.sendMessage 'get-view-data'
 
 
   #
@@ -149,19 +153,17 @@ module.exports = React.createClass
       if current == currentOld
         return
 
-      if current >= 0 && current <= total
+      if current > 0
         console.log "Updating from #{currentOld} to #{current}"
 
         findItem.current = current
-        @onAction('progress-update',{ item: { current: current, total: total },viewName: @props.route.viewName },@onUpdate)
+        @onAction('progress-update',{ item: { title: itemTitle,current: current, total: total },viewName: @props.route.viewName },@onUpdate)
 
         # Update input
         $($(e.target).next()).find('input').attr('placeholder',current)
         $($(e.target)).attr('placeholder',current)
-      else if current > total
+      else
         @onActionError("You thought you could do that,didnt you?")
-      else if current < 0
-        @onActionError("Baka.")
     else
       @onActionError("There was a problem updating the progress.")
 
@@ -177,12 +179,12 @@ module.exports = React.createClass
       current = parseInt(findItem.current)
       total = parseInt(findItem.total)
 
-      if current > 0 && current <= total
+      if current > 0
         current--
         console.log "Updating from #{current+1} to #{current}"
 
         findItem.current = current
-        @onAction('progress-update',{ item: { current: current, total: total },viewName: @props.route.viewName },@onUpdate)
+        @onAction('progress-update',{ item: { title:itemTitle, current: current, total: total },viewName: @props.route.viewName },@onUpdate)
 
         # Update input
         $($(e.target).next()).find('input').attr('placeholder',current)
@@ -197,16 +199,17 @@ module.exports = React.createClass
 
     findItem = _.find @state.layout.status.items, (o) -> o.title == itemTitle
 
+
     if findItem?
       current = parseInt(findItem.current)
       total = parseInt(findItem.total)
 
-      if current >= 0 && current <= total
+      if current >= 0
         current++
-        console.log "Updating from #{current-1} to #{current}"
+        console.log "Updating #{itemTitle} from #{current-1} to #{current}"
 
         findItem.current = current
-        @onAction('progress-update',{ item: { current: current, total: total },viewName: @props.route.viewName },@onUpdate)
+        @onAction('progress-update',{ item: { title:itemTitle, current: current, total: total },viewName: @props.route.viewName },@onUpdate)
 
         # Update input
         $($(e.target).prev()).find('input').attr('placeholder',current)
@@ -221,9 +224,10 @@ module.exports = React.createClass
     console.log $("#scoreSelect option[value=#{value}]")
     $("#scoreSelect option[value=#{value}]").attr('selected','selected');
 
-    @chart.data.datasets[0].data[0] = parseInt($(e.target).val())
-    @chart.data.datasets[0].data[1] = 10 - parseInt($(e.target).val())
-    @chart.update()
+    if @state.layout.scoring.type == 'normal'
+      @chart.data.datasets[0].data[0] = parseInt($(e.target).val())
+      @chart.data.datasets[0].data[1] = 10 - parseInt($(e.target).val())
+      @chart.update()
 
 
     @onAction('score-update',{ item: { current: parseInt(value) },viewName: @props.route.viewName },@onUpdate)
@@ -323,7 +327,12 @@ module.exports = React.createClass
       <div className="detailsPage-right">
         <div className="detailsPage-row">
           <h1>{ @state.layout.title }</h1>
-          <h2>{ @state.layout.author }</h2>
+          <h2>
+          {
+            if @state.layout.params?
+              @state.layout.params.author.name
+            }
+          </h2>
           <span className="detailsPage-genre">
             <ul>
               {

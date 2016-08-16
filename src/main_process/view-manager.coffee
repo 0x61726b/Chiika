@@ -68,14 +68,11 @@ module.exports = class ViewManager
         promise = view.db.load()
         async.push promise
         promise.then (data) =>
-          view.setDataSource(data)
-
           if data.length == 0
             view.needUpdate = true
           else
             chiika.logger.info("View #{view.name} has data length of #{data.length}")
-
-            view.loadData(data)
+            view.setDataSource(data)
       _when.all(async).then =>
         _.forEach @views, (view) =>
           if view.needUpdate
@@ -128,7 +125,7 @@ module.exports = class ViewManager
 
 
       chiika.uiManager.addUIItem uiItem
-      newView = new TabView(view)
+      newView = new SubView(view)
 
     else if view.displayType == "subview"
       newView = new SubView(view)

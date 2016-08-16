@@ -65,27 +65,29 @@ module.exports = class DbCustom extends IDb
   # @option object [String] value
   # @param [Object] callback Function which will be called upon insert
   # @todo Add parameter validation
-  addKey: (object,callback) ->
-    onInsertOrUpdate = (insert,update) =>
-      if insert? # Insert
-        @keys.push object
-      if update?
-        findItem = _.find @keys, (o) -> o.name == object.name
-        index = _.indexOf @keys,findItem
-        if findItem?
-          @keys.splice(index,1,findItem)
+  addKey: (data,callback) ->
+    saveData = (data) =>
+      @insertRecord data, (result) =>
+        #If it exists already,it won't insert, so update
+        if result.exists
+          @updateRecords data, (args) =>
+            callback?(args)
+
+            findKey = _.find @keys, { name: name }
+            index   = _.indexOf @keys, findKey
+
+            if index != -1
+              @keys.splice(index,1,data)
         else
-          chiika.logger.error("There was an update op but the local array doesn't have the entry.")
-      callback?()
+          callback?( {rows: 1 })
+          @keys.push data
 
-    onInsertComplete = (result) =>
-      if result.exists
-        @updateRecords object,=>
-          onInsertOrUpdate?(null,true)
-      else
-        onInsertOrUpdate?(true,null)
 
-    @insertRecord object,onInsertComplete
+    if !@isReady()
+      @on 'load', =>
+        saveData(data)
+    else
+      saveData(data)
 
   #
   # Updates a row or rows where key==value

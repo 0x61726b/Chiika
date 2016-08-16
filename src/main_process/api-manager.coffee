@@ -61,6 +61,7 @@ module.exports = class APIManager
     _.forEach @activeScripts, (script) =>
       @initializeScript(script.name)
 
+
   postCompile: () ->
     _.forEach @activeScripts, (v,k) =>
       instance = v

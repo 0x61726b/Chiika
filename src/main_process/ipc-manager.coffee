@@ -228,7 +228,21 @@ module.exports = class IpcManager
 
   getViewData: ->
     @receiveAnswer 'get-view-data', (event,args) =>
-      chiika.viewManager.getViews()
+      mainViews = chiika.viewManager.getViews()
+      rendererViews = []
+
+      _.forEach mainViews,(view) =>
+        newView = {}
+        newView.displayType = view.displayType
+        newView.name        = view.name
+        newView.owner       = view.owner
+        if view.displayType == 'TabGridView'
+          onGetGridData = (tabData) =>
+            newView.dataSource = tabData
+            rendererViews.push newView
+
+          chiika.chiikaApi.emit 'get-grid-data', { calling: view.owner, view: view,data: view.dataSource, return: onGetGridData }
+      rendererViews
 
   getViewDataByName: ->
     @receiveAnswer 'get-view-by-name', (event,args) =>

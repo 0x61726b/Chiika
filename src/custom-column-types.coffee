@@ -14,6 +14,9 @@
 #Description:
 #----------------------------------------------------------------------------
 
+moment                        = require 'moment'
+string                        = require 'string'
+
 window.sortFunctions = {}
 ###########
 #
@@ -69,11 +72,64 @@ eXcell_typeWithIcon = (cell)->
     @setCValue('<i class="'+val+'"></i>')
   @baka = 42
     #
-window.eXcell_animeType = eXcell_typeWithIcon
-window.eXcell_animeType.prototype = new eXcell
+window.eXcell_animeTypeText = eXcell_typeWithIcon
+window.eXcell_animeTypeText.prototype = new eXcell
 
 window.eXcell_mangaType = eXcell_typeWithIcon
 window.eXcell_mangaType.prototype = new eXcell
+
+
+
+###########
+#
+# Last Updated
+#
+###########
+eXcell_lastUpdated = (cell)->
+  if cell
+    @cell = cell
+    @grid = @cell.parentNode.grid
+
+  @edit = ->
+    #
+  @isDisabled = ->
+    return true
+  @setValue = (val) ->
+    indexOfDash = val.indexOf('-')
+    dateValue = val.substring(indexOfDash + 2, val.length)
+    text = val.substring(0,indexOfDash)
+    @setCValue("<span sort-data=#{dateValue}>#{text}</span>")
+  @getValue = ->
+    parseInt(this.cell.firstChild.getAttribute('sort-data'))
+  @baka = 42
+
+window.eXcell_animeLastUpdatedText = eXcell_lastUpdated
+window.eXcell_animeLastUpdatedText.prototype = new eXcell
+
+window.eXcell_mangaLastUpdatedText = eXcell_lastUpdated
+window.eXcell_mangaLastUpdatedText.prototype = new eXcell
+
+
+###########
+#
+# Average Score
+#
+###########
+eXcell_avgScore = (cell)->
+  if cell
+    @cell = cell
+    @grid = @cell.parentNode.grid
+
+  @edit = ->
+    #
+  @isDisabled = ->
+    return true
+  @setValue = (val) ->
+    @setCValue(val)
+  @baka = 42
+
+window.eXcell_animeScoreAverage = eXcell_avgScore
+window.eXcell_animeScoreAverage.prototype = new eXcell
 
 
 ###########
@@ -81,7 +137,7 @@ window.eXcell_mangaType.prototype = new eXcell
 # Score
 #
 ###########
-eXcell_score = (cell)->
+eXcell_generic = (cell)->
   if cell
     @cell = cell
     @grid = @cell.parentNode.grid
@@ -94,16 +150,16 @@ eXcell_score = (cell)->
     @setCValue(val)
   @baka = 42
     #
-window.eXcell_animeScore = eXcell_score
+window.eXcell_animeScore = eXcell_generic
 window.eXcell_animeScore.prototype = new eXcell
 
-window.eXcell_mangaScore = eXcell_score
+window.eXcell_mangaScore = eXcell_generic
 window.eXcell_mangaScore.prototype = new eXcell
 
-window.eXcell_animeScoreAverage = eXcell_score
+window.eXcell_animeScoreAverage = eXcell_generic
 window.eXcell_animeScoreAverage.prototype = new eXcell
 
-window.eXcell_mangaScoreAverage = eXcell_score
+window.eXcell_mangaScoreAverage = eXcell_generic
 window.eXcell_mangaScoreAverage.prototype = new eXcell
 
 
@@ -146,7 +202,7 @@ eXcell_animeProgress = (cell)->
 window.eXcell_animeProgress = eXcell_animeProgress
 window.eXcell_animeProgress.prototype = new eXcell
 
-window.eXcell_mangaProgress = eXcell_animeProgress
+window.eXcell_mangaProgress = eXcell_generic
 window.eXcell_mangaProgress.prototype = new eXcell
 
 

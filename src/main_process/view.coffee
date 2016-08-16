@@ -24,12 +24,13 @@ module.exports = class View
   displayType: null
   needUpdate: false
   dataSource: []
+  processedDataSource: []
   constructor: (params={}) ->
     { @name, @displayName,@displayType,@owner, @category } = params
 
     @needUpdate = false
     @dataSource = []
-
+    @processedDataSource = []
 
 
   setDatabaseInterface: (db) ->
