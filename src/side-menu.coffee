@@ -18,7 +18,12 @@ React = require('react')
 {Router,Route,BrowserHistory,Link} = require('react-router')
 {BrowserWindow, ipcRenderer,remote} = require 'electron'
 
-_                 = require 'lodash'
+
+_find                   = require 'lodash/collection/find'
+_indexOf                = require 'lodash/array/indexOf'
+_forEach                = require 'lodash.foreach'
+_filter                 = require 'lodash/collection/filter'
+
 path              = require 'path'
 
 #Views
@@ -64,13 +69,13 @@ SideMenu = React.createClass
       @pendingUiItems = []
       @pendingCategories = []
 
-      _.forEach menuItems, (v,k) =>
+      _forEach menuItems, (v,k) =>
         #Add category
 
-        if _.indexOf(@pendingCategories, _.find(@pendingCategories, (o) -> return o == v.category )) == -1
+        if _indexOf(@pendingCategories, _find(@pendingCategories, (o) -> return o == v.category )) == -1
           @pendingCategories.push v.category
 
-        if _.indexOf(@pendingUiItems, _.find(@pendingUiItems, (o) -> return v.name == o.name )) == -1
+        if _indexOf(@pendingUiItems, _find(@pendingUiItems, (o) -> return v.name == o.name )) == -1
           @pendingUiItems.push v
 
       if @isMounted()
@@ -91,14 +96,14 @@ SideMenu = React.createClass
     <Link className="side-menu-link #{@isMenuItemActive(item.name)}" to="#{item.name}" key={i}><li className="side-menu-li" key={i}>{item.display}</li></Link>
 
   renderMenuItems: (category) ->
-    menuItemsOfThisCategory = _.filter(@state.uiItems, (o) ->
+    menuItemsOfThisCategory = _filter(@state.uiItems, (o) ->
       return o.category == category)
     if menuItemsOfThisCategory.length > 0
       menuItemsOfThisCategory.map (menuItem,j) =>
         @renderMenuItem(menuItem,j + 1)
 
   settingsClick: ->
-    window.location = '#Settings'
+    window.location = @props.props.location.pathname + '/Settings'
 
   render: () ->
     (<div className="sidebar">
@@ -130,7 +135,7 @@ SideMenu = React.createClass
               </div>
           }
         </ul>
-        <Link className="button raised red" to="Home" state={{ settings:true }} id="settings-button">Settings</Link>
+        <Link className="button raised red" to="#{@props.props.location.pathname}" query={{ settings:true,location:'App' }} id="settings-button">Settings</Link>
       </div>
     </div>)
 

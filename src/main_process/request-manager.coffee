@@ -14,26 +14,26 @@
 #Description:
 #----------------------------------------------------------------------------
 
-request           = require 'request'
-_                 = require 'lodash'
-{RequestErrorException} = require './exceptions'
+request                       = require 'request'
+_assign                       = require 'lodash.assign'
+{RequestErrorException}       = require './exceptions'
 
 module.exports = class RequestManager
+  constructor: ->
+    @defaultHeaders = {
+      'User-Agent': 'ChiikaDesktopApplication',
+      'Content-Type' : 'application/x-www-form-urlencoded'
+    }
   makeGetRequest: (url,headers,callback) ->
 
-    if _.isUndefined headers
-      headers = {
-        'User-Agent': 'ChiikaDesktopApplication',
-        'Content-Type' : 'application/x-www-form-urlencoded'
-      }
-    else
-      _.assign headers, { 'User-Agent': 'ChiikaDesktopApplication','Content-Type' : 'application/x-www-form-urlencoded' }
+    if headers?
+      _assign headers, @defaultHeaders
 
     onRequestReturn = (error,response,body) ->
       if error
         chiika.logger.warn("Request has failed with status code: #{response.statusCode}")
       else
-        if !_.isUndefined response
+        if response?
           if response.statusCode != 200
             chiika.logger.warn("Request returned successful but the status code is #{response.statusCode}")
           else
@@ -50,19 +50,14 @@ module.exports = class RequestManager
 
   makePostRequest: (url,headers,callback) ->
 
-    if _.isUndefined headers
-      headers = {
-        'User-Agent': 'ChiikaDesktopApplication',
-        'Content-Type' : 'application/x-www-form-urlencoded'
-      }
-    else
-      _.assign headers, { 'User-Agent': 'ChiikaDesktopApplication','Content-Type' : 'application/x-www-form-urlencoded' }
+    if headers?
+      _assign headers, @defaultHeaders
 
     onRequestReturn = (error,response,body) ->
       if error
         chiika.logger.warn("Request has failed with status code: #{response.statusCode}")
       else
-        if !_.isUndefined response
+        if response?
           if response.statusCode != 200
             chiika.logger.warn("Request returned successful but the status code is #{response.statusCode}")
           else
@@ -82,20 +77,16 @@ module.exports = class RequestManager
     form = { username: user.userName, password: user.password }
     auth = { user: user.userName, password: user.password }
 
-    if _.isUndefined headers
-      headers = {
-        'User-Agent': 'ChiikaDesktopApplication',
-        'Content-Type' : 'application/x-www-form-urlencoded'
-      }
-    else
-      _.assign headers, { 'User-Agent': 'ChiikaDesktopApplication','Content-Type' : 'application/x-www-form-urlencoded' }
+    if headers?
+      _assign headers, @defaultHeaders
+
 
     chiika.logger.info("Creating a GET request to URL #{url}")
     onRequestReturn = (error,response,body) ->
       if error
         chiika.logger.warn("Request has failed with status code: #{response.statusCode}")
       else
-        if !_.isUndefined response
+        if response?
           if response.statusCode != 200
             chiika.logger.warn("Request returned successful but the status code is #{response.statusCode}")
           else
@@ -121,20 +112,19 @@ module.exports = class RequestManager
 
     if body?
       contentLength = Buffer.byteLength(body)
-      _.assign form, { data: body }
-      _.assign defaultHeaders, { 'Content-Length', contentLength }
+      _assign form, { data: body }
 
 
-    if _.isUndefined headers
-      headers = defaultHeaders
+    if headers?
+      _assign headers, defaultHeaders
     else
-      _.assign headers, defaultHeaders
+      headers = defaultHeaders
 
     onRequestReturn = (error,response,body) ->
       if error
         chiika.logger.warn("Request has failed with status code: #{response.statusCode}")
       else
-        if !_.isUndefined response
+        if response?
           if response.statusCode != 200
             chiika.logger.warn("Request returned successful but the status code is #{response.statusCode}")
           else
@@ -144,6 +134,6 @@ module.exports = class RequestManager
           chiika.logger.error(body)
       callback(error,response,body)
     chiika.logger.info("Creating a POSTAUTH request to URL #{url}")
-    chiika.logger.debug("Creating a POSTAUTH request to URL #{url} - #{user.userName} - #{user.password} - Content length #{contentLength}")
+    chiika.logger.verbose("Creating a POSTAUTH request to URL #{url} - #{user.userName} - #{user.password} - Content length #{contentLength}")
 
     request.post { url: url, form: form, headers:headers, auth: auth }, onRequestReturn

@@ -13,15 +13,9 @@
 #authors: arkenthera
 #Description:
 #----------------------------------------------------------------------------
-{Emitter} = require 'event-kit'
-{BrowserWindow, ipcRenderer,remote} = require 'electron'
-
-
-_                     = require 'lodash'
-fs                    = require 'fs'
-path                  = require 'path'
-
-_when                 = require 'when'
+{Emitter}                   = require 'event-kit'
+{ipcRenderer}               = require 'electron'
+_when                       = require 'when'
 
 module.exports = class ChiikaIPC
   preloadPromises: []
@@ -40,7 +34,6 @@ module.exports = class ChiikaIPC
     _when.all(@preloadPromises).then =>
       @sendMessage('ui-init-complete')
 
-
   refreshUIData: (callback) ->
     @receive 'get-ui-data-response',(event,args) =>
       callback(args)
@@ -48,6 +41,13 @@ module.exports = class ChiikaIPC
   getViewData: (callback) ->
     @receive 'get-view-data-response', (event,args) =>
       callback(args)
+
+  getSettings: (callback) ->
+    @receive 'get-settings-data-response',(event,args) =>
+      callback(args)
+
+  setOption: (name,value) ->
+    @sendMessage 'set-settings-option', { name: name, value: value }
 
   getUIData: ->
     @preloadPromises.push @sendReceiveIPC 'get-ui-data',{}, (event,defer,args) =>

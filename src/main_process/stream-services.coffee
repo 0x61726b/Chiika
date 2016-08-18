@@ -14,7 +14,7 @@
 #//Description:
 #//----------------------------------------------------------------------------
 
-_ = require 'lodash'
+
 stringjs = require 'string'
 
 module.exports = class StreamServices

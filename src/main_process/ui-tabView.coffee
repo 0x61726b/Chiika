@@ -14,7 +14,7 @@
 #Description:
 #----------------------------------------------------------------------------
 
-_         = require 'lodash'
+
 _when     = require 'when'
 UIItem    = require './ui-item'
 

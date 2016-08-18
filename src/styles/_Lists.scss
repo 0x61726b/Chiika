@@ -144,6 +144,27 @@ div.gridbox_material.gridbox table.obj.row20px tr td.group_row img {
 div.gridbox_material.gridbox table.obj tr:hover td {
   background-color: $grey-0;
 }
+
+/* Failure attempt */
+// .dhxtabbar_tab_actv {
+//   color: $main-text!important;
+//   background-color: inherit!important;
+//   border: none;
+//   border-bottom: 2px solid $accent;
+// }
+// .dhxtabbar_tab {
+//   color: $main-text!important;
+//   border: none;
+// }
+// .dhxtabbar_tabs_base {
+//   display: inline-block;
+//   cursor: default;
+//   background-color: inherit;
+//   padding: 4px;
+//   text-align: center;
+// }
+
+/* Failure attempt end */
 /*****************************************************/
 .list-last-updated,
 .list-season {
@@ -163,11 +184,7 @@ div.gridbox_material.gridbox table.obj tr:hover td {
   font-weight: 500;
 };
 /*****************************************************/
-#gridWatchingList {}
-#gridPlantoWatchList {}
-#gridDroppedList {}
-#gridOnHoldList {}
-#gridCompletedList {}
+
 .react-tabs {
   background-color: inherit;
 }

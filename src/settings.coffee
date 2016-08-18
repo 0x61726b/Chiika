@@ -14,47 +14,103 @@
 #Description:
 #----------------------------------------------------------------------------
 
-React = require('react')
+React               = require('react')
+{Link}              = require('react-router')
 
 
-{Emitter} = require 'event-kit'
+CheckboxOption = React.createClass
+  getInitialState: ->
+    label: ''
+    id:''
+    checked: false
+  componentWillReceiveProps: (props) ->
+    @setState { label: props.label, checked: chiika.getOption(props.id),id : props.id }
+
+  componentDidMount: ->
+    @setState { label: @props.label, checked: chiika.getOption(@props.id),id : @props.id }
+
+  onChange: (e) ->
+    @setState { checked: $(e.target).prop('checked')}
+
+    chiika.setOption(@state.id,$(e.target).prop('checked'))
+  render: ->
+    <div>
+      <input type="checkbox" className="switch thin" id="#{@state.label}" onChange={@onChange} checked={@state.checked} />
+      <label htmlFor="#{@state.label}" className="indigo">
+        <p>{ @state.label }</p>
+      </label>
+    </div>
+
+AppSettings = React.createClass
+  render: ->
+    <div className="card">
+      <CheckboxOption label="Remember Window Position & Size" id="RememberWindowSizeAndPosition" />
+      <CheckboxOption label="Launch on startup" id="LaunchOnStartup" />
+      <CheckboxOption label="Minimize when clicked close" id="MinimizeWhenClickedClose" />
+      <CheckboxOption label="Launch minimized on startup" id="LaunchMinimized" />
+      <CheckboxOption label="Check for Updates" id="CheckForUpdates" />
+      <CheckboxOption label="Disable Bubble Notifications" id="DisableBubbleNotifications" />
+    </div>
+
+ListGeneral = React.createClass
+  componentDidMount: () ->
+
+  render: ->
+    <div>
+      <div className="card">
+        <div className="title">
+          <h4>Grid</h4>
+        </div>
+        <CheckboxOption label="Filter grid immediately" id="FilterGridImmediately" />
+      </div>
+      <div className="card">
+        <div className="title">
+          <h4>Tabs</h4>
+        </div>
+        <div>
+          <CheckboxOption label="Remember sorting preference" id="RememberSortingPreference" />
+          <CheckboxOption label="Remember scroll & tab position" id="RememberScrollTabPosition" />
+        </div>
+      </div>
+    </div>
 
 module.exports = React.createClass
+  getInitialState: ->
+    currentRoute: 'App'
+  componentWillReceiveProps: (props) ->
+    @setState { currentRoute: props.props.location.query.location }
+  componentDidMount: ->
+    @setState { currentRoute: @props.props.location.query.location }
+  isMenuItemActive: (path) ->
+    if path == @state.currentRoute
+      'active'
+    else
+      ''
   render: ->
     <div className="settingsModal">
       <div className="navigation">
         <h5>Settings</h5>
         <ul>
           <p className="list-title">General</p>
-          <a id="window" className="side-menu-link active">
-            <li>Window</li>
-          </a>
-          <a id="account" className="side-menu-link">
+          <Link className="side-menu-link #{@isMenuItemActive('App')}" to="#{@props.props.location.pathname}" query={{ settings:true, location: 'App' }}>
+            <li>Application</li>
+          </Link>
+          <Link className="side-menu-link #{@isMenuItemActive('Account')}" to="#{@props.props.location.pathname}" query={{ settings:true, location: 'Account' }}>
             <li>Account</li>
-          </a>
-          <a className="side-menu-link">
-            <li>Page 1</li>
-          </a>
+          </Link>
           <p className="list-title">Lists</p>
-          <a className="side-menu-link">
-            <li>Page 1</li>
-          </a>
-          <a className="side-menu-link">
-            <li>Page 1</li>
-          </a>
-          <p className="list-title">Accounts</p>
-          <a className="side-menu-link">
-            <li>Page 1</li>
-          </a>
-          <button className="button raised red"> Close </button>
+          <Link className="side-menu-link #{@isMenuItemActive('ListGeneral')}" to="#{@props.props.location.pathname}" query={{ settings:true, location: 'ListGeneral' }}>
+            <li>General</li>
+          </Link>
         </ul>
       </div>
       <div className="settings-page">
-        <h2>Settings Page Title</h2>
-        <div className="card">
-          <div className="title">
-            <h4>Settings Group Tiddddddddddddtel</h4>
-          </div>
-        </div>
+        <h2>{ @state.currentRoute }</h2>
+        {
+          if @state.currentRoute == 'App'
+            <AppSettings />
+          else if @state.currentRoute == 'ListGeneral'
+            <ListGeneral {...@props} />
+        }
       </div>
     </div>

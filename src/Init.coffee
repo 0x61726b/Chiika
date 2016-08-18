@@ -18,13 +18,13 @@ ReactDOM                 = require "react-dom"
 
 Chiika                   = require "../chiika"
 LoadingScreen            = require '../loading-screen'
-
+#
 Environment              = require '../chiika-environment'
 
 Col                      = require '../custom-column-types'
 
 window.$ = window.jQuery = require 'jquery'
-Bundle                  = require '../bundleJs.js'
+
 
 
 $ ->
@@ -45,7 +45,3 @@ $ ->
 
 
   chiika.emitter.emit 'reinitialize-ui', { delay: 100 }
-
-
-
-  #ReactDOM.render(React.createElement(Chiika), document.getElementById('app'))

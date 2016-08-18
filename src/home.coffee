@@ -16,9 +16,7 @@
 
 React                               = require('react')
 
-_                                   = require 'lodash'
 Chart                               = require 'chart.js'
-jQBridger                           = require 'jquery-bridget'
 #Views
 
 module.exports = React.createClass

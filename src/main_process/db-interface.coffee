@@ -15,7 +15,9 @@
 #----------------------------------------------------------------------------
 NoSQL     = require 'nosql'
 path      = require 'path'
-_         = require 'lodash'
+_forOwn   = require 'lodash.forown'
+_forEach  = require 'lodash.foreach'
+_isArray  = require 'lodash.isarray'
 _when     = require 'when'
 colors    = require 'colors'
 {Emitter} = require 'event-kit'
@@ -139,7 +141,7 @@ module.exports = class IDb
       key = Object.keys(doc)[0]
 
       if key == Object.keys(record)[0] && record[key] == doc[key]
-        _.forOwn record,(v,k) =>
+        _forOwn record,(v,k) =>
           doc[k] = v
         affectedRows++
       doc
@@ -175,10 +177,10 @@ module.exports = class IDb
     removeFnc = (doc) ->
       key = Object.keys(doc)[0]
       removeThisRecord = false
-      if !_.isArray record
+      if !_isArray record
         throw new InvalidParameterException("You have to supply array of keys.")
       else
-        _.forEach record, (o) ->
+        _forEach record, (o) ->
           firstKey = Object.keys(o)[0]
           if firstKey == key && o[key] == doc[key]
             removeThisRecord = true
@@ -200,7 +202,7 @@ module.exports = class IDb
     onAll = (data) =>
       exists = false
 
-      _.forEach data, (v,k) =>
+      _forEach data, (v,k) =>
         firstKey = Object.keys(v)[0]
         if firstKey == Object.keys(key)[0] && v[firstKey] == key[firstKey]
           exists = true

@@ -23,7 +23,7 @@ DbView          = require './db-view'
 
 {Emitter}       = require 'event-kit'
 
-_               = require 'lodash'
+_find           = require 'lodash/collection/find'
 _when           = require 'when'
 
 module.exports = class DatabaseManager
@@ -47,7 +47,7 @@ module.exports = class DatabaseManager
 
   # @todo Make it so that this returns same instance with same view name
   createViewDb: (viewName) ->
-    instance = _.find @instances, { viewName: viewName }
+    instance = _find @instances, { viewName: viewName }
     if instance?
       chiika.logger.info("[magenta](Database-Manager) Returning existing database instance for view #{viewName}")
       return instance

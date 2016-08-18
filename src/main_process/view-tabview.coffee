@@ -14,7 +14,6 @@
 #Description:
 #----------------------------------------------------------------------------
 
-_         = require 'lodash'
 _when     = require 'when'
 View    = require './view'
 
@@ -55,23 +54,6 @@ module.exports = class TabView extends View
           resolve()
         chiika.logger.info("Updating tab data #{tab.name}")
         @db.save(tab,onSaved)
-
-      # updated = false
-      # updatedTab = ""
-      #
-      # _.forEach @dataSource, (tab) =>
-      #   find = _.find tab.data, (o) -> o[key] == data[key]
-      #   index = _.indexOf tab.data, find
-      #
-      #   if index != -1
-      #     tab.data.splice(index,1,data)
-      #     chiika.logger.info("Existing row found for #{@name} at #{tab.name} - #{index}")
-      #     updated = true
-      #     updatedTab = tab.name
-      #     return false
-      #
-      #
-      # if updated
 
 
   #

@@ -15,8 +15,6 @@
 #----------------------------------------------------------------------------
 
 React = require('react')
-{Router,Route,BrowserHistory,Link} = require('react-router')
-
 anime = require 'animejs'
 
 #Views

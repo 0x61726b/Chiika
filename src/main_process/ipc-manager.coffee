@@ -14,11 +14,13 @@
 #Description:
 #----------------------------------------------------------------------------
 
-{BrowserWindow,ipcMain,globalShortcut,Tray,Menu} = require 'electron'
+{BrowserWindow,ipcMain} = require 'electron'
 
-_           = require 'lodash'
-_when       = require 'when'
-string      = require 'string'
+
+_forEach                = require 'lodash.foreach'
+_assign                 = require 'lodash.assign'
+_when                   = require 'when'
+string                  = require 'string'
 
 
 module.exports = class IpcManager
@@ -58,6 +60,7 @@ module.exports = class IpcManager
     @getUserData()
     @getLoginBackgrounds()
     @getServices()
+    @getSettings()
     @login()
     @loginCustom()
     @refreshViewByName()
@@ -66,8 +69,11 @@ module.exports = class IpcManager
     @windowMethodByName()
     @detailsLayoutRequest()
     @detailsAction()
+    @setOption()
 
     @spectron()
+
+
 
 
   #
@@ -185,13 +191,13 @@ module.exports = class IpcManager
   login: ->
     @receive 'set-user-login', (event,args) =>
       returnFromLogin = (result) =>
-        _.assign result,args
+        _assign result,args
         @send(chiika.windowManager.getLoginWindow(), 'login-response', result)
       if args.login?
         chiika.chiikaApi.emit 'set-user-login',{ calling: args.service, user: args.login.user, pass: args.login.pass, return: returnFromLogin}
       else
         params = { return: returnFromLogin,calling: args.service }
-        _.assign params,args
+        _assign params,args
         chiika.chiikaApi.emit 'set-user-login',params
 
     @receive 'continue-from-login', (event,args) =>
@@ -215,6 +221,20 @@ module.exports = class IpcManager
       @send(chiika.windowManager.getWindowByName(window),"spectron-#{args.message}",args)
 
 
+  getSettings: ->
+    @receiveAnswer 'get-settings-data', (event,args) =>
+      settings = chiika.settingsManager.appOptions
+
+      if settings?
+        settings
+
+  setOption: ->
+    @receive 'set-settings-option', (event,args) =>
+      optionName = args.name
+      optionValue = args.value
+
+      chiika.settingsManager.setOption(optionName,optionValue)
+
   #
   # When the main window loads , it will request UI data.
   # We send it here..
@@ -231,7 +251,7 @@ module.exports = class IpcManager
       mainViews = chiika.viewManager.getViews()
       rendererViews = []
 
-      _.forEach mainViews,(view) =>
+      _forEach mainViews,(view) =>
         newView = {}
         newView.displayType = view.displayType
         newView.name        = view.name
@@ -243,6 +263,7 @@ module.exports = class IpcManager
 
           chiika.chiikaApi.emit 'get-grid-data', { calling: view.owner, view: view,data: view.dataSource, return: onGetGridData }
       rendererViews
+
 
   getViewDataByName: ->
     @receiveAnswer 'get-view-by-name', (event,args) =>

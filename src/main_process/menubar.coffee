@@ -24,7 +24,6 @@ Tray = electron.Tray
 BrowserWindow = electron.BrowserWindow
 
 Positioner = require('electron-positioner')
-_ = require 'lodash'
 
 
 module.exports = class Menubar

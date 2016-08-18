@@ -15,7 +15,9 @@
 #----------------------------------------------------------------------------
 
 IDb           = require './db-interface'
-_             = require 'lodash'
+_find                   = require 'lodash/collection/find'
+_indexOf                = require 'lodash/array/indexOf'
+_forEach                = require 'lodash.foreach'
 _when         = require('when')
 
 {InvalidParameterException} = require './exceptions'
@@ -79,8 +81,7 @@ module.exports = class DbView extends IDb
         #If it exists already,it won't insert, so update
         if result.exists
           @updateRecords data, (args) =>
-            if !_.isUndefined callback
-              callback?(args)
+            callback?(args)
         else
           callback?( {rows: 1 })
 

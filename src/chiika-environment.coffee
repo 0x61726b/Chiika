@@ -14,12 +14,7 @@
 #Description:
 #----------------------------------------------------------------------------
 {Emitter}                                 = require 'event-kit'
-{BrowserWindow, ipcRenderer,remote,shell} = require 'electron'
-
-
-_                                         = require 'lodash'
-fs                                        = require 'fs'
-path                                      = require 'path'
+{ipcRenderer,remote,shell} = require 'electron'
 
 _when                                     = require 'when'
 Logger                                    = require './main_process/logger'
@@ -58,8 +53,9 @@ class ChiikaEnvironment
   preload: ->
     waitForUI = _when.defer()
     waitForViewData = _when.defer()
+    waitForSettingsData = _when.defer()
 
-    async = [ waitForUI.promise, waitForViewData.promise ]
+    async = [ waitForUI.promise, waitForViewData.promise,waitForSettingsData.promise ]
 
     @ipc.sendMessage 'get-ui-data'
     @ipc.refreshUIData (args) =>
@@ -83,6 +79,14 @@ class ChiikaEnvironment
 
       console.log @viewData
 
+    @ipc.sendMessage 'get-settings-data'
+    @ipc.getSettings (args) =>
+      @appSettings = args
+
+      waitForSettingsData.resolve()
+
+      console.log @appSettings
+
     _when.all(async)
 
   onReinitializeUI: (loading,main) ->
@@ -96,6 +100,13 @@ class ChiikaEnvironment
 
   openShellUrl: (url) ->
     shell.openExternal(url)
+
+  getOption: (option) ->
+    @appSettings[option]
+
+  setOption: (option,value) ->
+    @appSettings[option] = value
+    @ipc.setOption(option,value)
 
   sendNotification: (title,body,icon) ->
     if !icon?

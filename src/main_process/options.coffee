@@ -14,16 +14,27 @@
 #Description:
 #----------------------------------------------------------------------------
 
-module.exports = {
-  RefreshUponLaunch: true, #To-do : implement
-  UseAlternateListView : false,
-  RememberWindowSizeAndPosition: true,
-  DisableBubbleNotifications: false,
-  EnableBrowserDetection: false,
-  WindowProperties: {
-    width: 800,
-    height: 600,
-    x:0,
+module.exports =
+  LaunchOnStartup: false
+  MinimizeWhenClickedClose: false
+  LaunchMinimized: false
+  DisableBubbleNotifications: false
+  RefreshUponLaunch: true
+  UseAlternateListView : false
+  RememberWindowSizeAndPosition: true
+  DisableBubbleNotifications: false
+  EnableBrowserDetection: false
+  #Grid
+  FilterGridImmediately: true
+
+  #Tabs
+  RememberSortingPreference: true
+  RememberScrollTabPosition: true
+
+  #Window
+  WindowProperties:
+    width: 800
+    height: 600
+    x:0
     y:0
-  }
-}
+    center: true

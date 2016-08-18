@@ -18,8 +18,8 @@ path          = require 'path'
 fs            = require 'fs'
 
 
-_       = require process.cwd() + '/node_modules/lodash'
-string  = require process.cwd() + '/node_modules/string'
+# _       = require process.cwd() + '/node_modules/lodash'
+# string  = require process.cwd() + '/node_modules/string'
 
 
 module.exports = class UISetup

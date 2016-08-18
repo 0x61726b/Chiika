@@ -14,9 +14,11 @@
 #Description:
 #----------------------------------------------------------------------------
 
-IDb           = require './db-interface'
-_             = require 'lodash'
-_when         = require('when')
+IDb                     = require './db-interface'
+_find                   = require 'lodash/collection/find'
+_indexOf                = require 'lodash/array/indexOf'
+_forEach                = require 'lodash.foreach'
+_when                   = require('when')
 
 {InvalidParameterException} = require './exceptions'
 
@@ -43,19 +45,20 @@ module.exports = class DbUsers extends IDb
         loadDatabase()
 
   getDefaultUser: (owner) ->
-    match = _.find @users,{ owner: owner }
+    match = _find @users,{ owner: owner }
 
-    if _.isUndefined match
+    if match?
+      match
+    else
       chiika.logger.warn("Default user for #{owner} does not exist.")
-    else
-      match
+
+
   getUser: (userName) ->
-    match = _.find @users,{ userName: userName }
-    if _.isUndefined match
-      chiika.logger.warn("The user #{userName} you are trying to access doesn't exist.")
-      match
+    match = _find @users,{ userName: userName }
+    if match?
+      return match
     else
-      match
+      chiika.logger.warn("The user #{userName} you are trying to access doesn't exist.")
     #console.log data
 
   #
@@ -70,8 +73,7 @@ module.exports = class DbUsers extends IDb
   addUser: (user,callback) ->
     @insertRecord user,=>
       @users.push user
-      if !_.isUndefined callback
-        callback user
+      callback? user
 
     #@insertRecordWithKey user,callback
 
@@ -87,8 +89,7 @@ module.exports = class DbUsers extends IDb
   updateUser: (user,callback) ->
     #Callback of update operation
     onUpdateComplete = (result) ->
-      if !_.isUndefined callback
-        callback()
+      callback?()
 
 
     #Call the base class's update method, which will talk to the actual db object
@@ -102,8 +103,7 @@ module.exports = class DbUsers extends IDb
   # @todo Add parameter validation
   removeUser: (user,callback) ->
     onUpdateComplete = (result) ->
-      if !_.isUndefined callback
-        callback()
+      callback?()
 
 
 

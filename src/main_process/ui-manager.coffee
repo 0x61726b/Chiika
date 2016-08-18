@@ -14,7 +14,10 @@
 #Description:
 #----------------------------------------------------------------------------
 
-_               = require 'lodash'
+_find                   = require 'lodash/collection/find'
+_indexOf                = require 'lodash/array/indexOf'
+_forEach                = require 'lodash.foreach'
+_assign                 = require 'lodash.assign'
 _when           = require 'when'
 
 
@@ -29,7 +32,7 @@ module.exports = class UIManager
   # @param {String} itemName Name of the UI item
   # @return {Object} UI Item
   getUIItem: (itemName) ->
-    instance = _.find @uiItems, { name: itemName }
+    instance = _find @uiItems, { name: itemName }
 
     if instance?
       instance
@@ -38,13 +41,15 @@ module.exports = class UIManager
       return null
 
   addUIItem: (item) ->
-    instance = _.find @uiItems, { name: item.name }
-    index    = _.indexOf @uiItems, instance
+    instance = _find @uiItems, { name: item.name }
+    index    = _indexOf @uiItems, instance
 
     if index == -1
       @uiItems.push item
     else
       @uiItems.splice(index,1,instance)
+
+
 
   #
   # Returns the total number of UI items stored on DB
@@ -57,8 +62,8 @@ module.exports = class UIManager
 
 
   removeUIItem: (item) ->
-    match = _.find uiItems,item
-    index = _.indexOf uiItems,match
+    match = _find uiItems,item
+    index = _indexOf uiItems,match
 
     if match?
       @uiItems.splice(index,1,match)

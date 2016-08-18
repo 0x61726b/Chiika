@@ -16,7 +16,7 @@
 
 DefaultOptions      = require './options'
 mkdirp              = require 'mkdirp'
-_                   = require 'lodash'
+_forEach            = require 'lodash.foreach'
 _when               = require 'when'
 path                = require 'path'
 
@@ -82,9 +82,6 @@ module.exports = class SettingsManager
 
   applySettings: ->
     #Remember window properties
-    if @getOption('RememberWindowSizeAndPosition') == true
-      chiika.windowManager.rememberWindowProperties()
-
 
   save: ->
     cf = chiika.utility.openFileWSmart @configFilePath
@@ -130,19 +127,18 @@ module.exports = class SettingsManager
     ]
     promises = []
 
-    _.forEach folders, (v,k) ->
+    _forEach folders, (v,k) ->
       promises.push chiika.utility.createFolderSmart(v)
     promises.push chiika.utility.createFolder(chiika.getDbHome())
     _when.all(promises)
-
 
 
   #
   #
   #
   getOption: (name) ->
-    if @appOptions[name]?
-      chiika.logger.warn("The requested option #{@appOptions[name]} is not defined!")
+    if !@appOptions[name]?
+      chiika.logger.warn("The requested option #{name} is not defined!")
       return undefined
     else
       @appOptions[name]
@@ -151,8 +147,10 @@ module.exports = class SettingsManager
   #
   #
   setOption: (name,value) ->
-    if !_.isUndefined name && !_.isUndefined value
+    if name? && value?
       @appOptions[name] = value
+
+      chiika.logger.info("Set #{name} to #{value}")
     else
       chiika.logger.warn("You have supplied incorrect paramters.")
 

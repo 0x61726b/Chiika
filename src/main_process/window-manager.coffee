@@ -16,7 +16,11 @@
 
 {BrowserWindow,ipcMain,globalShortcut,Tray,Menu} = require 'electron'
 {Emitter}         = require 'event-kit'
-_                 = require 'lodash'
+
+_assign                 = require 'lodash.assign'
+_find                   = require 'lodash/collection/find'
+_remove                   = require 'lodash/array/remove'
+
 
 
 module.exports = class WindowManager
@@ -31,6 +35,7 @@ module.exports = class WindowManager
   #
   #
   #
+
   constructor: ->
     @emitter = new Emitter
 
@@ -54,18 +59,21 @@ module.exports = class WindowManager
       remember = chiika.settingsManager.getOption('RememberWindowSizeAndPosition')
 
       if remember
-        windowOptions.width = winProps.width
-        windowOptions.height = winProps.height
-        windowOptions.x = winProps.x
-        windowOptions.y = winProps.y
+        windowOptions.center = winProps.center
 
-    if !_.isUndefined options.x && !_.isUndefined options.y
-      _.assign windowOptions, { x: option.x , y: options.y }
+        if !windowOptions.center
+          windowOptions.width = winProps.width
+          windowOptions.height = winProps.height
+          windowOptions.x = winProps.x
+          windowOptions.y = winProps.y
+
+    if options.x? && options.y?
+      _assign windowOptions, { x: option.x , y: options.y }
 
     window = new BrowserWindow(windowOptions)
     @handleWindowEvents(window)
 
-    _.assign window, { name: options.name,rawWindowInstance: window, url: options.url }
+    _assign window, { name: options.name,rawWindowInstance: window, url: options.url }
     @windows.push window
 
     if options.name == 'main'
@@ -81,7 +89,6 @@ module.exports = class WindowManager
 
     window
 
-
   createModalWindow: (options,returnCallback) ->
     if options.parent == 'main'
       parent = @getMainWindow()
@@ -94,7 +101,7 @@ module.exports = class WindowManager
       window = new BrowserWindow({ webPreferences: { nodeIntegration: false, preload: __dirname + "/preload.js" }, width:1400,height: 900,parent: parent, modal:true, show: false, frame: false })
       @handleWindowEvents(window)
 
-      _.assign window, { name: options.name }
+      _assign window, { name: options.name }
       @windows.push window
 
       @openDevTools(window)
@@ -114,27 +121,11 @@ module.exports = class WindowManager
         chiika.chiikaApi.emit 'ui-dom-ready',window
 
   removeWindow: (window) ->
-    match = _.find @windows,window
+    match = _find @windows,window
 
     if match?
       chiika.logger.info("Removed window. #{match.name}")
-      _.remove @windows,window
-
-  rememberWindowProperties: ->
-    window = @getMainWindow()
-
-    if window?
-      @emitter.on 'close', ->
-
-        if window.name == 'main'
-          winPosX = window.getPosition()[0]
-          winPosY = window.getPosition()[1]
-          width = window.getSize()[0]
-          height = window.getSize()[1]
-
-          chiika.settingsManager.setWindowProperties({ x: winPosX, y: winPosY,width: width, height: height })
-    else
-      chiika.logger.warn("Can't remember window properties because window is null.")
+      _remove @windows,window
 
   handleWindowEvents: (window) ->
     window.on 'closed', =>
@@ -143,6 +134,14 @@ module.exports = class WindowManager
 
     window.on 'close', =>
       @emitter.emit 'close',window
+
+      if window.name == 'main' && chiika.settingsManager.getOption('RememberWindowSizeAndPosition') == true
+        winPosX = window.getPosition()[0]
+        winPosY = window.getPosition()[1]
+        width = window.getSize()[0]
+        height = window.getSize()[1]
+
+        chiika.settingsManager.setWindowProperties({ x: winPosX, y: winPosY,width: width, height: height, center: false })
       @removeWindow(window)
 
     window.webContents.on 'did-finish-load', =>
@@ -216,7 +215,7 @@ module.exports = class WindowManager
     @mainWindow
 
   getWindowByName: (name) ->
-    match = _.find @windows, { name: name }
+    match = _find @windows, { name: name }
 
     if match?
       return match

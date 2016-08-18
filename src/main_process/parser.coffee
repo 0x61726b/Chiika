@@ -14,8 +14,9 @@
 #//Description:
 #//----------------------------------------------------------------------------
 
-XmlParser = require("xml2js")
-_ = require 'lodash'
+XmlParser               = require("xml2js")
+_assign                 = require 'lodash.assign'
+
 S = require 'string'
 module.exports = class Parser
   parseXml: (data) ->
@@ -178,10 +179,10 @@ module.exports = class Parser
         vaImage = vaImageMatch[1]
 
 
-        _.assign vas[counter], { image: vaImage }
+        _assign vas[counter], { image: vaImage }
         counter = counter + 1
 
-      _.assign character, { voiceActors: vas }
+      _assign character, { voiceActors: vas }
       characters.push character
 
     animeDetails = {

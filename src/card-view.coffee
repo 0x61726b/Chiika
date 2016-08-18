@@ -15,8 +15,6 @@
 #----------------------------------------------------------------------------
 
 React                               = require('react')
-
-_                                   = require 'lodash'
 LoadingScreen                       = require './loading-screen'
 
 module.exports = React.createClass

@@ -14,13 +14,12 @@
 #Description:
 #----------------------------------------------------------------------------
 
-React = require('react')
+React                   = require('react')
 
-_ = require 'lodash'
+_find                   = require 'lodash/collection/find'
 
-CardView = require './card-view'
-LoadingMini = require './loading-mini'
-slick       = require 'slick-carousel'
+CardView                = require './card-view'
+LoadingMini             = require './loading-mini'
 
 module.exports = React.createClass
   getInitialState: ->
@@ -143,7 +142,7 @@ module.exports = React.createClass
   onProgressValueChange: (e) ->
     itemTitle = $(e.target).parent().parent().parent().attr("data-item")
 
-    findItem = _.find @state.layout.status.items, (o) -> o.title == itemTitle
+    findItem = _find @state.layout.status.items, (o) -> o.title == itemTitle
 
     if findItem?
       currentOld = parseInt(findItem.current)
@@ -173,7 +172,7 @@ module.exports = React.createClass
   onMinus: (e) ->
     itemTitle = $(e.target).parent().parent().attr("data-item")
 
-    findItem = _.find @state.layout.status.items, (o) -> o.title == itemTitle
+    findItem = _find @state.layout.status.items, (o) -> o.title == itemTitle
 
     if findItem?
       current = parseInt(findItem.current)
@@ -197,7 +196,7 @@ module.exports = React.createClass
   onPlus: (e) ->
     itemTitle = $(e.target).parent().parent().attr("data-item")
 
-    findItem = _.find @state.layout.status.items, (o) -> o.title == itemTitle
+    findItem = _find @state.layout.status.items, (o) -> o.title == itemTitle
 
 
     if findItem?
@@ -258,6 +257,7 @@ module.exports = React.createClass
       chiika.ipc.sendMessage 'get-view-data'
     else
       @onActionError("Whoops..Something went wrong.")
+      console.log result
 
   #
   #

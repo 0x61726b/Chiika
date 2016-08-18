@@ -14,8 +14,8 @@
 #//Description:
 #//----------------------------------------------------------------------------
 
-_ = require 'lodash'
-stringjs = require 'string'
+_forEach                = require 'lodash.foreach'
+stringjs                = require 'string'
 
 module.exports = class StreamServices
   streamServices:[
@@ -31,8 +31,8 @@ module.exports = class StreamServices
   ]
   getStreamServiceFromUrl: (url) ->
     streamService = undefined
-    _.forEach @streamServices, (v,k) =>
-      _.forEach v.identifiers, (vi,ki) =>
+    _forEach @streamServices, (v,k) =>
+      _forEach v.identifiers, (vi,ki) =>
         match = url.match vi
         if match?
           streamService = v

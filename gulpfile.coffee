@@ -262,6 +262,7 @@ do Your_Application_will_ = () ->
     electron = require('electron-connect').server.create({
         electron:ep,
         spawnOpt: {
+          command: "--debug=5858"
           env:development || 'nope'
         }
       })

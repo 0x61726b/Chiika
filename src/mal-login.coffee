@@ -16,14 +16,13 @@
 
 React                               = require('react')
 ReactDOM                            = require("react-dom")
-{Router,Route,BrowserHistory,Link}  = require('react-router')
 
-{electron,ipcRenderer,remote}       = require 'electron'
+{ipcRenderer,remote}                = require 'electron'
 
 IPC                                 = require '../chiika-ipc'
 LoadingScreen                       = require '../loading-screen'
 
-_                                   = require 'lodash'
+_find                               = require 'lodash/collection/find'
 string                              = require 'string'
 
 #Views
@@ -144,13 +143,13 @@ MalLogin = React.createClass
     pass = $("#password").val()
 
 
-    if _.isEmpty user
+    if user == ""
       #Do something here
       @highlightElement('red','userName')
     else
       @highlightElement('clear','userName')
 
-    if _.isEmpty pass
+    if pass == ""
       @highlightElement('red','password')
     else
       @highlightElement('clear','password')
@@ -191,12 +190,12 @@ MalLogin = React.createClass
   selectProvider: (e) ->
     provider = $(e.target).attr("data-provider")
 
-    if _.isUndefined provider
+    if !provider?
       provider = $(e.target).parent().attr("data-provider")
 
     #Find service
 
-    findService = _.find @state.services, (o) -> o.name == provider
+    findService = _find @state.services, (o) -> o.name == provider
 
     if findService?
       @setState { loggingInTo: findService }

@@ -14,18 +14,20 @@
 #Description:
 #----------------------------------------------------------------------------
 
-_               = require 'lodash'
-_when           = require 'when'
-View            = require './view'
-TabView         = require './view-tabview'
-SubView         = require './view-subview'
+_find                   = require 'lodash/collection/find'
+_indexOf                = require 'lodash/array/indexOf'
+_forEach                = require 'lodash.foreach'
+_when                   = require 'when'
+View                    = require './view'
+TabView                 = require './view-tabview'
+SubView                 = require './view-subview'
 
 
 module.exports = class ViewManager
   views: []
 
   getViewByName: (viewName) ->
-    find = _.find @views, (o) -> o.name == viewName
+    find = _find @views, (o) -> o.name == viewName
     if find?
       find
     else
@@ -56,7 +58,7 @@ module.exports = class ViewManager
         resolve()
       else
         chiika.logger.info("[magenta](UI-Manager) There are #{config.views.length} views...")
-        _.forEach config.views, (v) =>
+        _forEach config.views, (v) =>
           @addView(v)
         @loadViewData().then(resolve)
 
@@ -64,7 +66,7 @@ module.exports = class ViewManager
   loadViewData: ->
     new Promise (resolve) =>
       async = []
-      _.forEach @views, (view) =>
+      _forEach @views, (view) =>
         promise = view.db.load()
         async.push promise
         promise.then (data) =>
@@ -74,7 +76,7 @@ module.exports = class ViewManager
             chiika.logger.info("View #{view.name} has data length of #{data.length}")
             view.setDataSource(data)
       _when.all(async).then =>
-        _.forEach @views, (view) =>
+        _forEach @views, (view) =>
           if view.needUpdate
             view.update()
         resolve()
@@ -86,8 +88,8 @@ module.exports = class ViewManager
 
     if config?
       #Check this view exists
-      findConfig = _.find config.views,(o) -> o.name == view.name
-      indexConfig = _.indexOf config.views,findConfig
+      findConfig = _find config.views,(o) -> o.name == view.name
+      indexConfig = _indexOf config.views,findConfig
 
       if indexConfig == -1
         config.views.push view
@@ -103,8 +105,8 @@ module.exports = class ViewManager
       chiika.logger.info("Saving config file view...")
       chiika.settingsManager.saveConfigFile('view',config)
 
-    findView = _.find @views,(o) -> o.name == view.name
-    index    = _.indexOf @views,findView
+    findView = _find @views,(o) -> o.name == view.name
+    index    = _indexOf @views,findView
 
     # Create the view
     newView = {}

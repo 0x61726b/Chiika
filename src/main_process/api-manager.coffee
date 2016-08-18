@@ -17,7 +17,7 @@
 
 path                    = require 'path'
 fs                      = require 'fs'
-_                       = require 'lodash'
+forEach                 = require 'lodash.foreach'
 _when                   = require 'when'
 coffee                  = require 'coffee-script'
 string                  = require 'string'
@@ -25,6 +25,8 @@ string                  = require 'string'
 moment                  = require 'moment'
 rimraf                  = require 'rimraf'
 
+_find                   = require 'lodash/collection/find'
+_indexOf                = require 'lodash/array/indexOf'
 
 module.exports = class APIManager
   compiledUserScripts: []
@@ -44,8 +46,8 @@ module.exports = class APIManager
     @scriptsDirs.push path.join(process.cwd(),"scripts")
 
   getScriptByName: (name) ->
-    instance = _.find @activeScripts, { name: name }
-    if !_.isUndefined instance
+    instance = _find @activeScripts, { name: name }
+    if instance?
       return instance
     else
       chiika.logger.error("You are trying to access #{name} but it doesnt exist!")
@@ -58,14 +60,13 @@ module.exports = class APIManager
     chiika.chiikaApi.emit 'initialize', { calling: name }
 
   postInit: () ->
-    _.forEach @activeScripts, (script) =>
+    forEach @activeScripts, (script) =>
       @initializeScript(script.name)
 
-
   postCompile: () ->
-    _.forEach @activeScripts, (v,k) =>
+    forEach @activeScripts, (v,k) =>
       instance = v
-      index = _.indexOf @activeScripts,_.find @activeScripts, (o) -> o.name == v.name
+      index = _indexOf @activeScripts,_find @activeScripts, (o) -> o.name == v.name
 
       scriptName = instance.name
       scriptDesc = instance.displayDescription ? ""
@@ -86,25 +87,24 @@ module.exports = class APIManager
 
       @activeScripts.splice(index,1,localInstance)
 
+    if chiika.chiikaApi
+      forEach @activeScripts, (script) =>
+        @initializeScript(script.name)
+
     if !chiika.runningTests
       @runScripts()
-
-    if chiika.chiikaApi
-      _.forEach @activeScripts, (script) =>
-        @initializeScript(script.name)
 
   runScript: (run) ->
     run()
 
   runScripts: () ->
-    _.forEach @activeScripts, (v,k) =>
+    forEach @activeScripts, (v,k) =>
       instance = v
       instance.instance.run()
 
   clearScripts: ->
     @activeScripts = []
     @compiledScripts = []
-
 
 
   # Compile everything
@@ -120,7 +120,7 @@ module.exports = class APIManager
         fs.readdir scriptDir,(err,files) =>
           fileCount = files.length
 
-          _.forEach files, (v,k) =>
+          forEach files, (v,k) =>
             disabled = false
 
             stripExtension = string(v).chompRight('.coffee').s
@@ -128,18 +128,25 @@ module.exports = class APIManager
             if stripExtension[0] == "_"
               disabled = true
 
-            fs.readFile path.join(scriptDir,v),'utf-8', (err,data) =>
+            if disabled
+              processedFiles++
+              return
+
+            fileFullPath = path.join(scriptDir,v)
+            fs.readFile fileFullPath,'utf-8', (err,data) =>
               jsCode = data
 
               if err
                 resolve()
                 throw err
 
-              @compileScript jsCode,v,true, (err,script) =>
+
+              @compileScript jsCode,v,fileFullPath, (err,script) =>
                 processedFiles = processedFiles + 1
                 if err
                   resolve()
                   throw err
+
 
                 rScript = require(script)
                 try
@@ -151,24 +158,66 @@ module.exports = class APIManager
                     resolve()
                   return false
 
-                isService  = instance.isService
-                isActive = instance.isActive
+                if instance?
+                  isService  = instance.isService
+                  isActive = instance.isActive
 
-                if isActive && !disabled
-                  @activeScripts.push instance
+                  if isActive && !disabled
+                    @activeScripts.push instance
 
-                if !disabled
-                  @compiledScripts.push instance
+                  if !disabled
+                    @compiledScripts.push instance
+
 
                 if processedFiles == fileCount
                   resolve()
 
-
-
   #
   # Compiles javascript code
   #
-  compileScript: (js,file,cache,callback) ->
+  compileScript: (js,file,fileFullPath,callback) ->
+    stripExtension = string(file).chompRight('.coffee').s
+
+    scriptsConfig = chiika.settingsManager.readConfigFile('scripts')
+    if scriptsConfig?
+      findScript = _find scriptsConfig.scripts,(o) -> o.name == file
+      indexScript = _indexOf scriptsConfig.scripts,findScript
+
+      # Script has been compiled before. Check its timestamp to validate that whether it has changed or not
+      if indexScript != -1
+        timestamp = findScript.timestamp
+        lastModified = chiika.utility.getLastModifiedTime(fileFullPath)
+
+        if moment(lastModified).isAfter(moment(timestamp))
+          chiika.logger.info("#{file} has changed since last compilation. Recompiling - Last Modified #{moment(lastModified).format('DD/MM/YYYY HH:mm:ss')}")
+
+          @internalCompile js,file, (error,scriptPath) =>
+            findScript.timestamp = moment().add(10,'seconds').valueOf()
+            chiika.logger.info("Saving config file scripts")
+            chiika.settingsManager.saveConfigFile('scripts',scriptsConfig)
+            callback(null,path.join(chiika.getScriptCachePath(),stripExtension + '_cache.js'))
+        else
+          chiika.logger.info("#{file} did not change since last launch.Skipping...")
+          callback(null,path.join(chiika.getScriptCachePath(),stripExtension + '_cache.js'))
+      else
+        #Script not found. Compile
+        @internalCompile js,file, (error,scriptPath) =>
+          scriptsConfig.scripts.push { name: file,timestamp: moment().add(10,'seconds').valueOf()}
+          chiika.logger.info("Saving config file scripts")
+          chiika.settingsManager.saveConfigFile('scripts',scriptsConfig)
+          callback(null,path.join(chiika.getScriptCachePath(),stripExtension + '_cache.js'))
+    else
+      scriptsConfig = { scripts: [] }
+
+      @internalCompile js,file, (error,scriptPath) =>
+        scriptsConfig.scripts.push { name: file, timestamp: moment().add(10,'seconds').valueOf()}
+        chiika.logger.info("Saving config file scripts")
+        chiika.settingsManager.saveConfigFile('scripts',scriptsConfig)
+        callback(null,path.join(chiika.getScriptCachePath(),stripExtension + '_cache.js'))
+
+
+
+  internalCompile: (js,file,callback) ->
     stripExtension = string(file).chompRight('.coffee').s
     try
       compiledString = coffee.compile js
@@ -178,17 +227,15 @@ module.exports = class APIManager
       callback(e)
       throw e
 
-    cachedScriptPath = path.join(@scriptsCacheDir,stripExtension + moment().valueOf() + '.chiikaJS')
-    if cache
-      fs.writeFile cachedScriptPath,compiledString, (err) =>
-        if err
-          chiika.logger.error "[magenta](Api-Manager) Error occured while writing compiled script to the file."
-          chiika.logger.error "#{cachedScriptPath}"
-          callback(err,cachedScriptPath)
-          throw err
-        chiika.logger.verbose("[magenta](Api-Manager) Cached " + file + " " + moment().format('DD/MM/YYYY HH:mm'))
+    cachedScriptPath = path.join(@scriptsCacheDir,stripExtension + '_cache.js')
 
-        callback(null,cachedScriptPath)
+    fs.writeFile cachedScriptPath,compiledString, (err) =>
+      if err
+        chiika.logger.error "[magenta](Api-Manager) Error occured while writing compiled script to the file."
+        chiika.logger.error "#{cachedScriptPath}"
+        callback(err,cachedScriptPath)
+        throw err
+      callback(null,cachedScriptPath)
 
 
   clearCache: ->

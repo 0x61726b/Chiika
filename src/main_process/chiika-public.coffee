@@ -15,7 +15,6 @@
 #----------------------------------------------------------------------------
 {Emitter} = require 'event-kit'
 {InvalidParameterException} = require './exceptions'
-_ = require 'lodash'
 
 
 module.exports = class ChiikaPublicApi
@@ -34,18 +33,20 @@ module.exports = class ChiikaPublicApi
   #
   #
   makeGetRequest:(url,headers,callback) ->
-    if _.isUndefined callback
+    if callback?
+      chiika.requestManager.makeGetRequest(url,headers,callback)
+    else
       throw new InvalidParameterException("You have to supply a callback to 'makeGetRequest' method.")
-    chiika.requestManager.makeGetRequest(url,headers,callback)
 
 
   #
   #
   #
   makePostRequest:(url,headers,body,callback) ->
-    if _.isUndefined callback
+    if callback?
+      chiika.requestManager.makePostRequest(url,headers,body,callback)
+    else
       throw new InvalidParameterException("You have to supply a callback to 'makePostRequest' method.")
-    chiika.requestManager.makePostRequest(url,headers,body,callback)
 
 
 
@@ -53,31 +54,29 @@ module.exports = class ChiikaPublicApi
   #
   #
   makeGetRequestAuth:(url,user,headers,callback) ->
-    if _.isUndefined callback
+    if callback?
+      chiika.requestManager.makeGetRequestAuth(url,user,headers,callback)
+    else
       throw new InvalidParameterException("You have to supply a callback to 'makeGetRequestAuth' method.")
-    chiika.requestManager.makeGetRequestAuth(url,user,headers,callback)
 
 
   makePostRequestAuth:(url,user,headers,body,callback) ->
-    if _.isUndefined callback
+    if callback?
+      chiika.requestManager.makePostRequestAuth(url,user,headers,body,callback)
+    else
       throw new InvalidParameterException("You have to supply a callback to 'makePostRequestAuth' method.")
-    chiika.requestManager.makePostRequestAuth(url,user,headers,body,callback)
-
-
 
 
   sendMessageToWindow: (windowName,message,args) ->
     wnd = chiika.windowManager.getWindowByName(windowName)
 
-    if !_.isUndefined wnd
+    if wnd?
       wnd.webContents.send message,args
+
 
 
   requestViewUpdate: (viewName,owner,defer,params) ->
     if !params?
-      params = {}
-
-    if _.isUndefined params
       params = {}
 
     view = chiika.viewManager.getViewByName(viewName)
@@ -93,20 +92,20 @@ module.exports = class ChiikaPublicApi
 
   closeWindow: (windowName) ->
     wnd = chiika.windowManager.getWindowByName(windowName)
-    if !_.isUndefined wnd
+    if wnd?
       wnd.close()
 
 
   executeJavaScript: (windowName,javascript) ->
     wnd = chiika.windowManager.getWindowByName(windowName)
-    if !_.isUndefined wnd
+    if wnd?
       wnd.webContents.executeJavaScript(javascript)
 
 
 
   on: (receiver,message,callback) ->
     @emitter.on message, (args) =>
-      if _.isUndefined args.calling
+      if !args.calling?
         # console.log "#{receiver} - #{message}"
         # chiika.logger.error("Emitter has received #{message} but we don't know who to call to #{receiver} != #{args.calling}. Are you sure about this?")
         # Assume, if no caller call everyone

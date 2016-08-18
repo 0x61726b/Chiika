@@ -16,7 +16,11 @@
 
 IDb     = require './db-interface'
 {InvalidParameterException} = require './exceptions'
-_       = require 'lodash'
+
+_find                   = require 'lodash/collection/find'
+_indexOf                = require 'lodash/array/indexOf'
+
+
 _when   = require 'when'
 
 
@@ -47,12 +51,12 @@ module.exports = class DbCustom extends IDb
 
 
   getKey: (name) ->
-    match = _.find @keys,{ name: name }
-    if _.isUndefined match
+    match = _find @keys,{ name: name }
+    if match?
+      match
+    else
       chiika.logger.warn("The key #{name} you are trying to access doesn't exist.")
       undefined
-    else
-      match
 
   #
   # Adds a key into the database.
@@ -73,8 +77,8 @@ module.exports = class DbCustom extends IDb
           @updateRecords data, (args) =>
             callback?(args)
 
-            findKey = _.find @keys, { name: name }
-            index   = _.indexOf @keys, findKey
+            findKey = _find @keys, { name: name }
+            index   = _indexOf @keys, findKey
 
             if index != -1
               @keys.splice(index,1,data)
@@ -101,7 +105,7 @@ module.exports = class DbCustom extends IDb
   # @param [Object] callback Function which will be called upon insert
   # @todo Add parameter validation
   updateKeys: (object,callback) ->
-    if !_.isUndefined callback
+    if callback?
       @updateRecords object,callback
     else
       @updateRecords object,->

@@ -16,7 +16,8 @@
 
 React                               = require('react')
 
-_                                   = require 'lodash'
+_find                               = require 'lodash/collection/find'
+_indexOf                            = require 'lodash/array/indexOf'
 CardViews                           = require './cards'
 
 module.exports = class CardManager
@@ -30,8 +31,8 @@ module.exports = class CardManager
   # All cards must have a unique name
   #
   addCard: (card) ->
-    find = _.find @cards, (o) -> o.name == card.name
-    index = _.indexOf @cards,find
+    find = _find @cards, (o) -> o.name == card.name
+    index = _indexOf @cards,find
     if find?
       @cards.splice(index,1,find)
     else
@@ -39,7 +40,7 @@ module.exports = class CardManager
 
 
   getCard: (name) ->
-    find = _.find @cards, (o) -> o.name == name
+    find = _find @cards, (o) -> o.name == name
     if find?
       find
     else

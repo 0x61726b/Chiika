@@ -14,7 +14,8 @@
 #Description:
 #----------------------------------------------------------------------------
 
-_         = require 'lodash'
+
+_isArray  = require 'lodash.isarray'
 _when     = require 'when'
 
 module.exports = class View
@@ -53,9 +54,9 @@ module.exports = class View
 
 
   setDataSource: (data) ->
-    if _.isUndefined data
+    if !data?
       chiika.logger.warn("[magenta](#{@name}) - Undefined data source!")
-    if !_.isArray data
+    if !_isArray data
       chiika.logger.error("[magenta](#{@name}) - Non-array data source!")
       return
 

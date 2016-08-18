@@ -33,8 +33,6 @@ module.exports = class AppDelegate
       chiika.settingsManager.initialize().then =>
         defer.resolve()
         chiika.logger.verbose("Electron app is ready")
-
-        chiika.settingsManager.applySettings()
     return defer.promise
 
 
@@ -47,4 +45,4 @@ module.exports = class AppDelegate
     app.on 'will-quit', () =>
       globalShortcut.unregisterAll()
 
-      chiika.apiManager.clearCache()
+      # chiika.apiManager.clearCache()

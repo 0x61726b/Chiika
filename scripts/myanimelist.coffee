@@ -37,12 +37,18 @@ getSearchExtendedUrl = (type,id) ->
   else
     "http://myanimelist.net/includes/ajax.inc.php?id=#{id}&t=64"
 
-_       = require process.cwd() + '/node_modules/lodash'
-_when   = require process.cwd() + '/node_modules/when'
-string  = require process.cwd() + '/node_modules/string'
-xml2js  = require process.cwd() + '/node_modules/xml2js'
-moment  = require process.cwd() + '/node_modules/moment'
-{shell}   = require('electron')
+_assign       = scriptRequire 'lodash.assign'
+_find         = scriptRequire 'lodash/collection/find'
+_isArray      = scriptRequire 'lodash.isarray'
+_forEach      = scriptRequire 'lodash.forEach'
+_cloneDeep    = scriptRequire 'lodash.cloneDeep'
+_size         = scriptRequire 'lodash/collection/size'
+
+_when         = scriptRequire 'when'
+string        = scriptRequire 'string'
+xml2js        = scriptRequire 'xml2js'
+moment        = scriptRequire 'moment'
+{shell}       = require 'electron'
 
 
 module.exports = class MyAnimelist
@@ -121,7 +127,7 @@ module.exports = class MyAnimelist
       @retrieveLibrary 'anime',@malUser.realUserName, (result) =>
            userInfo = result.library.myanimelist.myinfo
 
-           _.assign @malUser, { malAnimeInfo: userInfo }
+           _assign @malUser, { malAnimeInfo: userInfo }
            @chiika.users.updateUser @malUser
 
            callback(result)
@@ -130,17 +136,18 @@ module.exports = class MyAnimelist
   #
   #
   getMangalistData: (callback) ->
-    if _.isUndefined @malUser
-      @chiika.logger.error("User can't be retrieved.Aborting manga list request.")
-      callback( { success: false })
-    else
+    if @malUser?
       @retrieveLibrary 'manga',@malUser.realUserName, (result) =>
            userInfo = result.library.myanimelist.myinfo
 
-           _.assign @malUser, { malMangaInfo: userInfo }
+           _assign @malUser, { malMangaInfo: userInfo }
            @chiika.users.updateUser @malUser
 
            callback(result)
+
+    else
+      @chiika.logger.error("User can't be retrieved.Aborting manga list request.")
+      callback( { success: false })
 
 
   authorizedPost: (url,body,callback) ->
@@ -153,6 +160,8 @@ module.exports = class MyAnimelist
 
       else
         callback( { success: true, response: body })
+
+      console.log body
 
     @chiika.makePostRequestAuth( url, { userName: @malUser.realUserName, password: @malUser.password },null,body, onAuthorizedPostComplete )
 
@@ -189,17 +198,18 @@ module.exports = class MyAnimelist
   # Searches animelist either manga or anime
   #
   search: (type,keywords,callback) ->
-    if _.isUndefined @malUser
-     @chiika.logger.error("User can't be retrieved.Aborting search request.")
-     callback( { success: false })
+    if @malUser?
+      onSearchComplete = (error,response,body) =>
+        @chiika.parser.parseXml(body)
+                      .then (result) =>
+                        if type == 'anime'
+                          callback(result.anime.entry)
+                        else if type == 'manga'
+                          callback(result.manga.entry)
     else
-     onSearchComplete = (error,response,body) =>
-       @chiika.parser.parseXml(body)
-                     .then (result) =>
-                       if type == 'anime'
-                         callback(result.anime.entry)
-                       else if type == 'manga'
-                         callback(result.manga.entry)
+      @chiika.logger.error("User can't be retrieved.Aborting search request.")
+      callback( { success: false })
+
 
      @chiika.makeGetRequestAuth getSearchUrl(type,keywords.split(" ").join("+")),{ userName: @malUser.realUserName, password: @malUser.password },null, onSearchComplete
 
@@ -239,10 +249,10 @@ module.exports = class MyAnimelist
     @on 'initialize', =>
       @malUser = @chiika.users.getDefaultUser(@name)
 
-      if _.isUndefined @malUser
-        @chiika.logger.warn("Default user for myanimelist doesn't exist. If this is the first time launch, you can ignore this.")
-      else
+      if @malUser?
         @chiika.logger.info("Default user : #{@malUser.realUserName}")
+      else
+        @chiika.logger.warn("Default user for myanimelist doesn't exist. If this is the first time launch, you can ignore this.")
 
       animelistView   = @chiika.viewManager.getViewByName('myanimelist_animelist')
       animeExtraView  = @chiika.viewManager.getViewByName('myanimelist_animeextra')
@@ -319,8 +329,8 @@ module.exports = class MyAnimelist
 
       if viewName == 'myanimelist_animelist'
         #If its on the list, it will have this entry
-        animeEntry = _.find @animelist, (o) -> (o.mal_id) == args.id
-        extraEntry = _.find @animeextra, (o) -> (o.mal_id) == args.id
+        animeEntry = _find @animelist, (o) -> (o.mal_id) == args.id
+        extraEntry = _find @animeextra, (o) -> (o.mal_id) == args.id
 
         timeSinceLastUpdate = @detailsSyncTimeRestriction
         if extraEntry?
@@ -344,14 +354,24 @@ module.exports = class MyAnimelist
         args.return({ updated: false, layout: @getAnimeDetailsLayout(id)})
 
       if viewName == 'myanimelist_mangalist'
-        #
+        animeEntry = _find @mangalist, (o) -> (o.mal_id) == args.id
+        extraEntry = _find @mangaextra, (o) -> (o.mal_id) == args.id
 
-        # @handleMangaDetailsRequest id, (response) =>
-        #   mangaExtraView = @chiika.viewManager.getViewByName('myanimelist_mangaextra')
-        #   @mangaextra = mangaExtraView.getData()
-        #
-        #   if response.success && response.updated > 0
-        #     args.return(@getMangaDetailsLayout(id))
+        timeSinceLastUpdate = @detailsSyncTimeRestriction
+        if extraEntry?
+          lastSync = extraEntry.lastSync
+          now = moment()
+          diff = moment.duration(now.diff(lastSync)).asHours()
+          timeSinceLastUpdate = diff
+        if timeSinceLastUpdate < @detailsSyncTimeRestriction - 1
+          @chiika.logger.script("#{args.id} was last updated #{timeSinceLastUpdate} hours ago.There is no need to update")
+        else
+          @handleMangaDetailsRequest id, (response) =>
+            mangaExtraView = @chiika.viewManager.getViewByName('myanimelist_mangaextra')
+            @mangaextra = mangaExtraView.getData()
+
+            if response.success && response.updated > 0
+              args.return({ updated: false, layout: @getMangaDetailsLayout(id)})
 
 
         args.return({ updated: false, layout: @getMangaDetailsLayout(id)})
@@ -433,6 +453,8 @@ module.exports = class MyAnimelist
       view = args.view
       data = args.data
 
+      @chiika.logger.script("[yellow](#{@name}) Requesting Grid Data for #{view.name}")
+
       if view.name == 'myanimelist_animelist'
         watching    = []
         ptw         = []
@@ -440,12 +462,12 @@ module.exports = class MyAnimelist
         dropped     = []
         completed   = []
 
-        _.forEach data, (anime) =>
+        _forEach data, (anime) =>
           status = anime.animeUserStatus
 
           animeValues = @getAnimeValues(anime)
 
-          newAnime = _.cloneDeep anime
+          newAnime = _cloneDeep anime
 
           # Pre process - add some more columns
           newAnime.animeProgress                 = (parseInt(anime.animeWatchedEpisodes) / parseInt(anime.animeTotalEpisodes)) * 100
@@ -483,12 +505,12 @@ module.exports = class MyAnimelist
         dropped     = []
         completed   = []
 
-        _.forEach data, (manga) =>
+        _forEach data, (manga) =>
           status = manga.mangaUserStatus
 
           mangaValues = @getMangaValues(manga)
 
-          newManga = _.cloneDeep manga
+          newManga = _cloneDeep manga
 
           # Pre process - add some more columns
           newManga.mangaProgress                 = "#{manga.mangaUserReadChapters} / #{manga.mangaUserReadVolumes}"
@@ -549,13 +571,13 @@ module.exports = class MyAnimelist
                          .then (xmlObject) =>
                            @malUser = @chiika.users.getUser(args.user + "_" + @name)
 
-                           _.assign newUser, { malID: xmlObject.user.id }
-                           if _.isUndefined @malUser
+                           _assign newUser, { malID: xmlObject.user.id }
+                           if @malUser?
+                             _assign @malUser,newUser
+                             @chiika.users.updateUser @malUser,userAdded
+                           else
                              @malUser = newUser
                              @chiika.users.addUser @malUser,userAdded
-                           else
-                             _.assign @malUser,newUser
-                             @chiika.users.updateUser @malUser,userAdded
 
             #  if chiika.users.getUser(malUser.userName)?
             #    chiika.users.updateUser malUser
@@ -573,7 +595,7 @@ module.exports = class MyAnimelist
 
     animeExtraView = @chiika.viewManager.getViewByName('myanimelist_animeextra')
 
-    animeEntry = _.find @animelist, (o) -> (o.mal_id) == animeId
+    animeEntry = _find @animelist, (o) -> (o.mal_id) == animeId
 
     #Searching
     #
@@ -605,9 +627,9 @@ module.exports = class MyAnimelist
       #
       @search 'anime',animeEntry.animeTitle, (list) =>
         isArray = false
-        if _.isArray list
+        if _isArray list
           isArray = true
-          _.forEach list, (v,k) =>
+          _forEach list, (v,k) =>
             if v.id == animeEntry.mal_id
               newAnimeEntry = searchMatch(v)
               entryFound = true
@@ -626,7 +648,7 @@ module.exports = class MyAnimelist
               @chiika.logger.script("[yellow](#{@name}-Anime-Search) Updated #{args.rows} entries.")
               animeExtraView.reload().then =>
                 callback?({ success: true, entry: newAnimeEntry, updated: args.rows })
-        else if _.size(list) > 0 && entryFound
+        else if _size(list) > 0 && entryFound
           newAnimeEntry.lastSync = moment().valueOf()
           @chiika.logger.script("[yellow](#{@name}-Anime-Search) Search returned 1 entry")
           animeExtraView.setData(newAnimeEntry,'mal_id').then (args) =>
@@ -689,7 +711,7 @@ module.exports = class MyAnimelist
 
     mangaExtraView = @chiika.viewManager.getViewByName('myanimelist_mangaextra')
 
-    mangaEntry = _.find @mangalist, (o) -> (o.mal_id) == mangaId
+    mangaEntry = _find @mangalist, (o) -> (o.mal_id) == mangaId
 
     #Searching
     #
@@ -720,9 +742,9 @@ module.exports = class MyAnimelist
       #
       @search 'manga',mangaEntry.mangaTitle, (list) =>
         isArray = false
-        if _.isArray list
+        if _isArray list
           isArray = true
-          _.forEach list, (v,k) =>
+          _forEach list, (v,k) =>
             if v.id == mangaEntry.mal_id
               newMangaEntry = searchMatch(v)
               entryFound = true
@@ -740,7 +762,7 @@ module.exports = class MyAnimelist
               @chiika.logger.script("[yellow](#{@name}-Manga-Search) Updated #{args.rows} entries.")
               mangaExtraView.reload().then =>
                 callback?({ success: true, entry: newMangaEntry, updated: args.rows })
-        else if _.size(list) > 0 && entryFound
+        else if _size(list) > 0 && entryFound
           @chiika.logger.script("[yellow](#{@name}-Manga-Search) Search returned 1 entry")
           mangaExtraView.setData(newMangaEntry,'mal_id').then (args) =>
             if args.rows > 0
@@ -795,7 +817,7 @@ module.exports = class MyAnimelist
 
 
   getMangaDetailsLayout: (id) ->
-    entry = _.find @mangalist, (o) -> o.mal_id == id
+    entry = _find @mangalist, (o) -> o.mal_id == id
     mv    = @getMangaValues(entry)
 
 
@@ -886,7 +908,7 @@ module.exports = class MyAnimelist
 
 
   getAnimeDetailsLayout: (id) ->
-    entry = _.find @animelist, (o) -> o.mal_id == id
+    entry = _find @animelist, (o) -> o.mal_id == id
 
     av    = @getAnimeValues(entry)
 
@@ -1011,7 +1033,7 @@ module.exports = class MyAnimelist
   setAnimelistTabViewData: (animeList,view) ->
 
     commonFormatList = []
-    _.forEach animeList, (anime) =>
+    _forEach animeList, (anime) =>
       commonFormatList.push @animeToCommonFormat(anime)
 
     view.setDataArray(commonFormatList)
@@ -1024,7 +1046,7 @@ module.exports = class MyAnimelist
   # For animeList object, see myanimelist.net/malappinfo.php?u=arkenthera&type=anime&status=all
   setMangalistTabViewData: (mangaList,view) ->
     commonFormatList = []
-    _.forEach mangaList, (anime) =>
+    _forEach mangaList, (anime) =>
       commonFormatList.push @mangaToCommonFormat(anime)
 
     view.setDataArray(commonFormatList)
@@ -1044,7 +1066,7 @@ module.exports = class MyAnimelist
     @chiika.logger.script("Updating #{type} progress - #{id} - to #{newProgress}")
     switch type
       when 'anime'
-        animeEntry = _.find @animelist, (o) -> (o.mal_id) == id
+        animeEntry = _find @animelist, (o) -> (o.mal_id) == id
         if animeEntry?
           animeEntry.animeWatchedEpisodes = newProgress
           @updateAnime animeEntry, (result) =>
@@ -1053,13 +1075,13 @@ module.exports = class MyAnimelist
                 if result.updated > 0
                   callback({ success: true, updated: result.updated })
                 else
-                  callback({ success: false, updated: result.updated, error:"Update request has failed.", errorDetailed: "Something went wrong when saving to database." })
+                  callback({ success: false, updated: result.updated, error:"Update request has failed.", response: result.response, errorDetailed: "Something went wrong when saving to database." })
             else
-              callback({ success: false, updated: 0, error: "Update request has failed.",errorDetailed: "Something went wrong with the http request. #{result.response}" })
+              callback({ success: false, updated: 0, error: "Update request has failed.",errorDetailed: "Something went wrong with the http request.", response: result.response })
 
 
       when 'manga'
-        mangaEntry = _.find @mangalist, (o) -> (o.mal_id) == id
+        mangaEntry = _find @mangalist, (o) -> (o.mal_id) == id
         if mangaEntry?
           mangaEntry.mangaUserReadVolumes = newProgress.volumes
           mangaEntry.mangaUserReadChapters = newProgress.chapters
@@ -1089,7 +1111,7 @@ module.exports = class MyAnimelist
     @chiika.logger.script("Updating #{type} score - #{id} - to #{newScore}")
     switch type
       when 'anime'
-        animeEntry = _.find @animelist, (o) -> (o.mal_id) == id
+        animeEntry = _find @animelist, (o) -> (o.mal_id) == id
         if animeEntry?
           animeEntry.animeScore = newScore
           @updateAnime animeEntry, (result) =>
@@ -1101,7 +1123,7 @@ module.exports = class MyAnimelist
 
 
       when 'manga'
-        mangaEntry = _.find @mangalist, (o) -> (o.mal_id) == id
+        mangaEntry = _find @mangalist, (o) -> (o.mal_id) == id
         if mangaEntry?
           mangaEntry.mangaScore = newScore
           @updateManga mangaEntry, (result) =>
@@ -1123,9 +1145,9 @@ module.exports = class MyAnimelist
 
     switch type
       when 'anime'
-        entry = _.find @animelist, (o) -> (o.mal_id) == id
+        entry = _find @animelist, (o) -> (o.mal_id) == id
       when 'manga'
-        entry = _.find @mangalist, (o) -> (o.mal_id) == id
+        entry = _find @mangalist, (o) -> (o.mal_id) == id
 
     switch type
       when 'anime'
@@ -1162,7 +1184,7 @@ module.exports = class MyAnimelist
   #
   #
   getAnimeValues: (entry) ->
-    extra = _.find @animeextra, (o) -> o.mal_id == entry.mal_id
+    extra = _find @animeextra, (o) -> o.mal_id == entry.mal_id
 
     if !extra?
       extra = {}
@@ -1311,7 +1333,7 @@ module.exports = class MyAnimelist
   #
   #
   getMangaValues: (entry) ->
-    extra = _.find @mangaextra, (o) -> o.mal_id == entry.mal_id
+    extra = _find @mangaextra, (o) -> o.mal_id == entry.mal_id
 
     if !extra?
       extra = {}
@@ -1515,7 +1537,7 @@ module.exports = class MyAnimelist
         fansub_group: ""
         tags:""
 
-    builder = new xml2js.Builder({xmlDec: { standalone: false }})
+    builder = new xml2js.Builder()
     buildXml = builder.buildObject(entry)
     buildXml
 
@@ -1540,7 +1562,7 @@ module.exports = class MyAnimelist
         retail_volumes: ""
         tags:""
 
-    builder = new xml2js.Builder({xmlDec: { standalone: false }})
+    builder = new xml2js.Builder()
     buildXml = builder.buildObject(entry)
     buildXml
 

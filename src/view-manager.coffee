@@ -16,7 +16,8 @@
 
 React                               = require('react')
 
-_                                   = require 'lodash'
+_find                               = require 'lodash/collection/find'
+_indexOf                            = require 'lodash/array/indexOf'
 #Views
 
 module.exports = class ViewManager
@@ -51,9 +52,11 @@ module.exports = class ViewManager
       @scrollData[viewName].scrollData[index] = $(".objbox").scrollTop()
 
 
+
+
   onTabSorted: (viewName,tabIndex,sortedColumn,type,direction) ->
-    oldData = _.find @tabViewSortInfo, (o) -> o.viewName == viewName && o.tabIndex == tabIndex
-    index   = _.indexOf @tabViewSortInfo, oldData
+    oldData = _find @tabViewSortInfo, (o) -> o.viewName == viewName && o.tabIndex == tabIndex
+    index   = _indexOf @tabViewSortInfo, oldData
 
     if oldData?
       oldData.column = sortedColumn
@@ -64,7 +67,7 @@ module.exports = class ViewManager
       @tabViewSortInfo.push sortInfo
 
   getTabSortInfo: (viewName,tabIndex) ->
-    sortInfo = _.find @tabViewSortInfo, (o) -> o.viewName == viewName && o.tabIndex == tabIndex
+    sortInfo = _find @tabViewSortInfo, (o) -> o.viewName == viewName && o.tabIndex == tabIndex
 
     if sortInfo?
       sortInfo
@@ -76,13 +79,14 @@ module.exports = class ViewManager
       if scroll?
         scroll
       else
-        0
+        null
     else
-      0
+      null
+
   getTabSelectedIndexByName: (viewName) ->
     v = @tabViewTabIndexCounter[viewName]
     if v?
       v
     else
-      { index: 0 }
+      { index: null }
       #chiika.logger.error("There was a problem with remembering last tab index for #{viewName}")

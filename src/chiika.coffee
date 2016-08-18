@@ -14,48 +14,25 @@
 #Description:
 #----------------------------------------------------------------------------
 
-React = require('react')
-{Router,Route,BrowserHistory} = require('react-router')
+React                               = require('react')
+{Router,Route,BrowserHistory}       = require('react-router')
 
-Modal = require 'react-modal'
+Modal                               = require 'react-modal'
 
-SideMenu = require './side-menu'
-Titlebar = require './titlebar'
-Settings = require './settings'
-LoadingScreen = require './loading-screen'
-Home = require './home'
-
-_ = require 'lodash'
+SideMenu                            = require './side-menu'
+Titlebar                            = require './titlebar'
+Settings                            = require './settings'
+LoadingScreen                       = require './loading-screen'
+Home                                = require './home'
 
 
 TabGridView = require './view-tabGrid'
 CardView = require './card-view'
 DetailsCardView = require './card-view-details'
 
-Content = React.createClass
-  componentDidMount: ->
-    console.log "hello"
-    chiika.emitter.on 'open-modal', (args) =>
-      @openModal(args)
-  render: () ->
-    (<div className="main">
-      <div id="titleBar">
-        <Titlebar />
-      </div>
-      <div className="content">
-        {this.props.props.children}
-      </div>
-      <div>
-      </div>
-    </div>)
-
-RouterContainer = React.createClass
-  render: ->
-    <div id="appMain"><SideMenu props={this.props} /><Content props={this.props}/></div>
-
 SettingsComponent = React.createClass
   getInitialState: ->
-    modalOpen: true
+    modalOpen: false
     openModalName: ''
 
   openModal: (name) ->
@@ -63,6 +40,10 @@ SettingsComponent = React.createClass
 
   closeModal: ->
     @setState { modalOpen: false }
+
+  componentWillReceiveProps: (props) ->
+    if props.props.location.query.settings
+      @openModal('settings')
   render: ->
     <div>
       <Modal isOpen={@state.modalOpen}
@@ -82,10 +63,27 @@ SettingsComponent = React.createClass
         }
         }}
       >
-      <div>hello</div>
+      <Settings {...@props} />
       </Modal>
     </div>
 
+Content = React.createClass
+  render: () ->
+    (<div className="main">
+      <div id="titleBar">
+        <Titlebar />
+      </div>
+      <div className="content">
+        {this.props.props.children}
+      </div>
+      <div id="modal-stuff">
+        <SettingsComponent {...this.props} />
+      </div>
+    </div>)
+
+RouterContainer = React.createClass
+  render: ->
+    <div id="appMain"><SideMenu props={this.props} /><Content props={this.props}/></div>
 
 
 ChiikaRouter = React.createClass

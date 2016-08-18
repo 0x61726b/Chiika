@@ -20,25 +20,21 @@
 #--------------------
 
 
-
 {BrowserWindow, ipcMain,globalShortcut,Tray,Menu,app} = require 'electron'
 
-yargs                             = require 'yargs'
+
+
 path                              = require 'path'
 
 
-fs                                = require 'fs'
-mkdirp                            = require 'mkdirp'
-_                                 = require 'lodash'
-_when                             = require 'when'
 {Emitter,Disposable}              = require 'event-kit'
 string                            = require 'string'
 
 
-ApplicationWindow                 = require './app-window'
+
 menubar                           = require './menubar'
 Logger                            = require './logger'
-
+#
 APIManager                        = require './api-manager'
 DbManager                         = require './database-manager'
 RequestManager                    = require './request-manager'
@@ -52,7 +48,6 @@ ChiikaPublicApi                   = require './chiika-public'
 Utility                           = require './utility'
 AppOptions                        = require './options'
 AppDelegate                       = require './app-delegate'
-
 
 process.on 'uncaughtException',(err) ->
   # chiika.logger.log 'error', 'Fatal uncaught exception crashed cluster', err, (err, level, msg, meta) =>
@@ -89,6 +84,12 @@ class Application
   #
   constructor: () ->
     global.chiika       = this
+    global.__base       = process.cwd() + '/'
+
+    global.scriptRequire = (name) ->
+      require(path.join(process.cwd(), 'node_modules',name))
+
+
     console.log         ("Using electron instance #{require.resolve('electron')}")
     @chiikaHome         = path.join(app.getPath('appData'),"chiika")
     console.log @chiikaHome
@@ -103,7 +104,7 @@ class Application
     @logger             = new Logger("verbose").logger
     global.logger       = @logger #Share with renderer
 
-    @emitter            = new Emitter
+    #@emitter            = new Emitter
     @utility            = new Utility()
     @settingsManager    = new SettingsManager()
     @apiManager         = new APIManager()
@@ -119,10 +120,12 @@ class Application
 
     @ipcManager.handleEvents()
 
+
     app.commandLine.appendSwitch('--disable-2d-canvas-image-chromium');
     app.commandLine.appendSwitch('--disable-accelerated-2d-canvas');
     app.commandLine.appendSwitch('--disable-gpu');
     app.commandLine.appendSwitch('--enable-experimental-web-platform-features')
+    app.commandLine.appendSwitch('--version-string.FileDescription=test')
 
     @appDelegate.run()
 
@@ -130,7 +133,6 @@ class Application
     @appDelegate.ready =>
       @dbManager.onLoad =>
         @run()
-
 
 
 
@@ -177,6 +179,7 @@ class Application
 
 
 
+
     if userCount > 0
       # If there are no UI items
       # compile scripts first
@@ -184,13 +187,16 @@ class Application
       # preload them first so when script is ready, they can access them right of the bat
       # after preload and script compile, check if the views need update
       # if they do, call view-update event so script can respond
+      #chiika.windowManager.createMainWindow()
       @apiManager.preCompile().then =>
         @apiManager.postCompile()
+        chiika.windowManager.createMainWindow()
 
         @viewManager.preload().then =>
           chiika.logger.verbose("Preloading UI complete!")
           @apiManager.postInit()
-          chiika.windowManager.createMainWindow()
+
+      #
 
 
 
@@ -199,6 +205,8 @@ class Application
     @chiikaHome
   getDbHome: ->
     path.join(@chiikaHome,"data","database")
+  getScriptCachePath: ->
+    path.join(@chiikaHome,'cache','scripts')
 
 
 app = new Application()

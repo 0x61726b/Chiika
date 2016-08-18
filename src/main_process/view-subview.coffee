@@ -14,9 +14,12 @@
 #Description:
 #----------------------------------------------------------------------------
 
-_         = require 'lodash'
-_when     = require 'when'
-View    = require './view'
+
+_when                   = require 'when'
+View                    = require './view'
+_find                   = require 'lodash/collection/find'
+_indexOf                = require 'lodash/array/indexOf'
+_forEach                = require 'lodash.foreach'
 
 {InvalidOperationException,InvalidParameterException} = require './exceptions'
 
@@ -28,7 +31,7 @@ module.exports = class SubView extends View
 
   loadData: (data) ->
     @dataSource = []
-    _.forEach data, (v,k) =>
+    _forEach data, (v,k) =>
       @dataSource.push v
 
 
@@ -46,7 +49,7 @@ module.exports = class SubView extends View
 
   setDataArray: (data) ->
     new Promise (resolve) =>
-      if _.isUndefined data
+      if !data?
         throw new InvalidParameterException("You didn't specify data to be added.")
 
       chiika.logger.info("Setting data for #{@name}")
@@ -68,13 +71,13 @@ module.exports = class SubView extends View
   # @return
   setData: (data,key) ->
     new Promise (resolve) =>
-      if _.isUndefined data
+      if !data?
         throw new InvalidParameterException("You didn't specify data to be added.")
 
       chiika.logger.info("Setting data for #{@name}")
 
-      find = _.find @dataSource, (o) -> o[key] == data[key]
-      index = _.indexOf @dataSource, find
+      find = _find @dataSource, (o) -> o[key] == data[key]
+      index = _indexOf @dataSource, find
 
       if find?
         chiika.logger.info("Existing row found for #{@name}")

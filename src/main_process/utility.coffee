@@ -15,7 +15,6 @@
 #----------------------------------------------------------------------------
 
 
-_                   = require 'lodash'
 path                = require 'path'
 fs                  = require 'fs'
 mkdirp              = require 'mkdirp'
@@ -35,10 +34,22 @@ module.exports = class Utility
       file = fs.statSync absolutePath
     catch e
       file = undefined
-    if _.isUndefined file
-      return false
-    else
+    if file?
       return true
+    else
+      return false
+
+  getLastModifiedTime: (absolutePath) ->
+    try
+      file = fs.statSync absolutePath
+    catch e
+      file = undefined
+    if file?
+      file.mtime.getTime()
+
+
+  getLastModifiedTimeSmart: (relativePath) ->
+    @getLastModifiedTime path.join chiika.getAppHome(),relativePath
 
   #
   # Checks if a file exist given a relative path to the app home

@@ -14,9 +14,10 @@
 #Description:
 #----------------------------------------------------------------------------
 
-IDb           = require './db-interface'
-_             = require 'lodash'
-_when         = require('when')
+IDb                     = require './db-interface'
+_find                   = require 'lodash/collection/find'
+_indexOf                = require 'lodash/array/indexOf'
+_when                   = require('when')
 
 {InvalidParameterException} = require './exceptions'
 
@@ -81,8 +82,8 @@ module.exports = class DbUI extends IDb
       if insert? # Insert
         @uiData.push menuItem
       if update?
-        findItem = _.find @uiData, (o) -> o.name == menuItem.name
-        index = _.indexOf @uiData,findItem
+        findItem = _find @uiData, (o) -> o.name == menuItem.name
+        index = _indexOf @uiData,findItem
         if findItem?
           @uiData.splice(index,1,findItem)
         else
@@ -105,7 +106,7 @@ module.exports = class DbUI extends IDb
       callback(data)
 
   getUIItemSync: (name) ->
-    _.find(@uiData, (o) -> o.name == name)
+    _find(@uiData, (o) -> o.name == name)
 
   getUIItemsAsync: (callback) ->
     onAll = (data) ->
@@ -115,36 +116,3 @@ module.exports = class DbUI extends IDb
 
   getUIItems: ->
     @uiData
-  # #
-  # # Updates the user
-  # # @param [Object] user User object
-  # # @param [Object] user User object
-  # # @option user [String] userName Name of the user
-  # # @option user [String] password Password of the user
-  # # @option user [Boolean] isPrimary When set, this user will be primary.
-  # # @param [Object] callback Function which will be called upon update
-  # # @todo Add parameter validation
-  # updateUser: (user,callback) ->
-  #   #Callback of update operation
-  #   onUpdateComplete = (result) ->
-  #     if !_.isUndefined callback
-  #       callback()
-  #
-  #
-  #   #Call the base class's update method, which will talk to the actual db object
-  #   @updateRecords user,onUpdateComplete,1
-  #
-  # #
-  # # Removes user
-  # # @param [Object] user
-  # # @options object [String] userName
-  # # @param [Object] callback Function which will be called upon update
-  # # @todo Add parameter validation
-  # removeUser: (user,callback) ->
-  #   onUpdateComplete = (result) ->
-  #     if !_.isUndefined callback
-  #       callback()
-  #
-  #
-  #
-  #   @removeRecords user,onUpdateComplete,1
