@@ -31,8 +31,10 @@ module.exports = React.createClass
     viewName: ""
     currentTabIndex: 0
     lastTabIndex: 0
-    tabs: 'dhtml'
+    tabs: 'react'
+    lowMemoryUsage: false
 
+  diff: 0
   currentGrid: null
   scrollPending: false
   updated: false
@@ -80,6 +82,10 @@ module.exports = React.createClass
     else
       @createTabAndGrids()
 
+    $(".form-control").off 'input'
+    $(".form-control").on 'input', (e) =>
+      @filterGrids(e.target.value)
+
     #Get UI item
     #
 
@@ -98,8 +104,6 @@ module.exports = React.createClass
       @tabbar = null
 
     @tabbar = new dhtmlXTabBar("tabbar")
-
-    @grids.push { name: @props.route.viewName }
 
     tabCache = chiika.viewManager.getTabSelectedIndexByName(@props.route.viewName)
     currentTabIndex = tabCache.index
@@ -128,18 +132,22 @@ module.exports = React.createClass
     @updateGrid(@tabbar.getActiveTab(),@uiItem.columns,@props.route.viewName)
 
   componentDidMount: ->
-    if @state.tabs == 'react'
-      @updateGrid(@uiItem.tabList[0].name,@uiItem.columns,@props.route.viewName)
-    else
-      @createTabAndGrids()
+    @updateGrid(@uiItem.tabList[0].name,@uiItem.columns,@props.route.viewName)
+
+
+    $(".form-control").off 'input'
+    $(".form-control").on 'input', (e) =>
+      @filterGrids(e.target.value)
+
+
+
+
+  filterGrids: (input) ->
+    _forEach @grids, (grid) =>
+      grid.grid.filterBy(1,input)
 
   updateGrid: (name,columnList,viewName) ->
-    if @state.tabs == 'dhtml'
-      currentGrid = @tabbar.tabs(name).attachGrid()
-    else if @state.tabs == 'react'
-      currentGrid = new dhtmlXGridObject(name)
-
-
+    currentGrid = new dhtmlXGridObject(name)
 
     columnIdsForDhtml = ""
     columnTextForDhtml = ""
@@ -163,9 +171,13 @@ module.exports = React.createClass
 
     diff = totalArea - fixedColumnsTotal
 
+    if @diff <= 0
+      @diff = diff
+
 
     _forEach columnList, (v,k) =>
       if !v.hidden
+
         columnIdsForDhtml += v.name + ","
         columnTextForDhtml += v.display + ","
         columnSorting += v.sort + ","
@@ -173,11 +185,10 @@ module.exports = React.createClass
         headerAligns.push "text-align: #{v.headerAlign};"
 
         if v.widthP?
-          calculatedWidth = diff * (v.widthP / 100)
+          calculatedWidth = @diff * (v.widthP / 100)
           columnInitWidths += calculatedWidth + ","
         else
           columnInitWidths += v.width + ","
-
 
     columnIdsForDhtml = columnIdsForDhtml.substring(0,columnIdsForDhtml.length - 1)
     columnTextForDhtml = columnTextForDhtml.substring(0,columnTextForDhtml.length - 1)
@@ -213,16 +224,14 @@ module.exports = React.createClass
     #
     #
     #
-    $(".form-control").on 'input', (e) =>
-      currentGrid.filterBy(1,e.target.value)
 
 
     #
     # After sorting, remember the sort preference of a particular tab
     #
-    if chiika.appSettings.RememberSortingPreference
-      currentGrid.attachEvent 'onAfterSorting', (index,type,direction) =>
-        chiika.viewManager.onTabSorted(viewName,chiika.viewManager.getTabSelectedIndexByName(@props.route.viewName).index,index,type,direction)
+    # if chiika.appSettings.RememberSortingPreference
+    #   currentGrid.attachEvent 'onAfterSorting', (index,type,direction) =>
+    #     chiika.viewManager.onTabSorted(viewName,chiika.viewManager.getTabSelectedIndexByName(@props.route.viewName).index,index,type,direction)
 
 
     # When clicked, go to details
@@ -233,35 +242,32 @@ module.exports = React.createClass
           window.location = "##{viewName}_details/#{find.mal_id}"
 
 
-    # $(window).resize( =>
-    #   if currentGrid?
-    #
-    #     console.log "Resize"
-    #
-    #     @tabbar.setSizes()
-    #     if $(".objbox")[0].scrollHeight > $(".objbox").height()
-    #       totalArea = $(".objbox").width() - 8
-    #     else
-    #       totalArea = $(".objbox").width()
-    #     fixedColumnsTotal = 0
-    #
-    #     _forEach @uiItem.columns, (v,k) =>
-    #       if v.width? && !v.hidden
-    #         fixedColumnsTotal += parseInt(v.width)
-    #
-    #     diff = totalArea - fixedColumnsTotal
-    #
-    #     for i in [0...@uiItem.columns.length]
-    #       v = @uiItem.columns[i]
-    #       if !v.hidden
-    #         width = 0
-    #         if v.widthP?
-    #           width = diff * (v.widthP / 100)
-    #         else
-    #           width = v.width
-    #         currentGrid.setColWidth(i,width.toString())
-    #         )
-    # $(window).trigger('resize')
+    $(window).resize( =>
+      if currentGrid?
+        #@tabbar.setSizes()
+        if $(".objbox")[0].scrollHeight > $(".objbox").height()
+          totalArea = $(".objbox").width() - 8
+        else
+          totalArea = $(".objbox").width()
+        fixedColumnsTotal = 0
+
+        _forEach @uiItem.columns, (v,k) =>
+          if v.width? && !v.hidden
+            fixedColumnsTotal += parseInt(v.width)
+
+        diff = totalArea - fixedColumnsTotal
+
+        for i in [0...@uiItem.columns.length]
+          v = @uiItem.columns[i]
+          if !v.hidden
+            width = 0
+            if v.widthP?
+              width = diff * (v.widthP / 100)
+            else
+              width = v.width
+            currentGrid.setColWidth(i,width.toString())
+            )
+    $(window).trigger('resize')
 
 
 
@@ -269,15 +275,11 @@ module.exports = React.createClass
     @uiItem = _find chiika.uiData, (o) => o.name == @props.route.viewName
 
     @grids = []
-  componentWillUnmount: ->
-    if @state.tabs == 'dhtml'
-      chiika.viewManager.onTabSelect(@props.route.viewName,@tabbar.getActiveTab())
-      chiika.viewManager.onTabViewUnmount(@props.route.viewName,@tabbar.getActiveTab())
 
-      @tabbar.clearAll()
-      @tabbar.unload()
-      @tabbar = null
-    else if @state.tabs == 'react'
+
+  componentWillUnmount: ->
+
+    if @state.tabs == 'react'
       _forEach @grids,(grid) =>
         grid.grid.clearAll()
         grid.grid = null
@@ -292,7 +294,7 @@ module.exports = React.createClass
   onSelect: (index,last) ->
     @setState { currentTabIndex: index, lastTabIndex: last }
   renderReactTabs: ->
-    <Tabs selectedIndex={@state.currentTabIndex} onSelect={@onSelect} forceRenderTabPanel=true>
+    <Tabs selectedIndex={@state.currentTabIndex} onSelect={@onSelect} forceRenderTabPanel={!@state.lowMemoryUsage}>
       <TabList>
         {@uiItem.tabList.map((tab, i) =>
               <Tab key={i}>{tab.display} <span className="label raised theme-accent">0</span></Tab>
