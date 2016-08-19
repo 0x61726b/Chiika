@@ -490,11 +490,11 @@ module.exports = class MyAnimelist
 
         animelistData = []
 
-        animelistData.push { name: 'watching',data: watching }
-        animelistData.push { name: 'ptw',data: ptw }
-        animelistData.push { name: 'dropped',data: dropped }
-        animelistData.push { name: 'onhold',data: onhold }
-        animelistData.push { name: 'completed',data: completed }
+        animelistData.push { name: 'al_watching',data: watching }
+        animelistData.push { name: 'al_ptw',data: ptw }
+        animelistData.push { name: 'al_dropped',data: dropped }
+        animelistData.push { name: 'al_onhold',data: onhold }
+        animelistData.push { name: 'al_completed',data: completed }
         args.return(animelistData)
 
 
@@ -531,11 +531,11 @@ module.exports = class MyAnimelist
 
         mangalistData = []
 
-        mangalistData.push { name: 'reading',data: reading }
-        mangalistData.push { name: 'ptr',data: ptr }
-        mangalistData.push { name: 'dropped',data: dropped }
-        mangalistData.push { name: 'onhold',data: onhold }
-        mangalistData.push { name: 'completed',data: completed }
+        mangalistData.push { name: 'ml_reading',data: reading }
+        mangalistData.push { name: 'ml_ptr',data: ptr }
+        mangalistData.push { name: 'ml_dropped',data: dropped }
+        mangalistData.push { name: 'ml_onhold',data: onhold }
+        mangalistData.push { name: 'ml_completed',data: completed }
         args.return(mangalistData)
 
     # This function is called from the login window.
@@ -1606,11 +1606,11 @@ module.exports = class MyAnimelist
       category: 'MyAnimelist',
       TabGridView: {
         tabList: [
-          { name:'watching', display: 'Watching' },
-          { name:'completed', display: 'Completed'},
-          { name:'onhold', display: 'On Hold'},
-          { name:'dropped', display: 'Dropped'},
-          { name:'ptw', display: 'Plan to Watch'}
+          { name:'al_watching', display: 'Watching' },
+          { name:'al_completed', display: 'Completed'},
+          { name:'al_onhold', display: 'On Hold'},
+          { name:'al_dropped', display: 'Dropped'},
+          { name:'al_ptw', display: 'Plan to Watch'}
           ],
         gridColumnList: [
           { name: 'animeTypeText',display: 'Type', sort: 'na', width:'40',align: 'center',headerAlign: 'center' },
@@ -1641,11 +1641,11 @@ module.exports = class MyAnimelist
       category: 'MyAnimelist',
       TabGridView: { #Must be the same name with displayType
         tabList: [
-          { name:'reading', display: 'Reading' },
-          { name:'completed', display: 'Completed'},
-          { name:'onhold', display: 'On Hold'},
-          { name:'dropped', display: 'Dropped'},
-          { name:'ptr', display: 'Plan to Read'}
+          { name:'ml_reading', display: 'Reading' },
+          { name:'ml_completed', display: 'Completed'},
+          { name:'ml_onhold', display: 'On Hold'},
+          { name:'ml_dropped', display: 'Dropped'},
+          { name:'ml_ptr', display: 'Plan to Read'}
           ],
         gridColumnList: [
           { name: 'mangaTitle',display: 'Title', sort: 'str', widthP:'60', align: 'left',headerAlign: 'left' },

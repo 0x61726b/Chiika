@@ -22,6 +22,7 @@ _when           = require 'when'
 
 
 
+
 module.exports = class UIManager
   uiItems: []
   preloadPromises: []

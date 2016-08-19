@@ -20,6 +20,8 @@ React                                   = require('react')
 _find                                   = require 'lodash/collection/find'
 _forEach                                = require 'lodash.foreach'
 _indexOf                                = require 'lodash/array/indexOf'
+_remove                                 = require 'lodash/array/remove'
+_assign                                 = require 'lodash.assign'
 {ReactTabs,Tab,Tabs,TabList,TabPanel}   = require 'react-tabs'
 LoadingScreen                           = require './loading-screen'
 #Views
@@ -35,15 +37,32 @@ module.exports = React.createClass
     lowMemoryUsage: false
 
   diff: 0
-  currentGrid: null
-  scrollPending: false
-  updated: false
   grids: []
   componentWillReceiveProps: (props) ->
     #document.title = @props.route.viewName  + "##{@state.currentTabIndex}"
+    @uiItem = _find chiika.uiData, (o) => o.name == props.route.viewName
 
-    # if @props.route.viewName != props.route.viewName
-    #   console.log "Changed from #{@props.route.viewName} to #{props.route.viewName}"
+    if @props.route.viewName != props.route.viewName
+      console.log "Changed from #{@props.route.viewName} to #{props.route.viewName}"
+      prevUIItem = _find chiika.uiData, (o) => o.name == @props.route.viewName
+      toRemove = []
+      _forEach @grids,(grid) =>
+        findInPreviousTabList = _find prevUIItem.tabList, (o) => o.name == grid.name
+
+        if findInPreviousTabList?
+          toRemove.push grid.name
+
+      _forEach toRemove, (val) =>
+        findGrid = _find @grids, (o) => o.name == val
+
+        if findGrid?
+          findGrid.grid.clearAll()
+          findGrid.grid = null
+          console.log "RIP #{findGrid.name}"
+          _remove @grids,findGrid
+
+
+
     #   @createTabAndGrids()
     #
     #   find = _find @grids, (o) => o.name == @props.route.viewName
@@ -58,33 +77,26 @@ module.exports = React.createClass
     #   if @state.viewName != props.route.viewName
     #     @state.currentTabIndex = tabCache.index
     #
-    # dataSourceLengths = []
+    dataSourceLengths = []
+    _forEach @uiItem.tabList, (v,k) ->
+      viewData = _find(chiika.viewData, (o) => o.name == props.route.viewName)
+      gridData = _find(viewData.dataSource, (o) => o.name == v.name)
 
-    # console.log "Hello -------- "
-    # console.log props.route.view.children[0].dataSource[3]
-    # uiItem = _find chiika.uiData, (o) => o.name == props.route.viewName
-    #
-    # _forEach uiItem.tabList, (v,k) ->
-    #   viewData = _find(chiika.viewData, (o) => o.name == props.route.viewName)
-    #   gridData = _find(viewData.dataSource, (o) => o.name == v.name)
-    #
-    #   dataSourceLengths.push gridData.data.length
-    #
-    #
-    # @setState { viewName: props.route.viewName, tabList: uiItem.tabList, columns: uiItem.columns, tabLenghts: dataSourceLengths }
+      dataSourceLengths.push gridData.data.length
 
+
+    @setState { viewName: props.route.viewName,tabList: @uiItem.tabList, columnList: @uiItem.columns,lengths: dataSourceLengths }
 
   componentDidUpdate: ->
-    @uiItem = _find chiika.uiData, (o) => o.name == @props.route.viewName
-
-    if @state.tabs == 'react'
+    # Did we create it before?
+    findGrid = _find @grids, { name: @uiItem.tabList[@state.currentTabIndex].name }
+    if !findGrid?
       @updateGrid(@uiItem.tabList[@state.currentTabIndex].name,@uiItem.columns,@props.route.viewName)
-    else
-      @createTabAndGrids()
 
-    $(".form-control").off 'input'
-    $(".form-control").on 'input', (e) =>
-      @filterGrids(e.target.value)
+
+    # $(".form-control").off 'input'
+    # $(".form-control").on 'input', (e) =>
+    #   @filterGrids(e.target.value)
 
     #Get UI item
     #
@@ -98,46 +110,13 @@ module.exports = React.createClass
     #   else
     #     $('scrollPosition').attr('value',scroll)
 
-  createTabAndGrids: () ->
-    if @tabbar?
-      @tabbar.clearAll()
-      @tabbar = null
-
-    @tabbar = new dhtmlXTabBar("tabbar")
-
-    tabCache = chiika.viewManager.getTabSelectedIndexByName(@props.route.viewName)
-    currentTabIndex = tabCache.index
-
-    if !currentTabIndex?
-      currentTabIndex = @uiItem.tabList[0].name
-
-    for tab in @uiItem.tabList
-      if tab.name == currentTabIndex
-        @tabbar.addTab(tab.name, tab.display, null, null, true)
-      else
-        @tabbar.addTab(tab.name, tab.display)
-
-    #@tabbar.enableAutoReSize(true)
-
-    #document.title = @props.route.viewName  + "##{@state.currentTabIndex}"
-
-    @tabbar.attachEvent 'onSelect', (index,last) =>
-      if !@tabbar.tabs(index).getAttachedObject()?
-        @updateGrid(index,@uiItem.columns,@props.route.viewName)
-
-      chiika.viewManager.onTabSelect(@props.route.viewName,index,last)
-      return true
-
-
-    @updateGrid(@tabbar.getActiveTab(),@uiItem.columns,@props.route.viewName)
-
   componentDidMount: ->
-    @updateGrid(@uiItem.tabList[0].name,@uiItem.columns,@props.route.viewName)
-
-
-    $(".form-control").off 'input'
-    $(".form-control").on 'input', (e) =>
-      @filterGrids(e.target.value)
+    # @updateGrid(@uiItem.tabList[0].name,@uiItem.columns,@props.route.viewName)
+    #
+    #
+    # $(".form-control").off 'input'
+    # $(".form-control").on 'input', (e) =>
+    #   @filterGrids(e.target.value)
 
 
 
@@ -244,7 +223,7 @@ module.exports = React.createClass
 
     $(window).resize( =>
       if currentGrid?
-        #@tabbar.setSizes()
+
         if $(".objbox")[0].scrollHeight > $(".objbox").height()
           totalArea = $(".objbox").width() - 8
         else
@@ -276,13 +255,13 @@ module.exports = React.createClass
 
     @grids = []
 
-
+  clearGrids: ->
+    _forEach @grids,(grid) =>
+      console.log "RIP #{grid.name}"
+      grid.grid.clearAll()
+      grid.grid = null
   componentWillUnmount: ->
-
-    if @state.tabs == 'react'
-      _forEach @grids,(grid) =>
-        grid.grid.clearAll()
-        grid.grid = null
+    @clearGrids()
 
     # scroll = chiika.viewManager.getTabScrollAmount(@state.viewName,@state.currentTabIndex)
     $(".form-control").off 'input'
@@ -296,23 +275,16 @@ module.exports = React.createClass
   renderReactTabs: ->
     <Tabs selectedIndex={@state.currentTabIndex} onSelect={@onSelect} forceRenderTabPanel={!@state.lowMemoryUsage}>
       <TabList>
-        {@uiItem.tabList.map((tab, i) =>
-              <Tab key={i}>{tab.display} <span className="label raised theme-accent">0</span></Tab>
-              )}
+        {@state.tabList.map((tab, i) =>
+            <Tab key={i}>{tab.display} <span className="label raised theme-accent">{@state.lengths[i]}</span></Tab>
+            )}
       </TabList>
       {
-        @uiItem.tabList.map (tab,i) =>
+        @state.tabList.map (tab,i) =>
           <TabPanel key={i}>
             <div id="#{tab.name}" className="listCommon"></div>
           </TabPanel>
       }
-  </Tabs>
-  renderDhtmlTabbar: ->
-    <div id="tabOuter">
-      <div id="tabbar" style={{ width: '100%', height: '100%' }} />
-    </div>
+    </Tabs>
   render: ->
-    if @state.tabs == 'react'
-      @renderReactTabs()
-    else if @state.tabs == 'dhtml'
-      @renderDhtmlTabbar()
+    @renderReactTabs()
