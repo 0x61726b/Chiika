@@ -132,7 +132,6 @@ module.exports = class SettingsManager
     promises.push chiika.utility.createFolder(chiika.getDbHome())
     _when.all(promises)
 
-
   #
   #
   #

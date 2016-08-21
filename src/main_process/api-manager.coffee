@@ -28,6 +28,7 @@ rimraf                  = require 'rimraf'
 _find                   = require 'lodash/collection/find'
 _indexOf                = require 'lodash/array/indexOf'
 
+
 module.exports = class APIManager
   compiledUserScripts: []
   scriptInstances: []
@@ -35,6 +36,7 @@ module.exports = class APIManager
   emitter: null
   activeScripts: []
   compiledScripts: []
+
 
   constructor: () ->
     global.api = this
@@ -87,6 +89,14 @@ module.exports = class APIManager
 
       @activeScripts.splice(index,1,localInstance)
 
+
+    @activeScripts.sort (a,b) =>
+      if a.isService && !b.isService
+        return -1
+      if b.isService && !a.isService
+        return 1
+      return 0
+    console.log @activeScripts
     if chiika.chiikaApi
       forEach @activeScripts, (script) =>
         @initializeScript(script.name)
@@ -217,6 +227,7 @@ module.exports = class APIManager
 
 
 
+
   internalCompile: (js,file,callback) ->
     stripExtension = string(file).chompRight('.coffee').s
     try
@@ -224,7 +235,6 @@ module.exports = class APIManager
       chiika.logger.info "[magenta](Api-Manager) Compiled " + file
     catch e
       chiika.logger.error("[magenta](Api-Manager) Error compiling user-script " + file)
-      callback(e)
       throw e
 
     cachedScriptPath = path.join(@scriptsCacheDir,stripExtension + '_cache.js')

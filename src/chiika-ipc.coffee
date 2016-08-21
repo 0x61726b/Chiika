@@ -38,6 +38,10 @@ module.exports = class ChiikaIPC
     @receive 'get-ui-data-response',(event,args) =>
       callback(args)
 
+  refreshViewData: (callback) ->
+    @receive 'refresh-view-response',(event,args) =>
+      callback(args)
+
   getViewData: (callback) ->
     @receive 'get-view-data-response', (event,args) =>
       callback(args)
@@ -75,12 +79,14 @@ module.exports = class ChiikaIPC
       console.log "spectron-scrollgrid"
       console.log scrollAmount
 
+
   #
   #
   #
-  refreshViewByName: (view,service) ->
-    @sendReceiveIPC 'refresh-view-by-name',{ viewName: view, service: service }, (event,args,defer) =>
-      console.log "refresh-view-by-name hello"
+  refreshViewByName: (view,service,params) ->
+    if !params?
+      params = {}
+    @sendMessage 'refresh-view-by-name',{ viewName: view, service: service,params: params }
 
   #
   #
@@ -106,7 +112,8 @@ module.exports = class ChiikaIPC
 
   onReconstructUI: ->
     @receive 'reconstruct-ui-response', (event,args) =>
-      chiika.reInitializeUI()
+      @sendMessage 'get-ui-data'
+      @sendMessage 'get-view-data'
 
   disposeListeners: (channel) ->
     ipcRenderer.removeAllListeners(channel)

@@ -24,14 +24,15 @@ module.exports = class View
   db: null
   displayType: null
   needUpdate: false
+  noUpdate: false
+  defaultDataSource: ""
   dataSource: []
   processedDataSource: []
   constructor: (params={}) ->
-    { @name, @displayName,@displayType,@owner, @category } = params
+    { @name, @displayName,@displayType,@owner, @dataSource, @category,@noUpdate,@defaultDataSource } = params
 
     @needUpdate = false
     @dataSource = []
-    @processedDataSource = []
 
 
   setDatabaseInterface: (db) ->
@@ -43,7 +44,7 @@ module.exports = class View
     defer = _when.defer()
     if @needUpdate
       if @owner?
-        chiika.chiikaApi.emit 'view-update',{ calling: @owner, view: this, defer: defer, params: {} }
+        chiika.chiikaApi.requestViewUpdate(this.name,@owner, () => defer.resolve())
       else
         chiika.logger.error("Can't update a view without owner! #{@name}")
         defer.resolve( { success: false })
@@ -51,6 +52,7 @@ module.exports = class View
     else
       defer.resolve({ success: true })
     defer.promise
+
 
 
   setDataSource: (data) ->

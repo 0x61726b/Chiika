@@ -43,8 +43,6 @@ module.exports = React.createClass
 
     owner = @props.route.owner
 
-    console.log @props
-
     chiika.ipc.getDetailsLayout id,@props.route.viewName,owner, (args) =>
       @setState { layout: args.layout }
       console.log @state.layout

@@ -38,6 +38,7 @@ module.exports = React.createClass
 
   diff: 0
   grids: []
+  containerWidth: 0
   componentWillReceiveProps: (props) ->
     #document.title = @props.route.viewName  + "##{@state.currentTabIndex}"
     @uiItem = _find chiika.uiData, (o) => o.name == props.route.viewName
@@ -60,22 +61,13 @@ module.exports = React.createClass
           findGrid.grid = null
           console.log "RIP #{findGrid.name}"
           _remove @grids,findGrid
+          $(window).off 'resize'
 
 
-
-    #   @createTabAndGrids()
-    #
-    #   find = _find @grids, (o) => o.name == @props.route.viewName
-    #   index = _indexOf @grids,find
-    #
-    #   @grids.splice()
-
-
-
-    # if chiika.appSettings.RememberScrollTabPosition
-    #   tabCache = chiika.viewManager.getTabSelectedIndexByName(props.route.viewName)
-    #   if @state.viewName != props.route.viewName
-    #     @state.currentTabIndex = tabCache.index
+    if chiika.appSettings.RememberScrollTabPosition
+      tabCache = chiika.viewManager.getTabSelectedIndexByName(props.route.viewName)
+      if @state.viewName != props.route.viewName
+        @state.currentTabIndex = tabCache.index ? 0
     #
     dataSourceLengths = []
     _forEach @uiItem.tabList, (v,k) ->
@@ -94,9 +86,7 @@ module.exports = React.createClass
       @updateGrid(@uiItem.tabList[@state.currentTabIndex].name,@uiItem.columns,@props.route.viewName)
 
 
-    # $(".form-control").off 'input'
-    # $(".form-control").on 'input', (e) =>
-    #   @filterGrids(e.target.value)
+
 
     #Get UI item
     #
@@ -111,13 +101,12 @@ module.exports = React.createClass
     #     $('scrollPosition').attr('value',scroll)
 
   componentDidMount: ->
-    # @updateGrid(@uiItem.tabList[0].name,@uiItem.columns,@props.route.viewName)
-    #
-    #
-    # $(".form-control").off 'input'
-    # $(".form-control").on 'input', (e) =>
-    #   @filterGrids(e.target.value)
+    # Hacks
+    @componentWillReceiveProps(@props)
 
+    $(".form-control").off 'input'
+    $(".form-control").on 'input', (e) =>
+      @filterGrids(e.target.value)
 
 
 
@@ -136,11 +125,15 @@ module.exports = React.createClass
     headerAligns = []
 
 
-
-    if $(".objbox").scrollHeight > $(".objbox").height()
-      totalArea = $(".objbox").width() - 20
+    # Calculate container size
+    if $("##{name}.objbox").scrollHeight > $("##{name} .objbox").height()
+      totalArea = $("##{name} .objbox").width() - 20
     else
-      totalArea = $(".objbox").width()
+      totalArea = $("##{name} .objbox").width()
+
+    if totalArea > 400
+      @containerWidth = totalArea
+
     fixedColumnsTotal = 0
 
 
@@ -148,12 +141,9 @@ module.exports = React.createClass
       if v.width? && !v.hidden
         fixedColumnsTotal += parseInt(v.width)
 
-    diff = totalArea - fixedColumnsTotal
+    diff = @containerWidth - fixedColumnsTotal
 
-    if @diff <= 0
-      @diff = diff
-
-
+    # For each column
     _forEach columnList, (v,k) =>
       if !v.hidden
 
@@ -164,7 +154,7 @@ module.exports = React.createClass
         headerAligns.push "text-align: #{v.headerAlign};"
 
         if v.widthP?
-          calculatedWidth = @diff * (v.widthP / 100)
+          calculatedWidth = diff * (v.widthP / 100)
           columnInitWidths += calculatedWidth + ","
         else
           columnInitWidths += v.width + ","
@@ -175,16 +165,16 @@ module.exports = React.createClass
     columnSorting = columnSorting.substring(0,columnSorting.length - 1)
     columnAligns = columnAligns.substring(0,columnAligns.length - 1)
 
+    # Set grid properties
     currentGrid.setInitWidths( columnInitWidths )
     currentGrid.setColumnIds( columnIdsForDhtml )
     currentGrid.setHeader(columnTextForDhtml,null,headerAligns)
     currentGrid.setColTypes( columnIdsForDhtml )
     currentGrid.setColAlign( columnAligns )
     currentGrid.setColSorting( columnSorting )
-
-
     currentGrid.enableMultiselect(true)
 
+    # Find this grids data
     viewData = _find(chiika.viewData, (o) => o.name == viewName)
     gridData = _find(viewData.dataSource, (o) => o.name == name)
 
@@ -194,11 +184,14 @@ module.exports = React.createClass
     currentGrid.parse gridConf,"js"
     @grids.push { name: name, grid: currentGrid }
 
+    # Filter grid if the search box isnt exmpty
+    if $(".form-control").val().length > 0
+      currentGrid.filterBy(1,$(".form-control").val())
     # Sort rows based on the recorded sort info
-    # if chiika.appSettings.RememberSortingPreference
-    #   sortInfo = chiika.viewManager.getTabSortInfo(viewName,chiika.viewManager.getTabSelectedIndexByName(viewName).index)
-    #   if sortInfo?
-    #     currentGrid.sortRows(sortInfo.column,sortInfo.type,sortInfo.direction)
+    if chiika.appSettings.RememberSortingPreference
+      sortInfo = chiika.viewManager.getTabSortInfo(viewName,chiika.viewManager.getTabSelectedIndexByName(viewName).index)
+      if sortInfo?
+        currentGrid.sortRows(sortInfo.column,sortInfo.type,sortInfo.direction)
 
     #
     #
@@ -208,9 +201,9 @@ module.exports = React.createClass
     #
     # After sorting, remember the sort preference of a particular tab
     #
-    # if chiika.appSettings.RememberSortingPreference
-    #   currentGrid.attachEvent 'onAfterSorting', (index,type,direction) =>
-    #     chiika.viewManager.onTabSorted(viewName,chiika.viewManager.getTabSelectedIndexByName(@props.route.viewName).index,index,type,direction)
+    if chiika.appSettings.RememberSortingPreference
+      currentGrid.attachEvent 'onAfterSorting', (index,type,direction) =>
+        chiika.viewManager.onTabSorted(viewName,chiika.viewManager.getTabSelectedIndexByName(@props.route.viewName).index,index,type,direction)
 
 
     # When clicked, go to details
@@ -220,24 +213,22 @@ module.exports = React.createClass
           find = gridConf.data[i]
           window.location = "##{viewName}_details/#{find.mal_id}"
 
-
     $(window).resize( =>
       if currentGrid?
-
-        if $(".objbox")[0].scrollHeight > $(".objbox").height()
-          totalArea = $(".objbox").width() - 8
+        if $("##{name} .objbox").scrollHeight > $("##{name} .objbox").height()
+          totalArea = $("##{name} .objbox").width() - 8
         else
-          totalArea = $(".objbox").width()
+          totalArea = $("##{name} .objbox").width()
         fixedColumnsTotal = 0
 
-        _forEach @uiItem.columns, (v,k) =>
+        _forEach @state.columnList, (v,k) =>
           if v.width? && !v.hidden
             fixedColumnsTotal += parseInt(v.width)
 
         diff = totalArea - fixedColumnsTotal
 
-        for i in [0...@uiItem.columns.length]
-          v = @uiItem.columns[i]
+        for i in [0...@state.columnList.length]
+          v = @state.columnList[i]
           if !v.hidden
             width = 0
             if v.widthP?
@@ -260,18 +251,24 @@ module.exports = React.createClass
       console.log "RIP #{grid.name}"
       grid.grid.clearAll()
       grid.grid = null
+
+
   componentWillUnmount: ->
     @clearGrids()
+
+    chiika.viewManager.onTabSelect(@state.viewName,@state.currentTabIndex)
+    chiika.viewManager.onTabViewUnmount(@state.viewName,@state.currentTabIndex)
 
     # scroll = chiika.viewManager.getTabScrollAmount(@state.viewName,@state.currentTabIndex)
     $(".form-control").off 'input'
     $(window).off 'resize'
-    # if @currentGrid?
-    #   $(".form-control").off 'input'
-    #   @currentGrid.clearAll()
-    #   @currentGrid = null
+
   onSelect: (index,last) ->
     @setState { currentTabIndex: index, lastTabIndex: last }
+
+    chiika.viewManager.onTabSelect(@state.viewName,index,last)
+
+
   renderReactTabs: ->
     <Tabs selectedIndex={@state.currentTabIndex} onSelect={@onSelect} forceRenderTabPanel={!@state.lowMemoryUsage}>
       <TabList>

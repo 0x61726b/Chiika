@@ -38,3 +38,14 @@ module.exports =
     x:0
     y:0
     center: true
+
+  #RSS
+  DefaultRssSource: 'ANN'
+  RSSSources: ['ANN','MAL']
+
+  #Keys
+  Keys:[
+    { action: 'test', key: 'Shift+O' },
+    { action: 'test2', key: 'Shift+P' },
+    { action: 'test3', key: 'Shift+H'}
+  ]

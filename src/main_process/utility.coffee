@@ -61,6 +61,7 @@ module.exports = class Utility
 
 
 
+
   #
   # Reads file sync given an absolute path
   # @param {String} absolutePath An absolute path of a file

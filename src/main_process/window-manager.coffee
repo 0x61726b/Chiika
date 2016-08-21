@@ -14,12 +14,12 @@
 #Description:
 #----------------------------------------------------------------------------
 
-{BrowserWindow,ipcMain,globalShortcut,Tray,Menu} = require 'electron'
-{Emitter}         = require 'event-kit'
+{BrowserWindow}                 = require 'electron'
+{Emitter}                       = require 'event-kit'
 
-_assign                 = require 'lodash.assign'
-_find                   = require 'lodash/collection/find'
-_remove                   = require 'lodash/array/remove'
+_assign                         = require 'lodash.assign'
+_find                           = require 'lodash/collection/find'
+_remove                         = require 'lodash/array/remove'
 
 
 
@@ -78,6 +78,9 @@ module.exports = class WindowManager
 
     if options.name == 'main'
       @mainWindow = window
+
+      chiika.shortcutManager.register(window)
+
 
     if options.name == 'loading'
       @loadingWindow = window
@@ -142,6 +145,8 @@ module.exports = class WindowManager
         height = window.getSize()[1]
 
         chiika.settingsManager.setWindowProperties({ x: winPosX, y: winPosY,width: width, height: height, center: false })
+
+        chiika.shortcutManager.unregisterAll(window)
       @removeWindow(window)
 
     window.webContents.on 'did-finish-load', =>

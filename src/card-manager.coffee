@@ -18,10 +18,12 @@ React                               = require('react')
 
 _find                               = require 'lodash/collection/find'
 _indexOf                            = require 'lodash/array/indexOf'
+_forEach                            = require 'lodash.foreach'
 CardViews                           = require './cards'
 
 module.exports = class CardManager
   cards: []
+  maxCardListItem: 6
 
 
   constructor: ->
@@ -34,7 +36,7 @@ module.exports = class CardManager
     find = _find @cards, (o) -> o.name == card.name
     index = _indexOf @cards,find
     if find?
-      @cards.splice(index,1,find)
+      @cards.splice(index,1,card)
     else
       @cards.push card
 
@@ -46,6 +48,59 @@ module.exports = class CardManager
     else
       null
 
+  refreshCards: ->
+    @cards = []
+    _forEach chiika.uiData, (uiItem) =>
+      if uiItem.type == 'card-list-item' || uiItem.type == 'card-list-item-upcoming'
+        items = []
+        view = _find chiika.viewData, (o) => o.name == uiItem.name
+        if view?
+          dataSource = view.dataSource
+          if dataSource.items? && dataSource.items.length > 0
+            for i in [0...@maxCardListItem]
+              items.push dataSource.items[i]
+          else if dataSource.length > 0
+            items = dataSource
+          @addCard {
+            name: uiItem.name,
+            type: uiItem.type,
+            properties: uiItem.cardProperties,
+            title: dataSource.provider,
+            items: items}
+        else
+          console.log "Couldnt find view with the name #{uiItem.name}"
+
+      else if uiItem.type == 'card-full-entry'
+        dataSource = uiItem.name
+        view = _find chiika.viewData, (o) => o.name == dataSource
+
+        if view?
+          @addCard {
+            name: uiItem.name
+            type: uiItem.type
+            properties: uiItem.cardProperties,
+            anime: view.dataSource
+          }
+      else if uiItem.type == 'card-statistics'
+        dataSource = uiItem.name
+        view = _find chiika.viewData, (o) => o.name == dataSource
+
+        if view?
+          @addCard {
+            name: uiItem.name
+            type: uiItem.type
+            properties: uiItem.cardProperties,
+            statistics: view.dataSource
+          }
+
   renderCard: (card,i) ->
     if card.type == 'miniCard'
       @views.miniCard(card,i)
+    else if card.type == 'card-list-item'
+      @views.cardList(card,i)
+    else if card.type == 'card-full-entry'
+      @views.cardAnime(card,i)
+    else if card.type == 'card-list-item-upcoming'
+      @views.cardListUpcoming(card,i)
+    else if card.type == 'card-statistics'
+      @views.cardStatistics(card,i)

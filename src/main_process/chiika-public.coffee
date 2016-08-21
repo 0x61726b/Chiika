@@ -24,6 +24,7 @@ module.exports = class ChiikaPublicApi
   constructor: (params={})->
     @emitter                                    = new Emitter
     {@logger, @db,@parser,@ui,@viewManager}     = params
+    @settingsManager                            = chiika.settingsManager
     @users                                      = @db.usersDb
     @custom                                     = @db.customDb
     @uiDb                                       = @db.uiDb
@@ -60,28 +61,53 @@ module.exports = class ChiikaPublicApi
       throw new InvalidParameterException("You have to supply a callback to 'makeGetRequestAuth' method.")
 
 
+
+  #
+  #
+  #
   makePostRequestAuth:(url,user,headers,body,callback) ->
     if callback?
       chiika.requestManager.makePostRequestAuth(url,user,headers,body,callback)
     else
       throw new InvalidParameterException("You have to supply a callback to 'makePostRequestAuth' method.")
-
-
+  #
+  #
+  #
   sendMessageToWindow: (windowName,message,args) ->
     wnd = chiika.windowManager.getWindowByName(windowName)
+    chiika.logger.info("Sending IPC #{message} to #{windowName}")
 
     if wnd?
       wnd.webContents.send message,args
 
 
 
-  requestViewUpdate: (viewName,owner,defer,params) ->
+  #
+  #
+  #
+  requestViewUpdate: (viewName,owner,callback,params) ->
+    if !params?
+      params = {}
+
+    onUpdateComplete = (result) =>
+      @sendMessageToWindow('main','refresh-data')
+      callback?(result)
+
+    view = chiika.viewManager.getViewByName(viewName)
+    if view?
+      @emit 'view-update', { calling: owner, view: view, return: onUpdateComplete, params: params }
+    else
+      chiika.logger.error("Can't update a non-existent view.")
+
+
+
+  requestViewUpdateDynamic: (viewName,owner,callback,params) ->
     if !params?
       params = {}
 
     view = chiika.viewManager.getViewByName(viewName)
     if view?
-      @emit 'view-update', { calling: owner, view: view, defer: defer, params: params }
+      @emit 'view-dynamic-update', { calling: owner, view: view, return: callback, params: params }
     else
       chiika.logger.error("Can't update a non-existent view.")
 

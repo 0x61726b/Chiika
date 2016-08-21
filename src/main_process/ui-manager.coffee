@@ -17,10 +17,9 @@
 _find                   = require 'lodash/collection/find'
 _indexOf                = require 'lodash/array/indexOf'
 _forEach                = require 'lodash.foreach'
+_remove                 = require 'lodash/array/remove'
 _assign                 = require 'lodash.assign'
 _when           = require 'when'
-
-
 
 
 module.exports = class UIManager
@@ -51,7 +50,6 @@ module.exports = class UIManager
       @uiItems.splice(index,1,instance)
 
 
-
   #
   # Returns the total number of UI items stored on DB
   # @returm {Integer}
@@ -62,10 +60,10 @@ module.exports = class UIManager
     @uiItems
 
 
-  removeUIItem: (item) ->
-    match = _find uiItems,item
-    index = _indexOf uiItems,match
+  removeUIItem: (name) ->
+    match = _find @uiItems,(o) -> o.name == name
+    index = _indexOf @uiItems,match
 
     if match?
-      @uiItems.splice(index,1,match)
-      chiika.logger.verbose("[magenta](UI-Manager) Removed a UI Item #{item.name}")
+      _remove @uiItems,match
+      chiika.logger.verbose("[magenta](UI-Manager) Removed a UI Item #{name}")

@@ -27,7 +27,7 @@
     "deferred": "^0.7.5",
     "draggabilly": "^2.1.1",
     "electron-connect": "^0.3.9",
-    "electron-localshortcut": "^0.6.0",
+    "electron-localshortcut": "^0.6.1",
     "electron-positioner": "^3.0.0",
     "event-kit": "^2.0.0",
     "express": "^4.14.0",

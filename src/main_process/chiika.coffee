@@ -22,8 +22,6 @@
 
 {BrowserWindow, ipcMain,globalShortcut,Tray,Menu,app} = require 'electron'
 
-
-
 path                              = require 'path'
 
 
@@ -41,6 +39,7 @@ RequestManager                    = require './request-manager'
 SettingsManager                   = require './settings-manager'
 WindowManager                     = require './window-manager'
 IpcManager                        = require './ipc-manager'
+ShortcutManager                   = require './shortcut-manager'
 Parser                            = require './parser'
 UIManager                         = require './ui-manager'
 ViewManager                       = require './view-manager'
@@ -71,6 +70,7 @@ process.on 'uncaughtException',(err) ->
     chiika.logger.error(err)
 
 
+
 module.exports =
 class Application
   devMode: false
@@ -79,16 +79,17 @@ class Application
   scriptsPaths: []
 
 
+
   #
   # Entry point of Chiika
   #
   constructor: () ->
     global.chiika       = this
     global.__base       = process.cwd() + '/'
+    process.env.CHIIKA_APPDATA = app.getPath('appData')
 
     global.scriptRequire = (name) ->
       require(path.join(process.cwd(), 'node_modules',name))
-
 
     console.log         ("Using electron instance #{require.resolve('electron')}")
     @chiikaHome         = path.join(app.getPath('appData'),"chiika")
@@ -100,11 +101,10 @@ class Application
     else
       console.log process.env.APPDATA
 
-
     @logger             = new Logger("verbose").logger
     global.logger       = @logger #Share with renderer
 
-    #@emitter            = new Emitter
+    @emitter            = new Emitter
     @utility            = new Utility()
     @settingsManager    = new SettingsManager()
     @apiManager         = new APIManager()
@@ -117,6 +117,7 @@ class Application
     @windowManager      = new WindowManager()
     @appDelegate        = new AppDelegate()
     @ipcManager         = new IpcManager()
+    @shortcutManager    = new ShortcutManager()
 
     @ipcManager.handleEvents()
 
@@ -130,9 +131,11 @@ class Application
     @appDelegate.run()
 
 
+
     @appDelegate.ready =>
       @dbManager.onLoad =>
         @run()
+        @handleEvents()
 
 
 
@@ -163,6 +166,7 @@ class Application
         @viewManager.preload()
                   .then =>
                     chiika.logger.verbose("Preloading complete!")
+                    @apiManager.postInit()
                     chiika.windowManager.createLoginWindow()
 
 
@@ -170,17 +174,17 @@ class Application
     # preload view data first, this way scripts can instantly access view data without waiting
     #
     if userCount == 0 && viewCount > 0
-      @viewManager.preload().then =>
-        chiika.logger.verbose("Preloading complete!")
+      @apiManager.preCompile().then =>
+        @apiManager.postCompile()
 
-        @apiManager.preCompile().then =>
-          @apiManager.postCompile()
+        @viewManager.preload().then =>
+          chiika.logger.verbose("Preloading complete!")
+
+          @apiManager.postInit()
           chiika.windowManager.createLoginWindow()
 
 
-
-
-    if userCount > 0
+    if userCount > 0 && viewCount > 0
       # If there are no UI items
       # compile scripts first
       # if there are UI items,
@@ -190,16 +194,20 @@ class Application
       #chiika.windowManager.createMainWindow()
       @apiManager.preCompile().then =>
         @apiManager.postCompile()
-        chiika.windowManager.createMainWindow()
+
 
         @viewManager.preload().then =>
           chiika.logger.verbose("Preloading UI complete!")
           @apiManager.postInit()
+          chiika.windowManager.createMainWindow()
 
       #
 
 
-
+  handleEvents: ->
+    @emitter.on 'shortcut-pressed', (key) =>
+      # Inform subsystems so they do their thing
+      @ipcManager.systemEvent('shortcut-pressed',key)
 
   getAppHome: ->
     @chiikaHome

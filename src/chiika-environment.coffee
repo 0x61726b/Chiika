@@ -18,6 +18,8 @@
 
 _when                                     = require 'when'
 Logger                                    = require './main_process/logger'
+_find                                     = require 'lodash/collection/find'
+_indexOf                                  = require 'lodash/array/indexOf'
 
 ChiikaIPC                                 = require './chiika-ipc'
 ViewManager                               = require './view-manager'
@@ -49,18 +51,48 @@ class ChiikaEnvironment
 
     @ipc.onReconstructUI()
     @ipc.spectron()
+    @refreshData()
+
+    # @ipc.refreshViewData (args) =>
+    #   view = _find @viewData, (o) -> o.name == args.view.name
+    #   index = _indexOf @viewData, view
+    #
+    #   console.log args
+    #
+    #   if view?
+    #     view.dataSource = args.view.dataSource
+    #     @viewData.splice(index,1,args.view)
+    #
+    #   @cardManager.refreshCards()
+
+  refreshData: ->
+    ipcRenderer.on 'refresh-data', (event,args) =>
+      @ipc.sendMessage 'get-ui-data'
+      @ipc.sendMessage 'get-view-data'
 
   preload: ->
     waitForUI = _when.defer()
     waitForViewData = _when.defer()
     waitForSettingsData = _when.defer()
+    waitForPostInit = _when.defer()
 
-    async = [ waitForUI.promise, waitForViewData.promise,waitForSettingsData.promise ]
+    async = [ waitForUI.promise, waitForViewData.promise,waitForSettingsData.promise,waitForPostInit.promise ]
 
     @ipc.sendMessage 'get-ui-data'
     @ipc.refreshUIData (args) =>
       @uiData = args
       chiika.logger.renderer("UI data is present.")
+
+      @uiData.sort (a,b) =>
+        if a.type.indexOf('card') == -1
+          return 0
+        else
+          if a.order > b.order
+            return -1
+          else
+            return 1
+        return 0
+
 
       infoStr = ''
       for uiData in @uiData
@@ -74,10 +106,11 @@ class ChiikaEnvironment
     @ipc.sendMessage 'get-view-data'
     @ipc.getViewData (args) =>
       @viewData = args
+      console.log @viewData
 
       waitForViewData.resolve()
 
-      console.log @viewData
+      @cardManager.refreshCards()
 
     @ipc.sendMessage 'get-settings-data'
     @ipc.getSettings (args) =>
@@ -87,6 +120,11 @@ class ChiikaEnvironment
 
       console.log @appSettings
 
+    @ipc.sendMessage 'post-init'
+    ipcRenderer.on 'post-init-response', (event,args) =>
+      console.log "All cool"
+
+      waitForPostInit.resolve()
     _when.all(async)
 
   onReinitializeUI: (loading,main) ->

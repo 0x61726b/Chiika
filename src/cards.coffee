@@ -18,6 +18,30 @@ React                               = require('react')
 
 
 module.exports = class CardViews
+  colors: [
+    "red",
+    "purple",
+    "indigo",
+    "orange",
+    "grey"
+  ]
+
+  openListItemUrl: (e) ->
+    e.preventDefault()
+    link = $(e.target).parent().attr("href")
+    chiika.openShellUrl(link)
+
+  openButtonUrl: (e) ->
+    link = $(e.target).attr('href')
+    if !link?
+      link = $(e.target).parent().attr('href')
+    chiika.openShellUrl(link)
+  navigateButtonUrl: (e) ->
+    link = $(e.target).attr('href')
+    if !link?
+      link = $(e.target).parent().attr('href')
+    console.log link
+    window.location = link
   #
   # @param {Object} card
   # @option card {Object} title
@@ -58,4 +82,95 @@ module.exports = class CardViews
             @miniCard(item.card)
           </div>
     }
+    </div>
+
+  cardList: (card,i) ->
+    <div className="card grid indigo" id="card-news" key={i}>
+      <div className="home-inline title">
+        <h1>{ card.properties.cardTitle }</h1>
+        <button type="button" href={card.properties.redirect} onClick={@openButtonUrl} className="button indigo raised" id="btn-play">View more on {card.properties.redirectTitle}</button>
+      </div>
+      <ul className="yui-list news divider">
+      {
+        card.items.map (item,i) =>
+          <li key={i}>
+            <a href="#{item.link}" onClick={@openListItemUrl} alt={item[card.properties.alt]}>
+              {
+                if card.properties.displayCategory
+                  <span className="label raised #{@colors[i % 5]}">
+                    { item.category }
+                  </span>
+              }
+              { item[card.properties.display] }
+            </a>
+          </li>
+      }
+      </ul>
+    </div>
+
+
+  cardListUpcoming: (card,i) =>
+    <div className="card grid pink" id="card-soon" key={i}>
+      <div className="home-inline title">
+        <h1>Soon™</h1>
+        <button type="button" className="button raised pink" name="button">Calendar <i className="ion-android-calendar"></i></button>
+      </div>
+      <ul className="yui-list divider">
+        {
+          card.items.map (item,i) =>
+            <li key={i}><span className="label #{item.color}">{ item.time }<p className="detail">{ item.day }</p></span> { item.title} </li>
+        }
+      </ul>
+    </div>
+
+
+  cardAnime: (card,i) ->
+    <div className="card grid currently-watching" id="card-cw" key={i}>
+        <div className="title">
+          <div className="home-inline">
+            <h1>{card.anime.title}</h1>
+            <button type="button" onClick={@navigateButtonUrl} href="##{card.properties.viewName}_details/#{card.anime.id}" className="button raised red">Details</button>
+          </div>
+          <span id="watching-genre">
+            <ul>
+              {
+                if card.anime.genres?
+                  card.anime.genres.split(',').map (genre,i) =>
+                    <li key={i}>{genre}</li>
+              }
+            </ul>
+          </span>
+        </div>
+        <div className="currently-watching-info">
+          <div className="watching-cover">
+            <img src={card.anime.cover} width="150" height="225" alt="" />
+            <button type="button" className="button raised lightblue">Share</button>
+          </div>
+          <div className="watching-info">
+            <span className="info-miniCards">
+              {
+                if card.anime.miniCards.length != 0
+                  card.anime.miniCards.map (card,i) =>
+                    chiika.cardManager.renderCard(card,i)
+              }
+            </span>
+            <p>
+              {card.anime.synopsis}
+            </p>
+          </div>
+        </div>
+    	</div>
+  cardStatistics: (card,i) ->
+    <div className="card grid teal" id="card-thisWeek" key={i}>
+      <div className="grid-sizer"></div>
+        <div className="home-inline title">
+          <h1>This week</h1>
+          <button type="button" onClick={@navigateButtonUrl} href="#History" className="teal raised button" name="button">History</button>
+        </div>
+        <ul className="yui-list floated divider">
+          {
+            card.statistics.map (item,i) =>
+              <li key={i}>{item.title} <span className="label raised green">{ item.count }</span></li>
+          }
+        </ul>
     </div>

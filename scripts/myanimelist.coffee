@@ -165,7 +165,6 @@ module.exports = class MyAnimelist
 
     @chiika.makePostRequestAuth( url, { userName: @malUser.realUserName, password: @malUser.password },null,body, onAuthorizedPostComplete )
 
-
   #
   #
   #
@@ -175,6 +174,20 @@ module.exports = class MyAnimelist
     @authorizedPost "#{updateAnime}#{anime.mal_id}.xml",data,(result) =>
       if result.success && result.response == "Updated"
         callback(result)
+
+        #Save history
+        historyView = @chiika.viewManager.getViewByName('myanimelist_animelist_history')
+
+        if historyView?
+          historyData = historyView.getData()
+
+          historyItem =
+            history_id: historyData.length
+            updated: moment().valueOf()
+            id: anime.mal_id
+            episode: anime.animeWatchedEpisodes
+
+          historyView.setData( historyItem, 'updated')
       else
         # It can return status code 200 but if the body isn't updated,it failed.
         result.success = false
@@ -300,25 +313,24 @@ module.exports = class MyAnimelist
         @getAnimelistData (result) =>
           if result.success
             @setAnimelistTabViewData(result.library.myanimelist.anime,update.view).then =>
-              update.defer.resolve({ success: result.success })
+              update.return({ success: result.success })
 
               # Save the date of this process
               @chiika.custom.addKey { name: "#{update.view.name}_updated", value:moment() }
           else
             @chiika.logger.warn("[yellow](#{@name}) view-update has failed.")
-            update.defer.resolve({ success: result.success })
+            update.return({ success: result.success })
 
 
       else if update.view.name == 'myanimelist_mangalist'
         @getMangalistData (result) =>
           if result.success
             @setMangalistTabViewData(result.library.myanimelist.manga,update.view).then =>
-              update.defer.resolve({ success: result.success })
+              update.return({ success: result.success })
 
               @chiika.custom.addKey { name: "#{update.view.name}_updated", value:moment() }
           else
-            update.defer.resolve({ success: result.success })
-
+            update.return({ success: result.success })
 
 
     @on 'details-layout', (args) =>
@@ -328,30 +340,7 @@ module.exports = class MyAnimelist
       viewName  = args.viewName
 
       if viewName == 'myanimelist_animelist'
-        #If its on the list, it will have this entry
-        animeEntry = _find @animelist, (o) -> (o.mal_id) == args.id
-        extraEntry = _find @animeextra, (o) -> (o.mal_id) == args.id
-
-        timeSinceLastUpdate = @detailsSyncTimeRestriction
-        if extraEntry?
-          lastSync = extraEntry.lastSync
-          now = moment()
-          diff = moment.duration(now.diff(lastSync)).asHours()
-          timeSinceLastUpdate = diff
-
-
-        if timeSinceLastUpdate < @detailsSyncTimeRestriction - 1
-          @chiika.logger.script("#{args.id} was last updated #{timeSinceLastUpdate} hours ago.There is no need to update")
-        else
-          @handleAnimeDetailsRequest id, (response) =>
-            animeExtraView = @chiika.viewManager.getViewByName('myanimelist_animeextra')
-            @animeextra = animeExtraView.getData()
-
-            if response.success && response.updated > 0
-              args.return({ updated: true, layout: @getAnimeDetailsLayout(id)})
-
-
-        args.return({ updated: false, layout: @getAnimeDetailsLayout(id)})
+        @onAnimeDetailsLayout(id,args.return)
 
       if viewName == 'myanimelist_mangalist'
         animeEntry = _find @mangalist, (o) -> (o.mal_id) == args.id
@@ -400,9 +389,9 @@ module.exports = class MyAnimelist
           if params.viewName == 'myanimelist_mangalist'
             newProgress = { }
             if item.title == 'Chapters'
-              newProgress = { chapters: item.current, volumes: layout.status.items[1].current }
+              newProgress = { chapters: item.current, volumes: layout.status.items[1].current,type: item.title }
             if item.title == 'Volumes'
-              newProgress = { volumes: item.current, chapters: layout.status.items[0].current }
+              newProgress = { volumes: item.current, chapters: layout.status.items[0].current,type: item.title }
 
             @updateProgress layout.id,'manga',newProgress, (result) =>
               args.return(result)
@@ -449,11 +438,11 @@ module.exports = class MyAnimelist
 
 
 
-    @on 'get-grid-data', (args,callback) =>
+    @on 'get-view-data', (args,callback) =>
       view = args.view
       data = args.data
 
-      @chiika.logger.script("[yellow](#{@name}) Requesting Grid Data for #{view.name}")
+      @chiika.logger.script("[yellow](#{@name}) Requesting View Data for #{view.name}")
 
       if view.name == 'myanimelist_animelist'
         watching    = []
@@ -498,7 +487,7 @@ module.exports = class MyAnimelist
         args.return(animelistData)
 
 
-      if view.name == 'myanimelist_mangalist'
+      else if view.name == 'myanimelist_mangalist'
         reading     = []
         ptr         = []
         onhold      = []
@@ -538,6 +527,46 @@ module.exports = class MyAnimelist
         mangalistData.push { name: 'ml_completed',data: completed }
         args.return(mangalistData)
 
+      else if args.view.name == 'myanimelist_animelist_history'
+        animelistView = @chiika.viewManager.getViewByName('myanimelist_animelist')
+
+        historyView = @chiika.viewManager.getViewByName('myanimelist_animelist_history')
+
+        if historyView?
+          historyData = historyView.getData()
+
+          currentMonth = moment().month()
+          currentYear  = moment().year()
+
+          monthNumbers = [0,0,0,0,0,0,0,0,0,0,0,0]
+          watchedByMonth = monthNumbers
+
+
+          _forEach historyData, (history) ->
+            lastUpdated = history.updated
+
+            date = moment(lastUpdated)
+
+            if date.isValid() && date.year() == currentYear
+              month = date.month()
+              watchedByMonth[month] += 1
+
+          nonZeroDataPoints = 0
+          chartLabels = []
+          dataPoints  = []
+          for i in [0...watchedByMonth.length]
+            if watchedByMonth[i] != 0
+              nonZeroDataPoints++
+              chartLabels.push moment.months()[i]
+              dataPoints.push watchedByMonth[i]
+
+          chartEpisodesWatched =
+            labels: chartLabels
+            datasets: [
+              { name: 'Episodes Watched',labels: chartLabels,data: dataPoints, color: 'red' }
+            ]
+          args.return([chartEpisodesWatched])
+
     # This function is called from the login window.
     # For example, if you need a token, retrieve it here then store it by calling chiika.custom.addkey
     # Note that you dont have to do anything here if you want
@@ -556,14 +585,22 @@ module.exports = class MyAnimelist
 
               deferUpdate1 = _when.defer()
               deferUpdate2 = _when.defer()
+              deferUpdate3 = _when.defer()
+              deferUpdate4 = _when.defer()
               async.push deferUpdate1.promise
               async.push deferUpdate2.promise
+              async.push deferUpdate3.promise
+              async.push deferUpdate4.promise
 
-              @chiika.requestViewUpdate('myanimelist_animelist',@name,deferUpdate1)
-              @chiika.requestViewUpdate('myanimelist_mangalist',@name,deferUpdate2)
+              @chiika.requestViewUpdate 'myanimelist_animelist',@name,() => deferUpdate1.resolve()
+              @chiika.requestViewUpdate('myanimelist_mangalist',@name,() => deferUpdate2.resolve())
+
+              @importHistoryFromMAL('anime', () => deferUpdate3.resolve() )
+              @importHistoryFromMAL('manga', () => deferUpdate4.resolve() )
 
               _when.all(async).then =>
                 args.return( { success: true })
+                @chiika.requestViewUpdate 'cards_randomAnime', @name
 
             newUser = { userName: args.user + "_" + @name,owner: @name, password: args.pass, realUserName: args.user }
 
@@ -589,6 +626,61 @@ module.exports = class MyAnimelist
             args.return( { success: false, response: response })
 
       @chiika.makePostRequestAuth( authUrl, { userName: args.user, password: args.pass },null,null, onAuthComplete )
+
+
+    @on 'system-event', (event) =>
+      if event.name == 'shortcut-pressed'
+        if event.params.action == 'test3'
+          @importHistoryFromMAL()
+
+  saveMangaHistory: (type,manga) ->
+    #Save history
+    historyView = @chiika.viewManager.getViewByName('myanimelist_mangalist_history')
+
+    if historyView?
+      historyData = historyView.getData()
+      historyItem = {}
+
+      if type == 'chapters'
+        historyItem =
+          history_id: historyData.length
+          updated: moment().valueOf()
+          id: manga.mal_id
+          chapters: manga.mangaUserReadChapters
+
+      if type == 'volumes'
+        historyItem =
+          history_id: historyData.length
+          updated: moment().valueOf()
+          id: manga.mal_id
+          volumes: manga.mangaUserReadVolumes
+
+      historyView.setData( historyItem, 'updated')
+
+  onAnimeDetailsLayout: (id,callback) ->
+    #If its on the list, it will have this entry
+    animeEntry = _find @animelist, (o) -> (o.mal_id) == id
+    extraEntry = _find @animeextra, (o) -> (o.mal_id) == id
+
+    timeSinceLastUpdate = @detailsSyncTimeRestriction
+    if extraEntry?
+      lastSync = extraEntry.lastSync
+      now = moment()
+      diff = moment.duration(now.diff(lastSync)).asHours()
+      timeSinceLastUpdate = diff
+
+
+    if timeSinceLastUpdate < @detailsSyncTimeRestriction - 1
+      @chiika.logger.script("#{id} was last updated #{timeSinceLastUpdate} hours ago.There is no need to update")
+      callback({ updated: true, layout: @getAnimeDetailsLayout(id)})
+    else
+      @handleAnimeDetailsRequest id, (response) =>
+        animeExtraView = @chiika.viewManager.getViewByName('myanimelist_animeextra')
+        @animeextra = animeExtraView.getData()
+
+        if response.success && response.updated > 0
+          callback({ updated: true, layout: @getAnimeDetailsLayout(id)})
+    callback({ updated: false, layout: @getAnimeDetailsLayout(id)})
 
   handleAnimeDetailsRequest: (animeId,callback) ->
     @chiika.logger.script("[yellow](#{@name}-Anime-Search) Searching for #{animeId}!")
@@ -1088,6 +1180,11 @@ module.exports = class MyAnimelist
 
           @updateManga mangaEntry, (result) =>
             if result.success
+              if newProgress.type == 'Chapters'
+                @saveMangaHistory('chapters',mangaEntry)
+              else
+                @saveMangaHistory('volumes',mangaEntry)
+
               @updateViewAndRefresh 'myanimelist_mangalist',mangaEntry,'mal_id', (result) =>
                 if result.updated > 0
                   callback({ success: true, updated: result.updated })
@@ -1576,6 +1673,7 @@ module.exports = class MyAnimelist
       owner: @name
       displayName: 'subview'
       displayType: 'subview'
+      noUpdate: true
       subview:{}
 
     @chiika.viewManager.addView animeExtraView
@@ -1590,6 +1688,7 @@ module.exports = class MyAnimelist
       owner: @name
       displayName: 'subview'
       displayType: 'subview'
+      noUpdate: true
       subview:{}
 
     @chiika.viewManager.addView mangaExtraView
@@ -1624,9 +1723,18 @@ module.exports = class MyAnimelist
         ]
       }
      }
+    historyView =
+      name: 'myanimelist_animelist_history'
+      owner: @name
+      displayName: 'AnimeList History'
+      displayType: 'none'
+      noUpdate: true
 
 
     @chiika.viewManager.addView defaultView
+    @chiika.viewManager.addView historyView
+
+
 
 
   #
@@ -1657,4 +1765,112 @@ module.exports = class MyAnimelist
         ]
       }
      }
+    historyView =
+      name: 'myanimelist_mangalist_history'
+      owner: @name
+      displayName: 'MangaList History'
+      displayType: 'none'
+      noUpdate: true
+
     @chiika.viewManager.addView defaultView
+    @chiika.viewManager.addView historyView
+
+  importHistoryFromMAL: (type,callback) ->
+    userHistoryUrl = "http://myanimelist.net/history/#{@malUser.realUserName}/#{type}"
+
+    historyView = @chiika.viewManager.getViewByName("myanimelist_#{type}list_history")
+
+    if type == 'anime'
+      animeIdPlusTitleRegex = /<td class="borderClass"\s><a href="\/anime.php\?id=(.*)">(.*)<\/a> ep.\s<strong>(.*)<\/strong>/g
+      dateRegex = /<td class="borderClass"\s\salign="right">\s(.*)<\/td>/g
+    else
+      animeIdPlusTitleRegex = /<td class="borderClass"\s><a href="\/manga.php\?id=(.*)">(.*)<\/a> chap.\s<strong>(.*)<\/strong>/g
+      dateRegex = /<td class="borderClass"\s\salign="right">\s(.*)<\/td>/g
+
+    onRequestReturn = (error,response,body) =>
+      idTitleMap = []
+
+      while idtitleMatch = animeIdPlusTitleRegex.exec body
+        id = idtitleMatch[1]
+        title = idtitleMatch[2]
+        ep = idtitleMatch[3]
+
+        idTitleMap.push { id: id, title: title,ep: ep }
+
+      counter = 0
+      while dateMatch = dateRegex.exec body
+        date = dateMatch[1]
+
+        idTitleMap[counter].updated = date
+        counter++
+
+
+      historyData = []
+      counter = 0
+      _forEach idTitleMap, (history) =>
+        time = history.updated
+        momentDate = {}
+        # Do some tests
+        indexOfHours = time.indexOf 'ago'
+
+        if indexOfHours >= 0
+          momentDate = moment()
+
+        indexOfYesterday = time.indexOf 'Yesterday'
+
+        if indexOfYesterday >= 0
+          momentDate = moment().subtract(1,'day')
+
+        if indexOfHours == -1 && indexOfYesterday == -1
+          indexOfSpace = time.indexOf ' '
+          month = time.substring(0,indexOfSpace)
+
+          momentDate = moment("#{moment().year()} #{month}",'YYYY MMM')
+        if momentDate.isValid()
+          if historyView?
+            historyItem =
+              history_id: counter
+              updated: momentDate.valueOf()
+              id: history.id
+              episode: history.ep
+            historyData.push historyItem
+            counter++
+      historyView.setDataArray(historyData).then(callback)
+
+
+
+
+    @chiika.makeGetRequest userHistoryUrl,null,onRequestReturn
+
+  importHistoryFromTaiga: ->
+    # Optional - Win Only - Import Taiga history
+    # Path : %AppData%/Taiga/user/userName@service/history.xml
+    historyFile = path.join process.env.CHIIKA_APPDATA, 'Taiga', 'data','user',"#{@malUser.realUserName}@myanimelist",'history.xml'
+
+    if @chiika.utility.fileExists historyFile
+      historyData = @chiika.utility.readFileSync historyFile
+
+      indexOfHistoryElement = historyData.indexOf('<history>')
+      historyData =  historyData.substring(indexOfHistoryElement,historyData.length)
+
+      @chiika.parser.parseXml(historyData).then (result) =>
+        historyXml  = result
+        _forEach historyXml.history.items.item, (item) =>
+          convertToMoment = moment(item.time)
+
+          if convertToMoment.isValid()
+            id = item.anime_id
+            episode = item.episode
+            time = convertToMoment.valueOf()
+
+            historyView = @chiika.viewManager.getViewByName('myanimelist_animelist_history')
+
+            if historyView?
+              historyData = historyView.getData()
+
+              historyItem =
+                history_id: historyData.length
+                updated: time
+                id: id
+                episode: episode
+              historyView.setData( historyItem, 'updated')

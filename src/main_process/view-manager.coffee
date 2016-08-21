@@ -17,10 +17,12 @@
 _find                   = require 'lodash/collection/find'
 _indexOf                = require 'lodash/array/indexOf'
 _forEach                = require 'lodash.foreach'
+_remove                 = require 'lodash/array/remove'
 _when                   = require 'when'
 View                    = require './view'
 TabView                 = require './view-tabview'
 SubView                 = require './view-subview'
+
 
 
 module.exports = class ViewManager
@@ -62,56 +64,78 @@ module.exports = class ViewManager
           @addView(v)
         @loadViewData().then(resolve)
 
-
   loadViewData: ->
     new Promise (resolve) =>
       async = []
+      needUpdateCount = 0
       _forEach @views, (view) =>
         promise = view.db.load()
         async.push promise
         promise.then (data) =>
-          if data.length == 0
+          if data.length == 0 && !view.noUpdate
             view.needUpdate = true
+            needUpdateCount++
           else
             chiika.logger.info("View #{view.name} has data length of #{data.length}")
             view.setDataSource(data)
       _when.all(async).then =>
+        chiika.logger.info("#{needUpdateCount} views need update.")
+        wait = []
         _forEach @views, (view) =>
           if view.needUpdate
-            view.update()
-        resolve()
+            if !view.noUpdate?
+              wait.push view.update()
+        _when.all(wait).then(resolve)
 
+  removeView: (name) ->
+    findView = _find @views,(o) -> o.name == name
+    index    = _indexOf @views,findView
+
+    if index != -1
+      _remove @views,findView
+      findView = null
+
+      chiika.uiManager.removeUIItem(name)
+      chiika.logger.info("Removed view #{name}")
 
   addView: (view,callback) ->
 
     config = chiika.settingsManager.readConfigFile('view')
 
-    if config?
-      #Check this view exists
-      findConfig = _find config.views,(o) -> o.name == view.name
-      indexConfig = _indexOf config.views,findConfig
+    if !view.dynamic?
+      if config?
+        #Check this view exists
+        findConfig = _find config.views,(o) -> o.name == view.name
+        indexConfig = _indexOf config.views,findConfig
 
-      if indexConfig == -1
-        config.views.push view
+        if indexConfig == -1
+          config.views.push view
+        else
+          config.views.splice(indexConfig,1,view)
+
+        chiika.settingsManager.saveConfigFile('view',config)
+        chiika.logger.info("Saving config file view...")
       else
-        config.views.splice(indexConfig,1,view)
-
-      chiika.settingsManager.saveConfigFile('view',config)
-      chiika.logger.info("Saving config file view...")
-    else
-      #Config file doesn't exists
-      config = { views: [] }
-      config.views.push view
-      chiika.logger.info("Saving config file view...")
-      chiika.settingsManager.saveConfigFile('view',config)
+        #Config file doesn't exists
+        config = { views: [] }
+        config.views.push view
+        chiika.logger.info("Saving config file view...")
+        chiika.settingsManager.saveConfigFile('view',config)
 
     findView = _find @views,(o) -> o.name == view.name
     index    = _indexOf @views,findView
 
+    if findView?
+      dataSource = findView.dataSource
+      findView = view
+      findView.dataSource = dataSource
+      @views.splice(index,1,view)
+
+      chiika.logger.info("Updated view #{view.name} - Data source Len #{findView.dataSource.length}")
+      return
+
     # Create the view
     newView = {}
-
-
 
     # UI item
     if view.displayType == "TabGridView"
@@ -132,14 +156,63 @@ module.exports = class ViewManager
     else if view.displayType == "subview"
       newView = new SubView(view)
 
-    chiika.logger.verbose("Adding new view #{view.displayType} - #{view.name}")
+    else if view.displayType == "CardListItem"
+      uiItem =
+        name: view.name
+        type: 'card-list-item'
+        display: view.displayName
+        owner: view.owner
+        displayType: 'CardListItem'
+        cardProperties: view.CardListItem
 
+      chiika.uiManager.addUIItem uiItem
+      newView = new SubView(view)
+
+      if index != -1
+        newView.dataSource = findView.dataSource
+
+
+    else if view.displayType == 'CardFullEntry'
+      uiItem =
+        name: view.name
+        type: 'card-full-entry'
+        display: view.displayName
+        owner: view.owner
+        displayType: 'CardFullEntry'
+        cardProperties: view.CardFullEntry
+
+      chiika.uiManager.addUIItem uiItem
+      newView = new SubView(view)
+
+    else if view.displayType == 'CardStatistics'
+      uiItem =
+        name: view.name
+        type: 'card-statistics'
+        display: view.displayName
+        owner: view.owner
+        displayType: view.displayType
+        cardProperties: view.CardStatistics
+
+      chiika.uiManager.addUIItem uiItem
+      newView = new SubView(view)
+
+    else if view.displayType == 'CardListItemUpcoming'
+      uiItem =
+        name: view.name
+        type: 'card-list-item-upcoming'
+        display: view.displayName
+        owner: view.owner
+        displayType: 'CardListItemUpcoming'
+        cardProperties: view.CardListItemUpcoming
+
+      chiika.uiManager.addUIItem uiItem
+      newView = new SubView(view)
+
+    else if view.displayType == 'none'
+      newView = new SubView(view)
+
+    chiika.logger.verbose("Adding new view #{view.displayType} - #{view.name}")
 
     dbView = chiika.dbManager.createViewDb(view.name)
     newView.setDatabaseInterface(dbView)
-
-
-    if index != -1
-      @views.splice(index,1,newView)
-    else
-      @views.push newView
+    @views.push newView

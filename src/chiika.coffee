@@ -24,6 +24,7 @@ Titlebar                            = require './titlebar'
 Settings                            = require './settings'
 LoadingScreen                       = require './loading-screen'
 Home                                = require './home'
+HistoryComponent                    = require './history'
 
 
 TabGridView = require './view-tabGrid'
@@ -120,6 +121,7 @@ ChiikaRouter = React.createClass
           { name:'Home', path: '/Home', component: Home, onEnter: @onEnter },
           { name:'Details', path: '/details/:id', component: DetailsCardView, onEnter: @onEnter }
           { name:'Settings', path: '/Settings', component: SettingsComponent, onEnter: @onEnter }
+          { name:'History', path: '/History', component: HistoryComponent, onEnter: @onEnter }
         ]
     }
     for route in routes

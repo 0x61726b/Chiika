@@ -17,6 +17,7 @@
 {BrowserWindow,ipcMain} = require 'electron'
 
 
+
 _forEach                = require 'lodash.foreach'
 _assign                 = require 'lodash.assign'
 _when                   = require 'when'
@@ -70,18 +71,17 @@ module.exports = class IpcManager
     @detailsLayoutRequest()
     @detailsAction()
     @setOption()
-
+    @postInit()
     @spectron()
 
-
-
+  systemEvent: (event,params) ->
+    chiika.chiikaApi.emit 'system-event',{ name: event, params: params }
 
   #
   #
   #
   windowMethodByName: ->
     @receive 'window-method', (event,args) =>
-      console.log args
       win = chiika.windowManager.getWindowByName(args.window)
       win[args.method]()
 
@@ -91,9 +91,9 @@ module.exports = class IpcManager
   #
   callWindowMethod: ->
     @receive 'call-window-method', (event,method) =>
-      console.log method
       win = BrowserWindow.fromWebContents(event.sender)
       win[method]()
+
 
 
   #
@@ -107,21 +107,19 @@ module.exports = class IpcManager
       params = { calling: args.owner, id: args.id,viewName: args.viewName, return: returnFromScript }
       chiika.chiikaApi.emit 'details-layout', params
 
+
+
   #
   #
   #
   reconstructUI: ->
     @receive 'reconstruct-ui', (event,args) =>
       #
-      async = []
       for script in chiika.apiManager.getScripts()
         if script.isActive
-          defer = _when.defer()
-          async.push defer.promise
-          chiika.chiikaApi.emit 'reconstruct-ui',{ defer: defer, calling: script.name }
-      _when.all(async).then =>
-        #Do something
-        event.sender.send 'reconstruct-ui-response'
+          chiika.chiikaApi.emit 'reconstruct-ui',{ calling: script.name }
+      #Do something
+      event.sender.send 'reconstruct-ui-response'
 
 
 
@@ -149,15 +147,11 @@ module.exports = class IpcManager
     @receive 'refresh-view-by-name', (event,args) =>
       view = chiika.viewManager.getViewByName(args.viewName)
 
-      deferUpdate = _when.defer()
+      params = args.params
       if view?
-        chiika.chiikaApi.emit 'view-update',{ calling: args.service,view: view,defer: deferUpdate }
-
-        deferUpdate.promise.then () =>
-          views = chiika.viewManager.getViews()
-
-          if views.length > 0
-            event.sender.send 'get-view-data-response',views
+        chiika.chiikaApi.requestViewUpdate(view.name,args.service)
+      else
+        chiika.logger.error("#{args.viewName} couldnt be found.")
 
 
   #
@@ -205,6 +199,16 @@ module.exports = class IpcManager
       chiika.apiManager.postInit()
 
 
+  #
+  #
+  #
+  postInit: ->
+    @receive 'post-init', (event,args) =>
+
+      onReturn = (response) =>
+        event.sender.send 'post-init-response'
+      # Send post init event and wait
+      chiika.chiikaApi.emit 'post-init',{ return: onReturn }
 
   loginCustom: ->
     @receive 'set-user-auth-pin', (event,args) =>
@@ -235,6 +239,10 @@ module.exports = class IpcManager
 
       chiika.settingsManager.setOption(optionName,optionValue)
 
+      chiika.chiikaApi.emit 'set-settings-option',{ name: optionName, value: optionValue }
+
+
+
   #
   # When the main window loads , it will request UI data.
   # We send it here..
@@ -246,6 +254,9 @@ module.exports = class IpcManager
       if uiItems.length > 0
         uiItems
 
+  #
+  #
+  #
   getViewData: ->
     @receiveAnswer 'get-view-data', (event,args) =>
       mainViews = chiika.viewManager.getViews()
@@ -256,14 +267,16 @@ module.exports = class IpcManager
         newView.displayType = view.displayType
         newView.name        = view.name
         newView.owner       = view.owner
-        if view.displayType == 'TabGridView'
-          onGetGridData = (tabData) =>
-            newView.dataSource = tabData
-            rendererViews.push newView
-
-          chiika.chiikaApi.emit 'get-grid-data', { calling: view.owner, view: view,data: view.dataSource, return: onGetGridData }
+        onGetData = (response) =>
+          if response.data?
+            newView.dataSource = response.data
+            if response[view.displayType]?
+              newView[view.displayType] = response[view.displayType]
+          else
+            newView.dataSource = response
+          rendererViews.push newView
+        chiika.chiikaApi.emit 'get-view-data', { calling: view.owner, view: view,data: view.dataSource, return: onGetData }
       rendererViews
-
 
   getViewDataByName: ->
     @receiveAnswer 'get-view-by-name', (event,args) =>

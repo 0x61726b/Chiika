@@ -41,6 +41,34 @@ CheckboxOption = React.createClass
       </label>
     </div>
 
+DropdownOption = React.createClass
+  getInitialState: ->
+    options: []
+    label: ''
+    defaultValue: ''
+  componentWillReceiveProps: (props) ->
+    @setState { label: props.label, options: props.options,id: props.id, defaultValue: props.defaultValue }
+
+  componentDidMount: ->
+    @setState { label: @props.label, options: @props.options,id: @props.id, defaultValue: @props.defaultValue }
+
+  componentDidUpdate: ->
+    $("##{@state.id}_select option[value=#{@state.defaultValue}]").attr('selected','selected')
+  onChange: (e) ->
+    value = $(e.target).val()
+    @props.onChange(value)
+  render: ->
+    <div>
+      <span>
+        { @state.label }
+        <select id="#{@state.id}_select" className="button lightblue" name="" onChange={@onChange}>
+          { @state.options.map (option,i) =>
+            <option value={option} key={i}>{option}</option>
+          }
+        </select>
+      </span>
+    </div>
+
 AppSettings = React.createClass
   render: ->
     <div className="card">
@@ -61,18 +89,26 @@ ListGeneral = React.createClass
         <div className="title">
           <h4>Grid</h4>
         </div>
-        <CheckboxOption label="Filter grid immediately" id="FilterGridImmediately" />
       </div>
       <div className="card">
         <div className="title">
           <h4>Tabs</h4>
         </div>
         <div>
-          <CheckboxOption label="Remember sorting preference" id="RememberSortingPreference" />
-          <CheckboxOption label="Remember scroll & tab position" id="RememberScrollTabPosition" />
+          <CheckboxOption label="Extra grid features" id="RememberSortingPreference" />
         </div>
       </div>
     </div>
+
+RSSSettings = React.createClass
+  onRSSSourceChanged: (newSource) ->
+    chiika.setOption('DefaultRssSource',newSource)
+    chiika.ipc.refreshViewByName('cards_news','cards')
+  render: ->
+    <div className="card">
+      <DropdownOption label="Default RSS Source" options={chiika.appSettings.RSSSources} id="DefaultRssSource" defaultValue="#{chiika.getOption('DefaultRssSource')}" onChange={@onRSSSourceChanged} />
+    </div>
+
 
 module.exports = React.createClass
   getInitialState: ->
@@ -102,6 +138,10 @@ module.exports = React.createClass
           <Link className="side-menu-link #{@isMenuItemActive('ListGeneral')}" to="#{@props.props.location.pathname}" query={{ settings:true, location: 'ListGeneral' }}>
             <li>General</li>
           </Link>
+          <p className="list-title">Connections</p>
+          <Link className="side-menu-link #{@isMenuItemActive('RSSSettings')}" to="#{@props.props.location.pathname}" query={{ settings:true, location: 'RSSSettings' }}>
+            <li>RSS</li>
+          </Link>
         </ul>
       </div>
       <div className="settings-page">
@@ -111,6 +151,8 @@ module.exports = React.createClass
             <AppSettings />
           else if @state.currentRoute == 'ListGeneral'
             <ListGeneral {...@props} />
+          else if @state.currentRoute == 'RSSSettings'
+            <RSSSettings {...@props} />
         }
       </div>
     </div>

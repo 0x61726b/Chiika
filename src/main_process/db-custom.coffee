@@ -77,7 +77,7 @@ module.exports = class DbCustom extends IDb
           @updateRecords data, (args) =>
             callback?(args)
 
-            findKey = _find @keys, { name: name }
+            findKey = _find @keys, { name: data.name }
             index   = _indexOf @keys, findKey
 
             if index != -1
@@ -85,7 +85,6 @@ module.exports = class DbCustom extends IDb
         else
           callback?( {rows: 1 })
           @keys.push data
-
 
     if !@isReady()
       @on 'load', =>

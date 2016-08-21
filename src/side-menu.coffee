@@ -72,11 +72,12 @@ SideMenu = React.createClass
       _forEach menuItems, (v,k) =>
         #Add category
 
-        if _indexOf(@pendingCategories, _find(@pendingCategories, (o) -> return o == v.category )) == -1
-          @pendingCategories.push v.category
+        if v.type == 'side-menu-item'
+          if _indexOf(@pendingCategories, _find(@pendingCategories, (o) -> return o == v.category )) == -1
+            @pendingCategories.push v.category
 
-        if _indexOf(@pendingUiItems, _find(@pendingUiItems, (o) -> return v.name == o.name )) == -1
-          @pendingUiItems.push v
+          if _indexOf(@pendingUiItems, _find(@pendingUiItems, (o) -> return v.name == o.name )) == -1
+            @pendingUiItems.push v
 
       if @isMounted()
         @setState { uiItems: @pendingUiItems, categories: @pendingCategories }

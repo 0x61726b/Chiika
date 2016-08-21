@@ -21,7 +21,9 @@ S = require 'string'
 module.exports = class Parser
   parseXml: (data) ->
     new Promise (resolve) ->
-      XmlParser.parseString data, { explicitArray: false }, (err,result) ->
+      XmlParser.parseString data, { explicitArray: false, mergeAttrs: true }, (err,result) ->
+        if err
+          throw err
         if result
           resolve result
 

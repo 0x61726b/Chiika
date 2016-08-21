@@ -52,7 +52,7 @@ module.exports = class SubView extends View
       if !data?
         throw new InvalidParameterException("You didn't specify data to be added.")
 
-      chiika.logger.info("Setting data for #{@name}")
+      chiika.logger.debug("Setting data for #{@name}")
 
       @dataSource = data
 
@@ -64,6 +64,7 @@ module.exports = class SubView extends View
         else
           @db.save @dataSource[i], null
 
+
   #
   # Add a single row to the subview
   #
@@ -74,19 +75,19 @@ module.exports = class SubView extends View
       if !data?
         throw new InvalidParameterException("You didn't specify data to be added.")
 
-      chiika.logger.info("Setting data for #{@name}")
+      chiika.logger.debug("Setting data for #{@name}")
 
       find = _find @dataSource, (o) -> o[key] == data[key]
       index = _indexOf @dataSource, find
 
       if find?
-        chiika.logger.info("Existing row found for #{@name}")
+        chiika.logger.debug("Existing row found for #{@name}")
         @dataSource.splice(index,1,data)
       else
-        chiika.logger.info("Adding new row for #{@name}")
+        chiika.logger.debug("Adding new row for #{@name}")
         @dataSource.push data
 
       onSaved = (args) =>
-        chiika.logger.info("Save successful for #{@name}")
+        chiika.logger.debug("Save successful for #{@name}")
         resolve(args)
       @db.save data, onSaved
