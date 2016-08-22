@@ -50,19 +50,8 @@ SettingsComponent = React.createClass
       <Modal isOpen={@state.modalOpen}
       onRequestClose={this.closeModal}
       shouldCloseOnOverlayClick=true
-      style={{
-        overlay: {
-        },
-        content: {
-          position: 'fixed'
-          right: 0
-          left: 0
-          marginRight: 'auto'
-          marginLeft: 'auto'
-          width: '85%'
-          minHeight: '10em'
-        }
-        }}
+      className="react-modal-content"
+      overlayClassName="react-modal-overlay"
       >
       <Settings {...@props} />
       </Modal>

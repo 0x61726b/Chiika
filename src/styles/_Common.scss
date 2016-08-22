@@ -30,7 +30,7 @@ $statusBarHeight: 0px;
 .ReactTabs__TabPanel {
   height: calc(100% - #{$tabListHeight});
 }
-.content > div {
+.content > .ReactTabs {
   height: 100%;
 }
 @-webkit-keyframes spin {
