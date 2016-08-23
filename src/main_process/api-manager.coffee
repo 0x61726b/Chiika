@@ -76,6 +76,7 @@ module.exports = class APIManager
       loginType  = instance.loginType ? "default"
       isService  = instance.isService ? false
       isActive   = instance.isActive ? false
+      order      = instance.order ? 0
 
       localInstance =
         name: scriptName
@@ -86,9 +87,9 @@ module.exports = class APIManager
         isService: isService
         isActive: isActive
         instance: instance
+        order: order
 
       @activeScripts.splice(index,1,localInstance)
-
 
     @activeScripts.sort (a,b) =>
       if a.isService && !b.isService
@@ -96,6 +97,15 @@ module.exports = class APIManager
       if b.isService && !a.isService
         return 1
       return 0
+
+    @activeScripts.sort (a,b) =>
+      if a.order > b.order
+        return 1
+      else
+        return -1
+      return 0
+
+
     console.log @activeScripts
     if chiika.chiikaApi
       forEach @activeScripts, (script) =>

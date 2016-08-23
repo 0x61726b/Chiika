@@ -48,6 +48,18 @@ class ChiikaEnvironment
 
 
 
+      # @uiData.sort (a,b) =>
+      #   if a.type.indexOf('card') == -1
+      #     return 0
+      #   else
+      #     if a.cardProperties.order > b.cardProperties.order
+      #       return -1
+      #     else
+      #       return 1
+      #   return 0
+
+
+
 
     @ipc.onReconstructUI()
     @ipc.spectron()
@@ -69,14 +81,80 @@ class ChiikaEnvironment
     ipcRenderer.on 'refresh-data', (event,args) =>
       @ipc.sendMessage 'get-ui-data'
       @ipc.sendMessage 'get-view-data'
+      @ipc.sendMessage 'get-settings-data'
 
   preload: ->
     waitForUI = _when.defer()
     waitForViewData = _when.defer()
     waitForSettingsData = _when.defer()
     waitForPostInit = _when.defer()
+    waitForViewByName = _when.defer()
+    waitForUIDataByName = _when.defer()
 
-    async = [ waitForUI.promise, waitForViewData.promise,waitForSettingsData.promise,waitForPostInit.promise ]
+    async = [ waitForUI.promise, waitForViewData.promise,waitForSettingsData.promise,waitForPostInit.promise,waitForViewByName.promise ]
+
+    ipcRenderer.on 'get-view-data-by-name-response', (event,args) =>
+      @logger.renderer("get-view-data-by-name-response - #{args.name}")
+      name = args.name
+
+      waitForViewByName.resolve()
+
+      findView = _find @viewData, (o) -> o.name == name
+      index    = _indexOf @viewData, findView
+      if findView?
+        if args.view?
+          @viewData.splice(index,1,args.view)
+          @logger.renderer("ViewData - Replacing #{name}")
+          console.log args.view
+        else
+          @viewData.splice(index,1)
+          @logger.renderer("ViewData - Removing #{name}")
+      else
+        @logger.renderer("Could not find view in renderer #{name}. Current views: ")
+        @viewData.push args.view
+
+      @cardManager.refreshCards()
+      @emitter.emit 'view-refresh', { view: args.view }
+
+
+    ##########################
+
+
+    ipcRenderer.on 'get-ui-data-by-name-response', (event,args) =>
+      @logger.renderer("get-ui-data-by-name-response - #{args.name}")
+      name = args.name
+
+      waitForUIDataByName.resolve()
+
+      findUiItem = _find @uiData, (o) -> o.name == name
+      index    = _indexOf @uiData, findUiItem
+      if findUiItem?
+        if args.item?
+          @uiData.splice(index,1,args.item)
+        else
+          @uiData.splice(index,1)
+      else
+        @uiData.push args.item
+
+      @uiData.sort (a,b) =>
+        if a.type.indexOf('card') == -1
+          return 0
+        else
+          if b? && a?
+            if b.cardProperties.order > a.cardProperties.order
+              return -1
+            else
+              return 1
+          else
+            return 0
+        return 0
+
+      @cardManager.refreshCards()
+      @emitter.emit 'ui-data-refresh', { item: args.item }
+
+
+
+    ##########################
 
     @ipc.sendMessage 'get-ui-data'
     @ipc.refreshUIData (args) =>
@@ -87,10 +165,13 @@ class ChiikaEnvironment
         if a.type.indexOf('card') == -1
           return 0
         else
-          if a.order > b.order
-            return -1
+          if b? && a?
+            if b.cardProperties.order > a.cardProperties.order
+              return -1
+            else
+              return 1
           else
-            return 1
+            return 0
         return 0
 
 
@@ -106,7 +187,6 @@ class ChiikaEnvironment
     @ipc.sendMessage 'get-view-data'
     @ipc.getViewData (args) =>
       @viewData = args
-      console.log @viewData
 
       waitForViewData.resolve()
 
@@ -117,8 +197,6 @@ class ChiikaEnvironment
       @appSettings = args
 
       waitForSettingsData.resolve()
-
-      console.log @appSettings
 
     @ipc.sendMessage 'post-init'
     ipcRenderer.on 'post-init-response', (event,args) =>
@@ -134,6 +212,7 @@ class ChiikaEnvironment
       @ipc.disposeListeners('get-ui-data-response')
 
       @preload().then =>
+        console.log "All promises have returned"
         setTimeout(main,args.delay)
 
   openShellUrl: (url) ->

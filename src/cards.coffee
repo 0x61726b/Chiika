@@ -15,6 +15,7 @@
 #----------------------------------------------------------------------------
 
 React                               = require('react')
+LoadingScreen                       = require './loading-screen'
 
 
 module.exports = class CardViews
@@ -36,12 +37,23 @@ module.exports = class CardViews
     if !link?
       link = $(e.target).parent().attr('href')
     chiika.openShellUrl(link)
+
+
   navigateButtonUrl: (e) ->
     link = $(e.target).attr('href')
     if !link?
       link = $(e.target).parent().attr('href')
-    console.log link
+
     window.location = link
+
+  cntWatchingCardClick: (e) ->
+    clicked = $(e.target).parent().parent()
+    clicked.toggleClass 'expanded'
+    if @lastToggle?
+      @lastToggle.toggleClass 'expanded'
+    @lastToggle = clicked
+
+
   #
   # @param {Object} card
   # @option card {Object} title
@@ -125,41 +137,46 @@ module.exports = class CardViews
 
 
   cardAnime: (card,i) ->
-    <div className="card grid currently-watching" id="card-cw" key={i}>
-        <div className="title">
-          <div className="home-inline">
-            <h1>{card.anime.title}</h1>
-            <button type="button" onClick={@navigateButtonUrl} href="##{card.properties.viewName}_details/#{card.anime.id}" className="button raised red">Details</button>
-          </div>
-          <span id="watching-genre">
-            <ul>
-              {
-                if card.anime.genres?
-                  card.anime.genres.split(',').map (genre,i) =>
-                    <li key={i}>{genre}</li>
-              }
-            </ul>
-          </span>
-        </div>
-        <div className="currently-watching-info">
-          <div className="watching-cover">
-            <img src={card.anime.cover} width="150" height="225" alt="" />
-            <button type="button" className="button raised lightblue">Share</button>
-          </div>
-          <div className="watching-info">
-            <span className="info-miniCards">
-              {
-                if card.anime.miniCards.length != 0
-                  card.anime.miniCards.map (card,i) =>
-                    chiika.cardManager.renderCard(card,i)
-              }
+    if !card.anime?
+      <LoadingScreen key={i} />
+    else
+      <div className="card grid currently-watching" id="card-cw" key={i}>
+          <div className="title">
+            <div className="home-inline">
+              <h1>{card.anime.title}</h1>
+              <button type="button" onClick={@navigateButtonUrl} href="##{card.properties.viewName}_details/#{card.anime.id}" className="button raised red">Details</button>
+            </div>
+            <span id="watching-genre">
+              <ul>
+                {
+                  if card.anime.genres?
+                    card.anime.genres.split(',').map (genre,i) =>
+                      <li key={i}>{genre}</li>
+                }
+              </ul>
             </span>
-            <p>
-              {card.anime.synopsis}
-            </p>
           </div>
-        </div>
-    	</div>
+          <div className="currently-watching-info">
+            <div className="watching-cover">
+              <img src={card.anime.cover} width="150" height="225" alt="" />
+              <button type="button" className="button raised lightblue">Share</button>
+            </div>
+            <div className="watching-info">
+              <span className="info-miniCards">
+                {
+                  if card.anime.miniCards.length != 0
+                    card.anime.miniCards.map (card,i) =>
+                      chiika.cardManager.renderCard(card,i)
+                }
+              </span>
+              <p>
+                {card.anime.synopsis}
+              </p>
+            </div>
+          </div>
+      	</div>
+
+
   cardStatistics: (card,i) ->
     <div className="card grid teal" id="card-thisWeek" key={i}>
       <div className="grid-sizer"></div>
@@ -173,4 +190,35 @@ module.exports = class CardViews
               <li key={i}>{item.title} <span className="label raised green">{ item.count }</span></li>
           }
         </ul>
+    </div>
+
+  cardContinueWatching: (card,i) ->
+    <div className="card grid continue-watching" id="card-cnw" key={i}>
+      <div className="title home-inline">
+        <h1>Continue Watching</h1>
+        <button type="button" onClick={@navigateButtonUrl} href="#myanimelist_animelist" className="button raised lightblue" name="button">Anime List <i className="ion-ios-list"></i></button>
+      </div>
+      <div className="recent-images">
+      {
+          card.items.map (item,i) =>
+            <div className="card image-card" id="cnt-#{item.id}" onClick={@cntWatchingCardClick} key={i}>
+              <div className="watch-img">
+                <img src="#{item.layout.image}" width="120" height="180" alt="" />
+                <a>{ item.layout.title}</a>
+              </div>
+              <div className="watch-info">
+                <p>{ item.layout.title }</p>
+                <span className="label indigo">Episode { item.layout.watchedEpisodes} out of { item.layout.totalEpisodes}</span>
+                <span>
+                  <span className="label red">{ item.layout.typeText}</span>
+                  <span className="label teal">{ item.layout.averageScore }</span>
+                  <span className="label orange">{ item.layout.totalEpisodes } EPS</span>
+                </span>
+                <button type="button" onClick={@navigateButtonUrl} href="#myanimelist_animelist_details/#{item.id}" className="button raised indigo" name="button">Details</button>
+                <button type="button" className="button raised teal" name="button">Play next episode</button>
+                <button type="button" className="button raised green" name="button">open folder</button>
+              </div>
+            </div>
+      }
+      </div>
     </div>

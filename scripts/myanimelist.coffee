@@ -80,6 +80,8 @@ module.exports = class MyAnimelist
   #
   isActive: true
 
+  order: 0
+
   #
   # The time limit between Chiika should scrape the entry's MAL page
   #
@@ -187,7 +189,8 @@ module.exports = class MyAnimelist
             id: anime.mal_id
             episode: anime.animeWatchedEpisodes
 
-          historyView.setData( historyItem, 'updated')
+          historyView.setData( historyItem, 'history_id').then (args) =>
+            @chiika.requestViewDataUpdate('cards','cards_statistics')
       else
         # It can return status code 200 but if the body isn't updated,it failed.
         result.success = false
@@ -289,6 +292,9 @@ module.exports = class MyAnimelist
       if mangaExtraView?
         @mangaextra = mangaExtraView.getData()
         @chiika.logger.script("[yellow](#{@name}) MangaExtra data length #{@mangaextra.length} #{@name}")
+
+    @on 'post-init',(init) =>
+      init.defer.resolve()
 
     # This method will be called if there are no UI elements in the database
     # or the user wants to refresh the views
@@ -600,7 +606,6 @@ module.exports = class MyAnimelist
 
               _when.all(async).then =>
                 args.return( { success: true })
-                @chiika.requestViewUpdate 'cards_randomAnime', @name
 
             newUser = { userName: args.user + "_" + @name,owner: @name, password: args.pass, realUserName: args.user }
 
@@ -631,7 +636,11 @@ module.exports = class MyAnimelist
     @on 'system-event', (event) =>
       if event.name == 'shortcut-pressed'
         if event.params.action == 'test3'
-          @importHistoryFromMAL()
+          @importHistoryFromMAL('anime',->)
+
+    @on 'get-anime-values', (args) =>
+      args.return @getAnimeValues(args.entry)
+
 
   saveMangaHistory: (type,manga) ->
     #Save history
@@ -655,7 +664,8 @@ module.exports = class MyAnimelist
           id: manga.mal_id
           volumes: manga.mangaUserReadVolumes
 
-      historyView.setData( historyItem, 'updated')
+      historyView.setData( historyItem, 'updated').then (args) =>
+        @chiika.requestViewDataUpdate('cards','cards_statistics')
 
   onAnimeDetailsLayout: (id,callback) ->
     #If its on the list, it will have this entry
@@ -672,7 +682,7 @@ module.exports = class MyAnimelist
 
     if timeSinceLastUpdate < @detailsSyncTimeRestriction - 1
       @chiika.logger.script("#{id} was last updated #{timeSinceLastUpdate} hours ago.There is no need to update")
-      callback({ updated: true, layout: @getAnimeDetailsLayout(id)})
+      callback({ updated: false, layout: @getAnimeDetailsLayout(id)})
     else
       @handleAnimeDetailsRequest id, (response) =>
         animeExtraView = @chiika.viewManager.getViewByName('myanimelist_animeextra')
@@ -1795,7 +1805,10 @@ module.exports = class MyAnimelist
         title = idtitleMatch[2]
         ep = idtitleMatch[3]
 
-        idTitleMap.push { id: id, title: title,ep: ep }
+        if type == 'anime'
+          idTitleMap.push { id: id, title: title,ep: ep }
+        else
+          idTitleMap.push { id: id, title: title,chapter: ep }
 
       counter = 0
       while dateMatch = dateRegex.exec body
@@ -1811,31 +1824,61 @@ module.exports = class MyAnimelist
         time = history.updated
         momentDate = {}
         # Do some tests
-        indexOfHours = time.indexOf 'ago'
+        indexOfMinutes = time.indexOf 'minutes ago'
+        indexOfHours = time.indexOf 'hours ago'
+        indexOfYesterday = time.indexOf 'Yesterday'
+        indexOfSpace = time.indexOf ' '
+        indexOfComma = time.indexOf ','
+        indexOfColon = time.indexOf ':'
+
+        if indexOfMinutes >= 0
+          digitCount = indexOfSpace
+
+          minute = time.substring(0,digitCount)
+          momentDate = moment("#{moment().year()} #{moment().month()} #{moment().date()} #{moment().hour()} #{minute}",'YYYY MM DD HH mm')
+
 
         if indexOfHours >= 0
-          momentDate = moment()
+          digitCount = indexOfSpace
 
-        indexOfYesterday = time.indexOf 'Yesterday'
+          hour = time.substring(0,digitCount)
+          momentDate = moment("#{moment().year()} #{moment().month()} #{moment().date()} #{hour} #{moment().minute()}",'YYYY MM DD HH mm')
 
         if indexOfYesterday >= 0
-          momentDate = moment().subtract(1,'day')
+          hourDigitCount = indexOfColon - (indexOfComma + 1)
+          hour  = time.substring(indexOfComma + 1,indexOfComma + 1 + hourDigitCount)
+          minute = time.substring( indexOfColon + 1, indexOfColon + 1 + 2)
+          momentDate = moment("#{moment().year()} #{moment().month()} #{moment().date()} #{hour} #{minute}",'YYYY MM DD HH mm').subtract(1,'day')
 
-        if indexOfHours == -1 && indexOfYesterday == -1
-          indexOfSpace = time.indexOf ' '
+        if indexOfMinutes == -1 && indexOfHours == -1 && indexOfYesterday == -1
+          digits       = indexOfComma - indexOfSpace - 1
           month = time.substring(0,indexOfSpace)
+          day = time.substring(indexOfSpace + 1,indexOfSpace+digits+1)
 
-          momentDate = moment("#{moment().year()} #{month}",'YYYY MMM')
+          hourDigitCount = indexOfColon - (indexOfComma + 1)
+          hour  = time.substring(indexOfComma + 1,indexOfComma + 1 + hourDigitCount)
+          minute = time.substring( indexOfColon + 1, indexOfColon + 1 + 2)
+
+          momentDate = moment("#{moment().year()} #{month} #{day} #{hour} #{minute}",'YYYY MMM DD HH mm')
+        console.log momentDate.format('YYYY/MM/DD HH:mm') + " - #{time}"
         if momentDate.isValid()
           if historyView?
-            historyItem =
-              history_id: counter
-              updated: momentDate.valueOf()
-              id: history.id
-              episode: history.ep
+            if type == 'anime'
+              historyItem =
+                history_id: counter
+                updated: momentDate.valueOf()
+                id: history.id
+                episode: history.ep
+            else
+              historyItem =
+                history_id: counter
+                updated: momentDate.valueOf()
+                id: history.id
+                chapters: history.chapter
             historyData.push historyItem
             counter++
-      historyView.setDataArray(historyData).then(callback)
+      historyView.clear().then =>
+        historyView.setDataArray(historyData).then(callback)
 
 
 

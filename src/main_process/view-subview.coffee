@@ -47,6 +47,10 @@ module.exports = class SubView extends View
   getData: ->
     @dataSource
 
+  clear: ->
+    new Promise (resolve) =>
+      @db.clear(resolve)
+
   setDataArray: (data) ->
     new Promise (resolve) =>
       if !data?

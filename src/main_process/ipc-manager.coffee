@@ -16,12 +16,11 @@
 
 {BrowserWindow,ipcMain} = require 'electron'
 
-
-
 _forEach                = require 'lodash.foreach'
 _assign                 = require 'lodash.assign'
 _when                   = require 'when'
 string                  = require 'string'
+
 
 
 module.exports = class IpcManager
@@ -179,6 +178,7 @@ module.exports = class IpcManager
       chiika.chiikaApi.emit 'details-action', { calling: layout.owner, action: action, layout: layout, params: params, return: returnFromScript }
 
 
+
   #
   # We receive a user pass here, redirect it to the user script and let them process it
   #
@@ -206,9 +206,24 @@ module.exports = class IpcManager
     @receive 'post-init', (event,args) =>
 
       onReturn = (response) =>
+        chiika.logger.info("POST-INIT is completed.")
         event.sender.send 'post-init-response'
-      # Send post init event and wait
-      chiika.chiikaApi.emit 'post-init',{ return: onReturn }
+
+      scripts = chiika.apiManager.getScripts()
+
+      async = []
+
+      waitForScripts = _when.defer()
+      async.push waitForScripts.promise
+
+      _when.all(async).then(onReturn)
+
+      for script in scripts
+        wait = _when.defer()
+        async.push wait.promise
+        waitForScripts.resolve()
+
+        chiika.chiikaApi.emit 'post-init',{ calling: script.name,defer: wait  }
 
   loginCustom: ->
     @receive 'set-user-auth-pin', (event,args) =>
@@ -279,11 +294,41 @@ module.exports = class IpcManager
       rendererViews
 
   getViewDataByName: ->
-    @receiveAnswer 'get-view-by-name', (event,args) =>
+    @receive 'get-view-data-by-name', (event,args) =>
       view = chiika.viewManager.getViewByName(args.name)
-      view
+
+      newView = {}
+      newView.displayType = view.displayType
+      newView.name        = view.name
+      newView.owner       = view.owner
+      onGetData = (response) =>
+        if response.data?
+          newView.dataSource = response.data
+          if response[view.displayType]?
+            newView[view.displayType] = response[view.displayType]
+        else
+          newView.dataSource = response
+        newView
+      chiika.chiikaApi.emit 'get-view-data', { calling: view.owner, view: view,data: view.dataSource, return: onGetData }
+      event.sender.emit 'get-view-data-by-name-response', { name: view.name, view: newView}
 
 
+  processedViewData: (owner,view) ->
+    newView = {}
+    newView.displayType = view.displayType
+    newView.name        = view.name
+    newView.owner       = view.owner
+    onGetData = (response) =>
+      if response.data?
+        newView.dataSource = response.data
+        if response[view.displayType]?
+          newView[view.displayType] = response[view.displayType]
+      else
+        newView.dataSource = response
+    chiika.chiikaApi.emit 'get-view-data', { calling: owner, view: view,data: view.dataSource, return: onGetData }
+
+    newView
+    
   #
   #
   #

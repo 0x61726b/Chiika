@@ -72,7 +72,7 @@ SideMenu = React.createClass
       _forEach menuItems, (v,k) =>
         #Add category
 
-        if v.type == 'side-menu-item'
+        if v? && v.type == 'side-menu-item'
           if _indexOf(@pendingCategories, _find(@pendingCategories, (o) -> return o == v.category )) == -1
             @pendingCategories.push v.category
 

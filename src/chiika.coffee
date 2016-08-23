@@ -87,20 +87,21 @@ ChiikaRouter = React.createClass
   getRoutes: (uiData) ->
     routes = []
     uiData.map (route,i) =>
-      if route.type == "side-menu-item" && route.displayType == "TabGridView"
-        routes.push {
-        name: "/#{route.name}"
-        path: "/#{route.name}"
-        component:require(chiika.viewManager.getComponent(route.displayType))
-        viewName: route.name
-        onEnter: @onEnter}
-        routes.push {
-        name: "/#{route.name}_details"
-        path: "/#{route.name}_details/:id"
-        component:DetailsCardView
-        viewName: route.name
-        owner: route.owner
-        onEnter: @onEnter}
+      if route?
+        if route.type == "side-menu-item" && route.displayType == "TabGridView"
+          routes.push {
+          name: "/#{route.name}"
+          path: "/#{route.name}"
+          component:require(chiika.viewManager.getComponent(route.displayType))
+          viewName: route.name
+          onEnter: @onEnter}
+          routes.push {
+          name: "/#{route.name}_details"
+          path: "/#{route.name}_details/:id"
+          component:DetailsCardView
+          viewName: route.name
+          owner: route.owner
+          onEnter: @onEnter}
 
 
 

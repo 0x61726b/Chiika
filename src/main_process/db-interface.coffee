@@ -66,6 +66,9 @@ module.exports = class IDb
         resolve selected
       @nosql.all map,icall
 
+  clearDb: (callback) ->
+    @nosql.clear(callback)
+
   ##
   # Returns one row of database where key == value
   # @param {String} key Key

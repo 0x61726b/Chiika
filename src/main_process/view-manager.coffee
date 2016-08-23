@@ -152,6 +152,7 @@ module.exports = class ViewManager
 
       chiika.uiManager.addUIItem uiItem
       newView = new SubView(view)
+      newView.hasUIItem = true
 
     else if view.displayType == "subview"
       newView = new SubView(view)
@@ -167,6 +168,7 @@ module.exports = class ViewManager
 
       chiika.uiManager.addUIItem uiItem
       newView = new SubView(view)
+      newView.hasUIItem = true
 
       if index != -1
         newView.dataSource = findView.dataSource
@@ -183,6 +185,7 @@ module.exports = class ViewManager
 
       chiika.uiManager.addUIItem uiItem
       newView = new SubView(view)
+      newView.hasUIItem = true
 
     else if view.displayType == 'CardStatistics'
       uiItem =
@@ -195,6 +198,7 @@ module.exports = class ViewManager
 
       chiika.uiManager.addUIItem uiItem
       newView = new SubView(view)
+      newView.hasUIItem = true
 
     else if view.displayType == 'CardListItemUpcoming'
       uiItem =
@@ -207,6 +211,21 @@ module.exports = class ViewManager
 
       chiika.uiManager.addUIItem uiItem
       newView = new SubView(view)
+      newView.hasUIItem = true
+
+
+    else if view.displayType == 'CardItemContinueWatching'
+      uiItem =
+        name: view.name
+        type: 'card-item-continue-watching'
+        display: view.displayName
+        owner: view.owner
+        displayType: 'CardItemContinueWatching'
+        cardProperties: view.CardItemContinueWatching
+
+      chiika.uiManager.addUIItem uiItem
+      newView = new SubView(view)
+      newView.hasUIItem = true
 
     else if view.displayType == 'none'
       newView = new SubView(view)

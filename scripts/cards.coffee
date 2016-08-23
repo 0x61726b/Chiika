@@ -19,7 +19,12 @@ fs            = require 'fs'
 
 
 _forEach      = scriptRequire 'lodash.forEach'
+_pick         = scriptRequire 'lodash/object/pick'
+_find         = scriptRequire 'lodash/collection/find'
+_indexOf      = scriptRequire 'lodash/array/indexOf'
 moment        = scriptRequire 'moment'
+momentTz      = scriptRequire 'moment-timezone'
+_when         = scriptRequire 'when'
 
 ANNSource = "http://www.animenewsnetwork.com/newsroom/rss.xml"
 ANN       = "http://www.animenewsnetwork.com/"
@@ -36,6 +41,14 @@ module.exports = class CardViews
   displayDescription: "Cards"
   isService: false
   isActive: true
+
+  order: 2
+
+  currentlyWatchingOrder:0
+  continueWatchingOrder:1
+  upcomingOrder: 2
+  statisticsOrder: 3
+  newsOrder:4
 
   # Will be called by Chiika with the API object
   # you can do whatever you want with this object
@@ -67,7 +80,7 @@ module.exports = class CardViews
         display: 'description'
         alt: 'description'
         cardTitle: 'News'
-        order: 1
+        order: @newsOrder
       }
     source = @chiika.settingsManager.appOptions.DefaultRssSource
 
@@ -109,7 +122,7 @@ module.exports = class CardViews
       dynamic: true
       CardFullEntry: {
         viewName: 'myanimelist_animelist'
-        order: 0
+        order: @currentlyWatchingOrder
       }
 
     @chiika.viewManager.addView currentlyWatchingCard
@@ -122,7 +135,7 @@ module.exports = class CardViews
       displayType: 'CardStatistics'
       noUpdate: true
       CardStatistics: {
-        order: 1
+        order: @statisticsOrder
       }
 
     @chiika.viewManager.addView statisticsCard
@@ -135,10 +148,23 @@ module.exports = class CardViews
       displayType: 'CardListItemUpcoming'
       noUpdate: true
       CardListItemUpcoming: {
-        order:2
+        order:@upcomingOrder
       }
 
     @chiika.viewManager.addView upcomingCard
+
+  createContinueWatchingCard: ->
+    continueWatchingCard =
+      name: "cards_continueWatching"
+      owner: @name
+      displayName: 'Continue Watching'
+      displayType: 'CardItemContinueWatching'
+      noUpdate: true
+      CardItemContinueWatching: {
+        order:@continueWatchingOrder
+      }
+
+    @chiika.viewManager.addView continueWatchingCard
 
 
   getRssFeed: (url,callback) ->
@@ -192,18 +218,36 @@ module.exports = class CardViews
   run: (chiika) ->
     #This is the first event called here to let user do some initializing
     @on 'initialize',=>
+
+
+    @on 'post-init', (init) =>
       news = @chiika.viewManager.getViewByName('cards_news')
       upcoming = @chiika.viewManager.getViewByName('cards_upcoming')
       statistics = @chiika.viewManager.getViewByName('cards_statistics')
 
+      async = []
+
+
+      waitForNews = _when.defer()
+      waitForUpcoming = _when.defer()
+      async.push waitForNews.promise
+      async.push waitForUpcoming.promise
+
+      _when.all(async).then(init.defer.resolve)
+
+
+
       if news? && news.getData().length == 0
-        @chiika.requestViewUpdate('cards_news',@name)
+        @chiika.requestViewUpdate 'cards_news',@name, (response) =>
+          waitForNews.resolve()
+      else
+        waitForNews.resolve()
 
       if upcoming?
-        @chiika.requestViewUpdate('cards_upcoming',@name)
-
-    @on 'post-init', (init) =>
-      init.return()
+        @chiika.requestViewUpdate 'cards_upcoming',@name, (response) =>
+          waitForUpcoming.resolve()
+      else
+        waitForUpcoming.resolve()
       # @chiika.requestViewUpdate 'cards_randomAnime',@name, (response) =>
       #   @randomAnimeLayout = response.layout
       #   init.return()
@@ -217,8 +261,10 @@ module.exports = class CardViews
       @createNewsCard()
       @createUpcomingAnimeCard()
       @createStatisticsCard()
+      @createContinueWatchingCard()
 
     @on 'get-view-data', (args) =>
+      @chiika.logger.script("[yellow](#{@name}) get-view-data #{args.view.name}")
       if args.view.name == 'cards_news'
         dataSource = {}
         source = @chiika.settingsManager.appOptions.DefaultRssSource
@@ -232,6 +278,46 @@ module.exports = class CardViews
 
             dataSource = data
         args.return({ data: dataSource, CardListItem: { redirect: redirect, redirectTitle: source } })
+
+
+      else if args.view.name == 'cards_continueWatching'
+        historyAnime = @chiika.viewManager.getViewByName('myanimelist_animelist_history')
+        animeView = @chiika.viewManager.getViewByName('myanimelist_animelist')
+        animeExtraView = @chiika.viewManager.getViewByName('myanimelist_animeextra')
+
+        if historyAnime?
+          animeHistory = historyAnime.getData()
+          animelist    = animeView.getData()
+
+
+          cntWatchingLayouts = []
+          _forEach animeHistory, (history) =>
+            mal_id = history.id
+            ep     = history.episode
+
+            animeEntry = _find animelist, (o) -> o.mal_id == mal_id
+
+            if animeEntry?
+              onReturn = (anime) =>
+                exists = _find cntWatchingLayouts, (p) -> p.id == mal_id
+                index  = _indexOf cntWatchingLayouts,exists
+
+                if exists?
+                  if history.updated > exists.updated
+                    exists = { id: mal_id,time: history.updated,layout: anime }
+                    cntWatchingLayouts.splice(index,1,exists)
+                else
+                  cntWatchingLayouts.push { id: mal_id,time: history.updated,layout: anime }
+
+              @chiika.emit 'get-anime-values', { calling: 'myanimelist',entry: animeEntry,return: onReturn }
+
+          cntWatchingLayouts.sort (a,b) =>
+            if a.time > b.time
+              return -1
+            else
+              return 1
+            return 0
+          args.return(cntWatchingLayouts)
 
 
       else if args.view.name == 'cards_currentlyWatching'
@@ -276,7 +362,6 @@ module.exports = class CardViews
               if thisweek == week && history.volumes?
                 volumes++
 
-
         dataSource = [
           { title: 'Episodes Watched', count: episodes },
           { title: 'Chapters Read', count: chapters },
@@ -286,24 +371,74 @@ module.exports = class CardViews
 
       else if args.view.name == 'cards_upcoming'
         upcoming = @chiika.viewManager.getViewByName('cards_upcoming')
+        animelistView = @chiika.viewManager.getViewByName('myanimelist_animelist')
 
         if upcoming? && upcoming.getData().length > 0
-          args.return(upcoming.getData())
+          animelist = animelistView.getData()
+          upcomingData = upcoming.getData()
+
+          watchingListData = []
+          colors = ['red','green','indigo','blue','grey']
+          colorCounter = 0
+          _forEach upcomingData, (item) =>
+            weeklyAirdate = item.weeklyAirdate
+            mal_id        = item.mal_id
+            airdate       = item.airdate
+            simul         = item.simul
+            simulDelay    = item.simuldelay
+
+            findInAnimelist = _find animelist, (o) -> o.mal_id == mal_id
+
+            if findInAnimelist? && findInAnimelist.animeUserStatus == "1"
+              watchingListData.push { color: colors[colorCounter],title: item.title, weeklyAirdate: weeklyAirdate,day: weeklyAirdate.rd_weekday, time: weeklyAirdate.rd_time}
+              colorCounter++
+
+            if colorCounter > 4
+              colorCounter = 0
+
+          watchingListData.sort (a,b) =>
+            if b.weeklyAirdate.weekday_sort > a.weeklyAirdate.weekday_sort
+              return -1
+            else
+              return 1
+            return 0
+
+
+
+
+          args.return(watchingListData)
 
     @on 'view-update', (update) =>
+      @chiika.logger.script("[yellow](#{@name}) view-update - #{update.view.name}")
       if update.view.name == 'cards_upcoming'
-        # Calculate upcoming anime
-        dataSource = [
-          { id:'123', color:'indigo',time: '20:00', day:'TUE', title: 'NEW GAME'},
-          { id:'128',color:'indigo',time: '20:00', day:'TUE', title: 'NEW GAME'},
-          { id:'127',color:'indigo',time: '20:00', day:'TUE', title: 'NEW GAME'},
-          { id:'126',color:'indigo',time: '20:00', day:'TUE', title: 'NEW GAME'},
-          { id:'12',color:'indigo',time: '20:00', day:'TUE', title: 'NEW GAME'},
-          { id:'124',color:'indigo',time: '20:00', day:'TUE', title: 'NEW GAME'}
-        ]
+        calendarView = @chiika.viewManager.getViewByName('calendar_senpai')
+        if calendarView?
+          calendarData = calendarView.getData()
+          if calendarData.length > 0
+            userTimezone = momentTz.tz(momentTz.tz.guess())
+            utcOffset = momentTz.parseZone(userTimezone).utcOffset() * 60# In seconds
 
-        update.view.setDataArray(dataSource).then (args) =>
-          update.return()
+            calendarItems = calendarData[0].senpai.items
+
+            commonCalendarItems = []
+            _forEach calendarItems, (item) ->
+              airdates = item.airdates
+              userTimezoneAirdate = airdates[utcOffset]
+
+              if userTimezoneAirdate?
+                cItem =
+                  weeklyAirdate: userTimezoneAirdate
+                  title: item.name
+                  mal_id: item.MALID
+                  ann_id: item.ANNID
+                  airdate: item.airdate
+                  simul: item.simulcast
+                  simdelay: item.simulcast_delay
+
+                commonCalendarItems.push cItem
+            update.view.clear().then =>
+              update.view.setDataArray(commonCalendarItems).then (args) =>
+                update.return()
 
       else if update.view.name == 'cards_news'
         feedSource = update.params.source
@@ -315,11 +450,15 @@ module.exports = class CardViews
         @getFeed feedSource,(feed) =>
           update.view.setData(feed.feed, 'provider').then (args) =>
             update.return()
+
+
       else if update.view.name == 'cards_torrents'
         feedSource = "Nyaa"
         @getFeed feedSource,(feed) =>
           update.view.setData(feed.feed, 'provider').then (args) =>
             update.return()
+
+
       else if update.view.name == 'cards_currentlyWatching'
         animelistView   = @chiika.viewManager.getViewByName('myanimelist_animelist')
 
@@ -327,7 +466,7 @@ module.exports = class CardViews
           listLength = animelistView.getData().length
 
           if listLength > 0
-            random = Math.floor(Math.random() * listLength)
+            random = 155
             @randomAnime = animelistView.getData()[random]
             @chiika.logger.info("Selected random anime #{@randomAnime.mal_id}")
 
@@ -345,18 +484,12 @@ module.exports = class CardViews
           @chiika.requestViewUpdate 'cards_currentlyWatching',@name, (response) =>
             @currentlyWatchingLayout = response.layout
 
+            #@chiika.sendMessageToWindow('main','get-ui-data-by-name-response',{ name: 'cards_currentlyWatching', item: @chiika.ui.getUIItem('cards_currentlyWatching') } )
+
         if event.params.action == 'test2'
           @chiika.viewManager.removeView 'cards_currentlyWatching'
-          statistics = @chiika.viewManager.getViewByName('cards_statistics')
-
-          if statistics? && statistics.getData().length > 0
-            statisticsData = statistics.getData()[0]
-
-            statisticsData.items[0].count++
-
-            statistics.setData(statisticsData,'lastSaved').then (args) =>
-              @requestViewRefresh()
+          @chiika.sendMessageToWindow('main','get-ui-data-by-name-response',{ name: 'cards_currentlyWatching', item: null } )
 
 
   requestViewRefresh: ->
-    @chiika.sendMessageToWindow 'main','refresh-data'
+    throw "Nope"

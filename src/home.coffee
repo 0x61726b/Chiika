@@ -23,45 +23,14 @@ _forEach                            = require 'lodash.foreach'
 module.exports = React.createClass
   getInitialState: ->
     cards: []
-
-  componentWillReceiveProps: (props) ->
-    @props.data = {
-      labels: ["Your Score", "Total"],
-      datasets: [{
-        label: '# of Votes',
-        data: [7.4, 2.6],
-        backgroundColor: ['rgba(255, 159, 64, 1)'],
-        borderColor: [
-          'rgba(255, 159, 64, 1)'],
-        borderWidth: 0
-        }]}
-
   componentDidMount: ->
-    # chartCanvas = @refs.chart
-    #
-    # options = {
-    #   type: 'doughnut',
-    #   options: { legend: { display: false}, responsive: true },
-    #   data: {
-    #     labels: ["Your Score", "Total"],
-    #     datasets: [{
-    #       label: '# of Votes',
-    #       data: [7.4, 2.6],
-    #       backgroundColor: ['rgba(255, 159, 64, 1)'],
-    #       borderColor: [
-    #         'rgba(255, 159, 64, 1)'],
-    #       borderWidth: 0
-    #       }]}
-    #   }
-    #
-    # @setState { chart: chartCanvas }
-
     @setState { cards: chiika.cardManager.cards }
 
-    $('.card.image-card').click ->
-      $('.card.image-card').toggleClass "expanded"
+    chiika.emitter.on 'view-refresh', =>
+      if @isMounted()
+        @setState { cards: chiika.cardManager.cards }
 
-    chiika.ipc.getViewData (args) =>
+    chiika.emitter.on 'ui-data-refresh', =>
       if @isMounted()
         @setState { cards: chiika.cardManager.cards }
 

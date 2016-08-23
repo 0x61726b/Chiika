@@ -66,6 +66,9 @@ module.exports = class DbView extends IDb
         @on 'load', =>
           loadDatabase()
 
+  clear: (callback) ->
+    @clearDb(callback)
+
   #
   # Adds user into the database.
   # Will check if the parameter use already exists in the database

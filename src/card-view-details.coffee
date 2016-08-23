@@ -43,13 +43,13 @@ module.exports = React.createClass
 
     owner = @props.route.owner
 
+
     chiika.ipc.getDetailsLayout id,@props.route.viewName,owner, (args) =>
       @setState { layout: args.layout }
-      console.log @state.layout
+      console.log args.layout
 
       if args.updated
-        #Refresh view data
-        chiika.ipc.sendMessage 'get-view-data'
+        chiika.ipc.sendMessage 'get-view-data-by-name',{ name: @props.route.viewName }
 
 
   #
@@ -118,7 +118,7 @@ module.exports = React.createClass
 
     chiika.ipc.detailsActionResponse action,(args) =>
       chiika.ipc.disposeListeners('details-action-response')
-      returnCallback(args)
+      returnCallback?(args)
 
   #
   #
@@ -151,8 +151,6 @@ module.exports = React.createClass
         return
 
       if current > 0
-        console.log "Updating from #{currentOld} to #{current}"
-
         findItem.current = current
         @onAction('progress-update',{ item: { title: itemTitle,current: current, total: total },viewName: @props.route.viewName },@onUpdate)
 
@@ -178,7 +176,6 @@ module.exports = React.createClass
 
       if current > 0
         current--
-        console.log "Updating from #{current+1} to #{current}"
 
         findItem.current = current
         @onAction('progress-update',{ item: { title:itemTitle, current: current, total: total },viewName: @props.route.viewName },@onUpdate)
@@ -203,7 +200,6 @@ module.exports = React.createClass
 
       if current >= 0
         current++
-        console.log "Updating #{itemTitle} from #{current-1} to #{current}"
 
         findItem.current = current
         @onAction('progress-update',{ item: { title:itemTitle, current: current, total: total },viewName: @props.route.viewName },@onUpdate)
@@ -218,7 +214,6 @@ module.exports = React.createClass
   #
   onScoreChange: (e) ->
     value = $(e.target).val()
-    console.log $("#scoreSelect option[value=#{value}]")
     $("#scoreSelect option[value=#{value}]").attr('selected','selected');
 
     if @state.layout.scoring.type == 'normal'
@@ -247,15 +242,13 @@ module.exports = React.createClass
   #
   #
   onUpdate: (result) ->
-    console.log result
     if result.args.success
       @onActionSuccess("Updated!")
 
       #Refresh view data
-      chiika.ipc.sendMessage 'get-view-data'
+      chiika.ipc.sendMessage 'get-view-data-by-name', { name: @props.route.viewName }
     else
       @onActionError("Whoops..Something went wrong.")
-      console.log result
 
   #
   #

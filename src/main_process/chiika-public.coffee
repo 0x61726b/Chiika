@@ -16,7 +16,6 @@
 {Emitter} = require 'event-kit'
 {InvalidParameterException} = require './exceptions'
 
-
 module.exports = class ChiikaPublicApi
   emitter: null
   subscriptions: []
@@ -29,6 +28,9 @@ module.exports = class ChiikaPublicApi
     @custom                                     = @db.customDb
     @uiDb                                       = @db.uiDb
     @utility                                    = chiika.utility
+
+
+
 
   #
   #
@@ -48,7 +50,6 @@ module.exports = class ChiikaPublicApi
       chiika.requestManager.makePostRequest(url,headers,body,callback)
     else
       throw new InvalidParameterException("You have to supply a callback to 'makePostRequest' method.")
-
 
 
   #
@@ -80,8 +81,6 @@ module.exports = class ChiikaPublicApi
     if wnd?
       wnd.webContents.send message,args
 
-
-
   #
   #
   #
@@ -89,11 +88,20 @@ module.exports = class ChiikaPublicApi
     if !params?
       params = {}
 
+    view = chiika.viewManager.getViewByName(viewName)
+    uiItem = chiika.uiManager.getUIItem(viewName)
+
+
     onUpdateComplete = (result) =>
-      @sendMessageToWindow('main','refresh-data')
+      viewData = chiika.ipcManager.processedViewData(owner,view)
+      @sendMessageToWindow('main','get-view-data-by-name-response',{ name: viewName, view: viewData })
+
+      if view.hasUIItem
+        @sendMessageToWindow('main','get-ui-data-by-name-response',{ name: viewName, item: uiItem } )
+      else
+        chiika.logger.warn("#{viewName} doesn't have UI item.")
       callback?(result)
 
-    view = chiika.viewManager.getViewByName(viewName)
     if view?
       @emit 'view-update', { calling: owner, view: view, return: onUpdateComplete, params: params }
     else
@@ -101,6 +109,15 @@ module.exports = class ChiikaPublicApi
 
 
 
+  requestViewDataUpdate: (owner,viewName) ->
+    view = chiika.viewManager.getViewByName(viewName)
+    viewData = chiika.ipcManager.processedViewData(owner,view)
+    @sendMessageToWindow('main','get-view-data-by-name-response',{ name: viewName, view: viewData })
+
+
+  #
+  #
+  #
   requestViewUpdateDynamic: (viewName,owner,callback,params) ->
     if !params?
       params = {}
@@ -112,16 +129,25 @@ module.exports = class ChiikaPublicApi
       chiika.logger.error("Can't update a non-existent view.")
 
 
+  #
+  #
+  #
   createWindow: (options,returnCall) ->
     options.name += 'modal' # service/owner name + modal , anilistmodal etc.
     chiika.windowManager.createModalWindow(options,returnCall)
 
+
+  #
+  #
+  #
   closeWindow: (windowName) ->
     wnd = chiika.windowManager.getWindowByName(windowName)
     if wnd?
       wnd.close()
 
-
+  #
+  #
+  #
   executeJavaScript: (windowName,javascript) ->
     wnd = chiika.windowManager.getWindowByName(windowName)
     if wnd?
@@ -129,6 +155,9 @@ module.exports = class ChiikaPublicApi
 
 
 
+  #
+  #
+  #
   on: (receiver,message,callback) ->
     @emitter.on message, (args) =>
       if !args.calling?
@@ -144,15 +173,26 @@ module.exports = class ChiikaPublicApi
             callback(args)
           else
             chiika.logger.warn("Skipping #{receiver} - #{message} because #{receiver} is not active.")
-
+  #
+  #
+  #
   emit: (message,args) ->
     chiika.logger.debug("Emitting #{message} to #{args.calling}")
     @emitter.emit message,args
 
+
+
+  #
+  #
+  #
   dispatch: (handler,args...)->
     @emitter.constructor.dispatch handler,args...
 
 
+
+  #
+  #
+  #
   emitTo: (receiver,message,args...) ->
     @emitter.emit message,args...
 

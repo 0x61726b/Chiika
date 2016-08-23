@@ -27,6 +27,7 @@ module.exports = class UI
   displayDescription: "UI"
   isService: false
   isActive: true
+  order: 1
 
   # Will be called by Chiika with the API object
   # you can do whatever you want with this object
@@ -50,10 +51,14 @@ module.exports = class UI
 
 
     @on 'post-init', (init) =>
-      init.return()
-      # @chiika.requestViewUpdate 'cards_randomAnime',@name, (response) =>
-      #   @randomAnimeLayout = response.layout
-      #   init.return()
+      @chiika.logger.script("[yellow](#{@name}) post-init")
+      calendarData = @chiika.viewManager.getViewByName('calendar_senpai')
+
+      if calendarData? && calendarData.getData().length == 0
+        @chiika.requestViewUpdate 'calendar_senpai',@name, (response) =>
+          init.defer.resolve()
+      else
+        init.defer.resolve()
 
     # This method will be called if there are no UI elements in the database
     # or the user wants to refresh the views
@@ -61,8 +66,27 @@ module.exports = class UI
     @on 'reconstruct-ui', (update) =>
       @chiika.logger.script("[yellow](#{@name}) reconstruct-ui")
 
-    @on 'get-view-data', (args) =>
+      calendarView =
+        name: 'calendar_senpai'
+        owner: @name
+        displayName: ''
+        displayType: 'none'
+        noUpdate: true
+      @chiika.viewManager.addView calendarView
 
+    @on 'get-view-data', (args) =>
+      @chiika.logger.script("[yellow](#{@name}) get-view-data")
+
+    @on 'view-update', (update) =>
+      @chiika.logger.script("[yellow](#{@name}) view-update")
+
+      if update.view.name == 'calendar_senpai'
+        calendarFile = "D:/Arken/C++/ElectronProjects/Chiika/src/assets/prettifiedSenpai.json"
+        calendarData = @chiika.utility.readFileSync(calendarFile)
+        seasonData = JSON.parse(calendarData)
+        parsedCalendarData = { season: '2016 Sumner', senpai: seasonData }
+        update.view.setData(parsedCalendarData, 'season').then (args) =>
+          update.return()
 
 
 

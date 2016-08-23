@@ -50,48 +50,73 @@ module.exports = class CardManager
 
   refreshCards: ->
     @cards = []
-    _forEach chiika.uiData, (uiItem) =>
-      if uiItem.type == 'card-list-item' || uiItem.type == 'card-list-item-upcoming'
-        items = []
-        view = _find chiika.viewData, (o) => o.name == uiItem.name
-        if view?
-          dataSource = view.dataSource
-          if dataSource.items? && dataSource.items.length > 0
-            for i in [0...@maxCardListItem]
-              items.push dataSource.items[i]
-          else if dataSource.length > 0
-            items = dataSource
-          @addCard {
-            name: uiItem.name,
-            type: uiItem.type,
-            properties: uiItem.cardProperties,
-            title: dataSource.provider,
-            items: items}
-        else
-          console.log "Couldnt find view with the name #{uiItem.name}"
 
-      else if uiItem.type == 'card-full-entry'
-        dataSource = uiItem.name
-        view = _find chiika.viewData, (o) => o.name == dataSource
+    if chiika.uiData.length > 0
+      _forEach chiika.uiData, (uiItem) =>
+        if !uiItem?
+          console.log uiItem
+          return
+        if uiItem?
+          if uiItem.type == 'card-list-item' || uiItem.type == 'card-list-item-upcoming'
+            items = []
+            view = _find chiika.viewData, (o) => o.name == uiItem.name
+            if view?
+              dataSource = view.dataSource
+              if dataSource.items? && dataSource.items.length > 0
+                for i in [0...@maxCardListItem]
+                  items.push dataSource.items[i]
+              else if dataSource.length > 0
+                items = dataSource
+              @addCard {
+                name: uiItem.name,
+                type: uiItem.type,
+                properties: uiItem.cardProperties,
+                title: dataSource.provider,
+                items: items}
+            else
+              console.log "Couldnt find view with the name #{uiItem.name}"
 
-        if view?
-          @addCard {
-            name: uiItem.name
-            type: uiItem.type
-            properties: uiItem.cardProperties,
-            anime: view.dataSource
-          }
-      else if uiItem.type == 'card-statistics'
-        dataSource = uiItem.name
-        view = _find chiika.viewData, (o) => o.name == dataSource
+          else if uiItem.type == 'card-full-entry'
+            dataSource = uiItem.name
+            view = _find chiika.viewData, (o) => o.name == dataSource
 
-        if view?
-          @addCard {
-            name: uiItem.name
-            type: uiItem.type
-            properties: uiItem.cardProperties,
-            statistics: view.dataSource
-          }
+            if view?
+              @addCard {
+                name: uiItem.name
+                type: uiItem.type
+                properties: uiItem.cardProperties,
+                anime: view.dataSource
+              }
+            else
+              console.log "Couldnt find view with the name #{uiItem.name}"
+
+          else if uiItem.type == 'card-statistics'
+            dataSource = uiItem.name
+            view = _find chiika.viewData, (o) => o.name == dataSource
+
+            if view?
+              @addCard {
+                name: uiItem.name
+                type: uiItem.type
+                properties: uiItem.cardProperties,
+                statistics: view.dataSource
+              }
+            else
+              console.log "Couldnt find view with the name #{uiItem.name}"
+
+          else if uiItem.type == 'card-item-continue-watching'
+            dataSource = uiItem.name
+            view = _find chiika.viewData, (o) => o.name == dataSource
+
+            if view?
+              @addCard {
+                name: uiItem.name
+                type: uiItem.type
+                properties: uiItem.cardProperties,
+                items: view.dataSource
+              }
+            else
+              console.log "Couldnt find view with the name #{uiItem.name}"
 
   renderCard: (card,i) ->
     if card.type == 'miniCard'
@@ -104,3 +129,5 @@ module.exports = class CardManager
       @views.cardListUpcoming(card,i)
     else if card.type == 'card-statistics'
       @views.cardStatistics(card,i)
+    else if card.type == 'card-item-continue-watching'
+      @views.cardContinueWatching(card,i)
