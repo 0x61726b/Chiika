@@ -150,6 +150,9 @@ module.exports = React.createClass
       if current == currentOld
         return
 
+      if total? && total > 0 && (current) > total
+        return
+
       if current > 0
         findItem.current = current
         @onAction('progress-update',{ item: { title: itemTitle,current: current, total: total },viewName: @props.route.viewName },@onUpdate)
@@ -197,6 +200,10 @@ module.exports = React.createClass
     if findItem?
       current = parseInt(findItem.current)
       total = parseInt(findItem.total)
+
+      if total? && total > 0 && (current + 1) > total
+        return
+
 
       if current >= 0
         current++

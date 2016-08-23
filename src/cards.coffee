@@ -48,10 +48,17 @@ module.exports = class CardViews
 
   cntWatchingCardClick: (e) ->
     clicked = $(e.target).parent().parent()
-    clicked.toggleClass 'expanded'
-    if @lastToggle?
-      @lastToggle.toggleClass 'expanded'
+
+    removed = false
+    if @lastToggle? && @lastToggle.hasClass('expanded')
+      @lastToggle.removeClass 'expanded'
+      removed = true
+
+    if !removed or @lastToggle.attr('id') != clicked.attr('id')
+      clicked.toggleClass 'expanded'
+
     @lastToggle = clicked
+
 
 
   #

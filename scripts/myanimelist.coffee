@@ -543,8 +543,10 @@ module.exports = class MyAnimelist
 
           currentMonth = moment().month()
           currentYear  = moment().year()
+          sixWeeksAgo  = moment().subtract(6,'weeks')
 
           monthNumbers = [0,0,0,0,0,0,0,0,0,0,0,0]
+          sixWeeks = [0,0,0,0,0,0]
           watchedByMonth = monthNumbers
 
 
@@ -557,19 +559,57 @@ module.exports = class MyAnimelist
               month = date.month()
               watchedByMonth[month] += 1
 
+            if date.isValid() && date.isAfter(sixWeeksAgo)
+              howManyWeeks = (moment.duration(date.diff(sixWeeksAgo)).asWeeks())
+
+              if howManyWeeks < 6
+                round = Math.round(howManyWeeks)
+                sixWeeks[6 - round] += 1
+
+            #else
+              #console.log date.format("YYYY/MM/DD HH:mm") + " was not at least six weeks ago!"
+
+            if !date.isValid()
+              console.log "WARNING #{history.id} DATE IS NOT VALID!!"
+
+
           nonZeroDataPoints = 0
           chartLabels = []
           dataPoints  = []
-          for i in [0...watchedByMonth.length]
+          for i in [0...watchedByMonth.length+1]
             if watchedByMonth[i] != 0
               nonZeroDataPoints++
-              chartLabels.push moment.months()[i]
-              dataPoints.push watchedByMonth[i]
+
+          if nonZeroDataPoints > 3
+            for i in [0...watchedByMonth.length]
+              if watchedByMonth[i] != 0
+                chartLabels.push moment.months()[i]
+                dataPoints.push watchedByMonth[i]
+          else
+            # Show last 6 weeks?
+            for i in [5...-1]
+              if i == 0
+                chartLabels.push "This Week"
+              else if i == 5
+                chartLabels.push moment.months()[moment().month() - 1 ]
+              else if i == 2
+                chartLabels.push moment.months()[moment().month() ]
+              else
+                chartLabels.push ""
+              dataPoints.push sixWeeks[i]
 
           chartEpisodesWatched =
             labels: chartLabels
+            mode: nonZeroDataPoints
             datasets: [
-              { name: 'Episodes Watched',labels: chartLabels,data: dataPoints, color: 'red' }
+              { name: 'Episodes Watched since 6 weeks',
+              labels: chartLabels,
+              data: dataPoints,
+              backgroundColor: 'rgba(75,192,192,0.4)',
+              borderColor: 'rgba(75,192,192,1)',
+              pointBorderColor: 'rgba(75,192,192,1)',
+              pointHoverBackgroundColor: 'rgba(75,192,192,1)',
+              pointHoverBorderColor: 'rgba(220,220,220,1)'}
             ]
           args.return([chartEpisodesWatched])
 
@@ -1835,20 +1875,22 @@ module.exports = class MyAnimelist
           digitCount = indexOfSpace
 
           minute = time.substring(0,digitCount)
-          momentDate = moment("#{moment().year()} #{moment().month()} #{moment().date()} #{moment().hour()} #{minute}",'YYYY MM DD HH mm')
+          momentDate = moment().subtract(parseInt(minute),'minutes')
 
 
         if indexOfHours >= 0
           digitCount = indexOfSpace
 
           hour = time.substring(0,digitCount)
-          momentDate = moment("#{moment().year()} #{moment().month()} #{moment().date()} #{hour} #{moment().minute()}",'YYYY MM DD HH mm')
+          momentDate = moment().subtract(parseInt(hour),'hours')
 
         if indexOfYesterday >= 0
           hourDigitCount = indexOfColon - (indexOfComma + 1)
           hour  = time.substring(indexOfComma + 1,indexOfComma + 1 + hourDigitCount)
           minute = time.substring( indexOfColon + 1, indexOfColon + 1 + 2)
-          momentDate = moment("#{moment().year()} #{moment().month()} #{moment().date()} #{hour} #{minute}",'YYYY MM DD HH mm').subtract(1,'day')
+          momentDate = moment().subtract(1,'days')
+          momentDate = moment().subtract(parseInt(hour),'hours')
+          momentDate = moment().subtract(parseInt(minute),'minutes')
 
         if indexOfMinutes == -1 && indexOfHours == -1 && indexOfYesterday == -1
           digits       = indexOfComma - indexOfSpace - 1
@@ -1860,7 +1902,6 @@ module.exports = class MyAnimelist
           minute = time.substring( indexOfColon + 1, indexOfColon + 1 + 2)
 
           momentDate = moment("#{moment().year()} #{month} #{day} #{hour} #{minute}",'YYYY MMM DD HH mm')
-        console.log momentDate.format('YYYY/MM/DD HH:mm') + " - #{time}"
         if momentDate.isValid()
           if historyView?
             if type == 'anime'

@@ -63,31 +63,31 @@ module.exports = React.createClass
       }
     }
     _forEach config.datasets, (dataset) =>
-      options.data.datasets.push @getDataset dataset.name,dataset.data,dataset.color
+      options.data.datasets.push @getDataset dataset
 
     @chart = new Chart(document.getElementById("test1"),options)
 
-  getDataset: (label,data,color) ->
+  getDataset: (dataset) ->
     dataset = {
-        label: label,
+        label: dataset.name,
         fill: false,
         lineTension: 0.3,
-        backgroundColor: color,
-        borderColor: color,
+        backgroundColor: dataset.backgroundColor,
+        borderColor: dataset.borderColor,
         borderCapStyle: 'butt',
         borderDash: [],
         borderDashOffset: 0.0,
         borderJoinStyle: 'miter',
-        pointBorderColor: color,
+        pointBorderColor: dataset.pointBorderColor,
         pointBackgroundColor: "#fff",
         pointBorderWidth: 1,
         pointHoverRadius: 5,
-        pointHoverBackgroundColor: "rgba(75,192,192,1)",
-        pointHoverBorderColor: "rgba(220,220,220,1)",
+        pointHoverBackgroundColor: dataset.pointHoverBackgroundColor,
+        pointHoverBorderColor: dataset.pointHoverBorderColor,
         pointHoverBorderWidth: 2,
         pointRadius: 1,
         pointHitRadius: 10,
-        data: data,
+        data: dataset.data,
         spanGaps: false}
     dataset
 

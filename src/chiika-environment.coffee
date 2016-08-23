@@ -106,7 +106,7 @@ class ChiikaEnvironment
           @viewData.splice(index,1,args.view)
           @logger.renderer("ViewData - Replacing #{name}")
           console.log args.view
-        else
+        elseomm
           @viewData.splice(index,1)
           @logger.renderer("ViewData - Removing #{name}")
       else

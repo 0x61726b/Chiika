@@ -44,7 +44,6 @@ module.exports = React.createClass
     @uiItem = _find chiika.uiData, (o) => o.name == props.route.viewName
 
     if @props.route.viewName != props.route.viewName
-      console.log "Changed from #{@props.route.viewName} to #{props.route.viewName}"
       prevUIItem = _find chiika.uiData, (o) => o.name == @props.route.viewName
       toRemove = []
       _forEach @grids,(grid) =>
@@ -59,7 +58,6 @@ module.exports = React.createClass
         if findGrid?
           findGrid.grid.clearAll()
           findGrid.grid = null
-          console.log "RIP #{findGrid.name}"
           _remove @grids,findGrid
           $(window).off 'resize'
 
@@ -248,7 +246,6 @@ module.exports = React.createClass
 
   clearGrids: ->
     _forEach @grids,(grid) =>
-      console.log "RIP #{grid.name}"
       grid.grid.clearAll()
       grid.grid = null
 

@@ -137,6 +137,7 @@ module.exports = class ChiikaPublicApi
     chiika.windowManager.createModalWindow(options,returnCall)
 
 
+
   #
   #
   #
