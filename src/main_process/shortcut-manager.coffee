@@ -20,18 +20,22 @@ _forEach                        = require 'lodash.foreach'
 
 
 module.exports = class ShortcutManager
+  registered: false
+
   register: (window) ->
-    config = chiika.settingsManager.readConfigFile('Chiika')
+    if !@registered
+      config = chiika.settingsManager.readConfigFile('Chiika')
 
-    _forEach config.Keys, (key) =>
-      chiika.logger.info("Registering shortcut #{key.action} - #{key.key}")
+      @registered = true
+      _forEach config.Keys, (key) =>
+        chiika.logger.info("Registering shortcut #{key.action} - #{key.key}")
 
-      localShortcut.register window,key.key,=>
-        @onShortcut key
+        localShortcut.register window,key.key,=>
+          @onShortcut key
 
   onShortcut: (key) ->
     chiika.emitter.emit 'shortcut-pressed', key
-    
+
   unregister: (window,key) =>
     chiika.logger.info("Unregistering shortcut #{key.action} - #{key.key}")
     localShortcut.unregister(window,key.key)

@@ -42,6 +42,8 @@ module.exports = class CardViews
   isService: false
   isActive: true
 
+  continueWatchingEntryCount: 8
+
   order: 2
 
   currentlyWatchingOrder:0
@@ -263,6 +265,26 @@ module.exports = class CardViews
       @createStatisticsCard()
       @createContinueWatchingCard()
 
+      detectionCache =
+        name: "anime_detect_cache"
+        owner: @name
+        displayName: 'subview'
+        displayType: 'subview'
+        noUpdate: true
+        subview:{}
+
+      @chiika.viewManager.addView detectionCache
+
+    @on 'card-action', (action) =>
+      @chiika.logger.script("[yellow](#{@name}) card-action #{action.action}")
+
+      card = action.card
+      params = action.params
+      actionName = action.action
+
+      console.log card
+      console.log params
+
     @on 'get-view-data', (args) =>
       @chiika.logger.script("[yellow](#{@name}) get-view-data #{args.view.name}")
       if args.view.name == 'cards_news'
@@ -303,7 +325,7 @@ module.exports = class CardViews
                 index  = _indexOf cntWatchingLayouts,exists
 
                 if exists?
-                  if history.updated > exists.updated
+                  if history.updated > exists.time
                     exists = { id: mal_id,time: history.updated,layout: anime }
                     cntWatchingLayouts.splice(index,1,exists)
                 else
@@ -317,7 +339,13 @@ module.exports = class CardViews
             else
               return 1
             return 0
-          args.return(cntWatchingLayouts)
+
+          if cntWatchingLayouts.length >= @continueWatchingEntryCount
+            # Trim the array
+            finalLayouts = []
+            for i in [0...@continueWatchingEntryCount]
+              finalLayouts.push cntWatchingLayouts[i]
+            args.return(finalLayouts)
 
 
       else if args.view.name == 'cards_currentlyWatching'
@@ -438,6 +466,9 @@ module.exports = class CardViews
                 commonCalendarItems.push cItem
             update.view.clear().then =>
               update.view.setDataArray(commonCalendarItems).then (args) =>
+                @chiika.requestViewDataUpdate('cards','cards_upcoming')
+                @chiika.requestUIDataUpdate('cards_upcoming')
+
                 update.return()
 
       else if update.view.name == 'cards_news'
@@ -449,6 +480,7 @@ module.exports = class CardViews
 
         @getFeed feedSource,(feed) =>
           update.view.setData(feed.feed, 'provider').then (args) =>
+            @chiika.requestViewDataUpdate('cards','cards_news')
             update.return()
 
 
@@ -472,12 +504,15 @@ module.exports = class CardViews
         update.return()
 
     @on 'system-event', (event) =>
-      if event.name == 'md-detect' or event.name == 'shortcut-pressed'
-        if event.params.action? && event.params.action == 'test'
+      if event.name == 'md-detect' or (event.name == 'shortcut-pressed' and event.params.action == 'test')
+        if event.params.action?
           # anitomy = event.params
           anitomy = { AnimeTitle: 'Akatsuki no Yona', ReleaseGroup: 'FFF' }
+          videoFile = 'E:/Anime/Akatsuki no Yona/[FFF] Akatsuki no Yona [TV]/[FFF] Akatsuki no Yona - 01v2 [2B487C34].mkv'
         else
-          anitomy = event.params
+          anitomy = event.params.anitomy
+          videoFile = event.params.videoFile
+
 
         title = anitomy.AnimeTitle
         group = anitomy.ReleaseGroup
@@ -491,6 +526,45 @@ module.exports = class CardViews
 
           if findInAnimelist?
             @createCurrentlyWatchingCard()
+
+            # Save this file to cache
+            detectCache = @chiika.viewManager.getViewByName('anime_detect_cache')
+
+            if detectCache?
+              cacheData = detectCache.getData()
+
+              findInCache = _find cacheData, (o) => o.id == findInAnimelist.mal_id
+              if findInCache?
+                oneLevelBack = path.join(videoFile,'..')
+
+                pathExists = _find findInCache.knownPaths, (o) -> o == oneLevelBack
+                knownPathIndex = _indexOf findInCache.knownPaths,pathExists
+                if pathExists?
+                  findInCache.knownPaths.splice(knownPathIndex,1,oneLevelBack)
+                else
+                  findInCache.knownPaths.push path.join(videoFile,'..')
+
+                fileExists = _find findInCache.files, (o) -> o == videoFile
+                fileIndex = _indexOf findInCache.files,fileExists
+
+                if fileExists?
+                  findInCache.files.splice(fileIndex,1,videoFile)
+                else
+                  findInCache.files.push videoFile
+              else
+                findInCache =
+                  id: findInAnimelist.mal_id
+                  knownPaths: [
+                    path.join(videoFile,'..')
+                  ]
+                  files: [
+                    videoFile
+                  ]
+              detectCache.setData(findInCache,'id')
+
+
+
+
             onViewUpdate = (response) =>
               @currentlyWatchingLayout = response.layout
 

@@ -79,8 +79,6 @@ module.exports = class WindowManager
     if options.name == 'main'
       @mainWindow = window
 
-      chiika.shortcutManager.register(window)
-
 
     if options.name == 'loading'
       @loadingWindow = window
@@ -148,6 +146,10 @@ module.exports = class WindowManager
 
         chiika.shortcutManager.unregisterAll(window)
       @removeWindow(window)
+
+    window.on 'focus', =>
+      if window.name == 'main'
+        chiika.shortcutManager.register(window)
 
     window.webContents.on 'did-finish-load', =>
       @emitter.emit 'did-finish-load',window

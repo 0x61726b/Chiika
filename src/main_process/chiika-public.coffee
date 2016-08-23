@@ -92,16 +92,16 @@ module.exports = class ChiikaPublicApi
     uiItem = chiika.uiManager.getUIItem(viewName)
 
     onUpdateComplete = (result) =>
-      view = chiika.viewManager.getViewByName(viewName)
-      uiItem = chiika.uiManager.getUIItem(viewName)
-      viewData = chiika.ipcManager.processedViewData(owner,view)
-      
-      @sendMessageToWindow('main','get-view-data-by-name-response',{ name: viewName, view: viewData })
-      if view?
-        if view.hasUIItem
-          @sendMessageToWindow('main','get-ui-data-by-name-response',{ name: viewName, item: uiItem } )
-        else
-          chiika.logger.warn("#{viewName} doesn't have UI item.")
+      # view = chiika.viewManager.getViewByName(viewName)
+      # uiItem = chiika.uiManager.getUIItem(viewName)
+      # viewData = chiika.ipcManager.processedViewData(owner,view)
+      #
+      # @sendMessageToWindow('main','get-view-data-by-name-response',{ name: viewName, view: viewData })
+      # if view?
+      #   if view.hasUIItem
+      #     @sendMessageToWindow('main','get-ui-data-by-name-response',{ name: viewName, item: uiItem } )
+      #   else
+      #     chiika.logger.warn("#{viewName} doesn't have UI item.")
       callback?(result)
 
     if view?
@@ -111,6 +111,9 @@ module.exports = class ChiikaPublicApi
 
 
 
+  #
+  #
+  #
   requestViewDataUpdate: (owner,viewName) ->
     view = chiika.viewManager.getViewByName(viewName)
     viewData = chiika.ipcManager.processedViewData(owner,view)
@@ -122,6 +125,7 @@ module.exports = class ChiikaPublicApi
   requestUIDataUpdate: (viewName) ->
     uiItem = chiika.uiManager.getUIItem(viewName)
     @sendMessageToWindow('main','get-ui-data-by-name-response',{ name: viewName, item: uiItem } )
+
 
 
   #

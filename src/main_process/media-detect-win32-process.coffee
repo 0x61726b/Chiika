@@ -125,7 +125,7 @@ class Win32MediaDetect
 
           AnitomyParse = @anitomy.Parse(videoFileName) # Native
 
-          state = { status: 'md-running-video', player: mostRecent, anitomy: AnitomyParse }
+          state = { status: 'md-running-video', player: mostRecent, videoFile: videoFile, anitomy: AnitomyParse }
           process.send(state)
         else
           process.send({ status: 'md-video-not-video-file'})

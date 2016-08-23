@@ -163,8 +163,6 @@ module.exports = class MyAnimelist
       else
         callback( { success: true, response: body })
 
-      console.log body
-
     @chiika.makePostRequestAuth( url, { userName: @malUser.realUserName, password: @malUser.password },null,body, onAuthorizedPostComplete )
 
   #
@@ -191,6 +189,8 @@ module.exports = class MyAnimelist
 
           historyView.setData( historyItem, 'history_id').then (args) =>
             @chiika.requestViewDataUpdate('cards','cards_statistics')
+            @chiika.requestViewDataUpdate('myanimelist','myanimelist_animelist')
+            @chiika.requestViewDataUpdate('cards','cards_continueWatching')
       else
         # It can return status code 200 but if the body isn't updated,it failed.
         result.success = false
@@ -205,6 +205,9 @@ module.exports = class MyAnimelist
     @authorizedPost "#{updateManga}#{manga.mal_id}.xml",data,(result) =>
       if result.success && result.response == "Updated"
         callback(result)
+
+        # Statistics update on history method
+        @chiika.requestViewDataUpdate('myanimelist','myanimelist_mangalist')
       else
         # It can return status code 200 but if the body isn't updated,it failed.
         result.success = false
@@ -368,6 +371,8 @@ module.exports = class MyAnimelist
             if response.success && response.updated > 0
               args.return({ updated: false, layout: @getMangaDetailsLayout(id)})
 
+              @chiika.requestViewDataUpdate('myanimelist','myanimelist_mangalist')
+
 
         args.return({ updated: false, layout: @getMangaDetailsLayout(id)})
 
@@ -426,7 +431,6 @@ module.exports = class MyAnimelist
         when 'cover-click'
           id = layout.id
           if id?
-            console.log params
             if params.viewName == 'myanimelist_animelist'
               result = shell.openExternal("http://myanimelist.net/anime/#{id}")
             else
@@ -678,7 +682,7 @@ module.exports = class MyAnimelist
         if event.params.action == 'test3'
           @importHistoryFromMAL('anime',->)
 
-      
+
 
     @on 'get-anime-values', (args) =>
       args.return @getAnimeValues(args.entry)
@@ -732,6 +736,8 @@ module.exports = class MyAnimelist
 
         if response.success && response.updated > 0
           callback({ updated: true, layout: @getAnimeDetailsLayout(id)})
+
+          @chiika.requestViewDataUpdate('myanimelist','myanimelist_animelist')
     callback({ updated: false, layout: @getAnimeDetailsLayout(id)})
 
   handleAnimeDetailsRequest: (animeId,callback) ->
@@ -1891,8 +1897,8 @@ module.exports = class MyAnimelist
           hour  = time.substring(indexOfComma + 1,indexOfComma + 1 + hourDigitCount)
           minute = time.substring( indexOfColon + 1, indexOfColon + 1 + 2)
           momentDate = moment().subtract(1,'days')
-          momentDate = moment().subtract(parseInt(hour),'hours')
-          momentDate = moment().subtract(parseInt(minute),'minutes')
+          momentDate.set('hour',parseInt(hour))
+          momentDate.set('minute',parseInt(minute))
 
         if indexOfMinutes == -1 && indexOfHours == -1 && indexOfYesterday == -1
           digits       = indexOfComma - indexOfSpace - 1

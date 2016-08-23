@@ -27,6 +27,10 @@ module.exports =
   #Detection
   DisableAnimeRecognition: false
   EnableBrowserDetection: false
+
+  LibraryPaths: [
+    'E:/Anime'
+  ]
   #Grid
   FilterGridImmediately: true
 

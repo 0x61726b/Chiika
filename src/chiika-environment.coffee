@@ -230,6 +230,9 @@ class ChiikaEnvironment
     @appSettings[option] = value
     @ipc.setOption(option,value)
 
+  cardAction: (card,action,params) ->
+    @ipc.sendMessage 'card-action', { card:card, action:action, params: params }
+
   sendNotification: (title,body,icon) ->
     if !icon?
       icon = __dirname + "/../assets/images/chiika.png"

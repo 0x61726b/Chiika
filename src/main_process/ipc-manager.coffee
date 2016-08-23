@@ -69,6 +69,7 @@ module.exports = class IpcManager
     @windowMethodByName()
     @detailsLayoutRequest()
     @detailsAction()
+    @cardAction()
     @setOption()
     @postInit()
     @spectron()
@@ -176,6 +177,36 @@ module.exports = class IpcManager
         event.sender.send 'details-action-response', { action: action, args: args }
 
       chiika.chiikaApi.emit 'details-action', { calling: layout.owner, action: action, layout: layout, params: params, return: returnFromScript }
+
+
+
+  #
+  #
+  #
+  cardAction: ->
+    @receive 'card-action', (event,args) =>
+      action = args.action
+      card   = args.card
+      owner  = card.owner
+      params = args.params
+
+      if !action?
+        chiika.logger.error("Can't perform action without action itself you baka!")
+
+      if !card?
+        chiika.logger.error("Can't perform action without details layout")
+
+      if !owner?
+        chiika.logger.error("Can't perform action knowing who to call")
+
+      if !params?
+        chiika.logger.error("Can't perform action knowing who to call")
+
+      returnFromScript = (args) =>
+        chiika.logger.verbose("Action performed for #{owner} - #{action}")
+        #event.sender.send 'details-action-response', { action: action, args: args }
+
+      chiika.chiikaApi.emit 'card-action', { calling: owner, action: action, card: card, params: params,return: returnFromScript }
 
 
 
@@ -293,6 +324,9 @@ module.exports = class IpcManager
         chiika.chiikaApi.emit 'get-view-data', { calling: view.owner, view: view,data: view.dataSource, return: onGetData }
       rendererViews
 
+  #
+  #
+  #
   getViewDataByName: ->
     @receive 'get-view-data-by-name', (event,args) =>
       view = chiika.viewManager.getViewByName(args.name)
@@ -312,15 +346,15 @@ module.exports = class IpcManager
       chiika.chiikaApi.emit 'get-view-data', { calling: view.owner, view: view,data: view.dataSource, return: onGetData }
       event.sender.emit 'get-view-data-by-name-response', { name: view.name, view: newView}
 
-
+  #
+  #
+  #
   processedViewData: (owner,view) ->
     newView = {}
     newView.displayType = view.displayType
     newView.name        = view.name
     newView.owner       = view.owner
     onGetData = (response) =>
-      if view.name == 'cards_currentlyWatching'
-        console.log response
       if response.data?
         newView.dataSource = response.data
         if response[view.displayType]?

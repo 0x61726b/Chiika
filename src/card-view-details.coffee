@@ -48,8 +48,8 @@ module.exports = React.createClass
       @setState { layout: args.layout }
       console.log args.layout
 
-      if args.updated
-        chiika.ipc.sendMessage 'get-view-data-by-name',{ name: @props.route.viewName }
+      # if args.updated
+      #   chiika.ipc.sendMessage 'get-view-data-by-name',{ name: @props.route.viewName }
 
 
   #

@@ -56,7 +56,7 @@ module.exports = class MediaManager
             @player = message.player
             chiika.logger.info("Known media player detected! #{@player.mediaPlayer.name}")
 
-            @onVideoDetected(message.anitomy)
+            @onVideoDetected(message)
 
         #
         when 'md-video-not-video-file'

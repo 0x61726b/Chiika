@@ -59,6 +59,11 @@ module.exports = class CardViews
 
     @lastToggle = clicked
 
+  handleNextEpisode: (card,item) ->
+    console.log card
+    console.log item
+    chiika.cardAction(card,'play-next-episode', { nextEpisode: parseInt(item.layout.watchedEpisodes) + 1, id: item.id } )
+
 
 
   #
@@ -222,7 +227,7 @@ module.exports = class CardViews
                   <span className="label orange">{ item.layout.totalEpisodes } EPS</span>
                 </span>
                 <button type="button" onClick={@navigateButtonUrl} href="#myanimelist_animelist_details/#{item.id}" className="button raised indigo" name="button">Details</button>
-                <button type="button" className="button raised teal" name="button">Play next episode</button>
+                <button type="button" className="button raised teal" onClick={() => @handleNextEpisode(card,item)} name="button">Play Next Episode</button>
                 <button type="button" className="button raised green" name="button">open folder</button>
               </div>
             </div>

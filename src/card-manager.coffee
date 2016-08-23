@@ -112,8 +112,9 @@ module.exports = class CardManager
               @addCard {
                 name: uiItem.name
                 type: uiItem.type
-                properties: uiItem.cardProperties,
+                properties: uiItem.cardProperties
                 items: view.dataSource
+                owner: view.owner
               }
             else
               console.log "Couldnt find view with the name #{uiItem.name}"
