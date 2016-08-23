@@ -40,6 +40,7 @@ SettingsManager                   = require './settings-manager'
 WindowManager                     = require './window-manager'
 IpcManager                        = require './ipc-manager'
 ShortcutManager                   = require './shortcut-manager'
+MediaManager                      = require './media-manager'
 Parser                            = require './parser'
 UIManager                         = require './ui-manager'
 ViewManager                       = require './view-manager'
@@ -77,7 +78,6 @@ class Application
   runningTests: false
 
   scriptsPaths: []
-
 
 
   #
@@ -118,6 +118,7 @@ class Application
     @appDelegate        = new AppDelegate()
     @ipcManager         = new IpcManager()
     @shortcutManager    = new ShortcutManager()
+    @mediaManager       = new MediaManager()
 
     @ipcManager.handleEvents()
 
@@ -133,6 +134,8 @@ class Application
 
 
     @appDelegate.ready =>
+      @mediaManager.initialize()
+
       @dbManager.onLoad =>
         @run()
         @handleEvents()
@@ -208,6 +211,19 @@ class Application
     @emitter.on 'shortcut-pressed', (key) =>
       # Inform subsystems so they do their thing
       @ipcManager.systemEvent('shortcut-pressed',key)
+
+    @emitter.on 'set-option', (option) =>
+      # Inform subsystems so they do their thing
+      @mediaManager.systemEvent('set-option',option)
+
+
+    @emitter.on 'md-detect', (player) =>
+      # Inform subsystems so they do their thing
+      @ipcManager.systemEvent('md-detect',player)
+
+    @emitter.on 'md-close', () =>
+      # Inform subsystems so they do their thing
+      @ipcManager.systemEvent('md-close')
 
   getAppHome: ->
     @chiikaHome

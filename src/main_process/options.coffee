@@ -23,6 +23,9 @@ module.exports =
   UseAlternateListView : false
   RememberWindowSizeAndPosition: true
   DisableBubbleNotifications: false
+
+  #Detection
+  DisableAnimeRecognition: false
   EnableBrowserDetection: false
   #Grid
   FilterGridImmediately: true

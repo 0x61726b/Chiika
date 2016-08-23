@@ -283,6 +283,8 @@ do Your_Application_will_ = () ->
     gulp.watch([serveDir + '/main_process/request-manager.js'], electron.restart)
     gulp.watch([serveDir + '/main_process/settings-manager.js'], electron.restart)
     gulp.watch([serveDir + '/main_process/window-manager.js'], electron.restart)
+    gulp.watch([serveDir + '/main_process/media-manager.js'], electron.restart)
+    gulp.watch([serveDir + '/main_process/media-detect-win32-process.js'], electron.restart)
     gulp.watch([serveDir + '/main_process/ui-manager.js'], electron.restart)
     gulp.watch([serveDir + '/main_process/view.js'], electron.restart)
     gulp.watch([serveDir + '/main_process/ui-tabView.js'], electron.restart)

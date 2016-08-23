@@ -150,6 +150,8 @@ module.exports = class SettingsManager
       @appOptions[name] = value
 
       chiika.logger.info("Set #{name} to #{value}")
+
+      chiika.emitter.emit 'set-option', name
     else
       chiika.logger.warn("You have supplied incorrect paramters.")
 

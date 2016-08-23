@@ -319,6 +319,8 @@ module.exports = class IpcManager
     newView.name        = view.name
     newView.owner       = view.owner
     onGetData = (response) =>
+      if view.name == 'cards_currentlyWatching'
+        console.log response
       if response.data?
         newView.dataSource = response.data
         if response[view.displayType]?
@@ -328,7 +330,7 @@ module.exports = class IpcManager
     chiika.chiikaApi.emit 'get-view-data', { calling: owner, view: view,data: view.dataSource, return: onGetData }
 
     newView
-    
+
   #
   #
   #

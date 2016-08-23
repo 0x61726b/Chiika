@@ -72,6 +72,7 @@ DropdownOption = React.createClass
 AppSettings = React.createClass
   render: ->
     <div className="card">
+      <CheckboxOption label="Disable Anime Recognition" id="DisableAnimeRecognition" />
       <CheckboxOption label="Remember Window Position & Size" id="RememberWindowSizeAndPosition" />
       <CheckboxOption label="Launch on startup" id="LaunchOnStartup" />
       <CheckboxOption label="Minimize when clicked close" id="MinimizeWhenClickedClose" />

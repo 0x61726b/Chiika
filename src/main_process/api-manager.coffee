@@ -105,8 +105,6 @@ module.exports = class APIManager
         return -1
       return 0
 
-
-    console.log @activeScripts
     if chiika.chiikaApi
       forEach @activeScripts, (script) =>
         @initializeScript(script.name)

@@ -106,11 +106,13 @@ class ChiikaEnvironment
           @viewData.splice(index,1,args.view)
           @logger.renderer("ViewData - Replacing #{name}")
           console.log args.view
-        elseomm
+        else
           @viewData.splice(index,1)
           @logger.renderer("ViewData - Removing #{name}")
       else
         @logger.renderer("Could not find view in renderer #{name}. Current views: ")
+        console.log "WTF ?"
+        console.log args.view
         @viewData.push args.view
 
       @cardManager.refreshCards()
@@ -131,8 +133,11 @@ class ChiikaEnvironment
       if findUiItem?
         if args.item?
           @uiData.splice(index,1,args.item)
+          @logger.renderer("UIDATA - Replacing #{name}")
+          console.log args.item
         else
           @uiData.splice(index,1)
+          @logger.renderer("UIDATA - Removing #{name}")
       else
         @uiData.push args.item
 

@@ -678,6 +678,8 @@ module.exports = class MyAnimelist
         if event.params.action == 'test3'
           @importHistoryFromMAL('anime',->)
 
+      
+
     @on 'get-anime-values', (args) =>
       args.return @getAnimeValues(args.entry)
 

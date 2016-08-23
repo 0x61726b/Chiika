@@ -321,8 +321,8 @@ module.exports = class CardViews
 
 
       else if args.view.name == 'cards_currentlyWatching'
-        if @currentlyWatchingLayout?
-          args.return({ data: @currentlyWatchingLayout, CardFullEntry: { dataSourceName: 'cards_currentlyWatching' } })
+        if args.view.dataSource?
+          args.return(args.view.dataSource)
 
       else if args.view.name == 'cards_statistics'
         historyAnime = @chiika.viewManager.getViewByName('myanimelist_animelist_history')
@@ -460,35 +460,53 @@ module.exports = class CardViews
 
 
       else if update.view.name == 'cards_currentlyWatching'
-        animelistView   = @chiika.viewManager.getViewByName('myanimelist_animelist')
 
-        if animelistView?
-          listLength = animelistView.getData().length
+        onAnimeDetailsLayout = (response) =>
+          update.view.dataSource = response
+          @chiika.requestViewDataUpdate('cards','cards_currentlyWatching')
+          @chiika.requestUIDataUpdate('cards_currentlyWatching')
 
-          if listLength > 0
-            random = 155
-            @randomAnime = animelistView.getData()[random]
-            @chiika.logger.info("Selected random anime #{@randomAnime.mal_id}")
-
-            onAnimeDetailsLayout = (response) =>
-              update.return(response)
-            @chiika.emit 'details-layout', { viewName: 'myanimelist_animelist', id: @randomAnime.mal_id, return: onAnimeDetailsLayout }
+        @chiika.emit 'details-layout', { viewName: 'myanimelist_animelist', id: update.params.entry.mal_id, return: onAnimeDetailsLayout }
 
       else if update.view.name == 'cards_statistics'
         update.return()
 
     @on 'system-event', (event) =>
-      if event.name == 'shortcut-pressed'
-        if event.params.action == 'test'
-          @createCurrentlyWatchingCard()
-          @chiika.requestViewUpdate 'cards_currentlyWatching',@name, (response) =>
-            @currentlyWatchingLayout = response.layout
+      if event.name == 'md-detect' or event.name == 'shortcut-pressed'
+        if event.params.action? && event.params.action == 'test'
+          # anitomy = event.params
+          anitomy = { AnimeTitle: 'Akatsuki no Yona', ReleaseGroup: 'FFF' }
+        else
+          anitomy = event.params
+
+        title = anitomy.AnimeTitle
+        group = anitomy.ReleaseGroup
+
+        # Search title in local list
+        animelistView   = @chiika.viewManager.getViewByName('myanimelist_animelist')
+        if animelistView?
+          animelist = animelistView.getData()
+
+          findInAnimelist = _find animelist, (o) -> o.animeTitle == title
+
+          if findInAnimelist?
+            @createCurrentlyWatchingCard()
+            onViewUpdate = (response) =>
+              @currentlyWatchingLayout = response.layout
+
+            @chiika.requestViewUpdate 'cards_currentlyWatching',@name, onViewUpdate, { entry: findInAnimelist }
 
             #@chiika.sendMessageToWindow('main','get-ui-data-by-name-response',{ name: 'cards_currentlyWatching', item: @chiika.ui.getUIItem('cards_currentlyWatching') } )
-
-        if event.params.action == 'test2'
-          @chiika.viewManager.removeView 'cards_currentlyWatching'
+      if event.name == 'md-close' or (event.name == 'shortcut-pressed' and event.params.action == 'test2')
+        view = @chiika.viewManager.getViewByName('cards_currentlyWatching')
+        if view?
           @chiika.sendMessageToWindow('main','get-ui-data-by-name-response',{ name: 'cards_currentlyWatching', item: null } )
+        @chiika.viewManager.removeView 'cards_currentlyWatching'
+
+
+        # if event.params.action == 'test2'
+        #   @chiika.viewManager.removeView 'cards_currentlyWatching'
+        #   @chiika.sendMessageToWindow('main','get-ui-data-by-name-response',{ name: 'cards_currentlyWatching', item: null } )
 
 
   requestViewRefresh: ->

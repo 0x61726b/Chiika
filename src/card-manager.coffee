@@ -85,7 +85,7 @@ module.exports = class CardManager
                 name: uiItem.name
                 type: uiItem.type
                 properties: uiItem.cardProperties,
-                anime: view.dataSource
+                anime: view.dataSource.layout
               }
             else
               console.log "Couldnt find view with the name #{uiItem.name}"
