@@ -340,12 +340,7 @@ module.exports = class CardViews
               return 1
             return 0
 
-          if cntWatchingLayouts.length >= @continueWatchingEntryCount
-            # Trim the array
-            finalLayouts = []
-            for i in [0...@continueWatchingEntryCount]
-              finalLayouts.push cntWatchingLayouts[i]
-            args.return(finalLayouts)
+          args.return(cntWatchingLayouts)
 
 
       else if args.view.name == 'cards_currentlyWatching'

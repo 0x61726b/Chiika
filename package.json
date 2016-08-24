@@ -47,6 +47,7 @@
     "moment": "^2.14.1",
     "moment-timezone": "^0.5.4",
     "ncp": "^2.0.0",
+    "node-dir": "^0.1.16",
     "nosql": "^3.1.0",
     "os": "^0.1.1",
     "outlayer": "^2.1.0",

@@ -230,6 +230,7 @@ module.exports = class WindowManager
       chiika.logger.warn("Window named #{name} can't be found.")
       return undefined
 
+
   getLoginWindow: ->
     @getWindowByName('login')
 

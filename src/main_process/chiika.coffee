@@ -79,7 +79,6 @@ class Application
 
   scriptsPaths: []
 
-
   #
   # Entry point of Chiika
   #
@@ -87,6 +86,7 @@ class Application
     global.chiika       = this
     global.__base       = process.cwd() + '/'
     process.env.CHIIKA_APPDATA = app.getPath('appData')
+    process.env.CHIIKA_RESOURCES_SRC = path.join(__dirname,'..','assets')
 
     global.scriptRequire = (name) ->
       require(path.join(process.cwd(), 'node_modules',name))

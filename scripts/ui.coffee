@@ -81,7 +81,7 @@ module.exports = class UI
       @chiika.logger.script("[yellow](#{@name}) view-update")
 
       if update.view.name == 'calendar_senpai'
-        calendarFile = "D:/Arken/C++/ElectronProjects/Chiika/src/assets/prettifiedSenpai.json"
+        calendarFile = "#{process.env.CHIIKA_RESOURCES_SRC}/prettifiedSenpai.json"
         calendarData = @chiika.utility.readFileSync(calendarFile)
         seasonData = JSON.parse(calendarData)
         parsedCalendarData = { season: '2016 Sumner', senpai: seasonData }

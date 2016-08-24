@@ -14,8 +14,6 @@
 #Description:
 #----------------------------------------------------------------------------
 
-{BrowserWindow,ipcMain} = require 'electron'
-
 _forEach                = require 'lodash.foreach'
 _assign                 = require 'lodash.assign'
 _when                   = require 'when'
