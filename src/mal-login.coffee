@@ -181,7 +181,6 @@ MalLogin = React.createClass
     $("#continue").prop('disabled',true)
 
   continueToApp: () ->
-    @ipcManager.sendMessage 'call-window-method','close'
     @ipcManager.sendMessage 'continue-from-login'
 
   goDown: ->

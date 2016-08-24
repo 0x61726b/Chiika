@@ -7,6 +7,7 @@
 .gridTest > .card {
   flex-basis: 300px;
   flex-grow: 1;
+  overflow: hidden;
 }
 .gridTest > .card:nth-of-type(3n+1) {
   flex-grow: 2;
