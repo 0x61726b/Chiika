@@ -46,6 +46,72 @@ $main-text: #F5F5F5;
 $inverse-text: #111;
 */
 
+/* Variable Colors */
+$color-primary: #CC3C75;
+$color-secondary: #DD7596;
+$color-inverse: #B7C3F3;
+$color-emphasis: #4F6272;
+$color-accent: #5C92C6;
+
+/* Constant Colors */
+/* Available in Every Theme */
+
+// Warning
+$color-warning-main: #FF9500;
+$color-warning-light: #FFBC00;
+$color-warning-dark: #FF7B00;
+
+// Info
+$color-info-main: #34AADC;
+$color-info-light: #40D0F3;
+$color-info-dark: #2591C9;
+
+// Danger
+$color-danger-main: #F13527;
+$color-danger-light: #FD4D39;
+$color-danger-dark: #E5251B;
+
+// Success
+$color-success-main: #48c85e;
+$color-success-light: #60F181;
+$color-success-dark: #38C54C;
+
+$color-map: "warning" $color-warning-main,
+  "info" $color-info-main,
+  "danger" $color-danger-main,
+  "success" $color-success-main,
+  "primary" $color-primary,
+  "secondary" $color-secondary,
+  "inverse" $color-inverse,
+  "emphasis" $color-emphasis,
+  "accent" $color-accent;
+
+
+@each $color in $color-map {
+  .button.#{nth($color,1)},.#{nth($color,1)} {
+    color: nth($color, 2);
+  }
+  .button.#{nth($color,1)}:hover {
+    color: nth($color, 2);
+    background-color: rgba(nth($color, 2), 0.3);
+  }
+  .button.#{nth($color,1)}:active {
+    background-color: rgba(nth($color, 2), 0.5);
+  }
+  .#{nth($color,1)}.raised {
+    color: white;
+    background-color: nth($color, 2);
+  }
+  .#{nth($color,1)}.raised:hover {
+    color: white;
+    background-color: darken(nth($color, 2),5%);
+  }
+  .#{nth($color,1)}.raised:active {
+    color: white;
+    background-color: darken(nth($color, 2),10%);
+  }
+}
+
 // classes
 .theme-accent {
   background-color: $accent;

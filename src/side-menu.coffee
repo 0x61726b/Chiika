@@ -136,7 +136,7 @@ SideMenu = React.createClass
               </div>
           }
         </ul>
-        <Link className="button raised red" to="#{@props.props.location.pathname}" query={{ settings:true,location:'App' }} id="settings-button">Settings</Link>
+        <Link className="button raised danger" to="#{@props.props.location.pathname}" query={{ settings:true,location:'App' }} id="settings-button">Settings</Link>
       </div>
     </div>)
 
