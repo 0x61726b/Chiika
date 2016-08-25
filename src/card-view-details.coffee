@@ -88,10 +88,10 @@ module.exports = React.createClass
         data: {
           datasets: [{
             data: [userScore,remainder],
-            backgroundColor: ["#0288D1"]
+            backgroundColor: [$('.primary').css('background-color')]
             },{
             data: [average,10 - average],
-            backgroundColor: ["#6A1B9A"]
+            backgroundColor: [$('.emphasis').css('color')]
           }]
           labels: ["Average","y"]
         }
@@ -285,7 +285,7 @@ module.exports = React.createClass
         {
           if @state.layout.list
             <div>
-              <button type="button" className="button raised lightblue userStatusButton" onClick={@openProgress}>
+              <button type="button" className="button raised primary userStatusButton" onClick={@openProgress}>
                 {
                   @state.layout.status.defaultAction
                 }
@@ -351,7 +351,7 @@ module.exports = React.createClass
               <h5>Your Score</h5>
               {
                 if @state.layout.scoring.type == "normal"
-                  <select id="scoreSelect" className="button lightblue" name="" onChange={@onScoreChange}>
+                  <select id="scoreSelect" className="button primary" name="" onChange={@onScoreChange}>
                   {
                     [0,1,2,3,4,5,6,7,8,9,10].map (score,i) =>
                       <option value={score} key={i}>{score}</option>
@@ -400,16 +400,16 @@ module.exports = React.createClass
         </div>
       </div>
       <div className="fab-container">
-        <div className="fab fab-main">
+        <div className="fab fab-main raised accent">
           <i className="mdi mdi-menu"></i>
         </div>
-        <div className="fab fab-little" title="Open Folder">
+        <div className="fab fab-little emphasis" title="Open Folder">
           <i className="mdi mdi-folder"></i>
         </div>
-        <div className="fab fab-little" title="Torrent">
+        <div className="fab fab-little emphasis" title="Torrent">
           <i className="mdi mdi-rss"></i>
         </div>
-        <div className="fab fab-little" title="Play Next Episode">
+        <div className="fab fab-little emphasis" title="Play Next Episode">
           <i className="mdi mdi-play"></i>
         </div>
       </div>

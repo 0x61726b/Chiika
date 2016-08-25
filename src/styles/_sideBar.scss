@@ -22,7 +22,7 @@
   margin-left:10px;
   position: absolute;
   height: 1px;
-  border-bottom: 1px solid rgba($accent,0.5);
+  border-bottom: 1px solid rgba($color-accent,0.5);
 }
 //User Avatar and user name
 .avatar {
@@ -81,7 +81,7 @@ img.chiikaLogo {
 }
 .side-menu-link.active {
   padding-left: 7px;
-  border-left: 5px solid $accent;
+  border-left: 5px solid $color-accent;
   background-color: $sidebar-active;
 }
 .side-menu-link.active .side-menu-li {

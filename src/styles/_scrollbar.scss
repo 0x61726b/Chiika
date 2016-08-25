@@ -9,7 +9,7 @@
 ::-webkit-scrollbar-track {
   background: rgba($grey-2,0.5);
 }
-body {
-  scrollbar-face-color: red;
-  scrollbar-track-color: $grey-1;
+
+::-webkit-scrollbar-corner {
+  background-color: transparent;
 }

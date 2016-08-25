@@ -17,8 +17,8 @@ $grey-2:#DCDCE2;
 $grey-3:#B0B0BC;
 
 $sidebar: #282B30;
-$sidebar-hover: #1E2124;
-$sidebar-active: #1C1E22;
+$sidebar-hover: darken($sidebar,4%);
+$sidebar-active: darken($sidebar,7%);
 
 $main-text: #111;
 $main-text-darker: #010101;
@@ -47,11 +47,28 @@ $inverse-text: #111;
 */
 
 /* Variable Colors */
+
 $color-primary: #CC3C75;
 $color-secondary: #DD7596;
 $color-inverse: #B7C3F3;
 $color-emphasis: #4F6272;
 $color-accent: #5C92C6;
+
+/*
+$color-primary: #CC3C75;
+$color-secondary: #584B53;
+$color-inverse: #FEF5EF;
+$color-emphasis: #E4BB97;
+$color-accent: #D6E3F8;
+*/
+
+/*
+$color-primary: #CC3C75;
+$color-secondary: #23395B;
+$color-inverse: #FFFD98;
+$color-emphasis: #B9E3C6;
+$color-accent: #59C9A5;
+*/
 
 /* Constant Colors */
 /* Available in Every Theme */
@@ -88,7 +105,7 @@ $color-map: "warning" $color-warning-main,
 
 
 @each $color in $color-map {
-  .button.#{nth($color,1)},.#{nth($color,1)} {
+  .button.#{nth($color,1)}, .#{nth($color,1)}:not(.checkbox){
     color: nth($color, 2);
   }
   .button.#{nth($color,1)}:hover {
@@ -109,6 +126,14 @@ $color-map: "warning" $color-warning-main,
   .#{nth($color,1)}.raised:active {
     color: white;
     background-color: darken(nth($color, 2),10%);
+  }
+  .checkbox.#{nth($color,1)} input[type="checkbox"]:checked:after {
+    background-color: nth($color, 2);
+    border-color: nth($color, 2);
+  }
+  .radio.#{nth($color,1)} input[type="radio"]:checked:after {
+    background-color: nth($color, 2);
+    border-color: nth($color, 2);
   }
 }
 

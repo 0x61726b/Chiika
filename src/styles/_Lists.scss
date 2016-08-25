@@ -81,7 +81,7 @@ div.gridbox_material.gridbox table.obj tr td:first-child {
   padding-left: 10px;
 }
 div.gridbox_material.gridbox table.obj tr.rowselected td:first-child {
-  border-left: 2px solid $accent;
+  border-left: 2px solid $color-primary;
   padding-left: 8px;
 }
 div.gridbox_material.gridbox table.obj.row20px tr.rowselected td {
@@ -120,12 +120,13 @@ div.gridbox_material.gridbox table.hdr td div.hdrcell {
   font-family: Montserrat, 'sans-serif';
   padding-top: 1px;
   padding-bottom: 1px;
+  text-align: left;
 }
 div.gridbox_material.gridbox table.hdr td.dhxgrid_sort_asc_col,
 div.gridbox_material.gridbox table.hdr td.dhxgrid_sort_desc_col,{
   padding-right: 0;
   background: none;
-  color: $accent;
+  color: $color-primary;
   position: relative;
 }
 
@@ -150,7 +151,7 @@ div.gridbox_material.gridbox table.obj tr:hover td {
 //   color: $main-text!important;
 //   background-color: inherit!important;
 //   border: none;
-//   border-bottom: 2px solid $accent;
+//   border-bottom: 2px solid $color-primary;
 // }
 // .dhxtabbar_tab {
 //   color: $main-text!important;
@@ -217,7 +218,7 @@ div.gridbox_material.gridbox table.obj tr:hover td {
   color: $main-text;
   background-color: inherit;
   border: none;
-  border-bottom: 2px solid $accent;
+  border-bottom: 2px solid $color-primary;
 }
 .react-tabs [role=tab][aria-selected=false] {
   color: $main-text;
@@ -231,11 +232,11 @@ div.gridbox_material.gridbox table.obj tr:hover td {
   background-color: inherit;
   outline: none;
   box-shadow: none;
-  border-bottom: 2px solid $accent;
+  border-bottom: 2px solid $color-primary;
 }
 .react-tabs [role=tab][aria-selected=false]:hover {
   color: $main-text;
-  border-bottom: 2px solid $accent;
+  border-bottom: 2px solid $color-primary;
 }
 .react-tabs [role=tab]:focus:after {
   content: "";
@@ -244,5 +245,5 @@ div.gridbox_material.gridbox table.obj tr:hover td {
   left: 0;
   right: 0;
   bottom: -5px;
-  background: $accent;
+  background: $color-primary;
 }

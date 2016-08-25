@@ -2,7 +2,6 @@
   display: flex;
   flex-flow: row wrap;
   justify-content: flex-start;
-  overflow-y: scroll;
 }
 .gridTest > .card {
   flex-basis: 300px;
@@ -41,9 +40,15 @@
 /** Recent Updates **/
 
 .continue-watching {
-  background: -webkit-linear-gradient(45deg, #d691c1 0%,#6c83c9 38%,#7db9e8 100%);
+  background: -webkit-linear-gradient(0deg, $color-primary 0%, $color-emphasis 100%);
   //background-image: url('./../assets/images/login-bg.jpg');
   height: 320px;
+}
+.continue-watching ::-webkit-scrollbar-thumb {
+  background: rgba($color-inverse,0.5);
+}
+.continue-watching ::-webkit-scrollbar-track {
+  background: rgba($color-inverse,0.1);
 }
 .continue-watching > .title {
   color: $inverse-text;

@@ -35,7 +35,7 @@ CheckboxOption = React.createClass
     chiika.setOption(@state.id,$(e.target).prop('checked'))
   render: ->
     <div>
-      <label className="checkbox">
+      <label className="checkbox danger">
         <input type="checkbox" id="#{@state.label}" onChange={@onChange} checked={@state.checked} />
         { @state.label }
       </label>

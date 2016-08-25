@@ -270,7 +270,7 @@ module.exports = React.createClass
     <Tabs selectedIndex={@state.currentTabIndex} onSelect={@onSelect} forceRenderTabPanel={!@state.lowMemoryUsage}>
       <TabList>
         {@state.tabList.map((tab, i) =>
-            <Tab key={i}>{tab.display} <span className="label raised theme-accent">{@state.lengths[i]}</span></Tab>
+            <Tab key={i}>{tab.display} <span className="label raised primary">{@state.lengths[i]}</span></Tab>
             )}
       </TabList>
       {

@@ -32,6 +32,7 @@ $statusBarHeight: 0px;
 }
 .content > .ReactTabs {
   height: 100%;
+  overflow: hidden;
 }
 @-webkit-keyframes spin {
   100% {
@@ -47,4 +48,7 @@ $statusBarHeight: 0px;
   position: relative;
   top: 50%;
   transform: translateY(-50%);
+}
+.button * {
+  font-weight: 500;
 }

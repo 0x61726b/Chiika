@@ -12,6 +12,7 @@
 @import "_settings";
 @import "_login";
 @import "fullPage";
+@import "_scrollbar";
 
 .hidden {
   display: none;
@@ -26,7 +27,7 @@
 }
 .content {
   height: calc(100% - #{$titlebar-height});
-  overflow-y: scroll;
+  overflow-y: auto;
   background-color: $body-bg;
 }
 td {
@@ -46,19 +47,6 @@ td {
   -webkit-app-region: drag;
 }
 
-::-webkit-scrollbar-corner {
-  background-color: transparent;
-}
-
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-thumb {
-  border-radius: 2px;
-  background: rgba(150, 150, 150, .33);
-}
 
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
