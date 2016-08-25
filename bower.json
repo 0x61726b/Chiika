@@ -15,7 +15,7 @@
   "dependencies": {
     "roboto-fontface": "~0.4.3",
     "components-font-awesome": "~4.5.0",
-    "yui-css": "0.0.14",
+    "yui-css": "0.0.16",
     "dhtmlx": "dhtmlx-arkenthera#0.1.1",
     "mdi": "~1.6.50"
   }
