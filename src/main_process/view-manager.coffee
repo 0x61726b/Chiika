@@ -227,6 +227,19 @@ module.exports = class ViewManager
       newView = new SubView(view)
       newView.hasUIItem = true
 
+    else if view.displayType == 'CardItemNotRecognized'
+      uiItem =
+        name: view.name
+        type: 'card-item-not-recognized'
+        display: view.displayName
+        owner: view.owner
+        displayType: 'CardItemNotRecognized'
+        cardProperties: view.CardItemNotRecognized
+
+      chiika.uiManager.addUIItem uiItem
+      newView = new SubView(view)
+      newView.hasUIItem = true
+
     else if view.displayType == 'none'
       newView = new SubView(view)
 

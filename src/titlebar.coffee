@@ -15,7 +15,7 @@
 #----------------------------------------------------------------------------
 
 React = require('react')
-
+{remote} = require 'electron'
 
 {Emitter} = require 'event-kit'
 

@@ -1,0 +1,111 @@
+
+.desktop-notification {
+  position: absolute;
+  width: 400px;
+  background: white;
+  overflow: hidden;
+  border-radius: 4px;
+  border-bottom: 4px solid #34AADC;
+  background: rgba(255, 255, 255, 0.66);
+}
+.desktop-notification.recognized {
+  max-height: 125px
+}
+.notification-title {
+  padding: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  height: 74px;
+}
+.notification-title  .notf-meta {
+  margin-left: 8px;
+}
+.notf-meta h1,
+.notf-meta h2 {
+  margin: 0;
+}
+.notf-meta h1 {
+  font-size: 18px;
+  color: #121212;
+}
+.notf-meta h2 {
+  font-size: 16px;
+  color: #222;
+  font-weight: 400;
+}
+.img-circle {
+  overflow: hidden;
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.img-circle img {
+  width: 66px;
+  height: 99px;
+}
+.notification-guess {
+  background: rgba(255, 255, 255, 0.2);
+  max-height: 0;
+  opacity: 0;
+  animation: openGuess .4s forwards;
+}
+.desktop-notification.recognized .notification-guess {
+  display: none;
+}
+@keyframes openGuess {
+  from {}
+  to {
+    opacity: 1;
+    max-height: 75px;
+  }
+}
+.notification-guess .guess {
+  padding: 2px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+.notification-guess.img {
+  display: flex;
+  padding: 6px;
+  justify-content: space-around;
+}
+.notification-guess.img .img-guess {
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin: 2px;
+  border: 2px solid transparent;
+}
+.notification-guess.img .img-guess:hover {
+  border-color: rgba(240, 240, 240, 0.54);
+}
+.img-guess img {
+  width: 66px;
+  height: 99px;
+}
+
+.notification-actions {
+  width: 100%;
+  height: 35px;
+  display: flex;
+}
+.notification-actions button {
+  flex-grow: 1;
+  outline: none;
+  background: rgba(255, 255, 255, 0.4);
+  border: none;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.notification-actions button:hover {
+  background: rgba(255, 255, 255, 0.6);
+}

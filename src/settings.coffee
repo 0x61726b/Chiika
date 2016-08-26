@@ -74,11 +74,10 @@ AppSettings = React.createClass
     <div className="card">
       <CheckboxOption label="Disable Anime Recognition" id="DisableAnimeRecognition" />
       <CheckboxOption label="Remember Window Position & Size" id="RememberWindowSizeAndPosition" />
-      <CheckboxOption label="Launch on startup" id="LaunchOnStartup" />
-      <CheckboxOption label="Minimize when clicked close" id="MinimizeWhenClickedClose" />
+      <CheckboxOption label="Close to tray" id="CloseToTray" />
+      <CheckboxOption label="Minimize to tray" id="MinimizeToTray" />
       <CheckboxOption label="Launch minimized on startup" id="LaunchMinimized" />
       <CheckboxOption label="Check for Updates" id="CheckForUpdates" />
-      <CheckboxOption label="Disable Bubble Notifications" id="DisableBubbleNotifications" />
     </div>
 
 ListGeneral = React.createClass

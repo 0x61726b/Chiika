@@ -57,6 +57,11 @@ module.exports = class WindowManager
       #Get window settings
       winProps = chiika.settingsManager.getOption('WindowProperties')
       remember = chiika.settingsManager.getOption('RememberWindowSizeAndPosition')
+      minimize = chiika.settingsManager.getOption('LaunchMinimized')
+
+      if minimize
+        windowOptions.show = false
+
 
       if remember
         windowOptions.center = winProps.center
@@ -133,7 +138,7 @@ module.exports = class WindowManager
       @emitter.emit 'closed',window
       window = null
 
-    window.on 'close', =>
+    window.on 'close', (event) =>
       @emitter.emit 'close',window
 
       if window.name == 'main' && chiika.settingsManager.getOption('RememberWindowSizeAndPosition') == true
@@ -144,12 +149,24 @@ module.exports = class WindowManager
 
         chiika.settingsManager.setWindowProperties({ x: winPosX, y: winPosY,width: width, height: height, center: false })
 
-        chiika.shortcutManager.unregisterAll(window)
-      @removeWindow(window)
+        #chiika.shortcutManager.unregisterAll(window)
+
+
+      if window.name == 'main' && chiika.settingsManager.getOption('CloseToTray')
+        window.hide()
+        event.preventDefault()
+
+
+      if window.name != 'main'
+        @removeWindow(window)
 
     window.on 'focus', =>
       if window.name == 'main'
         chiika.shortcutManager.register(window)
+
+    window.on 'minimize', =>
+      if window.name == 'main' && chiika.settingsManager.getOption('MinimizeToTray')
+        window.hide()
 
     window.webContents.on 'did-finish-load', =>
       @emitter.emit 'did-finish-load',window
@@ -197,6 +214,7 @@ module.exports = class WindowManager
       loadImmediately: true
       })
     @openDevTools(loadingWindow)
+
 
   loadURL: (window) ->
     window.loadURL(window.url)

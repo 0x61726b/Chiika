@@ -16,13 +16,16 @@
 
 module.exports =
   LaunchOnStartup: false
-  MinimizeWhenClickedClose: false
-  LaunchMinimized: false
   DisableBubbleNotifications: false
   RefreshUponLaunch: true
   UseAlternateListView : false
   RememberWindowSizeAndPosition: true
   DisableBubbleNotifications: false
+
+  # Tray
+  MinimizeToTray: true
+  CloseToTray: true
+  LaunchMinimized: false
 
   #Detection
   DisableAnimeRecognition: false

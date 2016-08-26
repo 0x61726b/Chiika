@@ -16,6 +16,8 @@
 {Emitter} = require 'event-kit'
 {InvalidParameterException} = require './exceptions'
 
+{shell} = require 'electron'
+
 module.exports = class ChiikaPublicApi
   emitter: null
   subscriptions: []
@@ -29,9 +31,11 @@ module.exports = class ChiikaPublicApi
     @uiDb                                       = @db.uiDb
     @utility                                    = chiika.utility
     @appHome                                    = chiika.getAppHome()
+    @media                                      = chiika.mediaManager
 
 
-
+  openExternal: (uri) ->
+    shell.openExternal(uri)
 
   #
   #
@@ -76,11 +80,28 @@ module.exports = class ChiikaPublicApi
   #
   #
   sendMessageToWindow: (windowName,message,args) ->
-    wnd = chiika.windowManager.getWindowByName(windowName)
-    chiika.logger.info("Sending IPC #{message} to #{windowName}")
+    if windowName == 'notification'
+      chiika.notificationBar.sendMessage message,args
+    else
+      wnd = chiika.windowManager.getWindowByName(windowName)
+      chiika.logger.info("Sending IPC #{message} to #{windowName}")
 
-    if wnd?
-      wnd.webContents.send message,args
+      if wnd?
+        wnd.webContents.send message,args
+
+
+  #
+  #
+  #
+  createNotificationWindow: (callback) ->
+    chiika.notificationBar.doCreate(callback)
+
+
+  #
+  #
+  #
+  closeNotificationWindow: ->
+    chiika.notificationBar.close()
 
   #
   #

@@ -129,6 +129,21 @@ module.exports = class CardViews
 
     @chiika.viewManager.addView currentlyWatchingCard
 
+  createNotRecognizedWatchingCard: ->
+    notRecognizedCard =
+      name: "cards_notRecognized"
+      owner: @name
+      displayName: 'Not Recognized'
+      displayType: 'CardItemNotRecognized'
+      noUpdate: true
+      dynamic: true
+      CardItemNotRecognized: {
+        viewName: 'myanimelist_animelist'
+        order: @currentlyWatchingOrder
+      }
+
+    @chiika.viewManager.addView notRecognizedCard
+
   createStatisticsCard: ->
     statisticsCard =
       name: "cards_statistics"
@@ -275,6 +290,13 @@ module.exports = class CardViews
 
       @chiika.viewManager.addView detectionCache
 
+    @on 'create-card', (card) =>
+      if card.name == 'cards_currentlyWatching'
+        @createCurrentlyWatchingCard()
+
+      else if card.name == 'cards_notRecognized'
+        @createNotRecognizedWatchingCard()
+
     @on 'card-action', (action) =>
       @chiika.logger.script("[yellow](#{@name}) card-action #{action.action}")
 
@@ -282,8 +304,61 @@ module.exports = class CardViews
       params = action.params
       actionName = action.action
 
-      console.log card
-      console.log params
+      if actionName == 'play-next-episode'
+        detectCache = @chiika.viewManager.getViewByName('anime_detect_cache')
+
+        if detectCache?
+          cache = detectCache.getData()
+
+          findEntry = _find cache, (o) -> o.id == params.id
+
+          if findEntry?
+            knownPaths = findEntry.knownPaths
+            files = findEntry.files
+
+            _forEach files, (file) =>
+              if parseInt(file.episode) == parseInt(params.nextEpisode)
+                @chiika.openExternal(file.file)
+                return false
+
+            action.return( { state: 'episode-not-found'})
+          else
+            @chiika.logger.verbose("Folder not found for #{params.id}")
+            action.return({ state: 'not-found'})
+            # console.log "Known folders for #{params.id}"
+            # cache = []
+            # async = []
+            # _forEach findEntry.knownPaths, (kp) =>
+            #   wait = _when.defer()
+            #   async.push wait.promise
+            #
+            #   onReturn = (result) =>
+            #     cache.push x for x in result
+            #     wait.resolve()
+            #   @chiika.emit 'scan-folder', { calling: 'media', id: params.id, episode: params.nextEpisode, folder: kp,return: onReturn }
+            # _when.all(async).then =>
+            #   console.log cache
+
+      else if actionName == 'open-folder'
+        detectCache = @chiika.viewManager.getViewByName('anime_detect_cache')
+
+        if detectCache?
+          cache = detectCache.getData()
+
+          findEntry = _find cache, (o) -> o.id == params.id
+
+          if findEntry?
+            knownPaths = findEntry.knownPaths
+            @chiika.openExternal(knownPaths[0])
+
+        # if detectCache?
+        #   cache = detectCache.getData()
+        #
+        #   findEntry = _find cache, (o) -> o.id == params.id
+        #
+        #   if findEntry?
+
+
 
     @on 'get-view-data', (args) =>
       @chiika.logger.script("[yellow](#{@name}) get-view-data #{args.view.name}")
@@ -324,6 +399,8 @@ module.exports = class CardViews
                 exists = _find cntWatchingLayouts, (p) -> p.id == mal_id
                 index  = _indexOf cntWatchingLayouts,exists
 
+                if parseInt(anime.watchedEpisodes) == parseInt(anime.totalEpisodes)
+                  return
                 if exists?
                   if history.updated > exists.time
                     exists = { id: mal_id,time: history.updated,layout: anime }
@@ -344,8 +421,10 @@ module.exports = class CardViews
 
 
       else if args.view.name == 'cards_currentlyWatching'
-        if args.view.dataSource?
-          args.return(args.view.dataSource)
+        dataSource = args.view.dataSource
+        if dataSource?
+          cardTitle = "#{dataSource.parse.AnimeTitle} - Episode: #{dataSource.parse.EpisodeNumber}"
+          args.return({ title: cardTitle, layout: dataSource.layout })
 
       else if args.view.name == 'cards_statistics'
         historyAnime = @chiika.viewManager.getViewByName('myanimelist_animelist_history')
@@ -431,8 +510,17 @@ module.exports = class CardViews
 
           args.return(watchingListData)
 
+      else if args.view.name == 'cards_notRecognized'
+        dataSource = args.view.dataSource
+        if dataSource?
+          cardTitle = "Not recognized #{dataSource.parse.AnimeTitle} - Episode: #{dataSource.parse.EpisodeNumber}"
+
+          args.return({ title: cardTitle, values: dataSource.values })
+
     @on 'view-update', (update) =>
       @chiika.logger.script("[yellow](#{@name}) view-update - #{update.view.name}")
+
+
       if update.view.name == 'cards_upcoming'
         calendarView = @chiika.viewManager.getViewByName('calendar_senpai')
         if calendarView?
@@ -489,94 +577,30 @@ module.exports = class CardViews
       else if update.view.name == 'cards_currentlyWatching'
 
         onAnimeDetailsLayout = (response) =>
-          update.view.dataSource = response
+          update.view.dataSource = { parse: update.params.parse, layout: response.layout }
           @chiika.requestViewDataUpdate('cards','cards_currentlyWatching')
           @chiika.requestUIDataUpdate('cards_currentlyWatching')
 
         @chiika.emit 'details-layout', { viewName: 'myanimelist_animelist', id: update.params.entry.mal_id, return: onAnimeDetailsLayout }
 
+      else if update.view.name == 'cards_notRecognized'
+        recognizeResult = update.params.result
+        parseResult     = update.params.parse
+
+        animeValues = []
+        _forEach recognizeResult.suggestions, (suggestion) =>
+          onReturn = (result) =>
+            animeValues.push result
+          @chiika.emit 'get-anime-values', { calling: 'myanimelist',entry: suggestion.entry,return: onReturn }
+
+
+        update.view.dataSource = { parse: parseResult, values: animeValues }
+        @chiika.requestViewDataUpdate('cards','cards_notRecognized')
+        @chiika.requestUIDataUpdate('cards_notRecognized')
+
+
       else if update.view.name == 'cards_statistics'
         update.return()
-
-    @on 'system-event', (event) =>
-      if event.name == 'md-detect' or (event.name == 'shortcut-pressed' and event.params.action == 'test')
-        if event.params.action?
-          # anitomy = event.params
-          anitomy = { AnimeTitle: 'Akatsuki no Yona', ReleaseGroup: 'FFF' }
-          videoFile = 'E:/Anime/Akatsuki no Yona/[FFF] Akatsuki no Yona [TV]/[FFF] Akatsuki no Yona - 01v2 [2B487C34].mkv'
-        else
-          anitomy = event.params.anitomy
-          videoFile = event.params.videoFile
-
-
-        title = anitomy.AnimeTitle
-        group = anitomy.ReleaseGroup
-
-        # Search title in local list
-        animelistView   = @chiika.viewManager.getViewByName('myanimelist_animelist')
-        if animelistView?
-          animelist = animelistView.getData()
-
-          findInAnimelist = _find animelist, (o) -> o.animeTitle == title
-
-          if findInAnimelist?
-            @createCurrentlyWatchingCard()
-
-            # Save this file to cache
-            detectCache = @chiika.viewManager.getViewByName('anime_detect_cache')
-
-            if detectCache?
-              cacheData = detectCache.getData()
-
-              findInCache = _find cacheData, (o) => o.id == findInAnimelist.mal_id
-              if findInCache?
-                oneLevelBack = path.join(videoFile,'..')
-
-                pathExists = _find findInCache.knownPaths, (o) -> o == oneLevelBack
-                knownPathIndex = _indexOf findInCache.knownPaths,pathExists
-                if pathExists?
-                  findInCache.knownPaths.splice(knownPathIndex,1,oneLevelBack)
-                else
-                  findInCache.knownPaths.push path.join(videoFile,'..')
-
-                fileExists = _find findInCache.files, (o) -> o == videoFile
-                fileIndex = _indexOf findInCache.files,fileExists
-
-                if fileExists?
-                  findInCache.files.splice(fileIndex,1,videoFile)
-                else
-                  findInCache.files.push videoFile
-              else
-                findInCache =
-                  id: findInAnimelist.mal_id
-                  knownPaths: [
-                    path.join(videoFile,'..')
-                  ]
-                  files: [
-                    videoFile
-                  ]
-              detectCache.setData(findInCache,'id')
-
-
-
-
-            onViewUpdate = (response) =>
-              @currentlyWatchingLayout = response.layout
-
-            @chiika.requestViewUpdate 'cards_currentlyWatching',@name, onViewUpdate, { entry: findInAnimelist }
-
-            #@chiika.sendMessageToWindow('main','get-ui-data-by-name-response',{ name: 'cards_currentlyWatching', item: @chiika.ui.getUIItem('cards_currentlyWatching') } )
-      if event.name == 'md-close' or (event.name == 'shortcut-pressed' and event.params.action == 'test2')
-        view = @chiika.viewManager.getViewByName('cards_currentlyWatching')
-        if view?
-          @chiika.sendMessageToWindow('main','get-ui-data-by-name-response',{ name: 'cards_currentlyWatching', item: null } )
-        @chiika.viewManager.removeView 'cards_currentlyWatching'
-
-
-        # if event.params.action == 'test2'
-        #   @chiika.viewManager.removeView 'cards_currentlyWatching'
-        #   @chiika.sendMessageToWindow('main','get-ui-data-by-name-response',{ name: 'cards_currentlyWatching', item: null } )
-
 
   requestViewRefresh: ->
     throw "Nope"

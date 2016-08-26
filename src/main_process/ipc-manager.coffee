@@ -73,6 +73,9 @@ module.exports = class IpcManager
     @setOption()
     @postInit()
     @spectron()
+    @startLibraryScan()
+    @scriptAction()
+    @notificationBar()
 
   systemEvent: (event,params) ->
     chiika.chiikaApi.emit 'system-event',{ name: event, params: params }
@@ -204,12 +207,36 @@ module.exports = class IpcManager
 
       returnFromScript = (args) =>
         chiika.logger.verbose("Action performed for #{owner} - #{action}")
-        #event.sender.send 'details-action-response', { action: action, args: args }
+        event.sender.send "card-action-#{action}-response", args
+
 
       chiika.chiikaApi.emit 'card-action', { calling: owner, action: action, card: card, params: params,return: returnFromScript }
 
 
+  #
+  #
+  #
+  scriptAction: ->
+    @receive 'script-action', (event,args) =>
+      action = args.action
+      owner = args.owner
+      callback = args.callback
+      params = args.params
 
+      console.log params
+
+      returnFromScript = (args) =>
+        chiika.logger.verbose("Action performed for #{owner} - #{action}")
+        event.sender.send "script-action-#{action}-response", args
+
+      chiika.chiikaApi.emit action, { calling: owner, action: action, params: params,return: returnFromScript }
+
+  #
+  #
+  #
+  notificationBar: ->
+    @receive 'notf-bar-dismiss', (event,args) =>
+      chiika.notificationBar.hide()
   #
   # We receive a user pass here, redirect it to the user script and let them process it
   #
@@ -226,6 +253,7 @@ module.exports = class IpcManager
         chiika.chiikaApi.emit 'set-user-login',params
 
     @receive 'continue-from-login', (event,args) =>
+      chiika.windowManager.getWindowByName('login').close()
       chiika.windowManager.createMainWindow()
       chiika.apiManager.postInit()
 
@@ -260,6 +288,9 @@ module.exports = class IpcManager
     @receive 'set-user-auth-pin', (event,args) =>
       chiika.chiikaApi.emitTo args.service,'set-user-auth-pin',{}
 
+  startLibraryScan: ->
+    @receive 'start-library-scan', (event,args) =>
+      chiika.mediaManager.startLibraryProcess()
 
   spectron: ->
     @receive 'spectron.', (event,args) =>

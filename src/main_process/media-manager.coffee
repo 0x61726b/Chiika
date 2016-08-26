@@ -24,14 +24,84 @@ cp                      = require 'child_process'
 module.exports = class MediaManager
   processAlive: false
 
+
+  #
+  #
+  #
+  initialize: ->
+    if chiika.settingsManager.getOption('DisableAnimeRecognition')
+      chiika.logger.error("Detection is disabled.")
+    else
+      @startDetectorProcess()
+
+  #
+  #
+  #
   onVideoDetected: (anitomyParse) ->
     if @player?
       chiika.emitter.emit 'md-detect',anitomyParse
 
+  #
+  #
+  #
   onPlayerClosed: ->
     chiika.emitter.emit 'md-close'
 
-  handleEvents: ->
+
+  #
+  #
+  #
+  runLibraryProcess: (libraryPaths,animelist,animeextra,callback) ->
+
+    chiika.logger.verbose("Spawning library process")
+    animelistStr = JSON.stringify(animelist)
+    @libraryProcess = cp.fork("#{__dirname}/media-library-process.js",[JSON.stringify(libraryPaths)])
+
+    extraStr = JSON.stringify([])
+
+    if animeextra.length > 0
+      extraStr = JSON.stringify(animeextra)
+
+
+    @libraryProcess.send { message: 'set-anime-list', animelist: animelistStr, extra: extraStr }
+
+    @libraryProcess.on 'close',(code,signal) =>
+      if signal == 'SIGTERM'
+        return
+      if code != 0
+        throw "Error on child process wtf? - #{code} - #{signal}"
+
+    @libraryProcess.on 'message', (message) =>
+      if message.message == 'media-recognized'
+        list = message.list
+        chiika.logger.info "#{list.length} entries have been recognized."
+        callback?(list)
+      if message.message == 'media-not-recognized'
+        list = message.list
+        chiika.logger.info "#{list.length} entries have not been recognized."
+        @libraryProcess.kill('SIGTERM')
+        @libraryProcess = null
+
+
+
+
+
+  #
+  #
+  #
+  startDetectorProcess: ->
+    MediaPlayerList = [
+      { name: "MPC" , class: "MediaPlayerClassicW", executables: ['mpc-hc', 'mpc-hc64'] },
+      { name: "BSPlayer" , class: "BSPlayer", executables: ['bsplayer'] },
+      { name: "Google Chrome" , class: "Chrome_WidgetWin_1", browser:0, executables: ['chrome'] },
+      { name: "Mozilla Firefox" , class: "MozillaWindowClass", browser: 1, executables: ['firefox'] }]
+    str = JSON.stringify(MediaPlayerList)
+
+    chiika.logger.verbose "Spawning child process"
+    @child = cp.fork("#{__dirname}/media-detect-win32-process.js",[str,true])
+
+    @processAlive = true
+
     @child.on 'close',(code,signal) =>
       if signal == 'SIGTERM'
         return
@@ -39,7 +109,6 @@ module.exports = class MediaManager
         throw "Error on child process wtf? - #{code} - #{signal}"
 
     @child.on 'message', (message) =>
-
       switch message.status
 
         #
@@ -61,8 +130,6 @@ module.exports = class MediaManager
           if @player?
             @player = null
             @onPlayerClosed()
-
-
   #
   #
   #
@@ -72,34 +139,19 @@ module.exports = class MediaManager
     else
       false
 
+
+  #
+  #
+  #
   comparePlayers: (a,b) ->
     if a? && b? && a.processName == b.processName
       true
     else
       false
 
-  initialize: ->
-    if chiika.settingsManager.getOption('DisableAnimeRecognition')
-      chiika.logger.error("Detection is disabled.")
-    else
-      @spawnChild()
-
-  spawnChild: ->
-    MediaPlayerList = [
-      { name: "MPC" , class: "MediaPlayerClassicW", executables: ['mpc-hc', 'mpc-hc64'] },
-      { name: "BSPlayer" , class: "BSPlayer", executables: ['bsplayer'] },
-      { name: "Google Chrome" , class: "Chrome_WidgetWin_1", browser:0, executables: ['chrome'] },
-      { name: "Mozilla Firefox" , class: "MozillaWindowClass", browser: 1, executables: ['firefox'] }]
-    str = JSON.stringify(MediaPlayerList)
-
-
-    chiika.logger.verbose "Spawning child process"
-    @child = cp.fork("#{__dirname}/media-detect-win32-process.js",[str,true])
-
-    @processAlive = true
-
-    @handleEvents()
-
+  #
+  #
+  #
   disableRecognition: ->
     if @processAlive
       @child.kill('SIGTERM')
@@ -107,10 +159,16 @@ module.exports = class MediaManager
       chiika.logger.verbose "Killing child process"
       @processAlive = false
 
+  #
+  #
+  #
   enableRecognition: ->
     if !@processAlive
       @spawnChild()
 
+  #
+  #
+  #
   systemEvent: (event,param) ->
     if event == 'set-option'
       optionValue = chiika.settingsManager.getOption(param)

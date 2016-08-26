@@ -24,6 +24,7 @@ _indexOf                                  = require 'lodash/array/indexOf'
 ChiikaIPC                                 = require './chiika-ipc'
 ViewManager                               = require './view-manager'
 CardManager                               = require './card-manager'
+NotificationManager                       = require './notification-manager'
 
 class ChiikaEnvironment
   emitter: null
@@ -44,6 +45,7 @@ class ChiikaEnvironment
     @ipc              = new ChiikaIPC()
     @viewManager      = new ViewManager()
     @cardManager      = new CardManager()
+    @notificationManager = new NotificationManager()
 
 
 
@@ -65,17 +67,6 @@ class ChiikaEnvironment
     @ipc.spectron()
     @refreshData()
 
-    # @ipc.refreshViewData (args) =>
-    #   view = _find @viewData, (o) -> o.name == args.view.name
-    #   index = _indexOf @viewData, view
-    #
-    #   console.log args
-    #
-    #   if view?
-    #     view.dataSource = args.view.dataSource
-    #     @viewData.splice(index,1,args.view)
-    #
-    #   @cardManager.refreshCards()
 
   refreshData: ->
     ipcRenderer.on 'refresh-data', (event,args) =>
@@ -223,6 +214,9 @@ class ChiikaEnvironment
   openShellUrl: (url) ->
     shell.openExternal(url)
 
+  notification: (notf) ->
+    window.yuiNotification(notf)
+
   getOption: (option) ->
     @appSettings[option]
 
@@ -230,8 +224,21 @@ class ChiikaEnvironment
     @appSettings[option] = value
     @ipc.setOption(option,value)
 
-  cardAction: (card,action,params) ->
+  cardAction: (card,action,params,callback) ->
     @ipc.sendMessage 'card-action', { card:card, action:action, params: params }
+
+    ipcRenderer.on "card-action-#{action}-response", (event,args) =>
+      callback(args)
+      @ipc.disposeListeners("card-action-#{action}-response")
+
+  #
+  #
+  #
+  scriptAction: (owner,action,params,callback) ->
+    if !params?
+      params = {}
+
+    @ipc.sendMessage 'script-action', { owner: owner, action: action, params: params, return: callback }
 
   sendNotification: (title,body,icon) ->
     if !icon?

@@ -625,6 +625,7 @@ module.exports = class MyAnimelist
     #
     @on 'set-user-login', (args,callback) =>
       @chiika.logger.script("[yellow](#{@name}) Auth in process " + args.user)
+
       onAuthComplete = (error,response,body) =>
         if error?
           @chiika.logger.error(error)
@@ -680,12 +681,19 @@ module.exports = class MyAnimelist
     @on 'system-event', (event) =>
       if event.name == 'shortcut-pressed'
         if event.params.action == 'test3'
-          @importHistoryFromMAL('anime',->)
+          @chiika.emit 'scan-library', { calling: 'media' }
 
 
 
     @on 'get-anime-values', (args) =>
       args.return @getAnimeValues(args.entry)
+
+    @on 'make-search', (args) =>
+      @chiika.logger.script("[yellow](#{@name}) make-search #{args.title}")
+
+      title = args.title
+      @doSearch title, (results) =>
+        args.return(results)
 
 
   saveMangaHistory: (type,manga) ->
@@ -739,6 +747,36 @@ module.exports = class MyAnimelist
 
           @chiika.requestViewDataUpdate('myanimelist','myanimelist_animelist')
     callback({ updated: false, layout: @getAnimeDetailsLayout(id)})
+
+
+  doSearch: (title,callback) ->
+    searchMatch = (v) ->
+      newAnimeEntry = {}
+      newAnimeEntry.mal_id = v.id
+      newAnimeEntry.animeEnglish = v.english
+      newAnimeEntry.animeTitle = v.title
+      newAnimeEntry.animeSynonyms = v.synonyms
+      newAnimeEntry.animeType = v.type
+      newAnimeEntry.animeStartDate = v.start_date
+      newAnimeEntry.animeEndDate = v.end_date
+      newAnimeEntry.animeStatus = v.status
+      newAnimeEntry.animeImage = v.image
+      newAnimeEntry.animeScoreAverage = v.score
+      newAnimeEntry.animeSynopsis = v.synopsis
+      newAnimeEntry
+
+    results = []
+
+    @search 'anime',title, (list) =>
+      if _isArray list
+        _forEach list, (entry) =>
+          results.push searchMatch(entry)
+
+      else
+        results.push searchMatch(list)
+        entryFound = true
+
+      callback?(results)
 
   handleAnimeDetailsRequest: (animeId,callback) ->
     @chiika.logger.script("[yellow](#{@name}-Anime-Search) Searching for #{animeId}!")
@@ -1342,7 +1380,7 @@ module.exports = class MyAnimelist
     extra = _find @animeextra, (o) -> o.mal_id == entry.mal_id
 
     if !extra?
-      extra = {}
+      extra = entry
 
     title               = entry.animeTitle ? ""                       #MalApi
     synonyms            = entry.animeSynonyms ? ""                    #MalApi

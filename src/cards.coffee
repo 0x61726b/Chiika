@@ -16,6 +16,7 @@
 
 React                               = require('react')
 LoadingScreen                       = require './loading-screen'
+{dialog}                            = require('electron').remote
 
 
 module.exports = class CardViews
@@ -60,9 +61,26 @@ module.exports = class CardViews
     @lastToggle = clicked
 
   handleNextEpisode: (card,item) ->
-    console.log card
-    console.log item
-    chiika.cardAction(card,'play-next-episode', { nextEpisode: parseInt(item.layout.watchedEpisodes) + 1, id: item.id } )
+    nextEpisode = parseInt(item.layout.watchedEpisodes) + 1
+    onActionCompete = (args) ->
+      console.log args
+      if args.state == 'episode-not-found'
+        chiika.notificationManager.episodeNotFound(item.layout.title,nextEpisode)
+
+      if args.state == 'not-found'
+        chiika.notificationManager.folderNotFound =>
+          folders = dialog.showOpenDialog({
+            properties: ['openDirectory','multiSelections']
+          })
+
+          if folders?
+            chiika.scriptAction('media','set-folders-for-entry', { id: item.id,folders: folders })
+
+    chiika.cardAction card,'play-next-episode', { nextEpisode: parseInt(item.layout.watchedEpisodes) + 1, id: item.id }, onActionCompete
+
+  handleOpenFolder: (card,item) ->
+    chiika.cardAction card,'open-folder', { id: item.id }
+
 
 
 
@@ -149,44 +167,41 @@ module.exports = class CardViews
 
 
   cardAnime: (card,i) ->
-    if !card.anime?
-      <LoadingScreen key={i} />
-    else
-      <div className="card grid currently-watching" id="card-cw" key={i}>
-          <div className="title">
-            <div className="home-inline">
-              <h1>{card.anime.title}</h1>
-              <button type="button" onClick={@navigateButtonUrl} href="##{card.properties.viewName}_details/#{card.anime.id}" className="button raised red">Details</button>
-            </div>
-            <span id="watching-genre">
-              <ul>
-                {
-                  if card.anime.genres?
-                    card.anime.genres.split(',').map (genre,i) =>
-                      <li key={i}>{genre}</li>
-                }
-              </ul>
+    <div className="card grid currently-watching" id="card-cw" key={i}>
+        <div className="title">
+          <div className="home-inline">
+            <h1>{card.title}</h1>
+            <button type="button" onClick={@navigateButtonUrl} href="##{card.properties.viewName}_details/#{card.anime.id}" className="button raised red">Details</button>
+          </div>
+          <span id="watching-genre">
+            <ul>
+              {
+                if card.anime.genres?
+                  card.anime.genres.split(',').map (genre,i) =>
+                    <li key={i}>{genre}</li>
+              }
+            </ul>
+          </span>
+        </div>
+        <div className="currently-watching-info">
+          <div className="watching-cover">
+            <img src={card.anime.cover} width="150" height="225" alt="" />
+            <button type="button" className="button raised lightblue">Share</button>
+          </div>
+          <div className="watching-info">
+            <span className="info-miniCards">
+              {
+                if card.anime.miniCards? && card.anime.miniCards.length != 0
+                  card.anime.miniCards.map (card,i) =>
+                    chiika.cardManager.renderCard(card,i)
+              }
             </span>
+            <p>
+              {card.anime.synopsis}
+            </p>
           </div>
-          <div className="currently-watching-info">
-            <div className="watching-cover">
-              <img src={card.anime.cover} width="150" height="225" alt="" />
-              <button type="button" className="button raised lightblue">Share</button>
-            </div>
-            <div className="watching-info">
-              <span className="info-miniCards">
-                {
-                  if card.anime.miniCards.length != 0
-                    card.anime.miniCards.map (card,i) =>
-                      chiika.cardManager.renderCard(card,i)
-                }
-              </span>
-              <p>
-                {card.anime.synopsis}
-              </p>
-            </div>
-          </div>
-      	</div>
+        </div>
+    	</div>
 
 
   cardStatistics: (card,i) ->
@@ -202,6 +217,26 @@ module.exports = class CardViews
               <li key={i}>{item.title} <span className="label raised green">{ item.count }</span></li>
           }
         </ul>
+    </div>
+
+
+  cardNotRecognized: (card,i) ->
+    <div className="card grid continue-watching" id="card-cnw" key={i}>
+      <div className="title home-inline">
+        <h1>{ card.items.title }</h1>
+        <button type="button" onClick={@navigateButtonUrl} href="#myanimelist_animelist" className="button raised lightblue" name="button">Anime List <i className="ion-ios-list"></i></button>
+      </div>
+      <div className="recent-images">
+      {
+          card.items.values.map (item,i) =>
+            <div className="card image-card" id="cnt-#{item.id}" onClick={@cntWatchingCardClick} key={i}>
+              <div className="watch-img">
+                <img src="#{item.image}" width="120" height="180" alt="" />
+                <a>{ item.title}</a>
+              </div>
+            </div>
+      }
+      </div>
     </div>
 
   cardContinueWatching: (card,i) ->
@@ -228,7 +263,7 @@ module.exports = class CardViews
                 </span>
                 <button type="button" onClick={@navigateButtonUrl} href="#myanimelist_animelist_details/#{item.id}" className="button raised indigo" name="button">Details</button>
                 <button type="button" className="button raised teal" onClick={() => @handleNextEpisode(card,item)} name="button">Play Next Episode</button>
-                <button type="button" className="button raised green" name="button">open folder</button>
+                <button type="button" className="button raised green" onClick={() => @handleOpenFolder(card,item)} name="button">Open Folder</button>
               </div>
             </div>
       }

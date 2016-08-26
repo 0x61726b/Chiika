@@ -86,6 +86,7 @@ module.exports = class CardManager
                 type: uiItem.type
                 properties: uiItem.cardProperties,
                 anime: view.dataSource.layout
+                title: view.dataSource.title
               }
             else
               console.log "Couldnt find view with the name #{uiItem.name}"
@@ -119,6 +120,21 @@ module.exports = class CardManager
             else
               console.log "Couldnt find view with the name #{uiItem.name}"
 
+          else if uiItem.type == 'card-item-not-recognized'
+            dataSource = uiItem.name
+            view = _find chiika.viewData, (o) => o.name == dataSource
+
+            if view?
+              @addCard {
+                name: uiItem.name
+                type: uiItem.type
+                properties: uiItem.cardProperties
+                items: view.dataSource
+                owner: view.owner
+              }
+            else
+              console.log "Couldnt find view with the name #{uiItem.name}"
+
   renderCard: (card,i) ->
     if card.type == 'miniCard'
       @views.miniCard(card,i)
@@ -132,3 +148,5 @@ module.exports = class CardManager
       @views.cardStatistics(card,i)
     else if card.type == 'card-item-continue-watching'
       @views.cardContinueWatching(card,i)
+    else if card.type == 'card-item-not-recognized'
+      @views.cardNotRecognized(card,i)

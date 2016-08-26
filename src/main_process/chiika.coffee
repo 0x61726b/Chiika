@@ -19,10 +19,10 @@
 #
 #--------------------
 
-
 {BrowserWindow, ipcMain,globalShortcut,Tray,Menu,app} = require 'electron'
 
 path                              = require 'path'
+
 
 
 {Emitter,Disposable}              = require 'event-kit'
@@ -48,6 +48,7 @@ ChiikaPublicApi                   = require './chiika-public'
 Utility                           = require './utility'
 AppOptions                        = require './options'
 AppDelegate                       = require './app-delegate'
+NotificationBar                   = require './notification-bar'
 
 process.on 'uncaughtException',(err) ->
   # chiika.logger.log 'error', 'Fatal uncaught exception crashed cluster', err, (err, level, msg, meta) =>
@@ -71,7 +72,6 @@ process.on 'uncaughtException',(err) ->
     chiika.logger.error(err)
 
 
-
 module.exports =
 class Application
   devMode: false
@@ -79,27 +79,24 @@ class Application
 
   scriptsPaths: []
 
+
+
   #
   # Entry point of Chiika
   #
   constructor: () ->
-    global.chiika       = this
-    global.__base       = process.cwd() + '/'
+    global.chiika          = this
+    global.__base          = process.cwd() + '/'
+    global.mainProcessHome = __dirname
+
     process.env.CHIIKA_APPDATA = app.getPath('appData')
     process.env.CHIIKA_RESOURCES_SRC = path.join(__dirname,'..','assets')
 
     global.scriptRequire = (name) ->
       require(path.join(process.cwd(), 'node_modules',name))
 
-    console.log         ("Using electron instance #{require.resolve('electron')}")
     @chiikaHome         = path.join(app.getPath('appData'),"chiika")
-    console.log @chiikaHome
-    if process.platform == "linux"
-      console.log process.env.HOME
-    else if process.platform == "darwin"
-      console.log path.join(process.env.HOME,'Library/Application Support')
-    else
-      console.log process.env.APPDATA
+
 
     @logger             = new Logger("verbose").logger
     global.logger       = @logger #Share with renderer
@@ -113,15 +110,15 @@ class Application
     @parser             = new Parser()
     @viewManager        = new ViewManager()
     @uiManager          = new UIManager()
+    @mediaManager       = new MediaManager()
     @chiikaApi          = new ChiikaPublicApi( { logger: @logger, db: @dbManager, parser: @parser, ui: @uiManager, viewManager: @viewManager })
     @windowManager      = new WindowManager()
     @appDelegate        = new AppDelegate()
     @ipcManager         = new IpcManager()
     @shortcutManager    = new ShortcutManager()
-    @mediaManager       = new MediaManager()
+    @notificationBar    = new NotificationBar()
 
     @ipcManager.handleEvents()
-
 
     app.commandLine.appendSwitch('--disable-2d-canvas-image-chromium');
     app.commandLine.appendSwitch('--disable-accelerated-2d-canvas');
@@ -202,9 +199,9 @@ class Application
         @viewManager.preload().then =>
           chiika.logger.verbose("Preloading UI complete!")
           @apiManager.postInit()
-          chiika.windowManager.createMainWindow()
+          @notificationBar.create()
 
-      #
+          chiika.windowManager.createMainWindow()
 
 
   handleEvents: ->
