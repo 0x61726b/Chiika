@@ -38,8 +38,10 @@ If you'd like to help us develop Chiika, send me an email.
 
 #Some Screenshots
 
-![](http://i.imgur.com/nUGQzRb.png)
-![Scrobbler](http://i.imgur.com/gsAtn1L.png)
+![](http://i.imgur.com/19IDz05.png)
+![](http://i.imgur.com/V6EBgsk.png)
+![](http://i.imgur.com/97veusb.png)
+![](http://i.imgur.com/JlDAlkK.png)
 
 #Testing
 
