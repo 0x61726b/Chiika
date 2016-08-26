@@ -21,6 +21,8 @@ _find                   = require 'lodash/collection/find'
 CardView                = require './card-view'
 LoadingMini             = require './loading-mini'
 
+{dialog}                            = require('electron').remote
+
 module.exports = React.createClass
   getInitialState: ->
     layout:
@@ -67,6 +69,9 @@ module.exports = React.createClass
   componentDidMount: ->
     $('.fab-main').click ->
       $('.fab-container').toggleClass 'active'
+
+    $('.fab-main fab').click ->
+      console.log(this)
 
 
   #
@@ -261,13 +266,46 @@ module.exports = React.createClass
   #
   #
   onActionError: (error) ->
-    window.yuiToast(error,'top',5000,'dark')
+    chiika.toastError(error,5000)
 
   #
   #
   #
   onActionSuccess: (message) ->
-    window.yuiToast(message,'top',2500,'dark')
+    chiika.toastSuccess(message,2500)
+
+  onCardActionCompleteCommon: (id,args) ->
+    if args.state == 'not-found'
+      chiika.notificationManager.folderNotFound =>
+        folders = dialog.showOpenDialog({
+          properties: ['openDirectory','multiSelections']
+        })
+
+        if folders?
+          chiika.scriptAction('media','set-folders-for-entry', { id: id,folders: folders })
+  #
+  #
+  #
+  openFolder: ->
+    chiika.mediaAction 'cards','open-folder', { id: @state.layout.id }, (args) => @onCardActionCompleteCommon(@state.layout.id,args)
+
+  playNextEpisode: ->
+    nextEpisode = parseInt(@state.layout.status.items[0].current) + 1
+    onActionCompete = (args) =>
+      console.log args
+      if args.state == 'episode-not-found'
+        chiika.notificationManager.episodeNotFound(@state.layout.title,nextEpisode)
+
+      if args.state == 'not-found'
+        chiika.notificationManager.folderNotFound =>
+          folders = dialog.showOpenDialog({
+            properties: ['openDirectory','multiSelections']
+          })
+
+          if folders?
+            chiika.scriptAction('media','set-folders-for-entry', { id: @state.layout.id,folders: folders })
+
+    chiika.mediaAction 'cards','play-next-episode', { nextEpisode: nextEpisode, id: @state.layout.id }, onActionCompete
 
   render: ->
     <div className="detailsPage">
@@ -403,13 +441,13 @@ module.exports = React.createClass
         <div className="fab fab-main raised accent">
           <i className="mdi mdi-menu"></i>
         </div>
-        <div className="fab fab-little emphasis" title="Open Folder">
+        <div className="fab fab-little emphasis" title="Open Folder" onClick={@openFolder}>
           <i className="mdi mdi-folder"></i>
         </div>
         <div className="fab fab-little emphasis" title="Torrent">
           <i className="mdi mdi-rss"></i>
         </div>
-        <div className="fab fab-little emphasis" title="Play Next Episode">
+        <div className="fab fab-little emphasis" title="Play Next Episode" onClick={@playNextEpisode}>
           <i className="mdi mdi-play"></i>
         </div>
       </div>

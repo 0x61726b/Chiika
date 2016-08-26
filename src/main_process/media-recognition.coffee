@@ -47,7 +47,6 @@ module.exports = class MyAnimelistRecognition
       if string(syn).toLowerCase().contains(title)
         weight += 7
 
-
     words = title.split(' ')
 
     _forEach words, (word) =>
@@ -62,11 +61,13 @@ module.exports = class MyAnimelistRecognition
 
     weight
 
+
+
   #
   #
   #
   cache: (detectCache,recognize,parse,videoFile) ->
-    cache = @doCache(detectCache,recognize,parse,videoFile)
+    cache = @doCache(detectCache.getData(),recognize,parse,videoFile)
     detectCache.setData(cache,'id')
     cache
 
@@ -74,43 +75,43 @@ module.exports = class MyAnimelistRecognition
   #
   #
   #
-  doCache: (detectCache,recognize,parse,videoFile) ->
-    if detectCache?
-      cacheData = detectCache.getData()
+  doCache: (cacheData,recognize,parse,videoFile) ->
+    findInCache = _find cacheData, (o) => o.id == recognize.entry.mal_id
+    if findInCache?
+      oneLevelBack = path.join(videoFile,'..')
 
-      findInCache = _find cacheData, (o) => o.id == recognize.entry.mal_id
-      if findInCache?
-        oneLevelBack = path.join(videoFile,'..')
-
-        pathExists = _find findInCache.knownPaths, (o) -> o == oneLevelBack
-        knownPathIndex = _indexOf findInCache.knownPaths,pathExists
-        if pathExists?
-          findInCache.knownPaths.splice(knownPathIndex,1,oneLevelBack)
-        else
-          findInCache.knownPaths.push path.join(videoFile,'..')
-
-        fileExists = _find findInCache.files, (o) -> o.file == videoFile
-        fileIndex = _indexOf findInCache.files,fileExists
-
-        if fileExists?
-          findInCache.files.splice(fileIndex,1,{ file:videoFile, episode: parse.EpisodeNumber })
-        else
-          findInCache.files.push { file:videoFile, episode: parse.EpisodeNumber }
+      pathExists = _find findInCache.knownPaths, (o) -> o == oneLevelBack
+      knownPathIndex = _indexOf findInCache.knownPaths,pathExists
+      if pathExists?
+        findInCache.knownPaths.splice(knownPathIndex,1,oneLevelBack)
       else
-        findInCache =
-          id: recognize.entry.mal_id
-          knownPaths: [
-            path.join(videoFile,'..')
-          ]
-          files: [
-            { file:videoFile, episode: parse.EpisodeNumber }
-          ]
-      findInCache
+        findInCache.knownPaths.push path.join(videoFile,'..')
 
+      fileExists = _find findInCache.files, (o) -> o.file == videoFile
+      fileIndex = _indexOf findInCache.files,fileExists
+
+      if fileExists?
+        findInCache.files.splice(fileIndex,1,{ file:videoFile, episode: parse.EpisodeNumber })
+      else
+        findInCache.files.push { file:videoFile, episode: parse.EpisodeNumber }
+    else
+      findInCache =
+        id: recognize.entry.mal_id
+        knownPaths: [
+          path.join(videoFile,'..')
+        ]
+        files: [
+          { file:videoFile, episode: parse.EpisodeNumber }
+        ]
+    findInCache
+
+  #
+  #
+  #
   cacheInBulk: (detectCache,list) ->
-    cacheEntries = []
+    cacheEntries = detectCache.getData()
     _forEach list,(entry) =>
-      cacheEntries.push @doCache(detectCache,entry.recognize,entry.parse,entry.videoFile)
+      cacheEntries.push @doCache(cacheEntries,entry.recognize,entry.parse,entry.videoFile)
 
 
     clearEntries = []
@@ -123,6 +124,9 @@ module.exports = class MyAnimelistRecognition
 
     detectCache.setDataArray(clearEntries)
 
+  #
+  #
+  #
   clear: (title) ->
     title = title.toLowerCase()
     title = title.trim()

@@ -7,9 +7,10 @@
   border-radius: 4px;
   border-bottom: 4px solid #34AADC;
   background: rgba(255, 255, 255, 0.66);
+  transition: opacity 2s;
 }
-.desktop-notification.recognized {
-  max-height: 125px
+.dn-fade-out {
+  opacity: 0;
 }
 .notification-title {
   padding: 8px;
@@ -50,19 +51,6 @@
 }
 .notification-guess {
   background: rgba(255, 255, 255, 0.2);
-  max-height: 0;
-  opacity: 0;
-  animation: openGuess .4s forwards;
-}
-.desktop-notification.recognized .notification-guess {
-  display: none;
-}
-@keyframes openGuess {
-  from {}
-  to {
-    opacity: 1;
-    max-height: 75px;
-  }
 }
 .notification-guess .guess {
   padding: 2px 8px;
@@ -73,7 +61,6 @@
 }
 .notification-guess.img {
   display: flex;
-  padding: 6px;
   justify-content: space-around;
 }
 .notification-guess.img .img-guess {

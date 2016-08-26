@@ -29,17 +29,25 @@ module.exports = class NotificationBar
   clickCount: 0
 
   hide: ->
+    chiika.logger.info("Hide notification bar")
     @notfWindow.hide()
 
   show: ->
+    chiika.logger.info("Show notification bar")
     @notfWindow.show()
 
+
+  #
+  #
+  #
   close: ->
     if @notfWindow?
+      @enableNotfBar = false
+
       @notfWindow.close()
       @notfWindow = null
 
-      @enableNotfBar = false
+      chiika.logger.info("Closing notification bar")
 
   #
   #
@@ -63,16 +71,28 @@ module.exports = class NotificationBar
         chiika.windowManager.getWindowByName('main').show()
 
     chiika.logger.info("Created tray")
+
+  #
+  #
+  #
   create: ->
     @createTray()
 
-
+  #
+  #
+  #
   sendMessage: (message,args) =>
     @notfWindow.webContents.send message,args
 
-  doCreate: (callback) ->
+
+  #
+  #
+  #
+  doCreate: (callback,size) ->
+    # Recognized
+    # 400 200
     width = 400
-    height = 225
+    height = size
 
 
     notificationWindow = new BrowserWindow {
@@ -83,7 +103,9 @@ module.exports = class NotificationBar
       y:0,
       frame: false,
       show:false,
-      transparent:true
+      resizable: false,
+      movable: false,
+      transparent: !chiika.settingsManager.getOption('NoTransparentWindows')
     }
     @notfWindow = notificationWindow
     @notfWindow.setSkipTaskbar(true)
@@ -92,33 +114,33 @@ module.exports = class NotificationBar
 
     @enableNotfBar = true
 
-
     display = electron.screen.getPrimaryDisplay().workAreaSize
 
     position = {}
     defaultPosition = { x: display.width - width, y: (display.height - height) }
-    position.x = defaultPosition.x
+    position = defaultPosition
 
     if process.platform != 'linux'
       trayBounds = @tray.getBounds()
 
 
       position.x = defaultPosition.x - trayBounds.width
+      position.y = trayBounds.y - height
 
-      if trayBounds.y == 0
-        position.y = trayBounds.height + 15
-      else
-        position.y = trayBounds.y - height - 50
-
-
+    console.log position
     @notfWindow.setPosition(position.x,position.y)
     @notfWindow.on 'ready-to-show', =>
       @notfWindow.show()
+      @notfWindow.setPosition(position.x,position.y)
 
       callback?()
 
     @notfWindow.on 'close', (event) =>
+      if @enableNotfBar
+        event.preventDefault()
 
+    @notfWindow.on 'blur', () =>
+      @hide()
 
       # hideAfterSomeTime = =>
       #   @hide()
@@ -126,3 +148,4 @@ module.exports = class NotificationBar
 
     @notfWindow.on 'closed', ->
       @notfWindow = null
+      @enableNotfBar = false

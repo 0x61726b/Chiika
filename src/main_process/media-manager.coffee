@@ -37,9 +37,9 @@ module.exports = class MediaManager
   #
   #
   #
-  onVideoDetected: (anitomyParse) ->
+  onVideoDetected: (videoInfo) ->
     if @player?
-      chiika.emitter.emit 'md-detect',anitomyParse
+      chiika.emitter.emit 'md-detect',videoInfo
 
   #
   #

@@ -297,47 +297,59 @@ module.exports = class CardViews
       else if card.name == 'cards_notRecognized'
         @createNotRecognizedWatchingCard()
 
-    @on 'card-action', (action) =>
-      @chiika.logger.script("[yellow](#{@name}) card-action #{action.action}")
+    @on 'media-action', (action) =>
+      @chiika.logger.script("[yellow](#{@name}) media-action #{action.action}")
 
-      card = action.card
       params = action.params
       actionName = action.action
 
       if actionName == 'play-next-episode'
         detectCache = @chiika.viewManager.getViewByName('anime_detect_cache')
 
-        if detectCache?
-          cache = detectCache.getData()
+        findEpisode = =>
+          episodeFound = false
+          if detectCache?
+            cache = detectCache.getData()
 
-          findEntry = _find cache, (o) -> o.id == params.id
+            findEntry = _find cache, (o) -> o.id == params.id
 
-          if findEntry?
-            knownPaths = findEntry.knownPaths
-            files = findEntry.files
+            if findEntry?
+              knownPaths = findEntry.knownPaths
+              files = findEntry.files
+              _forEach files, (file) =>
+                if parseInt(file.episode) == parseInt(params.nextEpisode)
+                  @chiika.openExternal(file.file)
+                  episodeFound = true
+                  return false
+          episodeFound
 
-            _forEach files, (file) =>
-              if parseInt(file.episode) == parseInt(params.nextEpisode)
-                @chiika.openExternal(file.file)
-                return false
+        findFolder = =>
+          if detectCache?
+            cache = detectCache.getData()
 
-            action.return( { state: 'episode-not-found'})
-          else
-            @chiika.logger.verbose("Folder not found for #{params.id}")
-            action.return({ state: 'not-found'})
-            # console.log "Known folders for #{params.id}"
-            # cache = []
-            # async = []
-            # _forEach findEntry.knownPaths, (kp) =>
-            #   wait = _when.defer()
-            #   async.push wait.promise
-            #
-            #   onReturn = (result) =>
-            #     cache.push x for x in result
-            #     wait.resolve()
-            #   @chiika.emit 'scan-folder', { calling: 'media', id: params.id, episode: params.nextEpisode, folder: kp,return: onReturn }
-            # _when.all(async).then =>
-            #   console.log cache
+            findEntry = _find cache, (o) -> o.id == params.id
+
+            if findEntry?
+              return findEntry.knownPaths
+            else
+              return null
+          return null
+
+        folders = findFolder()
+        if !folders?
+          @chiika.logger.info("No known folders for #{params.id}")
+          action.return({ state: 'not-found'})
+        else
+          if !findEpisode()
+            # Scan folder
+            onReturn = (results) =>
+              console.log "Scanazad #{folders[0]}"
+
+              # Try again
+              if !findEpisode()
+                action.return( { state: 'episode-not-found'})
+
+            @chiika.emit 'scan-folder', { id: params.id, folder: folders[0], return: onReturn }
 
       else if actionName == 'open-folder'
         detectCache = @chiika.viewManager.getViewByName('anime_detect_cache')
@@ -351,12 +363,10 @@ module.exports = class CardViews
             knownPaths = findEntry.knownPaths
             @chiika.openExternal(knownPaths[0])
 
-        # if detectCache?
-        #   cache = detectCache.getData()
-        #
-        #   findEntry = _find cache, (o) -> o.id == params.id
-        #
-        #   if findEntry?
+            @chiika.logger.info("Opening folder #{knownPaths}")
+          else
+            @chiika.logger.info("No known folders for #{params.id}")
+            action.return({ state: 'not-found'})
 
 
 

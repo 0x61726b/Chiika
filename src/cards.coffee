@@ -60,6 +60,16 @@ module.exports = class CardViews
 
     @lastToggle = clicked
 
+  onActionCompleteCommon: (item,args) ->
+    if args.state == 'not-found'
+      chiika.notificationManager.folderNotFound =>
+        folders = dialog.showOpenDialog({
+          properties: ['openDirectory','multiSelections']
+        })
+
+        if folders?
+          chiika.scriptAction('media','set-folders-for-entry', { id: item.id,folders: folders })
+
   handleNextEpisode: (card,item) ->
     nextEpisode = parseInt(item.layout.watchedEpisodes) + 1
     onActionCompete = (args) ->
@@ -76,10 +86,10 @@ module.exports = class CardViews
           if folders?
             chiika.scriptAction('media','set-folders-for-entry', { id: item.id,folders: folders })
 
-    chiika.cardAction card,'play-next-episode', { nextEpisode: parseInt(item.layout.watchedEpisodes) + 1, id: item.id }, onActionCompete
+    chiika.mediaAction 'cards','play-next-episode', { nextEpisode: parseInt(item.layout.watchedEpisodes) + 1, id: item.id }, onActionCompete
 
   handleOpenFolder: (card,item) ->
-    chiika.cardAction card,'open-folder', { id: item.id }
+    chiika.mediaAction 'cards','open-folder', { id: item.id }, (args) => @onActionCompleteCommon(item,args)
 
 
 

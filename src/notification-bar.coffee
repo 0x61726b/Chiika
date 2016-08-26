@@ -18,7 +18,7 @@ React                               = require('react')
 ReactDOM                            = require("react-dom")
 Chart                               = require 'chart.js'
 _forEach                            = require 'lodash.foreach'
-{remote,ipcRenderer}                 = require 'electron'
+{remote,ipcRenderer,shell}          = require 'electron'
 
 window.$ = window.jQuery = require('jQuery')
 
@@ -37,9 +37,30 @@ NotificationBar = React.createClass
     $("#notf").toggleClass 'recognized'
     $("#notf").toggleClass 'not-recognized'
 
+  onImageClick: (id) ->
+    shell.openExternal(id)
+
+  update: ->
+    ipcRenderer.send 'notf-bar-update',{ params: @state.layout }
+
+  onHover: (title) ->
+    $("#notf-title h1").html(title)
+
+  setSelected: (entry) ->
+    @selectedEntry = entry
+
+    console.log @selectedEntry
+
+  pick: () ->
+    if @selectedEntry?
+      ipcRenderer.send 'notf-bar-pick', { layout: @state.layout, entry: @selectedEntry }
+      @onHover("Hello ?")
+
   componentDidMount: ->
     ipcRenderer.on 'notf-bar-not-recognized', (event,args) =>
-      layout = { title: args.title, episode: args.episode }
+      layout = { title: args.title, episode: args.episode, videoFile: args.videoFile, parse: args.parse }
+      console.log "notf-bar-not-recognized"
+      console.log args
 
       if args.suggestions.length <= 4
         layout.suggestions = args.suggestions
@@ -49,27 +70,60 @@ NotificationBar = React.createClass
           layout.suggestions.push args.suggestions[i]
 
 
-      @setState { recognized: false, layout: layout }
+      @setState { recognized: false, notRecognizedText:"Chiika could not identify this title #{args.title}", layout: layout }
 
     ipcRenderer.on 'notf-bar-recognized', (event,args) =>
-      layout = { title: args.title, episode: args.episode,image: args.image }
+      console.log "notf-bar-recognized"
+      console.log args
+      layout = { title: args.title, episode: args.episode,image: args.image,imageLink: args.imageLink }
       @setState { recognized: true, layout: layout }
 
+  componentDidUpdate: ->
+    if @state.recognized
+      if @updateInterval?
+        @updateInterval.clear()
+        @updateInterval = null
+
       time = 120
-      updateTimer = ->
-        if time == 0
-          time = 120
+      updateTimer = =>
         time = time - 1
         $("#updateButton").html("Update in #{time}")
+        if time == 0
+          $("#updateButton").html("Updated")
+          $("#updateButton").attr('disabled','disabled')
+          $(".desktop-notification").css('border-bottom','4px solid #60F181')
 
-      setInterval(updateTimer,1000)
+          @update()
+
+          clearInterval(@updateInterval)
+          @updateInterval = null
+
+      @updateInterval = setInterval(updateTimer,1000)
+
+      fadeOutAfterSometime = =>
+        $(".desktop-notification").toggleClass 'dn-fade-out'
+
+        afterFade = =>
+          @onDismiss()
+          $(".desktop-notification").toggleClass 'dn-fade-out'
+          $(".desktop-notification").css('opacity:1')
+
+        @afterFade = setTimeout(afterFade,2000)
+
+      @fadeAfterSometime = setTimeout(fadeOutAfterSometime,4000)
+
+
+      remote.getCurrentWindow().on 'focus', () =>
+        @fadeAfterSometime = setTimeout(fadeOutAfterSometime,4000)
+
+
 
   recognized: ->
     <div className="desktop-notification recognized" id="notf">
       <div className="notification-title">
         <div className="notf-img">
           <div className="img-circle">
-            <img src="#{@state.layout.image}" alt="" />
+            <img src="#{@state.layout.image}" onClick={ () => @onImageClick(@state.layout.imageLink)} alt="" />
           </div>
         </div>
         <div className="notf-meta">
@@ -78,7 +132,7 @@ NotificationBar = React.createClass
         </div>
       </div>
       <div className="notification-actions">
-        <button type="button" className="notification-button" id="updateButton">Update in 120</button>
+        <button type="button" className="notification-button" onClick={@update} id="updateButton">Update in 120</button>
         <button type="button" className="notification-button" onClick={@onDismiss}>Dismiss</button>
       </div>
     </div>
@@ -91,8 +145,8 @@ NotificationBar = React.createClass
             <img src="../assets/images/notfbar/cover6.jpg" alt="" />
           </div>
         </div>
-        <div className="notf-meta">
-          <h1>Couldnt identify title { @state.layout.title }</h1>
+        <div className="notf-meta" id="notf-title">
+          <h1>{ @state.notRecognizedText }</h1>
           <h2>Episode: { @state.layout.episode }</h2>
         </div>
       </div>
@@ -100,12 +154,12 @@ NotificationBar = React.createClass
         {
           @state.layout.suggestions.map (suggestion,i) =>
             <div className="img-guess" key={i}>
-              <img src="#{suggestion.entry.animeImage}" alt="" />
+              <img src="#{suggestion.entry.animeImage}" onClick={ () => @setSelected(suggestion.entry.mal_id)} onMouseEnter={ () => @onHover(suggestion.entry.animeTitle)} alt="" />
             </div>
         }
       </div>
       <div className="notification-actions">
-        <button type="button" className="notification-button" onClick={@showGuess}>Show Guess</button>
+        <button type="button" className="notification-button" onClick={@pick}>Pick</button>
         <button type="button" className="notification-button">Search</button>
         <button type="button" className="notification-button" onClick={@onDismiss}>Dismiss</button>
       </div>

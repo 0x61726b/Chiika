@@ -27,6 +27,7 @@ animePageUrl                  = 'http://myanimelist.net/anime/'
 mangaPageUrl                  = 'http://myanimelist.net/manga/'
 updateAnime                   = 'http://myanimelist.net/api/animelist/update/'
 updateManga                   = 'http://myanimelist.net/api/mangalist/update/'
+addAnime                      = 'http://myanimelist.net/api/animelist/add/'
 
 getSearchUrl = (type,keywords) ->
   "http://myanimelist.net/api/#{type}/search.xml?q=#{keywords}"
@@ -155,13 +156,13 @@ module.exports = class MyAnimelist
   authorizedPost: (url,body,callback) ->
     onAuthorizedPostComplete = (error,response,body) =>
       if error
-        callback( { success: false , response: body })
+        callback( { success: false , response: body, statusCode: response.statusCode })
 
       else if response.statusCode != 200
-        callback( { success: false , response: body })
+        callback( { success: false , response: body, statusCode: response.statusCode })
 
       else
-        callback( { success: true, response: body })
+        callback( { success: true, response: body, statusCode: response.statusCode })
 
     @chiika.makePostRequestAuth( url, { userName: @malUser.realUserName, password: @malUser.password },null,body, onAuthorizedPostComplete )
 
@@ -195,6 +196,19 @@ module.exports = class MyAnimelist
         # It can return status code 200 but if the body isn't updated,it failed.
         result.success = false
         callback(result)
+
+  #
+  #
+  #
+  addAnime: (anime,callback) ->
+    data = @buildAnimeXmlForUpdating(anime)
+    @authorizedPost "#{addAnime}#{anime.mal_id}.xml",data,(result) =>
+      if result.statusCode == 201
+        callback?(result)
+      else
+        callback?(result)
+
+        # Problems
 
   #
   #
@@ -694,6 +708,24 @@ module.exports = class MyAnimelist
       title = args.title
       @doSearch title, (results) =>
         args.return(results)
+
+    @on 'add-anime', (args) =>
+      entry = args.entry
+      status = args.status
+
+      entry.animeWatchedEpisodes = "0"
+      entry.animeUserStatus = status
+      entry.animeScore = "0"
+
+      @addAnime entry, (result) =>
+        if result.statusCode == 201
+          args.return()
+          # @updateViewAndRefresh 'myanimelist_animelist',entry,'mal_id', (result) =>
+          #   @chiika.showToast("#{entry.animeTitle} has been added succesfully!",3000,'success')
+          #
+          #   @chiika.requestViewDataUpdate(@name,'myanimelist_animelist')
+          #
+          #   args.return()
 
 
   saveMangaHistory: (type,manga) ->
@@ -1378,6 +1410,15 @@ module.exports = class MyAnimelist
   #
   getAnimeValues: (entry) ->
     extra = _find @animeextra, (o) -> o.mal_id == entry.mal_id
+    findInAnimelist = _find @animelist, (o) -> o.mal_id == entry.mal_id
+
+    if !entry.mal_id?
+      chiika.logger.error("You are trying to access an entry without mal_id. Excuse me?")
+
+    if findInAnimelist?
+      list = true
+    else
+      list = false
 
     if !extra?
       extra = entry
@@ -1486,6 +1527,7 @@ module.exports = class MyAnimelist
 
     anime =
       id: entry.mal_id
+      list: list
       title: title
       synonyms: synonyms
       type: type

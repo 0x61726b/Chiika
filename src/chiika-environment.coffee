@@ -67,6 +67,19 @@ class ChiikaEnvironment
     @ipc.spectron()
     @refreshData()
 
+    ipcRenderer.on 'show-toast', (event,args) =>
+      message = args.message
+      duration = args.duration
+      type = args.type
+
+      if type == 'success'
+        chiika.toastSuccess(message,duration)
+      if type == 'error'
+        chiika.toastError(message,duration)
+      if type == 'loading'
+        chiika.toastLoading(message,duration)
+      if type == 'info'
+        chiika.toastInfo(message,duration)
 
   refreshData: ->
     ipcRenderer.on 'refresh-data', (event,args) =>
@@ -217,6 +230,42 @@ class ChiikaEnvironment
   notification: (notf) ->
     window.yuiNotification(notf)
 
+
+  toast: (toast) ->
+    window.yuiToast(toast)
+
+  toastSuccess: (message,duration) ->
+    @toast({
+      message: message,
+      duration: duration,
+      theme: 'success',
+      position: 'hue'
+      })
+
+  toastInfo: (message,duration) ->
+    @toast({
+      message: message,
+      duration: duration,
+      theme: 'info',
+      position: 'hue'
+      })
+
+  toastError: (message,duration) ->
+    @toast({
+      message: message,
+      duration: duration,
+      theme: 'danger',
+      position: 'hue'
+      })
+
+  toastLoading: (message,duration) ->
+    @toast({
+      message: message,
+      duration: duration,
+      theme: 'timer',
+      position: 'hue'
+      })
+
   getOption: (option) ->
     @appSettings[option]
 
@@ -224,12 +273,12 @@ class ChiikaEnvironment
     @appSettings[option] = value
     @ipc.setOption(option,value)
 
-  cardAction: (card,action,params,callback) ->
-    @ipc.sendMessage 'card-action', { card:card, action:action, params: params }
+  mediaAction: (owner,action,params,callback) ->
+    @ipc.sendMessage 'media-action', { owner:owner, action:action, params: params }
 
-    ipcRenderer.on "card-action-#{action}-response", (event,args) =>
+    ipcRenderer.on "media-action-#{action}-response", (event,args) =>
       callback(args)
-      @ipc.disposeListeners("card-action-#{action}-response")
+      @ipc.disposeListeners("media-action-#{action}-response")
 
   #
   #

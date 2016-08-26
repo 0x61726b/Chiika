@@ -78,6 +78,7 @@ AppSettings = React.createClass
       <CheckboxOption label="Minimize to tray" id="MinimizeToTray" />
       <CheckboxOption label="Launch minimized on startup" id="LaunchMinimized" />
       <CheckboxOption label="Check for Updates" id="CheckForUpdates" />
+      <CheckboxOption label="Disable transparency (Transparency might not work on some OSes)" id="NoTransparentWindows" />
     </div>
 
 ListGeneral = React.createClass

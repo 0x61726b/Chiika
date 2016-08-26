@@ -187,17 +187,13 @@ module.exports = class IpcManager
   #
   #
   cardAction: ->
-    @receive 'card-action', (event,args) =>
+    @receive 'media-action', (event,args) =>
       action = args.action
-      card   = args.card
-      owner  = card.owner
+      owner  = args.owner
       params = args.params
 
       if !action?
         chiika.logger.error("Can't perform action without action itself you baka!")
-
-      if !card?
-        chiika.logger.error("Can't perform action without details layout")
 
       if !owner?
         chiika.logger.error("Can't perform action knowing who to call")
@@ -207,10 +203,11 @@ module.exports = class IpcManager
 
       returnFromScript = (args) =>
         chiika.logger.verbose("Action performed for #{owner} - #{action}")
-        event.sender.send "card-action-#{action}-response", args
+        event.sender.send "media-action-#{action}-response", args
 
 
-      chiika.chiikaApi.emit 'card-action', { calling: owner, action: action, card: card, params: params,return: returnFromScript }
+      chiika.chiikaApi.emit 'media-action', { calling: owner, action: action, params: params,return: returnFromScript }
+
 
 
   #
@@ -231,12 +228,25 @@ module.exports = class IpcManager
 
       chiika.chiikaApi.emit action, { calling: owner, action: action, params: params,return: returnFromScript }
 
+
+
+
   #
   #
   #
   notificationBar: ->
     @receive 'notf-bar-dismiss', (event,args) =>
       chiika.notificationBar.hide()
+
+    @receive 'notf-bar-update', (event,args) =>
+      params = args.params
+      chiika.chiikaApi.emit 'system-event', { calling: 'media', name:'md-update', params: params }
+
+    @receive 'notf-bar-pick', (event,args) =>
+      layout = args.layout
+      entry  = args.entry
+
+      chiika.chiikaApi.emit 'system-event', { calling: 'media', name:'md-pick', params: { layout: layout, entry: entry } }
   #
   # We receive a user pass here, redirect it to the user script and let them process it
   #
@@ -267,6 +277,7 @@ module.exports = class IpcManager
       onReturn = (response) =>
         chiika.logger.info("POST-INIT is completed.")
         event.sender.send 'post-init-response'
+        chiika.emitter.emit 'post-init-complete'
 
       scripts = chiika.apiManager.getScripts()
 

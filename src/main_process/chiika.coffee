@@ -18,16 +18,13 @@
 #--------------------
 #
 #--------------------
-
 {BrowserWindow, ipcMain,globalShortcut,Tray,Menu,app} = require 'electron'
+
 
 path                              = require 'path'
 
-
-
 {Emitter,Disposable}              = require 'event-kit'
 string                            = require 'string'
-
 
 
 menubar                           = require './menubar'
@@ -49,6 +46,8 @@ Utility                           = require './utility'
 AppOptions                        = require './options'
 AppDelegate                       = require './app-delegate'
 NotificationBar                   = require './notification-bar'
+
+
 
 process.on 'uncaughtException',(err) ->
   # chiika.logger.log 'error', 'Fatal uncaught exception crashed cluster', err, (err, level, msg, meta) =>
@@ -76,6 +75,7 @@ module.exports =
 class Application
   devMode: false
   runningTests: false
+  ready: false
 
   scriptsPaths: []
 
@@ -132,6 +132,7 @@ class Application
 
     @appDelegate.ready =>
       @mediaManager.initialize()
+      @notificationBar.create()
 
       @dbManager.onLoad =>
         @run()
@@ -199,11 +200,14 @@ class Application
         @viewManager.preload().then =>
           chiika.logger.verbose("Preloading UI complete!")
           @apiManager.postInit()
-          @notificationBar.create()
 
           chiika.windowManager.createMainWindow()
 
 
+
+  #
+  #
+  #
   handleEvents: ->
     @emitter.on 'shortcut-pressed', (key) =>
       # Inform subsystems so they do their thing
@@ -216,11 +220,23 @@ class Application
 
     @emitter.on 'md-detect', (player) =>
       # Inform subsystems so they do their thing
-      @ipcManager.systemEvent('md-detect',player)
+      if !@ready
+        chiika.logger.warn("Media player detection has to wait until post initialization.")
 
+        @emitter.on 'post-init-complete', =>
+          @ipcManager.systemEvent('md-detect',player)
+      else
+        @ipcManager.systemEvent('md-detect',player)
+
+    #
+    #
+    #
     @emitter.on 'md-close', () =>
       # Inform subsystems so they do their thing
       @ipcManager.systemEvent('md-close')
+
+    @emitter.on 'post-init-complete', () =>
+      @ready = true
 
   getAppHome: ->
     @chiikaHome

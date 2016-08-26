@@ -138,6 +138,8 @@ module.exports = class WindowManager
       @emitter.emit 'closed',window
       window = null
 
+      chiika.notificationBar.close()
+
     window.on 'close', (event) =>
       @emitter.emit 'close',window
 

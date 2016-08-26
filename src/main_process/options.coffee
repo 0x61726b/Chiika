@@ -26,6 +26,7 @@ module.exports =
   MinimizeToTray: true
   CloseToTray: true
   LaunchMinimized: false
+  NoTransparentWindows: false
 
   #Detection
   DisableAnimeRecognition: false

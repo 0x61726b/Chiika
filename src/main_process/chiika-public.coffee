@@ -82,6 +82,7 @@ module.exports = class ChiikaPublicApi
   sendMessageToWindow: (windowName,message,args) ->
     if windowName == 'notification'
       chiika.notificationBar.sendMessage message,args
+      chiika.logger.info("Sending IPC #{message} to #{windowName}")
     else
       wnd = chiika.windowManager.getWindowByName(windowName)
       chiika.logger.info("Sending IPC #{message} to #{windowName}")
@@ -89,12 +90,21 @@ module.exports = class ChiikaPublicApi
       if wnd?
         wnd.webContents.send message,args
 
+  #
+  #
+  #
+  showToast: (message,duration,type) ->
+    @sendMessageToWindow 'main', 'show-toast', { message: message, duration: duration, type: type }
 
   #
   #
   #
-  createNotificationWindow: (callback) ->
-    chiika.notificationBar.doCreate(callback)
+  createNotificationWindow: (margin,callback) ->
+    if !chiika.notificationBar.enableNotfBar
+      chiika.notificationBar.doCreate(callback,margin)
+    else
+      callback?()
+
 
 
   #
