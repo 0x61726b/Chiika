@@ -59,6 +59,43 @@ a {
   text-decoration: none;
   color: $link-text;
 }
+
+.toast {
+  padding: 8px 8px 8px 0;
+  left: 16px;
+  color: white!important;
+}
+.toast.timer {
+  color: #282C34;
+}
+.toast::before {
+  content: '';
+  margin: -8px 8px -8px 0;
+  padding: 0 4px;
+  font: normal normal normal 24px/1 "Material Design Icons";
+  background: rgba(0,0,0,0.2);
+  text-align: center;
+  width: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+.toast.success::before{
+  content: '\F12C';
+}
+.toast.warning::before{
+  content: "\F205";
+}
+.toast.info::before{
+  content: "\F2FD";
+}
+.toast.timer::before{
+  content: "\F150";
+}
+.toast.danger::before{
+  content: "\F156";
+}
 /*
 .loading-screen > div {
   display: flex;
