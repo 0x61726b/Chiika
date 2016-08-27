@@ -47,38 +47,34 @@ module.exports = class IpcManager
       chiika.logger.info("[yellow](IPC-Manager) Received message #{message}")
       @answer event.sender,message,callback(event,args)
 
+  #
+  #
+  #
   receive: (message,callback) ->
     ipcMain.on message,(event,args) =>
       chiika.logger.info("[yellow](IPC-Manager) Received message #{message}")
       callback(event,args)
 
-  handleEvents: ->
-    @callWindowMethod()
-    @getUIData()
-    @getViewData()
-    @getViewDataByName()
-    @getUserData()
-    @getLoginBackgrounds()
-    @getServices()
-    @getSettings()
-    @login()
-    @loginCustom()
-    @refreshViewByName()
-    @modalWindowJsEval()
-    @reconstructUI()
-    @windowMethodByName()
-    @detailsLayoutRequest()
-    @detailsAction()
-    @cardAction()
-    @setOption()
-    @postInit()
-    @spectron()
-    @startLibraryScan()
-    @scriptAction()
-    @notificationBar()
-
+  #
+  #
+  #
   systemEvent: (event,params) ->
     chiika.chiikaApi.emit 'system-event',{ name: event, params: params }
+
+  #
+  #
+  #
+  searching: () ->
+    @receive 'make-search',(event,args) =>
+      searchString = args.searchString
+      searchType   = args.searchType
+      searchSource = args.searchSource
+      searchMode = args.searchMode
+
+      returnFromScript = (result) =>
+        event.sender.send 'make-search-response', result
+      chiika.chiikaApi.emit 'search', { calling: 'search', searchString:searchString,searchMode:searchMode,searchType:searchType,searchSource:searchSource, return: returnFromScript }
+
 
   #
   #
@@ -450,3 +446,29 @@ module.exports = class IpcManager
         return bgs
       else
         return undefined
+
+  handleEvents: ->
+    @callWindowMethod()
+    @getUIData()
+    @getViewData()
+    @getViewDataByName()
+    @getUserData()
+    @getLoginBackgrounds()
+    @getServices()
+    @getSettings()
+    @login()
+    @loginCustom()
+    @refreshViewByName()
+    @modalWindowJsEval()
+    @reconstructUI()
+    @windowMethodByName()
+    @detailsLayoutRequest()
+    @detailsAction()
+    @cardAction()
+    @setOption()
+    @postInit()
+    @spectron()
+    @startLibraryScan()
+    @scriptAction()
+    @notificationBar()
+    @searching()

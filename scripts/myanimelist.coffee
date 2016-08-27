@@ -795,6 +795,7 @@ module.exports = class MyAnimelist
       newAnimeEntry.animeImage = v.image
       newAnimeEntry.animeScoreAverage = v.score
       newAnimeEntry.animeSynopsis = v.synopsis
+      newAnimeEntry.animeTotalEpisodes = v.episodes
       newAnimeEntry
 
     results = []
@@ -1471,6 +1472,18 @@ module.exports = class MyAnimelist
     if type == "6"
       typeText = "Music"
 
+    userStatusText = ""
+    if userStatus == "1"
+      userStatusText = "Watching"
+    else if userStatus == "2"
+      userStatusText = "Completed"
+    else if userStatus == "3"
+      userStatusText = "On Hold"
+    else if userStatus == "4"
+      userStatusText = "Dropped"
+    else if userStatus == "6"
+      userStatusText = "Plan to Watch"
+
     # Change the season from date to text
     startDate = entry.animeStartDate
 
@@ -1541,6 +1554,7 @@ module.exports = class MyAnimelist
       userEndDate: userEndDate
       score: score
       userStatus: userStatus
+      userStatusText: userStatusText
       userRewatching: userRewatching
       userRewatchingEp: userRewatchingEp
       lastUpdated: lastUpdated

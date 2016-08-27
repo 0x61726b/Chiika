@@ -161,6 +161,7 @@ module.exports = class Media
 
     @on 'system-event', (event) =>
       @chiika.logger.script("[yellow](#{@name}) system-event - #{event.name}")
+      
       if event.name == 'md-detect' or (event.name == 'shortcut-pressed' and event.params.action == 'test')
         @tryRecognize(event.params)
 

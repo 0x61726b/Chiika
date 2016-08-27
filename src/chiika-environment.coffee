@@ -25,6 +25,7 @@ ChiikaIPC                                 = require './chiika-ipc'
 ViewManager                               = require './view-manager'
 CardManager                               = require './card-manager'
 NotificationManager                       = require './notification-manager'
+SearchManager                             = require './search-manager'
 
 class ChiikaEnvironment
   emitter: null
@@ -42,10 +43,11 @@ class ChiikaEnvironment
     @emitter          = new Emitter
     @logger           = remote.getGlobal('logger')
 
-    @ipc              = new ChiikaIPC()
-    @viewManager      = new ViewManager()
-    @cardManager      = new CardManager()
+    @ipc                 = new ChiikaIPC()
+    @viewManager         = new ViewManager()
+    @cardManager         = new CardManager()
     @notificationManager = new NotificationManager()
+    @searchManager       = new SearchManager()
 
 
 
@@ -209,8 +211,6 @@ class ChiikaEnvironment
 
     @ipc.sendMessage 'post-init'
     ipcRenderer.on 'post-init-response', (event,args) =>
-      console.log "All cool"
-
       waitForPostInit.resolve()
     _when.all(async)
 
@@ -300,6 +300,9 @@ class ChiikaEnvironment
     if !delay?
       delay = 500
     @emitter.emit 'reinitialize-ui',{ delay: delay }
+
+  domReady: ->
+    @searchManager.postInit()
 
   getWorkingDirectory: ->
     process.cwd()

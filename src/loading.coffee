@@ -15,39 +15,26 @@
 #----------------------------------------------------------------------------
 
 React = require('react')
-{Router,Route,BrowserHistory,Link} = require('react-router')
-ReactDOM = require("react-dom")
-{electron,ipcRenderer} = require 'electron'
-
 anime = require 'animejs'
-
-window.$ = window.jQuery = require('./../bundleJs.js')
 
 #Views
 
-LoadingWindow = React.createClass
+module.exports = React.createClass
   componentDidMount: () ->
     anime({
       targets: '.anime'+name,
-      rotate: {
-        value: 180,
-        duration: 1500,
-        easing: 'easeInOutQuad'
-      },
-      scale: {
-        value: 2,
-        delay: 150,
-        duration: 850,
-        easing: 'easeInOutExpo',
-      },
-      direction: 'alternate',
-      loop: true
+      scale: [0.5,0.7],
+      duration: 800,
+      direction: 'alternate'
+      easing: 'easeInQuart',
+      loop: true,
+      delay: (el,index) ->
+        return index*200
     })
 
   render: () ->
-    (<div className="loading-screen">
+    (<div className="loading-small">
       <div>
-        <img src="../assets/images/logo.svg" style={{width: 72,height:72}} className="anime" alt="" />
+        <img src="#{__dirname}/assets/images/logo.svg" style={{width: 150,height:150, color: 'gray'}} className="anime" alt="" />
       </div>
     </div>)
-ReactDOM.render(React.createElement(LoadingWindow), document.getElementById('app'))

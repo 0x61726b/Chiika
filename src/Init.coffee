@@ -34,6 +34,8 @@ $ ->
     $(".loading-screen").fadeOut 'fast', ->
       ReactDOM.render(React.createElement(Chiika), document.getElementById('app'))
 
+      chiika.domReady()
+
   loading()
 
   window.chiika = new Environment({

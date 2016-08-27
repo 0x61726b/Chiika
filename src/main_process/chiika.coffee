@@ -18,8 +18,8 @@
 #--------------------
 #
 #--------------------
-{BrowserWindow, ipcMain,globalShortcut,Tray,Menu,app} = require 'electron'
 
+{BrowserWindow, ipcMain,globalShortcut,Tray,Menu,app} = require 'electron'
 
 path                              = require 'path'
 

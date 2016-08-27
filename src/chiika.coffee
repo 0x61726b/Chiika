@@ -25,7 +25,7 @@ Settings                            = require './settings'
 LoadingScreen                       = require './loading-screen'
 Home                                = require './home'
 HistoryComponent                    = require './history'
-
+SearchComponent                     = require './search'
 
 TabGridView = require './view-tabGrid'
 CardView = require './card-view'
@@ -112,8 +112,10 @@ ChiikaRouter = React.createClass
           { name:'Details', path: '/details/:id', component: DetailsCardView, onEnter: @onEnter }
           { name:'Settings', path: '/Settings', component: SettingsComponent, onEnter: @onEnter }
           { name:'History', path: '/History', component: HistoryComponent, onEnter: @onEnter }
+          { name:'Search', path: '/Search/:searchString', component: SearchComponent, onEnter: @onEnter }
         ]
     }
+
     for route in routes
       routerConfig.childRoutes.push route
     routerConfig
