@@ -67,7 +67,9 @@ module.exports = React.createClass
 
   resultItem: (sr,i) ->
       <div className="result-cover" title="#{sr.title}" key={i}>
-        <img src="#{sr.image}" width="150" height="225" alt="" />
+        <div className="result-cover-img">
+          <img src="#{sr.image}" width="150" height="225" alt="" />
+        </div>
         <div className="result-meta">
           <div className="meta">
             { sr.type }

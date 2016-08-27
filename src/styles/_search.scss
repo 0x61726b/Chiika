@@ -82,8 +82,16 @@
   box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.3);
   background: white;
 }
+.result-cover-img {
+  width: 150px;
+  height: 225px;
+}
 .result-cover img {
   margin: 0;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
 }
 .result-cover span {
   position: absolute;
