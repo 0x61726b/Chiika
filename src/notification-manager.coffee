@@ -28,7 +28,7 @@ module.exports = class NotificationManager
       actions: [
       ]
     chiika.notification(notification)
-    
+
   folderNotFound: (callback) ->
     notification =
       title: 'Folder not found!'
@@ -36,5 +36,15 @@ module.exports = class NotificationManager
       color: 'red'
       actions: [
         { name: 'Set Folder', clickAction: callback }
+      ]
+    chiika.notification(notification)
+
+  deleteFromListConfirmation: (callback) ->
+    notification =
+      title: 'Are you sure?'
+      message: 'Ima delete this u sure?'
+      color: 'red'
+      actions: [
+        { name: 'Do whatever', clickAction: callback }
       ]
     chiika.notification(notification)

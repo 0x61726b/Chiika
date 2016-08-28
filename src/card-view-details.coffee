@@ -42,6 +42,9 @@ module.exports = React.createClass
   #
   #
   componentWillMount: ->
+    @requestDetails()
+
+  requestDetails: (id)->
     id = @props.params.id
 
     owner = @props.route.owner
@@ -72,54 +75,74 @@ module.exports = React.createClass
   #
   #
   componentDidMount: ->
-    $('.fab-main').click ->
-      $('.fab-container').toggleClass 'active'
-
-    $('.fab-main fab').click ->
-      console.log(this)
 
 
   #
   #
   #
   componentDidUpdate: ->
+
+    $('.fab-main').off 'click'
+    $('.fab-main').click ->
+      $('.fab-container').toggleClass 'active'
+
+
     scoring = @state.layout.scoring
 
     userScore = 0
     remainder = 10
 
-    if scoring.type == 'normal' #0-10
-      userScore = scoring.userScore
-      average = scoring.average
-      remainder = 10 - userScore
-      options = {
-        type: 'doughnut',
-        options: { legend: { display: false}, cutoutPercentage: 60 },
-        data: {
-          datasets: [{
-            data: [userScore,remainder],
-            backgroundColor: [$('.primary').css('background-color')]
-            },{
-            data: [average,10 - average],
-            backgroundColor: [$('.emphasis').css('color')]
-          }]
-          labels: ["Average","y"]
+    if @state.layout.cover?
+      if scoring.type == 'normal' #0-10
+        userScore = scoring.userScore ? 0
+        average = scoring.average ? 0
+        remainder = 10 - userScore
+        options = {
+          type: 'doughnut',
+          options: { legend: { display: false}, cutoutPercentage: 60 },
+          data: {
+            datasets: [{
+              data: [userScore,remainder],
+              backgroundColor: [$('.primary').css('background-color')]
+              },{
+              data: [average,10 - average],
+              backgroundColor: [$('.emphasis').css('color')]
+            }]
+            labels: ["Average","y"]
+          }
         }
-      }
-      @chart = new Chart(document.getElementById("score-circle"),options)
+        @chart = new Chart(document.getElementById("score-circle"),options)
 
 
-      # jQuery stuff
-      $("#scoreSelect option[value=#{@state.layout.scoring.userScore}]").attr('selected','selected')
+        # jQuery stuff
+        $("#scoreSelect option[value=#{@state.layout.scoring.userScore}]").attr('selected','selected')
 
-      $(".number input").bind 'keypress', (e) =>
-        if e.keyCode == 13 #Enter
-          @onProgressValueChange(e)
+        $(".number input").bind 'keypress', (e) =>
+          if e.keyCode == 13 #Enter
+            @onProgressValueChange(e)
 
-      $(".number input").focus ->
-        $(this).val("")
+        $(".number input").focus ->
+          $(this).val("")
 
 
+  deleteFromList: ->
+    chiika.notificationManager.deleteFromListConfirmation =>
+      chiika.toastLoading('Deleting..','infinite')
+      onDeleteReturn = (params) =>
+        if params.args.success
+          chiika.toastSuccess('Deleted!',2000)
+          @requestDetails()
+        else
+          chiika.toastError("Could not delete. #{params.args.response}",2000)
+      @onAction('delete-entry', null, onDeleteReturn)
+
+  addToList: ->
+    onActionCompete = (params) =>
+      if params.args.success
+        @requestDetails()
+        chiika.toastSuccess('Added!',2000)
+    @onAction 'add-entry',null,onActionCompete
+    chiika.toastLoading('Adding..','infinite')
   #
   #
   #
@@ -128,6 +151,8 @@ module.exports = React.createClass
 
     chiika.ipc.detailsActionResponse action,(args) =>
       chiika.ipc.disposeListeners('details-action-response')
+      if $('.toast')?
+        $('.toast').remove()
       returnCallback?(args)
 
   #
@@ -143,10 +168,16 @@ module.exports = React.createClass
   onCharacterClick: (e) ->
     @onAction('character-click',{ id: $(e.target).parent().attr("data-character") })
 
+  #
+  #
+  #
   openProgress: (e) ->
     $('.userStatus').toggleClass('open')
     $('.userStatusButton').toggleClass('open')
 
+  #
+  #
+  #
   onProgressValueChange: (e) ->
     itemTitle = $(e.target).parent().parent().parent().attr("data-item")
 
@@ -166,6 +197,7 @@ module.exports = React.createClass
       if current > 0
         findItem.current = current
         @onAction('progress-update',{ item: { title: itemTitle,current: current, total: total },viewName: @props.route.viewName },@onUpdate)
+        chiika.toastLoading("Updating..",'infinite')
 
         # Update input
         $($(e.target).next()).find('input').attr('placeholder',current)
@@ -192,6 +224,7 @@ module.exports = React.createClass
 
         findItem.current = current
         @onAction('progress-update',{ item: { title:itemTitle, current: current, total: total },viewName: @props.route.viewName },@onUpdate)
+        chiika.toastLoading("Updating..",'infinite')
 
         # Update input
         $($(e.target).next()).find('input').attr('placeholder',current)
@@ -220,6 +253,7 @@ module.exports = React.createClass
 
         findItem.current = current
         @onAction('progress-update',{ item: { title:itemTitle, current: current, total: total },viewName: @props.route.viewName },@onUpdate)
+        chiika.toastLoading("Updating..",'infinite')
 
         # Update input
         $($(e.target).prev()).find('input').attr('placeholder',current)
@@ -240,6 +274,7 @@ module.exports = React.createClass
 
 
     @onAction('score-update',{ item: { current: parseInt(value) },viewName: @props.route.viewName },@onUpdate)
+    chiika.toastLoading("Updating..",'infinite')
 
   #
   #
@@ -255,6 +290,7 @@ module.exports = React.createClass
     $('.userStatus').toggleClass('open')
 
     @onAction('status-update',{ item: { identifier: action },viewName: @props.route.viewName },@onUpdate)
+    chiika.toastLoading("Updating..",'infinite')
   #
   #
   #
@@ -365,7 +401,7 @@ module.exports = React.createClass
                 }
               </div>
             else
-              <button type="button" className="button raised primary" onClick={@openProgress}>Add to list</button>
+              <button type="button" className="button raised primary" onClick={@addToList}>Add to list</button>
           }
         </div>
         <div className="detailsPage-right">
@@ -447,14 +483,22 @@ module.exports = React.createClass
           <div className="fab fab-main raised accent">
             <i className="mdi mdi-menu"></i>
           </div>
-          <div className="fab fab-little emphasis" title="Open Folder" onClick={@openFolder}>
-            <i className="mdi mdi-folder"></i>
-          </div>
+          {
+            if @state.layout.list
+              <div>
+                <div className="fab fab-little emphasis" title="Delete from list" onClick={@deleteFromList}>
+                  <i className="mdi mdi-folder"></i>
+                </div>
+                <div className="fab fab-little emphasis" title="Open Folder" onClick={@openFolder}>
+                  <i className="mdi mdi-folder"></i>
+                </div>
+                <div className="fab fab-little emphasis" title="Play Next Episode" onClick={@playNextEpisode}>
+                  <i className="mdi mdi-play"></i>
+                </div>
+              </div>
+          }
           <div className="fab fab-little emphasis" title="Torrent">
             <i className="mdi mdi-rss"></i>
-          </div>
-          <div className="fab fab-little emphasis" title="Play Next Episode" onClick={@playNextEpisode}>
-            <i className="mdi mdi-play"></i>
           </div>
         </div>
       </div>

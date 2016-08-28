@@ -20,6 +20,7 @@ View                    = require './view'
 _find                   = require 'lodash/collection/find'
 _indexOf                = require 'lodash/array/indexOf'
 _forEach                = require 'lodash.foreach'
+_remove                 = require 'lodash/array/remove'
 
 {InvalidOperationException,InvalidParameterException} = require './exceptions'
 
@@ -46,6 +47,15 @@ module.exports = class SubView extends View
 
   getData: ->
     @dataSource
+
+  remove: (key,id,callback) ->
+    find = _find @dataSource, (o) -> o[key] == id
+
+    if find?
+      _remove @dataSource, find
+
+      @db.remove(key,find,callback)
+
 
   clear: ->
     new Promise (resolve) =>

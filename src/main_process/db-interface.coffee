@@ -173,27 +173,21 @@ module.exports = class IDb
   #   @example revemoRecords [ { name: 'mykey' }]
   # @param record
   # @return
-  removeRecords: (record,callback) ->
+  removeRecord: (key,record,callback) ->
     chiika.logger.debug("IDb::removeRecord")
 
     #Called for every row
     removeFnc = (doc) ->
-      key = Object.keys(doc)[0]
-      removeThisRecord = false
-      if !_isArray record
-        throw new InvalidParameterException("You have to supply array of keys.")
-      else
-        _forEach record, (o) ->
-          firstKey = Object.keys(o)[0]
-          if firstKey == key && o[key] == doc[key]
-            removeThisRecord = true
-            return false
-      removeThisRecord
+      if doc[key] == record[key]
+        return true
+      return false
 
     removeCallback = (err,count) ->
       chiika.logger.verbose("[magenta](#{@name}) - Removed keys - #{count}")
+      callback({ count: count })
 
     @nosql.remove removeFnc,removeCallback,"Remove records"
+
 
 
   #

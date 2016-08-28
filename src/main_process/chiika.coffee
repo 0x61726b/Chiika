@@ -27,10 +27,11 @@ path                              = require 'path'
 {Emitter,Disposable}              = require 'event-kit'
 string                            = require 'string'
 
-
 menubar                           = require './menubar'
 Logger                            = require './logger'
 #
+
+
 APIManager                        = require './api-manager'
 DbManager                         = require './database-manager'
 RequestManager                    = require './request-manager'

@@ -69,6 +69,7 @@ module.exports = class DbView extends IDb
   clear: (callback) ->
     @clearDb(callback)
 
+
   #
   # Adds user into the database.
   # Will check if the parameter use already exists in the database
@@ -94,4 +95,6 @@ module.exports = class DbView extends IDb
         saveData(data)
     else
       saveData(data)
-    #@insertRecordWithKey user,callback
+
+  remove: (key,entry,callback) ->
+    @removeRecord(key,entry,callback)

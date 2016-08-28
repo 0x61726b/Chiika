@@ -105,6 +105,7 @@ module.exports = class NotificationBar
       show:false,
       resizable: false,
       movable: false,
+      alwaysOnTop: true,
       transparent: !chiika.settingsManager.getOption('NoTransparentWindows')
     }
     @notfWindow = notificationWindow
@@ -138,9 +139,6 @@ module.exports = class NotificationBar
     @notfWindow.on 'close', (event) =>
       if @enableNotfBar
         event.preventDefault()
-
-    @notfWindow.on 'blur', () =>
-      @hide()
 
       # hideAfterSomeTime = =>
       #   @hide()

@@ -28,6 +28,8 @@ mangaPageUrl                  = 'http://myanimelist.net/manga/'
 updateAnime                   = 'http://myanimelist.net/api/animelist/update/'
 updateManga                   = 'http://myanimelist.net/api/mangalist/update/'
 addAnime                      = 'http://myanimelist.net/api/animelist/add/'
+removeAnime                   = 'http://myanimelist.net/api/animelist/delete/'
+removeManga                   = 'http://myanimelist.net/api/mangalist/delete/'
 
 getSearchUrl = (type,keywords) ->
   "http://myanimelist.net/api/#{type}/search.xml?q=#{keywords}"
@@ -203,6 +205,26 @@ module.exports = class MyAnimelist
   addAnime: (anime,callback) ->
     data = @buildAnimeXmlForUpdating(anime)
     @authorizedPost "#{addAnime}#{anime.mal_id}.xml",data,(result) =>
+      if result.statusCode == 201
+        callback?(result)
+      else
+        callback?(result)
+
+        # Problems
+
+  removeAnime: (anime,callback) ->
+    data = @buildAnimeXmlForUpdating(anime)
+    @authorizedPost "#{removeAnime}#{anime.mal_id}.xml",data,(result) =>
+      if result.statusCode == 201
+        callback?(result)
+      else
+        callback?(result)
+
+        # Problems
+
+  removeManga: (manga,callback) ->
+    data = @buildMangaXmlForUpdating(manga)
+    @authorizedPost "#{removeManga}#{manga.mal_id}.xml",data,(result) =>
       if result.statusCode == 201
         callback?(result)
       else
@@ -463,12 +485,98 @@ module.exports = class MyAnimelist
           else
             @onActionError("Need ID for cover-click")
 
+
         when 'character-click'
           if !params.id?
             onActionError("Need ID for character-click")
           else
             result = shell.openExternal("http://myanimelist.net/character/#{params.id}")
             args.return({ success:result })
+
+        when 'delete-entry'
+          if !layout.id?
+            onActionError("Need ID for delete-entry")
+          else
+            if layout.layoutType == 'anime'
+              animeView = @chiika.viewManager.getViewByName('myanimelist_animelist')
+              if animeView?
+                entry = _find animeView.getData(), (o) -> o.mal_id == layout.id
+                if entry?
+                  @removeAnime entry, (response) =>
+                    if response.success
+                      animeView.remove 'mal_id',layout.id, (dbop) =>
+                        if dbop.count > 0
+                          # Update the local list
+                          @animelist = animeView.getData()
+                          @chiika.requestViewDataUpdate('myanimelist','myanimelist_animelist')
+                          args.return(response)
+
+            if layout.layoutType == 'manga'
+              mangaView = @chiika.viewManager.getViewByName('myanimelist_mangalist')
+              if mangaView?
+                entry = _find mangaView.getData(), (o) -> o.mal_id == layout.id
+                if entry?
+                  @removeManga entry, (response) =>
+                    if response.success
+                      mangaView.remove 'mal_id',layout.id, (dbop) =>
+                        if dbop.count > 0
+                          @chiika.requestViewDataUpdate('myanimelist','myanimelist_mangalist')
+                          args.return(response)
+
+        when 'add-entry'
+          if !layout.id?
+            onActionError("Need ID for add-entry")
+          else
+            if layout.layoutType == 'anime'
+              animeView = @chiika.viewManager.getViewByName('myanimelist_animelist')
+              if animeView?
+                rawEntry = layout.rawEntry
+                entry =
+                  mal_id: layout.id
+                  animeTitle: rawEntry.animeTitle
+                  animeSynonyms: rawEntry.animeSynonyms
+                  animeType: rawEntry.animeType
+                  animeSeriesStatus: rawEntry.animeStatus
+                  animeStartDate: rawEntry.animeStartDate
+                  animeEndDate: rawEntry.animeEndDate
+                  animeImage: rawEntry.animeImage
+                  animeWatchedEpisodes: "0"
+                  animeUserStatus: "6" # Ptw
+                  animeScore:"0"
+                  animeUserStartDate: ""
+                  animeUserEndDate:""
+                  animeUserRewatching: ""
+                  animeUserRewatchingEp: ""
+                  animeLastUpdated: moment().valueOf()
+                  animeUserTags: ""
+
+                if entry.animeType == 'TV'
+                  entry.animeType = '1'
+                if entry.animeType == 'OVA'
+                  entry.animeType = '2'
+                if entry.animeType == 'Movie'
+                  entry.animeType = '3'
+                if entry.animeType == 'Special'
+                  entry.animeType = '4'
+                if entry.animeType == 'ONA'
+                  entry.animeType = '5'
+                if entry.animeType == 'Music'
+                  entry.animeType = '6'
+
+                if entry.animeSeriesStatus == 'Finished Airing'
+                  entry.animeSeriesStatus = "2"
+                if entry.animeSeriesStatus == 'Currently Airing'
+                  entry.animeSeriesStatus = "1"
+                if entry.animeSeriesStatus == 'Not yet aired'
+                  entry.animeSeriesStatus = "3"
+
+                @addAnime entry, (result) =>
+                  if result.statusCode == 201
+                    @updateViewAndRefresh 'myanimelist_animelist',entry,'mal_id', (result) =>
+                      if result.updated > 0
+                        @chiika.requestViewDataUpdate('myanimelist','myanimelist_animelist')
+                        args.return(result)
+
 
 
 
@@ -770,7 +878,7 @@ module.exports = class MyAnimelist
     extraEntry = _find @animeextra, (o) -> (o.mal_id) == id
 
     timeSinceLastUpdate = @detailsSyncTimeRestriction
-    if extraEntry?
+    if animeEntry? && extraEntry?
       lastSync = extraEntry.lastSync
       now = moment()
       diff = moment.duration(now.diff(lastSync)).asHours()
@@ -1213,6 +1321,7 @@ module.exports = class MyAnimelist
 
     detailsLayout =
       id: mv.id
+      layoutType: 'manga'
       title: mv.title
       genres: mv.genres
       list: mv.list
@@ -1258,7 +1367,6 @@ module.exports = class MyAnimelist
 
   getAnimeDetailsLayout: (entry) ->
     av    = @getAnimeValues(entry)
-    console.log av.list
 
     if av.synonyms?
       av.synonyms = av.synonyms.split(";")[0]
@@ -1334,8 +1442,10 @@ module.exports = class MyAnimelist
     else if av.userStatus == "6"
       userStatusText = "Plan to Watch"
 
+
     detailsLayout =
       id: av.id
+      layoutType: 'anime'
       title: av.title
       genres: av.genres
       list: av.list
@@ -1371,6 +1481,10 @@ module.exports = class MyAnimelist
         userScore: av.score
         average: av.averageScore
       miniCards: cards
+
+    if !av.list
+      detailsLayout.rawEntry = entry
+    detailsLayout
   #
   # In the @createViewAnimelist, we created 5 tab
   # Here we supply the data of the tabs

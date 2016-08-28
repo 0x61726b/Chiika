@@ -27,6 +27,7 @@ LoadingScreen                       = require './loading-screen'
 Home                                = require './home'
 HistoryComponent                    = require './history'
 SearchComponent                     = require './search'
+Loading                             = require './loading'
 
 TabGridView = require './view-tabGrid'
 CardView = require './card-view'
@@ -114,6 +115,7 @@ ChiikaRouter = React.createClass
           { name:'Settings', path: '/Settings', component: SettingsComponent, onEnter: @onEnter }
           { name:'History', path: '/History', component: HistoryComponent, onEnter: @onEnter }
           { name:'Search', path: '/Search/:searchString', component: SearchComponent, onEnter: @onEnter }
+          { name:'LoadingTest', path: '/LoadingTest', component: Loading, onEnter: @onEnter }
         ]
     }
 
