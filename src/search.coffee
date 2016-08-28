@@ -23,23 +23,38 @@ module.exports = React.createClass
   getInitialState: ->
     searchState: 'searching'
     searchResults: []
+    searchAnime: true
+    searchManga: true
 
-  setSearchParams: (props) ->
-    searchString = props.params.searchString
-    searchMode   = props.location.query.searchMode
-    searchType   = props.location.query.searchType
-    searchSource   = props.location.query.searchSource
-
-    console.log props
+  setSearchParams: (searchString,searchMode,searchType,searchSource) ->
     if searchString.length > 0 && searchMode?
       console.log "Creating search request for #{searchString} - #{searchMode} - #{searchType} - #{searchSource}"
 
       @setState { searchString: searchString, searchMode: searchMode, searchType: searchType, searchSource: searchSource, searchState: 'searching' }
-      chiika.searchManager.search searchString,searchMode,searchType,searchSource, (results) =>
+
+  componentDidUpdate: ->
+    if @state.searchAnime && @state.searchManga
+      searchSource = 'myanimelist_animelist,myanimelist_mangalist'
+      searchType = 'anime-manga'
+
+    if @state.searchAnime && !@state.searchManga
+      searchSource = 'myanimelist_animelist'
+      searchType = 'anime'
+
+    if @state.searchManga && !@state.searchAnime
+      searchSource = 'myanimelist_mangalist'
+      searchType = 'manga'
+
+
+    if !@state.searchAnime && !@state.searchManga
+      return
+
+    console.log "#{@state.searchString} - #{@state.searchMode} - #{searchType} - #{searchSource}"
+
+    if @state.searchState == 'searching'
+      chiika.searchManager.search @state.searchString,@state.searchMode,searchType,searchSource, (results) =>
         console.log results
         @setState { searchResults: results, searchState: 'completed' }
-  componentDidUpdate: ->
-    # console.log "#{@state.searchString} - #{@state.searchMode} - #{@state.searchType} - #{@state.searchSource}"
     #
     # if @state.searchString.length > 0 && @state.searchMode?
     #   console.log "Creating search request for #{@state.searchString} - #{@state.searchMode} - #{@state.searchType} - #{@state.searchSource}"
@@ -49,28 +64,46 @@ module.exports = React.createClass
 
   componentDidMount: ->
     console.log "Mount"
-    @setSearchParams(@props)
+    @setSearchParams(@props.params.searchString,@props.location.query.searchMode,@props.location.query.searchType,@props.location.query.searchSource)
+
   componentWillReceiveProps: (props) ->
     console.log props
-    @setSearchParams(props)
+    @setSearchParams(props.params.searchString,props.location.query.searchMode,props.location.query.searchType,props.location.query.searchSource)
     # chiika.searchManager.search value,'list','myanimelist_animelist', (results) =>
     #   @setState { searchResults: results, searchState: 'completed' }
 
   componentWillUnmount: ->
+    $("#gridSearch").val('')
+    chiika.ipc.disposeListeners('make-search-response')
+
+  onTypeChange: (type,e) ->
+    value = $(e.target).prop('checked')
+
+    if type == 'anime'
+      @setState { searchAnime: value, searchState: 'searching' }
+
+    if type == 'manga'
+      @setState { searchManga: value, searchState: 'searching' }
 
 
-  onTypeChange: (type) ->
-    @setState { searchType: type }
+
 
   onSourceChange: (source) ->
     @setState { searchSource: source }
 
+  onCoverClick: (sourceView,id,title) ->
+    console.log sourceView
+    window.location = "##{sourceView}_details/#{id}?title=#{title}"
+
   resultItem: (sr,i) ->
       <div className="result-cover" title="#{sr.title}" key={i}>
-        <div className="result-cover-img">
+        <div className="result-cover-img" onClick={() => @onCoverClick(sr.sourceView,sr.id,sr.title)}>
           <img src="#{sr.image}" width="150" height="225" alt="" />
         </div>
         <div className="result-meta">
+          <div className="meta">
+            { sr.entryType }
+          </div>
           <div className="meta">
             { sr.type }
           </div>
@@ -94,11 +127,11 @@ module.exports = React.createClass
         <div className="filter-item">
           <h1>Type</h1>
           <div className="filter-dropdown">
-            <label className="radio">
-              <input type="radio" name="name" value="" onChange={ () => @onTypeChange('Anime')} /> Anime
+            <label className="checkbox">
+              <input type="checkbox" name="name" checked={@state.searchAnime} onChange={ (e) => @onTypeChange('anime',e)} /> Anime
             </label>
-            <label className="radio">
-              <input type="radio" name="name" value="" onChange={ () => @onTypeChange('Manga')} /> Manga
+            <label className="checkbox">
+              <input type="checkbox" name="name" checked={@state.searchManga} onChange={ (e) => @onTypeChange('manga',e)} /> Manga
             </label>
           </div>
         </div>
@@ -121,7 +154,7 @@ module.exports = React.createClass
           <Loading />
       }
       {
-        if @state.searchResults.length > 0
+        if @state.searchState != 'searching' && @state.searchResults.length > 0
           <div className="search-results">
           {
             @state.searchResults.map (sr,i) =>

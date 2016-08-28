@@ -38,7 +38,7 @@ module.exports = class SearchManager
       if e.keyCode == 13
         value = $("#gridSearch").val()
         if value.length > 0
-          window.location = "#Search/#{value}?searchMode=list-remote&searchType=Anime&searchSource=myanimelist_animelist"
+          window.location = "#Search/#{value}?searchMode=list-remote&searchType=anime-manga&searchSource=myanimelist_animelist,myanimelist_mangalist"
         #@emitter.emit 'form-input-enter',$("#gridSearch").val()
 
 

@@ -23,6 +23,7 @@ _find         = scriptRequire 'lodash/collection/find'
 _indexOf      = scriptRequire 'lodash/array/indexOf'
 _filter       = scriptRequire 'lodash/collection/filter'
 moment        = scriptRequire 'moment'
+_when         = scriptRequire 'when'
 string        = scriptRequire 'string'
 Recognition   = require "#{mainProcessHome}/media-recognition"
 
@@ -46,12 +47,13 @@ module.exports = class Search
   on: (event,args...) ->
     @chiika.on @name,event,args...
 
-  searchResultLayout: (entry,listEntry) ->
+  animeSearchResultLayout: (entry,listEntry) ->
     layout =
       id: entry.mal_id
       image: entry.animeImage
       averageScore: entry.animeScoreAverage
-      type: entry.animeType
+      entryType: entry.animeType
+      type:'Anime'
       episodes: "#{entry.animeTotalEpisodes} EPs"
       title: entry.animeTitle
       airing: entry.animeStatus
@@ -67,6 +69,33 @@ module.exports = class Search
         userStatusText = "Dropped"
       else if listEntry.animeUserStatus == "6"
         userStatusText = "Plan to Watch"
+      layout.status = userStatusText
+    else
+      layout.status = "Add to List"
+    return layout
+
+  mangaSearchResultLayout: (entry,listEntry) ->
+    layout =
+      id: entry.mal_id
+      image: entry.mangaImage
+      averageScore: entry.mangaScoreAverage
+      entryType: entry.mangaType
+      type:'Manga'
+      episodes: "15"
+      title: entry.mangaTitle
+      airing: entry.mangaStatus
+    if listEntry?
+      userStatusText = ""
+      if listEntry.mangaUserStatus == "1"
+        userStatusText = "Reading"
+      else if listEntry.mangaUserStatus == "2"
+        userStatusText = "Completed"
+      else if listEntry.mangaUserStatus == "3"
+        userStatusText = "On Hold"
+      else if listEntry.mangaUserStatus == "4"
+        userStatusText = "Dropped"
+      else if listEntry.mangaUserStatus == "6"
+        userStatusText = "Plan to Read"
       layout.status = userStatusText
     else
       layout.status = "Add to List"
@@ -94,21 +123,95 @@ module.exports = class Search
       searchSource = params.searchSource
       searchMode   = params.searchMode
 
-      sourceView = @chiika.viewManager.getViewByName(searchSource)
+      if searchSource.split(',').length > 0
+        searchSource = searchSource.split(',')
 
-      sourceData = []
-      if sourceView?
-        sourceData = sourceView.getData()
 
       if searchMode == 'list-remote'
-        onSearch = (response) =>
-          results = []
-          _forEach response, (entry) =>
-            findInAnimelist = _find sourceData,(o) -> o.mal_id == entry.mal_id
-            results.push @searchResultLayout(entry,findInAnimelist)
-          params.return(results)
-        # Create search request
-        @chiika.emit 'make-search', { calling: sourceView.owner, title: searchString, return: onSearch }
+        if searchType == 'anime-manga'
+          sourceViewAnime = @chiika.viewManager.getViewByName(searchSource[0])
+          sourceViewManga = @chiika.viewManager.getViewByName(searchSource[1])
+
+          sourceDataAnime = []
+          if sourceViewAnime?
+            sourceDataAnime = sourceViewAnime.getData()
+
+          sourceDataManga = []
+          if sourceViewManga?
+            sourceDataManga = sourceViewManga.getData()
+
+
+          waitForAnime = _when.defer()
+          waitForManga = _when.defer()
+
+          combineResults = []
+
+          async = []
+          async.push waitForManga.promise
+          async.push waitForAnime.promise
+
+          _when.all(async).then =>
+            params.return(combineResults)
+
+          onAnimeSearch = (response) =>
+            results = []
+            _forEach response, (entry) =>
+              findInAnimelist = _find sourceDataAnime,(o) -> o.mal_id == entry.mal_id
+              layout = @animeSearchResultLayout(entry,findInAnimelist)
+              layout.sourceView = searchSource[0]
+              results.push layout
+
+            combineResults.push x for x in results
+            waitForAnime.resolve(results)
+
+
+          onMangaSearch = (response) =>
+            results = []
+            _forEach response, (entry) =>
+              findInMangalist = _find sourceDataManga,(o) -> o.mal_id == entry.mal_id
+              layout = @mangaSearchResultLayout(entry,findInMangalist)
+              layout.sourceView = searchSource[1]
+              results.push layout
+
+            combineResults.push x for x in results
+            waitForManga.resolve(results)
+          # Create search request
+          @chiika.emit 'make-search', { calling: sourceViewAnime.owner, title: searchString, type: 'anime',return: onAnimeSearch }
+          @chiika.emit 'make-search', { calling: sourceViewManga.owner, title: searchString, type: 'manga',return: onMangaSearch }
+
+
+        else if searchType == 'anime'
+          sourceViewAnime = @chiika.viewManager.getViewByName(searchSource[0])
+          sourceDataAnime = []
+          if sourceViewAnime?
+            sourceDataAnime = sourceViewAnime.getData()
+
+            onAnimeSearch = (response) =>
+              results = []
+              _forEach response, (entry) =>
+                findInAnimelist = _find sourceDataAnime,(o) -> o.mal_id == entry.mal_id
+                layout = @animeSearchResultLayout(entry,findInAnimelist)
+                layout.sourceView = searchSource[0]
+                results.push layout
+              params.return(results)
+            @chiika.emit 'make-search', { calling: sourceViewAnime.owner, title: searchString, type: 'anime',return: onAnimeSearch }
+
+        else if searchType == 'manga'
+          sourceView = @chiika.viewManager.getViewByName(searchSource[0])
+          sourceData = []
+          if sourceView?
+            sourceData = sourceView.getData()
+
+            onSearch = (response) =>
+              results = []
+              _forEach response, (entry) =>
+                findInMangalist = _find sourceData,(o) -> o.mal_id == entry.mal_id
+                layout = @mangaSearchResultLayout(entry,findInMangalist)
+                layout.sourceView = searchSource[0]
+                results.push layout
+              params.return(results)
+            @chiika.emit 'make-search', { calling: sourceView.owner, title: searchString, type: 'manga',return: onSearch }
+
       else if searchMode == 'list'
         if sourceData.length > 0
           findByTitle = _filter sourceData, (o) => string(@recognition.clear(o.animeTitle)).contains(searchString)

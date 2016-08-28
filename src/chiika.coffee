@@ -19,6 +19,7 @@ React                               = require('react')
 
 Modal                               = require 'react-modal'
 
+
 SideMenu                            = require './side-menu'
 Titlebar                            = require './titlebar'
 Settings                            = require './settings'
@@ -128,6 +129,8 @@ ChiikaRouter = React.createClass
     # For testing purposes
     # We will get the current route from title when running tests
     document.title = @currentRouteName.replace('/','')
+
+    console.log @currentRouteName
 
 
 

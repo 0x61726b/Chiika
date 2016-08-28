@@ -19,7 +19,8 @@ React                   = require('react')
 _find                   = require 'lodash/collection/find'
 
 CardView                = require './card-view'
-LoadingMini             = require './loading-mini'
+Loading                 = require './loading'
+
 
 {dialog}                            = require('electron').remote
 
@@ -45,8 +46,12 @@ module.exports = React.createClass
 
     owner = @props.route.owner
 
+    title = ""
 
-    chiika.ipc.getDetailsLayout id,@props.route.viewName,owner, (args) =>
+    if @props.location.query.title?
+      title = @props.location.query.title
+
+    chiika.ipc.getDetailsLayout id,@props.route.viewName,owner,{ title: title }, (args) =>
       @setState { layout: args.layout }
       console.log args.layout
 
@@ -308,147 +313,148 @@ module.exports = React.createClass
     chiika.mediaAction 'cards','play-next-episode', { nextEpisode: nextEpisode, id: @state.layout.id }, onActionCompete
 
   render: ->
-    <div className="detailsPage">
-      <div className="detailsPage-left">
-        <div className="detailsPage-back" onClick={this.props.history.goBack}>
-          <i className="mdi mdi-arrow-left"></i>
-          Back
-        </div>
-      {
-        if @state.layout.cover?
-          <img src="#{@state.layout.cover}" onClick={@onCoverClick} width="150" height="225" alt="" />
-        else
-          <LoadingMini />
-      }
-        {
-          if @state.layout.list
-            <div>
-              <button type="button" className="button raised primary userStatusButton" onClick={@openProgress}>
-                {
-                  @state.layout.status.defaultAction
-                }
-              </button>
-              <div className="userStatus">
-              {
-                @state.layout.status.actions.map (action,i) =>
-                  if action.name == @state.layout.status.defaultAction
-                    <div className="status current" key={i} onClick={@onStatusChange} data-action={action.identifier}>{action.name}</div>
-                  else
-                    <div className="status" key={i} onClick={@onStatusChange} data-action={action.identifier}>{action.name}</div>
-              }
-              </div>
-              {
-                @state.layout.status.items.map (item,i) =>
-                  <div className="progressInteractions" key={i} data-item={item.title}>
-                    <div className="title">
-                      { item.title }
-                    </div>
-                    <div className="interactions">
-                      <button className="minus" onClick={@onMinus}>
-                        -
-                      </button>
-                      <div className="number">
-                        <input type="number" name="name" placeholder="#{item.current}"/>
-                        <span>/ { item.total }</span>
-                      </div>
-                      <button className="plus" onClick={@onPlus}>
-                        +
-                      </button>
-                    </div>
-                  </div>
-              }
-            </div>
-        }
-      </div>
-      <div className="detailsPage-right">
-        <div className="detailsPage-row">
-          <h1>{ @state.layout.title }</h1>
-          <h2>
-          {
-            if @state.layout.params?
-              @state.layout.params.author.name
-            }
-          </h2>
-          <span className="detailsPage-genre">
-            <ul>
-              {
-                if @state.layout.genres?
-                  @state.layout.genres.split(',').map (genre,i) =>
-                    <li key={i}>{genre}</li>
-              }
-            </ul>
-          </span>
-        </div>
-        <div className="detailsPage-score detailsPage-row">
-          <div className="score-circle-div" data-score={@state.layout.scoring.average}>
-            <canvas id="score-circle" width="100" height="100"></canvas>
+    if !@state.layout.cover?
+      <Loading />
+    else
+      <div className="detailsPage">
+        <div className="detailsPage-left">
+          <div className="detailsPage-back" onClick={this.props.history.goBack}>
+            <i className="mdi mdi-arrow-left"></i>
+            Back
           </div>
-          <span className="detailsPage-score-info">
-            <h5>From { @state.layout.voted ? ""} votes</h5>
-            <span>
-              <h5>Your Score</h5>
-              {
-                if @state.layout.scoring.type == "normal"
-                  <select id="scoreSelect" className="button primary" name="" onChange={@onScoreChange}>
-                  {
-                    [0,1,2,3,4,5,6,7,8,9,10].map (score,i) =>
-                      <option value={score} key={i}>{score}</option>
-                  }
-                  </select>
-              }
-            </span>
-            </span>
-        </div>
-        <div className="detailsPage-miniCards detailsPage-row">
+        {
+          if @state.layout.cover?
+            <img src="#{@state.layout.cover}" onClick={@onCoverClick} width="150" height="225" alt="" />
+        }
           {
-            if @state.layout.miniCards.length != 0
-              @state.layout.miniCards.map (card,i) =>
-                chiika.cardManager.renderCard(card,i)
+            if @state.layout.list
+              <div>
+                <button type="button" className="button raised primary userStatusButton" onClick={@openProgress}>
+                  {
+                    @state.layout.status.defaultAction
+                  }
+                </button>
+                <div className="userStatus">
+                {
+                  @state.layout.status.actions.map (action,i) =>
+                    if action.name == @state.layout.status.defaultAction
+                      <div className="status current" key={i} onClick={@onStatusChange} data-action={action.identifier}>{action.name}</div>
+                    else
+                      <div className="status" key={i} onClick={@onStatusChange} data-action={action.identifier}>{action.name}</div>
+                }
+                </div>
+                {
+                  @state.layout.status.items.map (item,i) =>
+                    <div className="progressInteractions" key={i} data-item={item.title}>
+                      <div className="title">
+                        { item.title }
+                      </div>
+                      <div className="interactions">
+                        <button className="minus" onClick={@onMinus}>
+                          -
+                        </button>
+                        <div className="number">
+                          <input type="number" name="name" placeholder="#{item.current}"/>
+                          <span>/ { item.total }</span>
+                        </div>
+                        <button className="plus" onClick={@onPlus}>
+                          +
+                        </button>
+                      </div>
+                    </div>
+                }
+              </div>
             else
-              <LoadingMini />
+              <button type="button" className="button raised primary" onClick={@openProgress}>Add to list</button>
           }
         </div>
-        <div className="card">
-          <div className="detailsPage-card-item">
-            <div className="title">
-              <h2>Synopsis</h2>
-            </div>
+        <div className="detailsPage-right">
+          <div className="detailsPage-row">
+            <h1>{ @state.layout.title }</h1>
+            <h2>
             {
-              if @state.layout.synopsis.length > 0
-                <div className="card-content" dangerouslySetInnerHTML={{__html: @state.layout.synopsis }} />
+              if @state.layout.params?
+                @state.layout.params.author.name
+              }
+            </h2>
+            <span className="detailsPage-genre">
+              <ul>
+                {
+                  if @state.layout.genres?
+                    @state.layout.genres.split(',').map (genre,i) =>
+                      <li key={i}>{genre}</li>
+                }
+              </ul>
+            </span>
+          </div>
+          <div className="detailsPage-score detailsPage-row">
+            <div className="score-circle-div" data-score={@state.layout.scoring.average}>
+              <canvas id="score-circle" width="100" height="100"></canvas>
+            </div>
+            <span className="detailsPage-score-info">
+              <h5>From { @state.layout.voted ? ""} votes</h5>
+              <span>
+                <h5>Your Score</h5>
+                {
+                  if @state.layout.scoring.type == "normal"
+                    <select id="scoreSelect" className="button primary" name="" onChange={@onScoreChange}>
+                    {
+                      [0,1,2,3,4,5,6,7,8,9,10].map (score,i) =>
+                        <option value={score} key={i}>{score}</option>
+                    }
+                    </select>
+                }
+              </span>
+              </span>
+          </div>
+          <div className="detailsPage-miniCards detailsPage-row">
+            {
+              if @state.layout.miniCards.length != 0
+                @state.layout.miniCards.map (card,i) =>
+                  chiika.cardManager.renderCard(card,i)
             }
           </div>
-          <div className="detailsPage-card-item">
-            <div className="title">
-              <h2>Characters</h2>
+          <div className="card">
+            <div className="detailsPage-card-item">
+              <div className="title">
+                <h2>Synopsis</h2>
+              </div>
+              {
+                if @state.layout.synopsis.length > 0
+                  <div className="card-content" dangerouslySetInnerHTML={{__html: @state.layout.synopsis }} />
+              }
             </div>
-            <div className="card-content">
-              <div className="characters-images">
-                 {
-                  if @state.layout.characters.length > 0
-                    @state.layout.characters.map (ch,i) =>
-                      <div key={i} data-character={ch.id} onClick={@onCharacterClick}>
-                        <img src={ch.image}></img>
-                        <p>{ch.name}</p>
-                      </div>
-                  }
+            <div className="detailsPage-card-item">
+              <div className="title">
+                <h2>Characters</h2>
+              </div>
+              <div className="card-content">
+                <div className="characters-images">
+                   {
+                    if @state.layout.characters.length > 0
+                      @state.layout.characters.map (ch,i) =>
+                        <div key={i} data-character={ch.id} onClick={@onCharacterClick}>
+                          <img src={ch.image}></img>
+                          <p>{ch.name}</p>
+                        </div>
+                    }
+                </div>
               </div>
             </div>
           </div>
         </div>
+        <div className="fab-container">
+          <div className="fab fab-main raised accent">
+            <i className="mdi mdi-menu"></i>
+          </div>
+          <div className="fab fab-little emphasis" title="Open Folder" onClick={@openFolder}>
+            <i className="mdi mdi-folder"></i>
+          </div>
+          <div className="fab fab-little emphasis" title="Torrent">
+            <i className="mdi mdi-rss"></i>
+          </div>
+          <div className="fab fab-little emphasis" title="Play Next Episode" onClick={@playNextEpisode}>
+            <i className="mdi mdi-play"></i>
+          </div>
+        </div>
       </div>
-      <div className="fab-container">
-        <div className="fab fab-main raised accent">
-          <i className="mdi mdi-menu"></i>
-        </div>
-        <div className="fab fab-little emphasis" title="Open Folder" onClick={@openFolder}>
-          <i className="mdi mdi-folder"></i>
-        </div>
-        <div className="fab fab-little emphasis" title="Torrent">
-          <i className="mdi mdi-rss"></i>
-        </div>
-        <div className="fab fab-little emphasis" title="Play Next Episode" onClick={@playNextEpisode}>
-          <i className="mdi mdi-play"></i>
-        </div>
-      </div>
-    </div>

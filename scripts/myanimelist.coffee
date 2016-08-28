@@ -233,12 +233,15 @@ module.exports = class MyAnimelist
   search: (type,keywords,callback) ->
     if @malUser?
       onSearchComplete = (error,response,body) =>
-        @chiika.parser.parseXml(body)
-                      .then (result) =>
-                        if type == 'anime'
-                          callback(result.anime.entry)
-                        else if type == 'manga'
-                          callback(result.manga.entry)
+        if response.statusCode != 200
+          callback?([])
+        else
+          @chiika.parser.parseXml(body)
+                        .then (result) =>
+                          if type == 'anime'
+                            callback(result.anime.entry)
+                          else if type == 'manga'
+                            callback(result.manga.entry)
     else
       @chiika.logger.error("User can't be retrieved.Aborting search request.")
       callback( { success: false })
@@ -361,9 +364,12 @@ module.exports = class MyAnimelist
 
       id        = args.id
       viewName  = args.viewName
+      params    = args.params
 
       if viewName == 'myanimelist_animelist'
-        @onAnimeDetailsLayout(id,args.return)
+        @onAnimeDetailsLayout id,params, (result) =>
+          console.log "2"
+          args.return(result)
 
       if viewName == 'myanimelist_mangalist'
         animeEntry = _find @mangalist, (o) -> (o.mal_id) == args.id
@@ -378,17 +384,21 @@ module.exports = class MyAnimelist
         if timeSinceLastUpdate < @detailsSyncTimeRestriction - 1
           @chiika.logger.script("#{args.id} was last updated #{timeSinceLastUpdate} hours ago.There is no need to update")
         else
-          @handleMangaDetailsRequest id, (response) =>
+          @handleMangaDetailsRequest id, params, (response) =>
             mangaExtraView = @chiika.viewManager.getViewByName('myanimelist_mangaextra')
             @mangaextra = mangaExtraView.getData()
 
-            if response.success && response.updated > 0
-              args.return({ updated: false, layout: @getMangaDetailsLayout(id)})
+            if response.success && response.updated > 0 && response.list
+              entry = _find @mangalist, (o) -> o.mal_id == id
+              args.return({ updated: false, layout: @getMangaDetailsLayout(entry)})
 
               @chiika.requestViewDataUpdate('myanimelist','myanimelist_mangalist')
 
+            if response.success && !response.list
+              args.return({ updated: false, layout: @getMangaDetailsLayout(response.entry)})
 
-        args.return({ updated: false, layout: @getMangaDetailsLayout(id)})
+        if animeEntry?
+          args.return({ updated: false, layout: @getMangaDetailsLayout(animeEntry)})
 
     @on 'details-action', (args) =>
       action = args.action
@@ -706,7 +716,8 @@ module.exports = class MyAnimelist
       @chiika.logger.script("[yellow](#{@name}) make-search #{args.title}")
 
       title = args.title
-      @doSearch title, (results) =>
+      type  = args.type
+      @doSearch type,title, (results) =>
         args.return(results)
 
     @on 'add-anime', (args) =>
@@ -753,7 +764,7 @@ module.exports = class MyAnimelist
       historyView.setData( historyItem, 'updated').then (args) =>
         @chiika.requestViewDataUpdate('cards','cards_statistics')
 
-  onAnimeDetailsLayout: (id,callback) ->
+  onAnimeDetailsLayout: (id,params,callback) ->
     #If its on the list, it will have this entry
     animeEntry = _find @animelist, (o) -> (o.mal_id) == id
     extraEntry = _find @animeextra, (o) -> (o.mal_id) == id
@@ -768,21 +779,28 @@ module.exports = class MyAnimelist
 
     if timeSinceLastUpdate < @detailsSyncTimeRestriction - 1
       @chiika.logger.script("#{id} was last updated #{timeSinceLastUpdate} hours ago.There is no need to update")
-      callback({ updated: false, layout: @getAnimeDetailsLayout(id)})
+      callback({ updated: false, layout: @getAnimeDetailsLayout(animeEntry)})
     else
-      @handleAnimeDetailsRequest id, (response) =>
+      @handleAnimeDetailsRequest id,params, (response) =>
         animeExtraView = @chiika.viewManager.getViewByName('myanimelist_animeextra')
         @animeextra = animeExtraView.getData()
 
-        if response.success && response.updated > 0
-          callback({ updated: true, layout: @getAnimeDetailsLayout(id)})
+        if response.success && response.updated > 0 && response.list
+          entry = _find @animelist, (o) -> o.mal_id == id
+          callback({ updated: true, layout: @getAnimeDetailsLayout(entry)})
+
+        if response.success && !response.list
+          callback({ updated: false, layout: @getAnimeDetailsLayout(response.entry)})
 
           @chiika.requestViewDataUpdate('myanimelist','myanimelist_animelist')
-    callback({ updated: false, layout: @getAnimeDetailsLayout(id)})
+
+    if animeEntry?
+      callback({ updated: false, layout: @getAnimeDetailsLayout(animeEntry)})
+    #callback({ updated: false, layout: @getAnimeDetailsLayout({})})
 
 
-  doSearch: (title,callback) ->
-    searchMatch = (v) ->
+  doSearch: (type,title,callback) ->
+    searchMatchAnime = (v) ->
       newAnimeEntry = {}
       newAnimeEntry.mal_id = v.id
       newAnimeEntry.animeEnglish = v.english
@@ -798,49 +816,123 @@ module.exports = class MyAnimelist
       newAnimeEntry.animeTotalEpisodes = v.episodes
       newAnimeEntry
 
+    searchMatchManga = (v) ->
+      newMangaEntry = {}
+      newMangaEntry.mal_id = v.id
+      newMangaEntry.mangaEnglish = v.english
+      newMangaEntry.mangaTitle = v.title
+      newMangaEntry.mangaSynonyms = v.synonyms
+      newMangaEntry.mangaType = v.type
+      newMangaEntry.mangaStartDate = v.start_date
+      newMangaEntry.mangaEndDate = v.end_date
+      newMangaEntry.mangaImage = v.image
+      newMangaEntry.mangaScoreAverage = v.score
+      newMangaEntry.mangaSynopsis = v.synopsis
+      newMangaEntry
+
     results = []
 
-    @search 'anime',title, (list) =>
+    @search type,title, (list) =>
       if _isArray list
         _forEach list, (entry) =>
-          results.push searchMatch(entry)
-
+          if type == 'anime'
+            results.push searchMatchAnime(entry)
+          else
+            results.push searchMatchManga(entry)
       else
-        results.push searchMatch(list)
+        if type == 'anime'
+          results.push searchMatchAnime(list)
+        else
+          results.push searchMatchManga(list)
         entryFound = true
 
       callback?(results)
 
-  handleAnimeDetailsRequest: (animeId,callback) ->
+  doSearchExtended: (type,id,callback) ->
+    matchManga = (v) ->
+      newMangaEntry = {}
+      newMangaEntry.mal_id = id
+      newMangaEntry.mangaGenres = v.genres
+      newMangaEntry.mangaScoreAverage = v.score
+      newMangaEntry.mangaRanked = v.rank
+      newMangaEntry.mangaPopularity = v.popularity
+      newMangaEntry.scoredBy = v.scoredBy
+      newMangaEntry
+
+    matchAnime = (v) ->
+      newAnimeEntry = {}
+      newAnimeEntry.mal_id = id
+      newAnimeEntry.animeGenres = v.genres
+      newAnimeEntry.animeScoreAverage = v.score
+      newAnimeEntry.animeRanked = v.rank
+      newAnimeEntry.animePopularity = v.popularity
+      newAnimeEntry.scoredBy = v.scoredBy
+      newAnimeEntry
+
+    @searchExtended type, id, (result) ->
+      if result?
+        if type == 'manga'
+          callback?({ entry: matchManga(result) })
+        if type == 'anime'
+          callback?({ entry: matchAnime(result) })
+
+
+  doPageScrape: (type,id,callback) ->
+    if type == 'manga'
+      @mangaPageScrape id, (result) ->
+        if result?
+          newMangaEntry = {}
+          newMangaEntry.mal_id = id
+          newMangaEntry.mangaJapanese = result.japanese
+          newMangaEntry.mangaPublished = result.published
+          newMangaEntry.mangaCharacters = result.characters
+          newMangaEntry.mangaSerialization = result.serialization
+          newMangaEntry.mangaAuthor = result.author
+          callback?({ entry: newMangaEntry })
+
+    if type == 'anime'
+      @animePageScrape id, (result) ->
+        if result?
+          newAnimeEntry = {}
+          newAnimeEntry.mal_id = id
+          newAnimeEntry.animeStudio = result.studio
+          newAnimeEntry.animeSource = result.source
+          newAnimeEntry.animeJapanese = result.japanese
+          newAnimeEntry.animeBroadcast = result.broadcast
+          newAnimeEntry.animeDuration = result.duration
+          newAnimeEntry.animeAired = result.aired
+          newAnimeEntry.animeCharacters = result.characters
+          callback?({ entry: newAnimeEntry })
+
+  handleAnimeDetailsRequest: (animeId,params,callback) ->
     @chiika.logger.script("[yellow](#{@name}-Anime-Search) Searching for #{animeId}!")
 
     animeExtraView = @chiika.viewManager.getViewByName('myanimelist_animeextra')
 
     animeEntry = _find @animelist, (o) -> (o.mal_id) == animeId
 
-    #Searching
-    #
-    # For search to occur, we need a title
-    #
-    searchMatch = (v) ->
-      newAnimeEntry = {}
-      newAnimeEntry.mal_id = v.id
-      newAnimeEntry.animeEnglish = v.english
-      newAnimeEntry.animeTitle = v.title
-      newAnimeEntry.animeSynonyms = v.synonyms
-      newAnimeEntry.animeType = v.type
-      newAnimeEntry.animeStartDate = v.start_date
-      newAnimeEntry.animeEndDate = v.end_date
-      newAnimeEntry.animeStatus = v.status
-      newAnimeEntry.animeImage = v.image
-      newAnimeEntry.animeScoreAverage = v.score
-      newAnimeEntry.animeSynopsis = v.synopsis
-      newAnimeEntry
-
-    newAnimeEntry = {}
-    entryFound = false
-
     if animeEntry?
+      #Searching
+      #
+      # For search to occur, we need a title
+      #
+      searchMatch = (v) ->
+        newAnimeEntry = {}
+        newAnimeEntry.mal_id = v.id
+        newAnimeEntry.animeEnglish = v.english
+        newAnimeEntry.animeTitle = v.title
+        newAnimeEntry.animeSynonyms = v.synonyms
+        newAnimeEntry.animeType = v.type
+        newAnimeEntry.animeStartDate = v.start_date
+        newAnimeEntry.animeEndDate = v.end_date
+        newAnimeEntry.animeStatus = v.status
+        newAnimeEntry.animeImage = v.image
+        newAnimeEntry.animeScoreAverage = v.score
+        newAnimeEntry.animeSynopsis = v.synopsis
+        newAnimeEntry
+
+      newAnimeEntry = {}
+      entryFound = false
       #
       #
       # Mal API Search
@@ -868,7 +960,7 @@ module.exports = class MyAnimelist
             if args.rows > 0
               @chiika.logger.script("[yellow](#{@name}-Anime-Search) Updated #{args.rows} entries.")
               animeExtraView.reload().then =>
-                callback?({ success: true, entry: newAnimeEntry, updated: args.rows })
+                callback?({ success: true, entry: newAnimeEntry, updated: args.rows, list: true })
         else if _size(list) > 0 && entryFound
           newAnimeEntry.lastSync = moment().valueOf()
           @chiika.logger.script("[yellow](#{@name}-Anime-Search) Search returned 1 entry")
@@ -876,9 +968,9 @@ module.exports = class MyAnimelist
             if args.rows > 0
               @chiika.logger.script("[yellow](#{@name}-Anime-Search) Updated #{args.rows} entries.")
               animeExtraView.reload().then =>
-                callback?({ success: true, entry: newAnimeEntry, updated: args.rows })
+                callback?({ success: true, entry: newAnimeEntry, updated: args.rows, list: true })
         else if !entryFound
-          callback({ success: false, response: "Search failed.",updated: 0 })
+          callback({ success: false, response: "Search failed.",updated: 0, list: true })
 
 
       #
@@ -899,9 +991,9 @@ module.exports = class MyAnimelist
             newAnimeEntry.lastSync = moment().valueOf()
             @chiika.logger.script("[yellow](#{@name}-Anime-Search-Extended) Updated #{args.rows} entries.")
             animeExtraView.reload().then =>
-              callback?({ success: true, entry: newAnimeEntry, updated: args.rows, updated: 0 })
+              callback?({ success: true, entry: newAnimeEntry, updated: args.rows, updated: 0, list: true })
         else
-          callback?({ success: false, response: "No Entry" })
+          callback?({ success: false, response: "No Entry", list: true })
 
       #
       # Anime Page Scraping
@@ -922,40 +1014,58 @@ module.exports = class MyAnimelist
             newAnimeEntry.lastSync = moment().valueOf()
             @chiika.logger.script("[yellow](#{@name}-Anime-Mal-Scrape) Updated #{args.rows} entries.")
             animeExtraView.reload().then =>
-              callback?({ success: true, entry: newAnimeEntry, updated: args.rows })
+              callback?({ success: true, entry: newAnimeEntry, updated: args.rows, list: true })
         else
-          callback?({ success: false, response: "No Entry", updated: 0 })
+          callback?({ success: false, response: "No Entry", updated: 0, list: true })
 
+    else
+      # Not in list
+      # ID is not enough alone, there must be something else!
+      title = params.title
+      newAnimeEntry = {}
 
-  handleMangaDetailsRequest: (mangaId,callback) ->
+      @doSearch 'anime',title, (results) =>
+        _forEach results, (entry) =>
+          if entry.mal_id == animeId
+            _assign newAnimeEntry, entry
+            callback({ success: true, entry: newAnimeEntry, updated: 1,list: false })
+
+      @doSearchExtended 'anime',animeId, (result) =>
+        _assign newAnimeEntry, result.entry
+        callback?({ success: true, entry: newAnimeEntry, updated: 1,list: false })
+      #
+      @doPageScrape 'anime',animeId, (result) =>
+        _assign newAnimeEntry, result.entry
+        callback?({ success: true, entry: newAnimeEntry, updated: 1,list: false })
+
+  handleMangaDetailsRequest: (mangaId,params,callback) ->
     @chiika.logger.script("[yellow](#{@name}-Manga-Search) Searching for #{mangaId}!")
 
     mangaExtraView = @chiika.viewManager.getViewByName('myanimelist_mangaextra')
 
     mangaEntry = _find @mangalist, (o) -> (o.mal_id) == mangaId
 
-    #Searching
-    #
-    # For search to occur, we need a title
-    #
-    searchMatch = (v) ->
-      newMangaEntry = {}
-      newMangaEntry.mal_id = v.id
-      newMangaEntry.mangaEnglish = v.english
-      newMangaEntry.mangaTitle = v.title
-      newMangaEntry.mangaSynonyms = v.synonyms
-      newMangaEntry.mangaType = v.type
-      newMangaEntry.mangaStartDate = v.start_date
-      newMangaEntry.mangaEndDate = v.end_date
-      newMangaEntry.mangaImage = v.image
-      newMangaEntry.mangaScoreAverage = v.score
-      newMangaEntry.mangaSynopsis = v.synopsis
-      newMangaEntry
-
-    newMangaEntry = {}
-    entryFound = false
-
     if mangaEntry?
+      #Searching
+      #
+      # For search to occur, we need a title
+      #
+      searchMatch = (v) ->
+        newMangaEntry = {}
+        newMangaEntry.mal_id = v.id
+        newMangaEntry.mangaEnglish = v.english
+        newMangaEntry.mangaTitle = v.title
+        newMangaEntry.mangaSynonyms = v.synonyms
+        newMangaEntry.mangaType = v.type
+        newMangaEntry.mangaStartDate = v.start_date
+        newMangaEntry.mangaEndDate = v.end_date
+        newMangaEntry.mangaImage = v.image
+        newMangaEntry.mangaScoreAverage = v.score
+        newMangaEntry.mangaSynopsis = v.synopsis
+        newMangaEntry
+
+      newMangaEntry = {}
+      entryFound = false
       #
       #
       # Mal API Search
@@ -982,16 +1092,16 @@ module.exports = class MyAnimelist
             if args.rows > 0
               @chiika.logger.script("[yellow](#{@name}-Manga-Search) Updated #{args.rows} entries.")
               mangaExtraView.reload().then =>
-                callback?({ success: true, entry: newMangaEntry, updated: args.rows })
+                callback?({ success: true, entry: newMangaEntry, updated: args.rows, list: true })
         else if _size(list) > 0 && entryFound
           @chiika.logger.script("[yellow](#{@name}-Manga-Search) Search returned 1 entry")
           mangaExtraView.setData(newMangaEntry,'mal_id').then (args) =>
             if args.rows > 0
               @chiika.logger.script("[yellow](#{@name}-Manga-Search) Updated #{args.rows} entries.")
               mangaExtraView.reload().then =>
-                callback?({ success: true, entry: newMangaEntry, updated: args.rows })
+                callback?({ success: true, entry: newMangaEntry, updated: args.rows,list: true })
         else if !entryFound
-          callback({ success: false, response: "Search failed.",updated: 0 })
+          callback({ success: false, response: "Search failed.",updated: 0, list: true })
 
 
       #
@@ -1011,9 +1121,9 @@ module.exports = class MyAnimelist
           mangaExtraView.setData(newMangaEntry,'mal_id').then (args) =>
             @chiika.logger.script("[yellow](#{@name}-Anime-Search-Extended) Updated #{args.rows} entries.")
             mangaExtraView.reload().then =>
-              callback?({ success: true, entry: newMangaEntry, updated: args.rows})
+              callback?({ success: true, entry: newMangaEntry, updated: args.rows, list: true})
         else
-          callback?({ success: false, response: "No Entry" })
+          callback?({ success: false, response: "No Entry",list: true })
 
       #
       # Manga Page Scraping
@@ -1032,13 +1142,31 @@ module.exports = class MyAnimelist
           mangaExtraView.setData(newMangaEntry,'mal_id').then (args) =>
             @chiika.logger.script("[yellow](#{@name}-Manga-Mal-Scrape) Updated #{args.rows} entries.")
             mangaExtraView.reload().then =>
-              callback?({ success: true, entry: newMangaEntry, updated: args.rows })
+              callback?({ success: true, entry: newMangaEntry, updated: args.rows,list: true })
         else
-          callback?({ success: false, response: "No Entry", updated: 0 })
+          callback?({ success: false, response: "No Entry", updated: 0,list: true })
 
+    else
+      # Not in list
+      # ID is not enough alone, there must be something else!
+      title = params.title
+      newMangaEntry = {}
 
-  getMangaDetailsLayout: (id) ->
-    entry = _find @mangalist, (o) -> o.mal_id == id
+      @doSearch 'manga',title, (results) =>
+        _forEach results, (entry) =>
+          if entry.mal_id == mangaId
+            _assign newMangaEntry, entry
+            callback?({ success: true, entry: newMangaEntry, updated: 1,list: false })
+
+      @doSearchExtended 'manga',mangaId, (result) =>
+        _assign newMangaEntry, result.entry
+        callback?({ success: true, entry: newMangaEntry, updated: 1,list: false })
+
+      @doPageScrape 'manga',mangaId, (result) =>
+        _assign newMangaEntry, result.entry
+        callback?({ success: true, entry: newMangaEntry, updated: 1,list: false })
+
+  getMangaDetailsLayout: (entry) ->
     mv    = @getMangaValues(entry)
 
 
@@ -1068,7 +1196,7 @@ module.exports = class MyAnimelist
 
     cards = [typeCard]
 
-    if mv.serialization?
+    if mv.serialization.length > 0?
       cards.push serializationCard
 
     userStatusText = ""
@@ -1087,7 +1215,7 @@ module.exports = class MyAnimelist
       id: mv.id
       title: mv.title
       genres: mv.genres
-      list: true
+      list: mv.list
       status:
         items:
           [
@@ -1128,10 +1256,9 @@ module.exports = class MyAnimelist
       miniCards: cards
 
 
-  getAnimeDetailsLayout: (id) ->
-    entry = _find @animelist, (o) -> o.mal_id == id
-
+  getAnimeDetailsLayout: (entry) ->
     av    = @getAnimeValues(entry)
+    console.log av.list
 
     if av.synonyms?
       av.synonyms = av.synonyms.split(";")[0]
@@ -1211,7 +1338,7 @@ module.exports = class MyAnimelist
       id: av.id
       title: av.title
       genres: av.genres
-      list: true
+      list: av.list
       status:
         items:
           [
@@ -1410,19 +1537,18 @@ module.exports = class MyAnimelist
   #
   #
   getAnimeValues: (entry) ->
-    extra = _find @animeextra, (o) -> o.mal_id == entry.mal_id
-    findInAnimelist = _find @animelist, (o) -> o.mal_id == entry.mal_id
+    if entry?
+      extra = _find @animeextra, (o) -> o.mal_id == entry.mal_id
+      findInAnimelist = _find @animelist, (o) -> o.mal_id == entry.mal_id
 
-    if !entry.mal_id?
-      chiika.logger.error("You are trying to access an entry without mal_id. Excuse me?")
+    if !extra?
+      extra = entry
+
 
     if findInAnimelist?
       list = true
     else
       list = false
-
-    if !extra?
-      extra = entry
 
     title               = entry.animeTitle ? ""                       #MalApi
     synonyms            = entry.animeSynonyms ? ""                    #MalApi
@@ -1435,7 +1561,7 @@ module.exports = class MyAnimelist
     watchedEpisodes     = entry.animeWatchedEpisodes ? "0"            #MalApi
     userStartDate       = entry.animeUserStartDate ? ""               #MalApi
     userEndDate         = entry.animeUserEndDate ? ""                 #MalApi
-    score               = entry.animeScore ? "0.0"                    #MalApi
+    score               = entry.animeScore ? "0"                    #MalApi
     userStatus          = entry.animeUserStatus ? "0"                 #MalApi
     userRewatching      = entry.animeUserRewatching ? ""              #MalApi
     userRewatchingEp    = entry.animeUserRewatchingEp ? ""            #MalApi
@@ -1582,10 +1708,19 @@ module.exports = class MyAnimelist
   #
   #
   getMangaValues: (entry) ->
-    extra = _find @mangaextra, (o) -> o.mal_id == entry.mal_id
+    if entry?
+      extra = _find @mangaextra, (o) -> o.mal_id == entry.mal_id
+      findInMangalist = _find @mangalist, (o) -> o.mal_id == entry.mal_id
 
     if !extra?
-      extra = {}
+      extra = entry
+
+    list = false
+    if findInMangalist?
+      list = true
+    else
+      list = false
+
 
 
     title               = entry.mangaTitle ? ""                       #MalApi
@@ -1596,17 +1731,17 @@ module.exports = class MyAnimelist
     chapters            = entry.mangaSeriesChapters ? "0"             #MalApi
     seriesStart         = entry.mangaSeriesStart ? ""                 #MalApi
     seriesEnd           = entry.mangaSeriesEnd ? ""                   #MalApi
-    image               = entry.mangaImage ? "le_default_image"       #MalApi
+    image               = entry.mangaImage ? "../assets/images/chitoge.png"#MalApi
     readVolumes         = entry.mangaUserReadVolumes ? "0"            #MalApi
     readChapters        = entry.mangaUserReadChapters ? "0"           #MalApi
     userStart           = entry.mangaUserStart ? ""                   #MalApi
     userEnd             = entry.mangaUserEnd ? ""                     #MalApi
     userStatus          = entry.mangaUserStatus ? "0"                 #MalApi
-    score               = entry.mangaScore ? "0.0"                    #MalApi
-    tags                = entry.mangaTags ? "0.0"                     #MalApi
+    score               = entry.mangaScore ? "0"                    #MalApi
+    tags                = entry.mangaTags ? ""                     #MalApi
     rereading           = entry.mangaUserRereading ? ""               #MalApi
     rereadingChapter    = entry.mangaUserRereadingChapter ? ""        #MalApi
-    lastUpdated         = entry.mangaLastUpdated ? "0.0"              #MalApi
+    lastUpdated         = entry.mangaLastUpdated ? "0"              #MalApi
     averageScore        = extra.mangaScoreAverage ? "-"               #Ajax.inc
     ranked              = extra.mangaRanked ? ""                      #Ajax.inc
     genres              = extra.mangaGenres ? ""                      #Ajax.inc
@@ -1668,12 +1803,11 @@ module.exports = class MyAnimelist
 
     lastUpdatedText += " - " + lastUpdated
 
-
-
     manga =
       id: entry.mal_id
       title: title
       synonyms: synonyms
+      list: list
       type: type
       seriesStatus: seriesStatus
       chapters: chapters

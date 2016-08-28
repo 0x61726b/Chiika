@@ -103,7 +103,7 @@ module.exports = class IpcManager
       returnFromScript = (layout) ->
         event.sender.send 'details-layout-request-response',layout
 
-      params = { calling: args.owner, id: args.id,viewName: args.viewName, return: returnFromScript }
+      params = { calling: args.owner, id: args.id,viewName: args.viewName, params: args.params,return: returnFromScript }
       chiika.chiikaApi.emit 'details-layout', params
 
 
