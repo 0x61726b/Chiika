@@ -17,7 +17,7 @@
 
 path                    = require 'path'
 fs                      = require 'fs'
-forEach                 = require 'lodash.foreach'
+_forEach                = require 'lodash.foreach'
 _when                   = require 'when'
 coffee                  = require 'coffee-script'
 string                  = require 'string'
@@ -62,11 +62,11 @@ module.exports = class APIManager
     chiika.chiikaApi.emit 'initialize', { calling: name }
 
   postInit: () ->
-    forEach @activeScripts, (script) =>
+    _forEach @activeScripts, (script) =>
       @initializeScript(script.name)
 
   postCompile: () ->
-    forEach @activeScripts, (v,k) =>
+    _forEach @activeScripts, (v,k) =>
       instance = v
       index = _indexOf @activeScripts,_find @activeScripts, (o) -> o.name == v.name
 
@@ -106,7 +106,7 @@ module.exports = class APIManager
       return 0
 
     if chiika.chiikaApi
-      forEach @activeScripts, (script) =>
+      _forEach @activeScripts, (script) =>
         @initializeScript(script.name)
 
     if !chiika.runningTests
@@ -116,7 +116,7 @@ module.exports = class APIManager
     run()
 
   runScripts: () ->
-    forEach @activeScripts, (v,k) =>
+    _forEach @activeScripts, (v,k) =>
       instance = v
       instance.instance.run()
 
@@ -131,6 +131,7 @@ module.exports = class APIManager
     new Promise (resolve) =>
       chiika.logger.info "[magenta](Api-Manager) Pre-Compiling user scripts..."
 
+
       @activeScripts = []
       processedFiles = 0
 
@@ -138,7 +139,7 @@ module.exports = class APIManager
         fs.readdir scriptDir,(err,files) =>
           fileCount = files.length
 
-          forEach files, (v,k) =>
+          _forEach files, (v,k) =>
             disabled = false
 
             stripExtension = string(v).chompRight('.coffee').s
@@ -197,9 +198,15 @@ module.exports = class APIManager
     stripExtension = string(file).chompRight('.coffee').s
 
     scriptsConfig = chiika.settingsManager.readConfigFile('scripts')
+
+    cachedScriptPath = path.join(@scriptsCacheDir,stripExtension + '_cache.js')
+
     if scriptsConfig?
       findScript = _find scriptsConfig.scripts,(o) -> o.name == file
       indexScript = _indexOf scriptsConfig.scripts,findScript
+
+      if !chiika.utility.fileExists(cachedScriptPath)
+        indexScript = -1
 
       # Script has been compiled before. Check its timestamp to validate that whether it has changed or not
       if indexScript != -1

@@ -228,7 +228,7 @@ eXcell_title = (cell)->
     return true
   @setValue = (val) ->
     @setCValue(val)
-    this.cell.classList.add "list-title"
+    this.cell.classList.add "list-grid-title"
   @baka = 42
     #
 window.eXcell_animeTitle = eXcell_title

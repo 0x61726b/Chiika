@@ -83,10 +83,15 @@ module.exports = class ChiikaIPC
   #
   #
   #
-  refreshViewByName: (view,service,params) ->
+  refreshViewByName: (view,service,params,callback) ->
     if !params?
       params = {}
     @sendMessage 'refresh-view-by-name',{ viewName: view, service: service,params: params }
+
+    @receive "#{view}-refresh-response", (event,args) =>
+      callback?(args)
+
+      @disposeListeners("#{view}-refresh-response")
 
   #
   #

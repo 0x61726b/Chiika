@@ -36,7 +36,7 @@ module.exports = class ViewManager
 
   getComponent: (name) ->
     if name == 'TabGridView'
-      return './view-tabGrid'
+      return './view-tabgridview'
 
   onTabSelect: (viewName,index,last) ->
     @tabViewTabIndexCounter[viewName] = { index: index }

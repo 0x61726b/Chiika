@@ -71,7 +71,7 @@ module.exports = class Search
         userStatusText = "Plan to Watch"
       layout.status = userStatusText
     else
-      layout.status = "Add to List"
+      layout.status = "Not In List"
     return layout
 
   mangaSearchResultLayout: (entry,listEntry) ->
@@ -98,7 +98,7 @@ module.exports = class Search
         userStatusText = "Plan to Read"
       layout.status = userStatusText
     else
-      layout.status = "Add to List"
+      layout.status = "Not In List"
     return layout
 
 
@@ -197,7 +197,7 @@ module.exports = class Search
             @chiika.emit 'make-search', { calling: sourceViewAnime.owner, title: searchString, type: 'anime',return: onAnimeSearch }
 
         else if searchType == 'manga'
-          sourceView = @chiika.viewManager.getViewByName(searchSource[0])
+          sourceView = @chiika.viewManager.getViewByName(searchSource[1])
           sourceData = []
           if sourceView?
             sourceData = sourceView.getData()
@@ -213,10 +213,38 @@ module.exports = class Search
             @chiika.emit 'make-search', { calling: sourceView.owner, title: searchString, type: 'manga',return: onSearch }
 
       else if searchMode == 'list'
-        if sourceData.length > 0
-          findByTitle = _filter sourceData, (o) => string(@recognition.clear(o.animeTitle)).contains(searchString)
+        sourceViewAnime = @chiika.viewManager.getViewByName(searchSource[0])
+        sourceViewManga = @chiika.viewManager.getViewByName(searchSource[1])
 
-          results = []
+        sourceDataAnime = []
+        if sourceViewAnime?
+          sourceDataAnime = sourceViewAnime.getData()
+
+        sourceDataManga = []
+        if sourceViewManga?
+          sourceDataManga = sourceViewManga.getData()
+
+        combine = []
+        animeResults = []
+        mangaResults = []
+        if sourceDataManga.length > 0
+          findByTitle = _filter sourceDataManga, (o) => string(@recognition.clear(o.mangaTitle)).contains(searchString)
+
           _forEach findByTitle, (entry) =>
-            results.push @searchResultLayout(entry)
-          params.return(results)
+            combine.push @mangaSearchResultLayout(entry,entry)
+            mangaResults.push @mangaSearchResultLayout(entry,entry)
+
+        if sourceDataAnime.length > 0
+          findByTitle = _filter sourceDataAnime, (o) => string(@recognition.clear(o.animeTitle)).contains(searchString)
+
+          _forEach findByTitle, (entry) =>
+            combine.push @animeSearchResultLayout(entry,entry)
+            animeResults.push @animeSearchResultLayout(entry,entry)
+
+        if searchType == 'anime-manga'
+          params.return(combine)
+
+        if searchType == 'anime'
+          params.return(animeResults)
+        if searchType == 'manga'
+          params.return(mangaResults)

@@ -24,7 +24,7 @@ _indexOf                = require 'lodash/array/indexOf'
 _forEach                = require 'lodash.foreach'
 _filter                 = require 'lodash/collection/filter'
 
-path              = require 'path'
+path                    = require 'path'
 
 #Views
 

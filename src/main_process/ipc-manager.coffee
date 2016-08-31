@@ -148,7 +148,9 @@ module.exports = class IpcManager
 
       params = args.params
       if view?
-        chiika.chiikaApi.requestViewUpdate(view.name,args.service)
+        onUpdateComplete = (params) =>
+          event.sender.send "#{args.viewName}-refresh-response",params
+        chiika.chiikaApi.requestViewUpdate(view.name,args.service,onUpdateComplete)
       else
         chiika.logger.error("#{args.viewName} couldnt be found.")
 
@@ -297,7 +299,10 @@ module.exports = class IpcManager
 
   startLibraryScan: ->
     @receive 'start-library-scan', (event,args) =>
-      chiika.mediaManager.startLibraryProcess()
+      onScanComplete = (result) =>
+        event.sender.send 'scan-library-response', result
+
+      chiika.chiikaApi.emit 'scan-library',{ return: onScanComplete }
 
   spectron: ->
     @receive 'spectron.', (event,args) =>

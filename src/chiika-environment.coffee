@@ -83,6 +83,113 @@ class ChiikaEnvironment
       if type == 'info'
         chiika.toastInfo(message,duration)
 
+
+  scanLibrary: () ->
+    chiika.ipc.sendMessage 'start-library-scan'
+    chiika.ipc.receive 'scan-library-response', (event,result) =>
+      console.log result
+
+      @ipc.disposeListeners('scan-library-response')
+
+      chiika.toastSuccess("#{result.recognizedSeries} video files has been successfuly recognized!",4000)
+  openShellUrl: (url) ->
+    shell.openExternal(url)
+
+  notification: (notf) ->
+    window.yuiNotification(notf)
+
+  toast: (toast) ->
+    $(".toast").remove()
+    window.yuiToast(toast)
+
+  closeToast: () ->
+    console.log $(".toast")
+    $(".toast").remove()
+
+  toastSuccess: (message,duration) ->
+    @toast({
+      message: message,
+      duration: duration,
+      theme: 'success',
+      position: 'hue'
+      })
+
+  toastInfo: (message,duration) ->
+    @toast({
+      message: message,
+      duration: duration,
+      theme: 'info',
+      position: 'hue'
+      })
+
+  toastError: (message,duration) ->
+    @toast({
+      message: message,
+      duration: duration,
+      theme: 'danger',
+      position: 'hue'
+      })
+
+  toastLoading: (message,duration) ->
+    @toast({
+      message: message,
+      duration: duration,
+      theme: 'timer',
+      position: 'hue'
+      })
+
+  getOption: (option) ->
+    @appSettings[option]
+
+  setOption: (option,value) ->
+    @appSettings[option] = value
+    @ipc.setOption(option,value)
+
+  mediaAction: (owner,action,params,callback) ->
+    @ipc.sendMessage 'media-action', { owner:owner, action:action, params: params }
+
+    ipcRenderer.on "media-action-#{action}-response", (event,args) =>
+      callback(args)
+      @ipc.disposeListeners("media-action-#{action}-response")
+
+  #
+  #
+  #
+  scriptAction: (owner,action,params,callback) ->
+    if !params?
+      params = {}
+
+    @ipc.sendMessage 'script-action', { owner: owner, action: action, params: params, return: callback }
+
+  sendNotification: (title,body,icon) ->
+    if !icon?
+      icon = __dirname + "/../assets/images/chiika.png"
+    notf = new Notification(title,{ body: body, icon: icon})
+
+  reInitializeUI: (delay) ->
+    console.log "Reinitiazing UI"
+
+    if !delay?
+      delay = 500
+    @emitter.emit 'reinitialize-ui',{ delay: delay }
+
+  domReady: ->
+    @searchManager.postInit()
+
+  getWorkingDirectory: ->
+    process.cwd()
+
+
+  getResourcesPath: ->
+    process.resourcesPath
+
+
+  getUserTimezone: ->
+    moment = require 'moment-timezone'
+    userTimezone = moment.tz(moment.tz.guess())
+    utcOffset = moment.parseZone(userTimezone).utcOffset() * 60# In seconds
+    return { timezone: userTimezone , offset: utcOffset }
+
   refreshData: ->
     ipcRenderer.on 'refresh-data', (event,args) =>
       @ipc.sendMessage 'get-ui-data'
@@ -223,99 +330,4 @@ class ChiikaEnvironment
       @preload().then =>
         console.log "All promises have returned"
         setTimeout(main,args.delay)
-
-  openShellUrl: (url) ->
-    shell.openExternal(url)
-
-  notification: (notf) ->
-    window.yuiNotification(notf)
-
-
-  toast: (toast) ->
-    window.yuiToast(toast)
-
-  toastSuccess: (message,duration) ->
-    @toast({
-      message: message,
-      duration: duration,
-      theme: 'success',
-      position: 'hue'
-      })
-
-  toastInfo: (message,duration) ->
-    @toast({
-      message: message,
-      duration: duration,
-      theme: 'info',
-      position: 'hue'
-      })
-
-  toastError: (message,duration) ->
-    @toast({
-      message: message,
-      duration: duration,
-      theme: 'danger',
-      position: 'hue'
-      })
-
-  toastLoading: (message,duration) ->
-    @toast({
-      message: message,
-      duration: duration,
-      theme: 'timer',
-      position: 'hue'
-      })
-
-  getOption: (option) ->
-    @appSettings[option]
-
-  setOption: (option,value) ->
-    @appSettings[option] = value
-    @ipc.setOption(option,value)
-
-  mediaAction: (owner,action,params,callback) ->
-    @ipc.sendMessage 'media-action', { owner:owner, action:action, params: params }
-
-    ipcRenderer.on "media-action-#{action}-response", (event,args) =>
-      callback(args)
-      @ipc.disposeListeners("media-action-#{action}-response")
-
-  #
-  #
-  #
-  scriptAction: (owner,action,params,callback) ->
-    if !params?
-      params = {}
-
-    @ipc.sendMessage 'script-action', { owner: owner, action: action, params: params, return: callback }
-
-  sendNotification: (title,body,icon) ->
-    if !icon?
-      icon = __dirname + "/../assets/images/chiika.png"
-    notf = new Notification(title,{ body: body, icon: icon})
-
-  reInitializeUI: (delay) ->
-    console.log "Reinitiazing UI"
-
-    if !delay?
-      delay = 500
-    @emitter.emit 'reinitialize-ui',{ delay: delay }
-
-  domReady: ->
-    @searchManager.postInit()
-
-  getWorkingDirectory: ->
-    process.cwd()
-
-
-  getResourcesPath: ->
-    process.resourcesPath
-
-
-  getUserTimezone: ->
-    moment = require 'moment-timezone'
-    userTimezone = moment.tz(moment.tz.guess())
-    utcOffset = moment.parseZone(userTimezone).utcOffset() * 60# In seconds
-    return { timezone: userTimezone , offset: utcOffset }
-
 module.exports = ChiikaEnvironment

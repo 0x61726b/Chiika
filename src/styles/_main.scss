@@ -21,6 +21,7 @@
 }
 * {
   font-family: roboto;
+  transition: none;
 }
 .main {
   height: 100vh;
@@ -32,11 +33,15 @@
   overflow-y: auto;
   background-color: $body-bg;
 }
+.clusterize-scroll {
+  max-height: 90vh !important;
+  overflow: auto;
+}
 td {
   background-image: '';
 }
-.w2ui-overlay table.w2ui-drop-menu .w2ui-icon {
-  color: black;
+.list-grid-title {
+  width: 100vh;
 }
 .loading-screen {
   background-color: #333;

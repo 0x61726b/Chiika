@@ -28,6 +28,7 @@ mangaPageUrl                  = 'http://myanimelist.net/manga/'
 updateAnime                   = 'http://myanimelist.net/api/animelist/update/'
 updateManga                   = 'http://myanimelist.net/api/mangalist/update/'
 addAnime                      = 'http://myanimelist.net/api/animelist/add/'
+addManga                      = 'http://myanimelist.net/api/mangalist/add/'
 removeAnime                   = 'http://myanimelist.net/api/animelist/delete/'
 removeManga                   = 'http://myanimelist.net/api/mangalist/delete/'
 
@@ -212,6 +213,14 @@ module.exports = class MyAnimelist
 
         # Problems
 
+  addManga: (manga,callback) ->
+    data = @buildMangaXmlForUpdating(manga)
+    @authorizedPost "#{addManga}#{manga.mal_id}.xml",data,(result) =>
+      if result.statusCode == 201
+        callback?(result)
+      else
+        callback?(result)
+
   removeAnime: (anime,callback) ->
     data = @buildAnimeXmlForUpdating(anime)
     @authorizedPost "#{removeAnime}#{anime.mal_id}.xml",data,(result) =>
@@ -390,7 +399,6 @@ module.exports = class MyAnimelist
 
       if viewName == 'myanimelist_animelist'
         @onAnimeDetailsLayout id,params, (result) =>
-          console.log "2"
           args.return(result)
 
       if viewName == 'myanimelist_mangalist'
@@ -398,7 +406,7 @@ module.exports = class MyAnimelist
         extraEntry = _find @mangaextra, (o) -> (o.mal_id) == args.id
 
         timeSinceLastUpdate = @detailsSyncTimeRestriction
-        if extraEntry?
+        if animeEntry? && extraEntry?
           lastSync = extraEntry.lastSync
           now = moment()
           diff = moment.duration(now.diff(lastSync)).asHours()
@@ -520,6 +528,7 @@ module.exports = class MyAnimelist
                     if response.success
                       mangaView.remove 'mal_id',layout.id, (dbop) =>
                         if dbop.count > 0
+                          @mangalist = mangaView.getData()
                           @chiika.requestViewDataUpdate('myanimelist','myanimelist_mangalist')
                           args.return(response)
 
@@ -531,50 +540,24 @@ module.exports = class MyAnimelist
               animeView = @chiika.viewManager.getViewByName('myanimelist_animelist')
               if animeView?
                 rawEntry = layout.rawEntry
-                entry =
-                  mal_id: layout.id
-                  animeTitle: rawEntry.animeTitle
-                  animeSynonyms: rawEntry.animeSynonyms
-                  animeType: rawEntry.animeType
-                  animeSeriesStatus: rawEntry.animeStatus
-                  animeStartDate: rawEntry.animeStartDate
-                  animeEndDate: rawEntry.animeEndDate
-                  animeImage: rawEntry.animeImage
-                  animeWatchedEpisodes: "0"
-                  animeUserStatus: "6" # Ptw
-                  animeScore:"0"
-                  animeUserStartDate: ""
-                  animeUserEndDate:""
-                  animeUserRewatching: ""
-                  animeUserRewatchingEp: ""
-                  animeLastUpdated: moment().valueOf()
-                  animeUserTags: ""
-
-                if entry.animeType == 'TV'
-                  entry.animeType = '1'
-                if entry.animeType == 'OVA'
-                  entry.animeType = '2'
-                if entry.animeType == 'Movie'
-                  entry.animeType = '3'
-                if entry.animeType == 'Special'
-                  entry.animeType = '4'
-                if entry.animeType == 'ONA'
-                  entry.animeType = '5'
-                if entry.animeType == 'Music'
-                  entry.animeType = '6'
-
-                if entry.animeSeriesStatus == 'Finished Airing'
-                  entry.animeSeriesStatus = "2"
-                if entry.animeSeriesStatus == 'Currently Airing'
-                  entry.animeSeriesStatus = "1"
-                if entry.animeSeriesStatus == 'Not yet aired'
-                  entry.animeSeriesStatus = "3"
-
+                entry = @createAddedAnimeEntry(layout.id,rawEntry)
+                console.log entry
                 @addAnime entry, (result) =>
                   if result.statusCode == 201
                     @updateViewAndRefresh 'myanimelist_animelist',entry,'mal_id', (result) =>
                       if result.updated > 0
                         @chiika.requestViewDataUpdate('myanimelist','myanimelist_animelist')
+                        args.return(result)
+            if layout.layoutType == 'manga'
+              mangaView = @chiika.viewManager.getViewByName('myanimelist_mangalist')
+              if mangaView?
+                rawEntry = layout.rawEntry
+                entry = @createAddedMangaEntry(layout.id,rawEntry)
+                @addManga entry, (result) =>
+                  if result.statusCode == 201
+                    @updateViewAndRefresh 'myanimelist_mangalist',entry,'mal_id', (result) =>
+                      if result.updated > 0
+                        @chiika.requestViewDataUpdate('myanimelist','myanimelist_mangalist')
                         args.return(result)
 
 
@@ -897,6 +880,8 @@ module.exports = class MyAnimelist
           entry = _find @animelist, (o) -> o.mal_id == id
           callback({ updated: true, layout: @getAnimeDetailsLayout(entry)})
 
+          @chiika.requestViewDataUpdate('myanimelist','myanimelist_animelist')
+
         if response.success && !response.list
           callback({ updated: false, layout: @getAnimeDetailsLayout(response.entry)})
 
@@ -915,8 +900,8 @@ module.exports = class MyAnimelist
       newAnimeEntry.animeTitle = v.title
       newAnimeEntry.animeSynonyms = v.synonyms
       newAnimeEntry.animeType = v.type
-      newAnimeEntry.animeStartDate = v.start_date
-      newAnimeEntry.animeEndDate = v.end_date
+      newAnimeEntry.animeSeriesStartDate = v.start_date
+      newAnimeEntry.animeSeriesEndDate = v.end_date
       newAnimeEntry.animeStatus = v.status
       newAnimeEntry.animeImage = v.image
       newAnimeEntry.animeScoreAverage = v.score
@@ -931,8 +916,11 @@ module.exports = class MyAnimelist
       newMangaEntry.mangaTitle = v.title
       newMangaEntry.mangaSynonyms = v.synonyms
       newMangaEntry.mangaType = v.type
-      newMangaEntry.mangaStartDate = v.start_date
-      newMangaEntry.mangaEndDate = v.end_date
+      newMangaEntry.mangaSeriesStartDate = v.start_date
+      newMangaEntry.mangaSeriesEndDate = v.end_date
+      newMangaEntry.mangaSeriesStatus = v.status
+      newMangaEntry.mangaSeriesChapters = v.chapters
+      newMangaEntry.mangaSeriesVolumes = v.volumes
       newMangaEntry.mangaImage = v.image
       newMangaEntry.mangaScoreAverage = v.score
       newMangaEntry.mangaSynopsis = v.synopsis
@@ -1031,8 +1019,8 @@ module.exports = class MyAnimelist
         newAnimeEntry.animeTitle = v.title
         newAnimeEntry.animeSynonyms = v.synonyms
         newAnimeEntry.animeType = v.type
-        newAnimeEntry.animeStartDate = v.start_date
-        newAnimeEntry.animeEndDate = v.end_date
+        newAnimeEntry.animeSeriesStartDate = v.start_date
+        newAnimeEntry.animeSeriesEndDate = v.end_date
         newAnimeEntry.animeStatus = v.status
         newAnimeEntry.animeImage = v.image
         newAnimeEntry.animeScoreAverage = v.score
@@ -1165,11 +1153,13 @@ module.exports = class MyAnimelist
         newMangaEntry.mangaTitle = v.title
         newMangaEntry.mangaSynonyms = v.synonyms
         newMangaEntry.mangaType = v.type
-        newMangaEntry.mangaStartDate = v.start_date
-        newMangaEntry.mangaEndDate = v.end_date
+        newMangaEntry.mangaSeriesStartDate = v.start_date
+        newMangaEntry.mangaSeriesEndDate = v.end_date
         newMangaEntry.mangaImage = v.image
         newMangaEntry.mangaScoreAverage = v.score
         newMangaEntry.mangaSynopsis = v.synopsis
+        newMangaEntry.mangaSeriesChapters = v.chapters
+        newMangaEntry.mangaSeriesVolumes = v.volumes
         newMangaEntry
 
       newMangaEntry = {}
@@ -1363,6 +1353,9 @@ module.exports = class MyAnimelist
         userScore: mv.score
         average: mv.averageScore
       miniCards: cards
+    if !detailsLayout.list
+      detailsLayout.rawEntry = entry
+    detailsLayout
 
 
   getAnimeDetailsLayout: (entry) ->
@@ -1669,13 +1662,13 @@ module.exports = class MyAnimelist
     type                = entry.animeType ? ""                        #MalApi
     totalEpisodes       = entry.animeTotalEpisodes ? "0"              #MalApi
     seriesStatus        = entry.animeSeriesStatus ? "0"               #MalApi
-    seriesStartDate     = entry.animeStartDate ? ""                   #MalApi
-    seriesEndDate       = entry.animeEndDate ? ""                     #MalApi
-    image               = entry.animeImage ? "le_default_image"       #MalApi
+    seriesStartDate     = entry.animeSeriesStartDate ? ""             #MalApi
+    seriesEndDate       = entry.animeSeriesEndDate ? ""               #MalApi
+    image               = entry.animeImage ? "../assets/images/chitoge.png"#MalApi
     watchedEpisodes     = entry.animeWatchedEpisodes ? "0"            #MalApi
     userStartDate       = entry.animeUserStartDate ? ""               #MalApi
     userEndDate         = entry.animeUserEndDate ? ""                 #MalApi
-    score               = entry.animeScore ? "0"                    #MalApi
+    score               = entry.animeScore ? "0"                      #MalApi
     userStatus          = entry.animeUserStatus ? "0"                 #MalApi
     userRewatching      = entry.animeUserRewatching ? ""              #MalApi
     userRewatchingEp    = entry.animeUserRewatchingEp ? ""            #MalApi
@@ -1725,7 +1718,7 @@ module.exports = class MyAnimelist
       userStatusText = "Plan to Watch"
 
     # Change the season from date to text
-    startDate = entry.animeStartDate
+    startDate = entry.animeSeriesStartDate
 
     if startDate?
       parts = startDate.split("-");
@@ -1843,8 +1836,8 @@ module.exports = class MyAnimelist
     seriesStatus        = entry.mangaSeriesStatus ? "0"               #MalApi
     volumes             = entry.mangaSeriesVolumes ? "0"              #MalApi
     chapters            = entry.mangaSeriesChapters ? "0"             #MalApi
-    seriesStart         = entry.mangaSeriesStart ? ""                 #MalApi
-    seriesEnd           = entry.mangaSeriesEnd ? ""                   #MalApi
+    seriesStart         = entry.mangaSeriesStartDate ? ""             #MalApi
+    seriesEnd           = entry.mangaSeriesEndDate? ""                #MalApi
     image               = entry.mangaImage ? "../assets/images/chitoge.png"#MalApi
     readVolumes         = entry.mangaUserReadVolumes ? "0"            #MalApi
     readChapters        = entry.mangaUserReadChapters ? "0"           #MalApi
@@ -1967,8 +1960,8 @@ module.exports = class MyAnimelist
     anime.animeType                 = v.series_type
     anime.animeTotalEpisodes        = v.series_episodes
     anime.animeSeriesStatus         = v.series_status
-    anime.animeStartDate            = v.series_start
-    anime.animeEndDate              = v.series_end
+    anime.animeSeriesStartDate      = v.series_start
+    anime.animeSeriesEndDate        = v.series_end
     anime.animeImage                = v.series_image
     anime.animeWatchedEpisodes      = v.my_watched_episodes
 
@@ -1981,6 +1974,7 @@ module.exports = class MyAnimelist
     anime.animeLastUpdated          = v.my_last_updated
     anime.animeUserTags             = v.my_tags
     anime
+
 
   #
   #
@@ -1995,13 +1989,13 @@ module.exports = class MyAnimelist
     manga.mangaType                   = v.series_type
     manga.mangaSeriesChapters         = v.series_chapters
     manga.mangaSeriesVolumes          = v.series_volumes
-    manga.mangaSeriesStart            = v.series_start
-    manga.mangaSeriesEnd              = v.series_end
+    manga.mangaSeriesStartDate        = v.series_start
+    manga.mangaSeriesEndDate          = v.series_end
     manga.mangaImage                  = v.series_image
     manga.mangaUserReadChapters       = v.my_read_chapters
     manga.mangaUserReadVolumes        = v.my_read_volumes
-    manga.mangaUserStart              = v.my_start_date
-    manga.mangaUserEnd                = v.my_finish_date
+    manga.mangaUserStartDate          = v.my_start_date
+    manga.mangaUserEndDate            = v.my_finish_date
     manga.mangaScore                  = v.my_score
     manga.mangaUserStatus             = v.my_status
     manga.mangaLastUpdated            = v.my_last_updated
@@ -2011,7 +2005,114 @@ module.exports = class MyAnimelist
 
     manga
 
+  getAnimeStatus: (type,status) ->
+    statusMap = [
+      { api: "1", text: "Currently Airing"},
+      { api: "2", text: "Finished Airing"},
+      { api: "3", text: "Not yet aired"}
+    ]
+    if type == 'text'
+      find = _find statusMap, (o) -> o.api == status
+      return find.text
+    if type == 'number'
+      find = _find statusMap, (o) -> o.text == status
+      return find.api
 
+  getAnimeType: (r,type) ->
+    typeMap = [
+      { api: '1', text: 'TV' },
+      { api: '2', text: 'OVA' },
+      { api: '3', text: 'Movie' },
+      { api: '4', text: 'Special' },
+      { api: '5', text: 'ONA' },
+      { api: '6', text: 'Music' }
+    ]
+    if r == 'text'
+      find = _find typeMap, (o) -> o.api == type
+      return find.text
+    if r == 'number'
+      find = _find typeMap, (o) -> o.text == type
+      return find.api
+
+  getMangaType: (r,type) ->
+    typeMap = [
+      { api: '1', text: 'Manga' },
+      { api: '2', text: 'Novel' },
+      { api: '3', text: 'Oneshot' },
+      { api: '4', text: 'Doujinshi' },
+      { api: '5', text: 'Manwha' },
+      { api: '6', text: 'Manhua' }
+    ]
+    if r == 'text'
+      find = _find typeMap, (o) -> o.api == type
+      return find.text
+    if r == 'number'
+      find = _find typeMap, (o) -> o.text == type
+      return find.api
+
+  getMangaStatus: (type,status) ->
+    statusMap = [
+      { api: "1", text: "Publishing"},
+      { api: "2", text: "Finished"}
+    ]
+    if type == 'text'
+      find = _find statusMap, (o) -> o.api == status
+      return find.text
+    if type == 'number'
+      find = _find statusMap, (o) -> o.text == status
+      return find.api
+
+  createAddedAnimeEntry: (id,rawEntry) ->
+    entry =
+      mal_id: id
+      animeTitle: rawEntry.animeTitle
+      animeSynonyms: rawEntry.animeSynonyms
+      animeType: rawEntry.animeType
+      animeSeriesStatus: rawEntry.animeStatus
+      animeSeriesStartDate: rawEntry.animeSeriesStartDate
+      animeSeriesEndDate: rawEntry.animeSeriesEndDate
+      animeImage: rawEntry.animeImage
+      animeWatchedEpisodes: "0"
+      animeUserStatus: "6" # Ptw
+      animeScore:"0"
+      animeUserStartDate: ""
+      animeUserEndDate:""
+      animeUserRewatching: ""
+      animeUserRewatchingEp: ""
+      animeLastUpdated: moment().valueOf()
+      animeUserTags: ""
+
+    entry.animeType = @getAnimeType('number',entry.animeType)
+    entry.animeSeriesStatus = @getAnimeStatus('number',entry.animeSeriesStatus)
+    entry
+
+  createAddedMangaEntry: (id,rawEntry) ->
+    entry =
+      mal_id: id
+      mangaTitle: rawEntry.mangaTitle
+      mangaSynonyms: rawEntry.mangaSynonyms
+      mangaType: rawEntry.mangaType
+      mangaSeriesStatus: rawEntry.mangaSeriesStatus
+      mangaSeriesStartDate: rawEntry.mangaSeriesStartDate
+      mangaSeriesEndDate: rawEntry.mangaSeriesEndDate
+      mangaImage: rawEntry.mangaImage
+      mangaSeriesChapters: rawEntry.mangaSeriesChapters
+      mangaSeriesVolumes: rawEntry.mangaSeriesVolumes
+      mangaUserReadChapters: "0"
+      mangaUserReadVolumes: "0"
+      mangaScore:"0"
+      mangaUserStatus: "6" #Ptr
+      mangaUserStartDate: ""
+      mangaUserEndDate:""
+      mangaUserRereading: ""
+      mangaUserRereadingChapter: ""
+      mangaLastUpdated: moment().valueOf()
+      mangaTags: ""
+
+    console.log rawEntry
+    entry.mangaType = @getMangaType('number',entry.mangaType)
+    entry.mangaSeriesStatus = @getMangaStatus('number',entry.mangaSeriesStatus)
+    entry
   #
   #
   #

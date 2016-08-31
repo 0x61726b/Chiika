@@ -143,10 +143,9 @@ module.exports = class Media
       @scanFolder folder, (cache) =>
         args.return(cache)
 
-    @on 'scan-library', () =>
-      libraryPaths = [
-        'E:/Anime'
-      ]
+    @on 'scan-library', (args) =>
+      libraryPaths = @chiika.settingsManager.getOption('LibraryPaths')
+
       animelistView = @chiika.viewManager.getViewByName('myanimelist_animelist')
       animeExtraView = @chiika.viewManager.getViewByName('myanimelist_animeextra')
 
@@ -159,9 +158,12 @@ module.exports = class Media
           detectCache = @chiika.viewManager.getViewByName('anime_detect_cache')
           @recognition.cacheInBulk(detectCache,results)
 
+
+          args.return({ recognizedSeries: results.length })
+
     @on 'system-event', (event) =>
       @chiika.logger.script("[yellow](#{@name}) system-event - #{event.name}")
-      
+
       if event.name == 'md-detect' or (event.name == 'shortcut-pressed' and event.params.action == 'test')
         @tryRecognize(event.params)
 

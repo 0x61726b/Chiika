@@ -20,6 +20,7 @@
 #--------------------
 
 
+
 {BrowserWindow, ipcMain,globalShortcut,Tray,Menu,app} = require 'electron'
 
 path                              = require 'path'
@@ -98,9 +99,10 @@ class Application
 
     @chiikaHome         = path.join(app.getPath('appData'),"chiika")
 
-
     @logger             = new Logger("verbose").logger
     global.logger       = @logger #Share with renderer
+
+
 
     @emitter            = new Emitter
     @utility            = new Utility()

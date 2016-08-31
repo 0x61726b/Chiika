@@ -44,6 +44,8 @@ module.exports = React.createClass
   componentWillMount: ->
     @requestDetails()
 
+    console.log @props.history
+
   requestDetails: (id)->
     id = @props.params.id
 
@@ -53,9 +55,12 @@ module.exports = React.createClass
 
     if @props.location.query.title?
       title = @props.location.query.title
+    else if @state.layout.title?
+      title = @state.layout.title
 
     chiika.ipc.getDetailsLayout id,@props.route.viewName,owner,{ title: title }, (args) =>
       @setState { layout: args.layout }
+
       console.log args.layout
 
       # if args.updated
@@ -151,8 +156,6 @@ module.exports = React.createClass
 
     chiika.ipc.detailsActionResponse action,(args) =>
       chiika.ipc.disposeListeners('details-action-response')
-      if $('.toast')?
-        $('.toast').remove()
       returnCallback?(args)
 
   #

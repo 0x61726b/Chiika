@@ -25,6 +25,7 @@ module.exports = React.createClass
     searchResults: []
     searchAnime: true
     searchManga: true
+    searchList : false
 
   setSearchParams: (searchString,searchMode,searchType,searchSource) ->
     if searchString.length > 0 && searchMode?
@@ -34,25 +35,29 @@ module.exports = React.createClass
 
   componentDidUpdate: ->
     if @state.searchAnime && @state.searchManga
-      searchSource = 'myanimelist_animelist,myanimelist_mangalist'
       searchType = 'anime-manga'
 
     if @state.searchAnime && !@state.searchManga
-      searchSource = 'myanimelist_animelist'
       searchType = 'anime'
 
     if @state.searchManga && !@state.searchAnime
-      searchSource = 'myanimelist_mangalist'
       searchType = 'manga'
+
+    if @state.searchList
+      searchMode = "list"
+    else
+      searchMode = 'list-remote'
 
 
     if !@state.searchAnime && !@state.searchManga
       return
 
-    console.log "#{@state.searchString} - #{@state.searchMode} - #{searchType} - #{searchSource}"
-
     if @state.searchState == 'searching'
-      chiika.searchManager.search @state.searchString,@state.searchMode,searchType,searchSource, (results) =>
+      console.log "#{@state.searchString} - #{searchMode} - #{searchType} - #{@state.searchSource}"
+      chiika.toastLoading("Searching #{@state.searchString}...",'infinite')
+      
+      chiika.searchManager.search @state.searchString,searchMode,searchType,@state.searchSource, (results) =>
+        chiika.closeToast()
         console.log results
         @setState { searchResults: results, searchState: 'completed' }
     #
@@ -88,11 +93,12 @@ module.exports = React.createClass
 
 
 
-  onSourceChange: (source) ->
-    @setState { searchSource: source }
+  onSourceChange: (source,e) ->
+    value = $(e.target).prop('checked')
+    if source == 'list'
+      @setState { searchList: value, searchState: 'searching' }
 
   onCoverClick: (sourceView,id,title) ->
-    console.log sourceView
     window.location = "##{sourceView}_details/#{id}?title=#{title}"
 
   resultItem: (sr,i) ->
@@ -140,6 +146,9 @@ module.exports = React.createClass
           <div className="filter-dropdown">
             <label className="checkbox">
               <input type="checkbox" name="name" value="" onChange={ () => @onSourceChange('myanimelist_animelist')} /> Myanimelist
+            </label>
+            <label className="checkbox">
+              <input type="checkbox" name="name" checked={@state.searchList} onChange={ (e) => @onSourceChange('list',e)} /> Local List
             </label>
           </div>
         </div>

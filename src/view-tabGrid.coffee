@@ -15,7 +15,8 @@
 #----------------------------------------------------------------------------
 
 React                                   = require('react')
-
+remote                                  = require('electron').remote
+{Menu,MenuItem}                         = require('electron').remote
 
 _find                                   = require 'lodash/collection/find'
 _forEach                                = require 'lodash.foreach'
@@ -77,11 +78,15 @@ module.exports = React.createClass
 
     @setState { viewName: props.route.viewName,tabList: @uiItem.tabList, columnList: @uiItem.columns,lengths: dataSourceLengths }
 
+
+
   componentDidUpdate: ->
     # Did we create it before?
     findGrid = _find @grids, { name: @uiItem.tabList[@state.currentTabIndex].name }
+
     if !findGrid?
       @updateGrid(@uiItem.tabList[@state.currentTabIndex].name,@uiItem.columns,@props.route.viewName)
+
 
 
 
@@ -171,6 +176,7 @@ module.exports = React.createClass
     currentGrid.setColAlign( columnAligns )
     currentGrid.setColSorting( columnSorting )
     currentGrid.enableMultiselect(true)
+    currentGrid.enableAutoWidth(true)
 
     # Find this grids data
     viewData = _find(chiika.viewData, (o) => o.name == viewName)
@@ -211,6 +217,27 @@ module.exports = React.createClass
           find = gridConf.data[i]
           window.location = "##{viewName}_details/#{find.mal_id}"
 
+    $($("table.hdr")[@state.currentTabIndex]).on 'contextmenu', =>
+      menu = new Menu()
+      _forEach columnList,(column) =>
+        onChecked = (menuItem,browserWindow,event) =>
+          column.hidden = !menuItem.checked
+          @updateGrid(@uiItem.tabList[@state.currentTabIndex].name,columnList,@props.route.viewName)
+          @bindResize(currentGrid,name,columnList)
+          $(window).trigger 'resize'
+
+        menu.append new MenuItem( { type: 'checkbox', label: "#{column.name}", checked: !column.hidden,click: onChecked})
+      menu.popup(remote.getCurrentWindow())
+
+
+    # Show context menu
+
+    @bindResize(currentGrid,name,columnList)
+    $(window).trigger('resize')
+
+
+  bindResize: (currentGrid,name,columnList) ->
+    $(window).off 'resize'
     $(window).resize( =>
       if currentGrid?
         if $("##{name} .objbox").scrollHeight > $("##{name} .objbox").height()
@@ -218,27 +245,29 @@ module.exports = React.createClass
         else
           totalArea = $("##{name} .objbox").width()
         fixedColumnsTotal = 0
+        nonFixedPercentages = 0
 
-        _forEach @state.columnList, (v,k) =>
-          if v.width? && !v.hidden
+        _forEach columnList, (v,k) =>
+          if v.width? && (!v.hidden? or !v.hidden)
             fixedColumnsTotal += parseInt(v.width)
+          if v.widthP? && (!v.hidden? or !v.hidden)
+            nonFixedPercentages += parseInt(v.widthP)
 
-        diff = totalArea - fixedColumnsTotal
+        diff = (totalArea - fixedColumnsTotal)
 
-        for i in [0...@state.columnList.length]
-          v = @state.columnList[i]
-          if !v.hidden
+        for i in [0...columnList.length]
+          v = columnList[i]
+          if (!v.hidden? or !v.hidden)
             width = 0
             if v.widthP?
-              width = diff * (v.widthP / 100)
+              remainder = 100 - nonFixedPercentages
+              pWidth = parseInt(v.widthP)
+
+              width = diff * (( pWidth ) / 100)
             else
               width = v.width
             currentGrid.setColWidth(i,width.toString())
             )
-    $(window).trigger('resize')
-
-
-
   componentWillMount: ->
     @uiItem = _find chiika.uiData, (o) => o.name == @props.route.viewName
 
@@ -264,6 +293,8 @@ module.exports = React.createClass
     @setState { currentTabIndex: index, lastTabIndex: last }
 
     chiika.viewManager.onTabSelect(@state.viewName,index,last)
+
+    $($("table.hdr")[last]).off 'contextmenu'
 
 
   renderReactTabs: ->

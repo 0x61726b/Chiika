@@ -14,8 +14,10 @@
 #Description:
 #----------------------------------------------------------------------------
 
-React               = require('react')
-{Link}              = require('react-router')
+React                               = require('react')
+{Link}                              = require('react-router')
+{dialog}                            = require('electron').remote
+_forEach                            = require 'lodash.foreach'
 
 
 CheckboxOption = React.createClass
@@ -54,6 +56,7 @@ DropdownOption = React.createClass
 
   componentDidUpdate: ->
     $("##{@state.id}_select option[value=#{@state.defaultValue}]").attr('selected','selected')
+
   onChange: (e) ->
     value = $(e.target).val()
     @props.onChange(value)
@@ -79,6 +82,31 @@ AppSettings = React.createClass
       <CheckboxOption label="Launch minimized on startup" id="LaunchMinimized" />
       <CheckboxOption label="Check for Updates" id="CheckForUpdates" />
       <CheckboxOption label="Disable transparency (Transparency might not work on some OSes)" id="NoTransparentWindows" />
+    </div>
+
+Recognition = React.createClass
+  getInitialState: ->
+    libraryPaths: chiika.getOption('LibraryPaths')
+  openDialog: ->
+    folders = dialog.showOpenDialog({
+      properties: ['openDirectory','multiSelections']
+    })
+
+    if folders?
+      folderText = ""
+      _forEach folders, (folder) =>
+        folderText += folder + "\n"
+      @setState { libraryPaths: folderText }
+      chiika.setOption('LibraryPaths',folders)
+  scanLibrary: ->
+    chiika.toastLoading('Scanning library...','infinite')
+    chiika.scanLibrary()
+
+  render: ->
+    <div className="card">
+      <textarea name="description" disabled value={@state.libraryPaths} onChange={@onChange} />
+      <button type="button" className="button raised primary" onClick={@openDialog}>Browse..</button>
+      <button type="button" className="button raised primary" onClick={@scanLibrary}>Scan library</button>
     </div>
 
 ListGeneral = React.createClass
@@ -110,6 +138,19 @@ RSSSettings = React.createClass
       <DropdownOption label="Default RSS Source" options={chiika.appSettings.RSSSources} id="DefaultRssSource" defaultValue="#{chiika.getOption('DefaultRssSource')}" onChange={@onRSSSourceChanged} />
     </div>
 
+AccountSettings = React.createClass
+  syncMyanimelist: ->
+    chiika.toastLoading('Syncing Myanimelist...','infinite')
+
+    chiika.ipc.refreshViewByName 'myanimelist_animelist','myanimelist',null, =>
+
+    chiika.ipc.refreshViewByName 'myanimelist_mangalist','myanimelist',null, (params) =>
+      chiika.toastSuccess('Synced myanimelist!',3000)
+  render: ->
+    <div className="card">
+      <button type="button" className="button raised primary" onClick={@syncMyanimelist}>Sync Myanimelist</button>
+    </div>
+
 
 module.exports = React.createClass
   getInitialState: ->
@@ -131,6 +172,9 @@ module.exports = React.createClass
           <p className="list-title">General</p>
           <Link className="side-menu-link #{@isMenuItemActive('App')}" to="#{@props.props.location.pathname}" query={{ settings:true, location: 'App' }}>
             <li>Application</li>
+          </Link>
+          <Link className="side-menu-link #{@isMenuItemActive('Recognition')}" to="#{@props.props.location.pathname}" query={{ settings:true, location: 'Recognition' }}>
+            <li>Recognition</li>
           </Link>
           <Link className="side-menu-link #{@isMenuItemActive('Account')}" to="#{@props.props.location.pathname}" query={{ settings:true, location: 'Account' }}>
             <li>Account</li>
@@ -154,6 +198,10 @@ module.exports = React.createClass
             <ListGeneral {...@props} />
           else if @state.currentRoute == 'RSSSettings'
             <RSSSettings {...@props} />
+          else if @state.currentRoute == 'Account'
+            <AccountSettings {...@props} />
+          else if @state.currentRoute == 'Recognition'
+            <Recognition {...@props} />
         }
       </div>
     </div>
