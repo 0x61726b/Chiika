@@ -6,61 +6,105 @@
   cursor: col-resize;
 }
 /* */
+/*
+// FIXME:
+#chiika-list > div {
+  overflow-x: scroll;
+  height: calc(100% - 30px);
+}
+*/
 .chiika-table {
   width: 100%;
   overflow: auto;
 }
 .chiika-header {
   display: flex;
+  background: #eee;
 }
-.col-list {
-  float: left;
-  display: table-column;
+.header-title {
+  border-bottom: 1px solid #ddd;
+  padding: 8px 0;
+  font-weight: bold;
 }
 .list-item {
-  display: table-row;
+  display: flex;
   width: auto;
-  clear:both;
-  border: 1px solid #dcdfe4;
-  height: 25px;
 }
-.header-animeTitle {
-  width: 120px;
+.list-item.selected {
+  background: rgba($color-accent,0.1);
 }
-.header-animeProgress {
-  width: 150px;
+.list-item > div {
+  padding-top: 6px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #dcdfe4;
 }
-.header-animeScoreAverage {
-  width: 100px;
+
+.header-animeTypeText {
+  width: 50px;
 }
-.header-animeScore {
-  width: 100px;
-}
-.header-animeSeason {
-  width: 100px;
-}
-/* */
 .col-animeTypeText {
   width: 50px;
 }
+
+.header-animeTitle {
+  overflow: hidden;
+  min-width: 200px;
+  max-width: 200px;
+  white-space: nowrap;
+}
 .col-animeTitle {
+  min-width: 192px;
+  max-width: 192px;
+  padding-left: 4px;
+  padding-right: 4px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.header-animeProgress {
   width: 120px;
 }
 .col-animeProgress {
+  width: 120px;
+
+  /* Delete this after progress bars */
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.header-animeScoreAverage {
   width: 100px;
 }
 .col-animeScoreAverage {
   width: 100px;
 }
+
+.header-animeScore {
+  width: 100px;
+}
 .col-animeScore {
   width: 100px;
 }
+
+.header-animeSeason {
+  width: 120px;
+}
 .col-animeSeason {
-  width: 100px;
+  width: 120px;
+}
+
+.header-animeLastUpdatedText {
+  width: 160px;
+}
+.col-animeLastUpdatedText {
+  width: 160px;
+  overflow: hidden;
+  white-space: nowrap;
 }
 /* */
 /****************************************/
-
 /* Failure attempt */
 // .dhxtabbar_tab_actv {
 //   color: $main-text!important;
@@ -79,7 +123,6 @@
 //   padding: 4px;
 //   text-align: center;
 // }
-
 /* Failure attempt end */
 /*****************************************************/
 .list-last-updated,
@@ -100,7 +143,6 @@
   font-weight: 500;
 };
 /*****************************************************/
-
 .react-tabs {
   background-color: inherit;
 }
@@ -139,7 +181,6 @@
   color: $main-text;
   border: none;
 }
-
 .react-tabs [role=tab]:focus,
 .react-tabs [role=tab][aria-disabled=true]:focus,
 .react-tabs [role=tab][aria-selected=false]:focus,

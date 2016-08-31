@@ -108,7 +108,7 @@ module.exports = React.createClass
     gridData.data
 
   listItemClick: (e) ->
-    
+
     $("#chiika-list").find(".list-item").each (e) ->
       $(this).removeClass "selected"
     $(e.target).parent().toggleClass "selected"
@@ -129,7 +129,7 @@ module.exports = React.createClass
     <div className="chiika-header" key={index}>
     {
       @state.columns.map (col,i) =>
-        <div className="header-#{col.name}" key={i}>{col.display}</div>
+        <div className="header-title col-#{col.name}" key={i}>{col.display}</div>
     }
     </div>
 
