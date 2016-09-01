@@ -104,7 +104,7 @@ Recognition = React.createClass
 
   render: ->
     <div className="card">
-      <textarea name="description" disabled value={@state.libraryPaths} onChange={@onChange} />
+      <textarea className="text-input" name="description" disabled value={@state.libraryPaths} onChange={@onChange} />
       <button type="button" className="button raised primary" onClick={@openDialog}>Browse..</button>
       <button type="button" className="button raised primary" onClick={@scanLibrary}>Scan library</button>
     </div>

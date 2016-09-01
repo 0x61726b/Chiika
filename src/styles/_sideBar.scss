@@ -63,6 +63,9 @@ img.chiikaLogo {
   position: relative;
   height: calc(100% - #{$sidebar-top-height});
   font-size: $navigation-font-size;
+  * {
+    transition: none;
+  }
 }
 .navigation ul {
   list-style-type: none;
