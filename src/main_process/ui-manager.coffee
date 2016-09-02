@@ -49,7 +49,6 @@ module.exports = class UIManager
     else
       @uiItems.splice(index,1,instance)
 
-
   #
   # Returns the total number of UI items stored on DB
   # @returm {Integer}
@@ -58,6 +57,18 @@ module.exports = class UIManager
 
   getUIItems: ->
     @uiItems
+
+  #
+  #
+  #
+  saveUIItem: (item) ->
+    config = chiika.settingsManager.readConfigFile('view')
+
+    findConfig = _find config.views,(o) -> o.name == item.name
+    indexConfig = _indexOf config.views,findConfig
+    if indexConfig > -1
+      config.views.splice(indexConfig,1,item)
+      chiika.settingsManager.saveConfigFile('view',config)
 
 
   removeUIItem: (name) ->

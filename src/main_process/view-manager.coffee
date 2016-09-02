@@ -247,4 +247,5 @@ module.exports = class ViewManager
 
     dbView = chiika.dbManager.createViewDb(view.name)
     newView.setDatabaseInterface(dbView)
+    newView.config = view
     @views.push newView

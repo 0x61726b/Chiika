@@ -23,12 +23,16 @@
 }
 .header-title {
   border-bottom: 1px solid #ddd;
+  border-right: 4px solid red;
   padding: 8px 0;
   font-weight: bold;
 }
 .list-item {
   display: flex;
   width: auto;
+}
+.col-list {
+  padding-right: 4px;
 }
 .list-item.selected {
   background: rgba($color-accent,0.1);
@@ -88,10 +92,10 @@
   width: 100px;
 }
 
-.header-animeSeason {
+.header-animeSeasonText {
   width: 120px;
 }
-.col-animeSeason {
+.col-animeSeasonText {
   width: 120px;
 }
 

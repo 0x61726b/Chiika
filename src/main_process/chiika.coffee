@@ -19,8 +19,6 @@
 #
 #--------------------
 
-
-
 {BrowserWindow, ipcMain,globalShortcut,Tray,Menu,app} = require 'electron'
 
 path                              = require 'path'

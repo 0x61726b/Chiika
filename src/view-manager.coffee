@@ -34,6 +34,11 @@ module.exports = class ViewManager
 
   scrollData: []
 
+  saveTabGridViewState: (view) ->
+    columns = view.columns
+    tabs    = view.tabList
+
+    chiika.setUIViewConfig { name:view.name, config: { gridColumnList: columns, tabList: tabs } }
   getComponent: (name) ->
     if name == 'TabGridView'
       return './view-tabgridview'

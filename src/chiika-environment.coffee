@@ -14,18 +14,22 @@
 #Description:
 #----------------------------------------------------------------------------
 {Emitter}                                 = require 'event-kit'
-{ipcRenderer,remote,shell} = require 'electron'
+{ipcRenderer,remote,shell}                = require 'electron'
+remote                                    = require('electron').remote
+{Menu,MenuItem}                           = require('electron').remote
 
 _when                                     = require 'when'
 Logger                                    = require './main_process/logger'
 _find                                     = require 'lodash/collection/find'
 _indexOf                                  = require 'lodash/array/indexOf'
+_forEach                                  = require 'lodash.foreach'
 
 ChiikaIPC                                 = require './chiika-ipc'
 ViewManager                               = require './view-manager'
 CardManager                               = require './card-manager'
 NotificationManager                       = require './notification-manager'
 SearchManager                             = require './search-manager'
+ListManager                               = require './list-manager'
 
 class ChiikaEnvironment
   emitter: null
@@ -48,6 +52,7 @@ class ChiikaEnvironment
     @cardManager         = new CardManager()
     @notificationManager = new NotificationManager()
     @searchManager       = new SearchManager()
+    @listManager         = new ListManager()
 
 
 
@@ -92,8 +97,19 @@ class ChiikaEnvironment
       @ipc.disposeListeners('scan-library-response')
 
       chiika.toastSuccess("#{result.recognizedSeries} video files has been successfuly recognized!",4000)
+
+
+  setUIViewConfig: (uiItem) ->
+    chiika.ipc.sendMessage 'set-ui-config', { item: uiItem }
+
   openShellUrl: (url) ->
     shell.openExternal(url)
+
+  popupContextMenu: (config) ->
+    menu = new Menu()
+    _forEach config,(item) ->
+      menu.append item
+    menu.popup(remote.getCurrentWindow())
 
   notification: (notf) ->
     window.yuiNotification(notf)

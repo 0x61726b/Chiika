@@ -28,6 +28,7 @@ module.exports = class View
   defaultDataSource: ""
   dataSource: []
   processedDataSource: []
+  config: null
   constructor: (params={}) ->
     { @name, @displayName,@displayType,@owner, @dataSource, @category,@noUpdate,@defaultDataSource } = params
 

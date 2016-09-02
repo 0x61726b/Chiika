@@ -19,6 +19,7 @@
 _forEach                = require 'lodash.foreach'
 _assign                 = require 'lodash.assign'
 _when                   = require 'when'
+_find                   = require 'lodash/collection/find'
 string                  = require 'string'
 
 
@@ -346,6 +347,21 @@ module.exports = class IpcManager
   #
   #
   #
+  setUIData: ->
+    @receive 'set-ui-config', (event,args) =>
+      views = chiika.viewManager.getViews()
+
+      uiItem = args.item
+
+      find = _find views, (o) -> o.name == uiItem.name
+      if find?
+        find.config[find.displayType] = uiItem.config
+        chiika.uiManager.saveUIItem(find.config)
+
+
+  #
+  #
+  #
   getViewData: ->
     @receiveAnswer 'get-view-data', (event,args) =>
       mainViews = chiika.viewManager.getViews()
@@ -477,3 +493,4 @@ module.exports = class IpcManager
     @scriptAction()
     @notificationBar()
     @searching()
+    @setUIData()

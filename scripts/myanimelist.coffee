@@ -588,8 +588,8 @@ module.exports = class MyAnimelist
           newAnime.animeScoreAverage             = animeValues.averageScore
           newAnime.animeTypeText                 = animeValues.typeText
           newAnime.animeSeason                   = animeValues.season
+          newAnime.animeSeasonText               = animeValues.seasonText
           newAnime.animeLastUpdatedText          = animeValues.lastUpdatedText
-
 
           if status == "1"
             watching.push newAnime
@@ -1769,8 +1769,6 @@ module.exports = class MyAnimelist
     if diffYears > 0
       lastUpdatedText = "#{diffYears} years ago"
 
-    lastUpdatedText += " - " + lastUpdated
-
     anime =
       id: entry.mal_id
       list: list
@@ -1794,7 +1792,8 @@ module.exports = class MyAnimelist
       lastUpdatedText: lastUpdatedText
       tags: tags
       typeText: typeText
-      season: season
+      seasonText: season
+      season: startDate
       score: score
       averageScore: averageScore
       ranked: ranked
@@ -2213,12 +2212,12 @@ module.exports = class MyAnimelist
           { name:'al_ptw', display: 'Plan to Watch'}
           ],
         gridColumnList: [
-          { name: 'animeTypeText',display: 'Type', sort: 'na', width:'40',align: 'center',headerAlign: 'center' },
+          { name: 'animeTypeText',display: 'Type', sort: 'int', width:'40',align: 'center',headerAlign: 'center' },
           { name: 'animeTitle',display: 'Title', sort: 'str', widthP:'60', align: 'left', headerAlign: 'left' },
-          { name: 'animeProgress',display: 'Progress', sort: 'int', widthP:'40', align: 'center',headerAlign: 'center' },
+          { name: 'animeProgress',display: 'Progress', sort: 'float', widthP:'40', align: 'center',headerAlign: 'center' },
           { name: 'animeScore',display: 'Score', sort: 'int', width:'100',align: 'center',headerAlign: 'center' },
-          { name: 'animeScoreAverage',display: 'Avg Score', sort: 'int', width:'100', align: 'center',headerAlign: 'center' },
-          { name: 'animeSeason',display: 'Season', sort: 'str', width:'100', align: 'center',headerAlign: 'center'},
+          { name: 'animeScoreAverage',display: 'Avg Score', sort: 'float', width:'100', align: 'center',headerAlign: 'center' },
+          { name: 'animeSeasonText',display: 'Season', sort: 'date', width:'100', align: 'center',headerAlign: 'center'},
           { name: 'animeLastUpdatedText',display: 'Last Updated', sort: 'int', width:'140', align: 'center',headerAlign: 'center' },
           { name: 'animeId',hidden: true }
         ]
