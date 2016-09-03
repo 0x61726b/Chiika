@@ -29,10 +29,11 @@ $statusBarHeight: 0px;
 }
 .ReactTabs__TabPanel {
   height: calc(100% - #{$tabListHeight});
+  width: 100%;
 }
 .content > .ReactTabs {
   height: 100%;
-  overflow: hidden;
+  overflow-y: hidden;
 }
 @-webkit-keyframes spin {
   100% {

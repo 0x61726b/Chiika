@@ -58,9 +58,36 @@ td {
   justify-content: center;
   align-content: center;
   align-items: center;
-  height: calc(100% - 53px); // Hackz
+  height: calc(100%); // Hackz
 }
-
+.chiika-logo-path {
+  stroke-dasharray: 3652;
+  stroke-dashoffset: 3652;
+  animation: dash 4s linear infinite;
+  stroke: transparent;
+  transform-origin: center center;
+}
+/*
+.loading-small:after {
+  content: 'Loading...';
+  position: absolute;
+  font-size: 36px;
+  font-weight: 300;
+  color: transparent;
+  animation: dash 5s linear infinite;
+  font-style: italic;
+}
+*/
+@keyframes dash {
+  from {
+    stroke-dashoffset: 3652;
+  }
+  to {
+    stroke-dashoffset: 0;
+    stroke: $color-primary;
+    color: $color-emphasis;
+  }
+}
 
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {

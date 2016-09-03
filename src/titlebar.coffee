@@ -53,6 +53,12 @@ module.exports = React.createClass
         </div>
         <div className="spotlightContainer">
             <div className="titlebar-stoplight">
+                <div className="titlebar-settings">
+                </div>
+
+                <div className="titlebar-divider">
+                </div>
+
                 <div className="titlebar-minimize">
                 </div>
 

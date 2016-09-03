@@ -21,18 +21,17 @@
   display: flex;
   background: #eee;
 }
+$border-size: 2px;
 .header-title {
   border-bottom: 1px solid #ddd;
-  border-right: 4px solid red;
+  border-right: $border-size solid $grey-3;
   padding: 8px 0;
+  padding-left: 2px;
   font-weight: bold;
 }
 .list-item {
   display: flex;
   width: auto;
-}
-.col-list {
-  padding-right: 4px;
 }
 .list-item.selected {
   background: rgba($color-accent,0.1);
@@ -40,7 +39,12 @@
 .list-item > div {
   padding-top: 6px;
   padding-bottom: 6px;
+  padding-left: $border-size;
   border-bottom: 1px solid #dcdfe4;
+}
+
+.list-item > div {
+  border-right: $border-size solid #dcdfe4;
 }
 
 .header-animeTypeText {
@@ -59,8 +63,6 @@
 .col-animeTitle {
   min-width: 192px;
   max-width: 192px;
-  padding-left: 4px;
-  padding-right: 4px;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -92,11 +94,14 @@
   width: 100px;
 }
 
-.header-animeSeasonText {
+.header-animeSeason{
   width: 120px;
 }
-.col-animeSeasonText {
+.col-animeSeason {
   width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .header-animeLastUpdatedText {
