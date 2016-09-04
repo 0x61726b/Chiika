@@ -70,6 +70,13 @@ module.exports = class UIManager
       config.views.splice(indexConfig,1,item)
       chiika.settingsManager.saveConfigFile('view',config)
 
+      match = _find @uiItems,(o) -> o.name == item.name
+      index = _indexOf @uiItems,match
+
+
+      match.displayConfig = item[item.displayType]
+      @uiItems.splice(index,1,match)
+
 
   removeUIItem: (name) ->
     match = _find @uiItems,(o) -> o.name == name

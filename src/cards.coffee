@@ -16,6 +16,7 @@
 
 React                               = require('react')
 LoadingScreen                       = require './loading-screen'
+Loading                             = require './loading'
 {dialog}                            = require('electron').remote
 
 
@@ -60,36 +61,7 @@ module.exports = class CardViews
 
     @lastToggle = clicked
 
-  onActionCompleteCommon: (item,args) ->
-    if args.state == 'not-found'
-      chiika.notificationManager.folderNotFound =>
-        folders = dialog.showOpenDialog({
-          properties: ['openDirectory','multiSelections']
-        })
-
-        if folders?
-          chiika.scriptAction('media','set-folders-for-entry', { id: item.id,folders: folders })
-
-  handleNextEpisode: (card,item) ->
-    nextEpisode = parseInt(item.layout.watchedEpisodes) + 1
-    onActionCompete = (args) ->
-      console.log args
-      if args.state == 'episode-not-found'
-        chiika.notificationManager.episodeNotFound(item.layout.title,nextEpisode)
-
-      if args.state == 'not-found'
-        chiika.notificationManager.folderNotFound =>
-          folders = dialog.showOpenDialog({
-            properties: ['openDirectory','multiSelections']
-          })
-
-          if folders?
-            chiika.scriptAction('media','set-folders-for-entry', { id: item.id,folders: folders })
-
-    chiika.mediaAction 'cards','play-next-episode', { nextEpisode: parseInt(item.layout.watchedEpisodes) + 1, id: item.id }, onActionCompete
-
-  handleOpenFolder: (card,item) ->
-    chiika.mediaAction 'cards','open-folder', { id: item.id }, (args) => @onActionCompleteCommon(item,args)
+  
 
 
 
@@ -137,7 +109,7 @@ module.exports = class CardViews
     </div>
 
   cardList: (card,i) ->
-    <div className="card grid indigo" id="card-news" key={i}>
+    <div className="card grid indigo #{if card.state == 0 then 'blur'}" id="card-news" key={i}>
       <div className="home-inline title">
         <h1>{ card.properties.cardTitle }</h1>
         <button type="button" href={card.properties.redirect} onClick={@openButtonUrl} className="button indigo raised" id="btn-play">View more on {card.properties.redirectTitle}</button>

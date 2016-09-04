@@ -58,5 +58,9 @@ module.exports =
   Keys:[
     { action: 'test', key: 'Shift+O' },
     { action: 'test2', key: 'Shift+P' },
-    { action: 'test3', key: 'Shift+H'}
+    { action: 'test3', key: 'Shift+H'},
+    { action: 'focus-input', key: 'Ctrl+L'}
   ]
+
+  #Cards
+  DisableCardNews: false

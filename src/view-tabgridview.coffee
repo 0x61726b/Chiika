@@ -33,87 +33,162 @@ module.exports = React.createClass
     lastKnownTabIndex: 0
     header: null
     tabs: []
-    data: []
+    lengths: []
     columns: []
-    state: 1 # Loading
+    state: 0 # Loading
     viewName: @props.route.viewName
+
   componentWillMount: ->
-    header = @constructHeader(@state.viewName)
-    tabs   = @constructTabs(@state.viewName)
-    data   = @constructData(@state.viewName,0)
-    @state.header = header
-    @state.tabs   = tabs
-    @state.state  = 1
-    @state.data   = data
+    @prepare(@state.viewName)
+
   componentDidMount: ->
     # Table features
 
     #Dev
-    @componentWillReceiveProps(@props)
+    #@componentWillReceiveProps(@props)
 
+    @refreshData = chiika.emitter.on 'view-refresh', (params) =>
+      if params.view == @state.viewName
+        data   = @constructData(@state.viewName,@state.index)
+        @setState { data: data }
+
+    $("#gridSearch").on 'input', (e) =>
+      @filter(e.target.value)
+
+  componentWillUnmount: ->
+    @refreshData.dispose()
+    $("#gridSearch").off 'input'
   #
   #
   componentDidUpdate: ->
-    pressed = false
-    start   = 0
-    startWidth = 0
-    startElement = null
+    uiItem = _find chiika.uiData, (o) => o.name == @state.viewName
 
-    $(".header-title").on 'mousemove', (e) ->
-      width = $(this).outerWidth(true)
-      borderRight = parseInt($(this).css('borderRightWidth'),10)
+    sortingPrefCol = uiItem.sortingPrefCol
+    sortingPrefDir = uiItem.sortingPrefDir
+    # pressed = false
+    # start   = 0
+    # startWidth = 0
+    # startElement = null
+    #
+    # $(".header-title").on 'mousemove', (e) ->
+    #   width = $(this).outerWidth(true)
+    #   borderRight = parseInt($(this).css('borderRightWidth'),10)
+    #
+    #   box = parseInt($(this).css('padding'),10) + borderRight
+    #   if parseInt(width,10) - borderRight <= e.offsetX
+    #     $(this).addClass 'resizing'
+    #   else
+    #     $(this).removeClass 'resizing'
+    #
+    #   if pressed
+    #     if startElement?
+    #       newWidth = startWidth + 4 + (e.pageX-start)
+    #       startElement.width(newWidth)
+    #       startElement.css('max-width',newWidth)
+    #       $(".col-list.#{startElement[0].classList[1]}").width(newWidth)
+    #       $(".col-list.#{startElement[0].classList[1]}").css('max-width',newWidth)
+    #
+    # $(".header-title").on 'mousedown', (e) ->
+    #   width = $(this).outerWidth(true)
+    #   borderRight = parseInt($(this).css('borderRightWidth'),10)
+    #   box = parseInt($(this).css('padding'),10) + borderRight
+    #
+    #   if parseInt(width,10) - borderRight <= e.offsetX
+    #     pressed = true
+    #     start = e.clientX
+    #     startWidth = $(this).width()
+    #     startElement = $(this)
+    #
+    #     e.preventDefault()
+    #
+    # $('body').on 'mouseup', (e) ->
+    #   pressed = false
+    #   startElement = null
+    #   start = 0
+    #   startWidth = 0
 
-      box = parseInt($(this).css('padding'),10) + borderRight
-      if parseInt(width,10) - borderRight <= e.offsetX
-        $(this).addClass 'resizing'
-      else
-        $(this).removeClass 'resizing'
 
-      if pressed
-        if startElement?
-          newWidth = startWidth + 4 + (e.pageX-start)
-          startElement.width(newWidth)
-          startElement.css('max-width',newWidth)
-          $(".col-list.#{startElement[0].classList[1]}").width(newWidth)
-          $(".col-list.#{startElement[0].classList[1]}").css('max-width',newWidth)
-
-    $(".header-title").on 'mousedown', (e) ->
-      width = $(this).outerWidth(true)
-      borderRight = parseInt($(this).css('borderRightWidth'),10)
-      box = parseInt($(this).css('padding'),10) + borderRight
-
-      if parseInt(width,10) - borderRight <= e.offsetX
-        pressed = true
-        start = e.clientX
-        startWidth = $(this).width()
-        startElement = $(this)
-
-        e.preventDefault()
-
-    $('body').on 'mouseup', (e) ->
-      pressed = false
-      startElement = null
-      start = 0
-      startWidth = 0
-
+  #
+  #
+  #
   componentWillReceiveProps: (props) ->
-    chiika.logger.renderer("TabGridView - ViewName: #{props.route.viewName}")
+    @prepare(props.route.viewName)
+  #
+  #
+  #
+  prepare: (viewName) ->
+    if @state.state == 1 && @state.viewName == viewName
+      return
+    chiika.logger.renderer("TabGridView - ViewName: #{viewName}")
 
-    header = @constructHeader(props.route.viewName)
-    tabs   = @constructTabs(props.route.viewName)
-    columns = @constructColumns(props.route.viewName)
-    data    = @constructData(props.route.viewName,0)
+    newViewName = viewName
+    uiItem = _find chiika.uiData, (o) => o.name == newViewName
 
-    @setState { header: header, viewName: props.route.viewName, tabs: tabs,columns: columns,data:data, state: 1 }
+    header = @constructHeader(newViewName)
+    tabs   = @constructTabs(newViewName).tabs
+    lengths = @constructTabs(newViewName).lengths
+    columns = @constructColumns(newViewName)
+    data    = @constructData(newViewName,uiItem.displayConfig.lastTabIndex)
+    sortingPrefDir = uiItem.displayConfig.sortingPrefDir
+    sortingPrefCol = uiItem.displayConfig.sortingPrefCol
+    findCol = _find uiItem.displayConfig.gridColumnList, (o) -> o.name == sortingPrefCol
 
+    if !findCol?
+      findCol = _find uiItem.displayConfig.gridColumnList, (o) -> o.name == "#{sortingPrefCol}Text"
+
+    sortingType    = findCol.sort
+    sortOrder = true
+    if sortingPrefDir == "dsc"
+      sortOrder = false
+
+
+
+    data = @sort(data,sortingType,sortOrder,sortingPrefCol)
+
+    state =
+      header: header
+      viewName: viewName
+      tabs: tabs
+      lengths:lengths
+      columns: columns
+      data:data
+      state: 1
+      index: uiItem.displayConfig.lastTabIndex
+      sortingPrefDir: sortingPrefDir
+      sortingPrefCol: sortingPrefCol
+      sortingType: sortingType
+
+
+    if @isMounted()
+      @setState state
+    else
+      @state = state
+
+  #
+  #
+  #
   onSelect: (index,last) ->
 
-    data    = @constructData(@state.viewName,index)
-    @setState { index: index,data:data}
+    uiItem = _find chiika.uiData, (o) => o.name == @state.viewName
+    uiItem.displayConfig.lastTabIndex = index
+    chiika.viewManager.saveTabGridViewState(uiItem)
 
+    if chiika.getOption('RememberSortingPreference')
+      data    = @constructData(@state.viewName,index)
+
+      data = @sort(data,@state.sortingType,@state.sortingPrefDir,@state.sortingPrefCol)
+      @setState { index: index,data:data }
+    else
+      data    = @constructData(@state.viewName,index)
+      @setState { index: index,data:data}
+
+
+  #
+  #
+  #
   constructHeader: (viewName) ->
     uiItem = _find chiika.uiData, (o) => o.name == viewName
-    columnList = uiItem.columns
+    columnList = uiItem.displayConfig.gridColumnList
     headers = []
 
     _forEach columnList, (column) =>
@@ -122,14 +197,29 @@ module.exports = React.createClass
 
     headers
 
+  #
+  #
+  #
   constructTabs: (viewName) ->
     uiItem = _find chiika.uiData, (o) => o.name == viewName
-    tabs = uiItem.tabList
+    tabs = uiItem.displayConfig.tabList
 
-    tabs
+    dataLenghts = []
+
+    viewData = _find(chiika.viewData, (o) => o.name == viewName)
+    _forEach tabs,(tab) =>
+      findDataSource = _find viewData.dataSource, (o) -> o.name == tab.name
+      gridData = _find(viewData.dataSource, (o) => o.name == findDataSource.name)
+      dataLenghts.push gridData.data.length
+
+    return { tabs: tabs,lengths: dataLenghts }
+
+  #
+  #
+  #
   constructColumns: (viewName) ->
     uiItem = _find chiika.uiData, (o) => o.name == viewName
-    columns = uiItem.columns
+    columns = uiItem.displayConfig.gridColumnList
 
     notHiddenColumns = []
     _forEach columns, (column) ->
@@ -138,23 +228,98 @@ module.exports = React.createClass
 
     notHiddenColumns
 
-
+  #
+  #
+  #
   constructData: (viewName,index) ->
     uiItem = _find chiika.uiData, (o) => o.name == viewName
     viewData = _find(chiika.viewData, (o) => o.name == viewName)
-    findDataSource = _find viewData.dataSource, (o) -> o.name == uiItem.tabList[index].name
+
+    findDataSource = _find viewData.dataSource, (o) -> o.name == uiItem.displayConfig.tabList[index].name
     gridData = _find(viewData.dataSource, (o) => o.name == findDataSource.name)
     gridData.data
 
+  #
+  #
+  #
+  filter: (data) ->
+    data = data.toLowerCase()
+    uiItem = _find chiika.uiData, (o) => o.name == @state.viewName
+    columns = uiItem.displayConfig.gridColumnList
+
+
+    filterByTitle = (value) ->
+      value[columns[1].name].toLowerCase().indexOf(data) > -1
+
+    data = @constructData(@state.viewName,@state.index).filter(filterByTitle)
+    @setState { data: data }
+
+  #
+  #
+  #
+  sort: (data,type,order,column) ->
+    switch type
+      when 'int'
+        data.sort (a,b) =>
+          a = parseInt(a[column])
+          b = parseInt(b[column])
+          if a > b
+            return (if order then (1) else (-1))
+          else if b > a
+            return (if order then (-1) else (1))
+          else if a == b
+            return 0
+      when 'float'
+        data.sort (a,b) =>
+          if parseFloat(a[column]) > parseFloat(b[column])
+            return (if order then (1) else (-1))
+          else if b > a
+            return (if order then (-1) else (1))
+          return 0
+      when 'str'
+        data.sort (a,b) =>
+          a = a[column].toLowerCase()
+          b = b[column].toLowerCase()
+
+          if a > b
+            return (if order then (1) else (-1))
+          else if b > a
+            return (if order then (-1) else (1))
+          return 0
+
+      when 'date'
+        data.sort (a,b) =>
+          a = moment(a[column],'YYYY/MM/DD')
+          b = moment(b[column],'YYYY/MM/DD')
+
+          if a.isAfter(b)
+            return (if order then (1) else (-1))
+          else if b.isAfter(a)
+            return (if order then (1) else (-1))
+          return 0
+
+
+    data
+
+  #
+  #
+  #
   listItemClick: (e) ->
     $("#chiika-list").find(".list-item").each (e) ->
       $(this).removeClass "selected"
     $(e.target).parent().toggleClass "selected"
 
+  #
+  #
+  #
   listItemDblClick: (e,index) ->
     data = @state.data[index]
     window.location = "##{@state.viewName}_details/#{data.mal_id}"
 
+
+  #
+  #
+  #
   headerClick: (e,col) ->
     tag =  $(e.target).prop('tagName')
 
@@ -179,67 +344,47 @@ module.exports = React.createClass
         name = name.substring(0,name.lastIndexOf('Text'))
 
       chiika.logger.info("Sorting #{name} - #{sortType} - #{orderAsc} - #{orderDsc}")
-      switch sortType
-        when 'int'
-          data.sort (a,b) =>
-            if parseInt(a[name]) > parseInt(b[name])
-              return (if orderAsc then (1) else (-1))
-            else
-              return (if orderDsc then (1) else (-1))
-            return 0
-        when 'float'
-          data.sort (a,b) =>
-            if parseFloat(a[name]) > parseFloat(b[name])
-              return (if orderAsc then (1) else (-1))
-            else
-              return (if orderDsc then (1) else (-1))
-            return 0
-        when 'str'
-          data.sort (a,b) =>
-            a = a[name].toLowerCase()
-            b = b[name].toLowerCase()
 
-            if a > b
-              return (if orderAsc then (-1) else (1))
-            else if b > a
-              return (if orderAsc then (1) else (-1))
-            return 0
+      if chiika.getOption('RememberSortingPreference')
+        uiItem = _find chiika.uiData, (o) => o.name == @state.viewName
+        uiItem.displayConfig.sortingPrefDir = if !orderAsc then "asc" else "dsc"
+        uiItem.displayConfig.sortingPrefCol = name
+        console.log uiItem
+        chiika.viewManager.saveTabGridViewState(uiItem)
 
-        when 'date'
-          data.sort (a,b) =>
-            a = moment(a[name],'YYYY/MM/DD')
-            b = moment(b[name],'YYYY/MM/DD')
-
-            if a.isAfter(b)
-              return (if orderAsc then (1) else (-1))
-            else if b.isAfter(a)
-              return (if orderDsc then (1) else (-1))
-            return 0
+        @setState { data: @sort(data,sortType,!orderAsc,name), sortingPrefDir:uiItem.displayConfig.sortingPrefDir,sortingPrefCol: uiItem.displayConfig.sortingPrefCol,sortingType: sortType  }
+      else
+        @setState { data: @sort(data,sortType,!orderAsc,name) }
 
 
-      @setState { data: data }
 
+
+  #
+  #
+  #
   headerContextMenu: (e,col) ->
     uiItem = _find chiika.uiData, (o) => o.name == @state.viewName
     onClick = (menuItem,browserWindow,event) =>
       if menuItem.type == 'checkbox'
-        column = _find uiItem.columns, (o) -> o.display == menuItem.label
+        column = _find uiItem.displayConfig.gridColumnList, (o) -> o.display == menuItem.label
         column.hidden = !column.hidden
         @setState { columns: @constructColumns(@state.viewName) }
-
         chiika.viewManager.saveTabGridViewState(uiItem)
 
     menuItems = []
-    _forEach uiItem.columns,(column) =>
+    _forEach uiItem.displayConfig.gridColumnList,(column) =>
       if column.display?
         menuItems.push new MenuItem( { type: 'checkbox', label: "#{column.display}",checked: !column.hidden,click: onClick})
     chiika.popupContextMenu(menuItems)
 
+  #
+  #
+  #
   itemContextMenu: (e,index) ->
     item = @state.data[index]
 
     onDeleteFromList = (menuItem,browserWindow,event) =>
-
+      chiika.listManager.deleteFromList('anime',item.mal_id,'myanimelist')
 
     menuItems = []
     menuItems.push new MenuItem( { type: 'normal', label: "#{item.mal_id}", enabled: false })
@@ -247,13 +392,18 @@ module.exports = React.createClass
     menuItems.push new MenuItem( { type: 'normal', label: "Delete from list", click: onDeleteFromList })
     chiika.popupContextMenu(menuItems)
 
-
+  #
+  #
+  #
   render: ->
     if @state.state == 0
       <Loading />
     else
       @renderTabs()
 
+  #
+  #
+  #
   renderSingleItem: (index,key) ->
     <div className="list-item" key={key} onClick={@listItemClick} onDoubleClick={ (e) => @listItemDblClick(e,index)} onContextMenu={ (e) => @itemContextMenu(e,index)}>
       {
@@ -261,19 +411,26 @@ module.exports = React.createClass
           <div className="col-list col-#{col.name}" key={i}>{@state.data[index][col.name]}</div>
       }
     </div>
+
+  #
+  #
+  #
   renderHeader: (index) ->
     <div className="chiika-header" key={index}>
     {
         @state.columns.map (col,i) =>
-          <div className="header-title col-#{col.name} order-asc" onContextMenu={ (e) => @headerContextMenu(e,col)} onClick={ (e) => @headerClick(e,col)} key={i}><span>{col.display}</span></div>
+          <div className="header-title col-#{col.name} order-#{@state.sortingPrefDir}" onContextMenu={ (e) => @headerContextMenu(e,col)} onClick={ (e) => @headerClick(e,col)} key={i}><span>{col.display}</span></div>
     }
     </div>
 
+  #
+  #
+  #
   renderTabs: ->
     <Tabs onSelect={@onSelect} selectedIndex={@state.index}>
       <TabList>
         {@state.tabs.map (tab, i) =>
-            <Tab key={i}>{tab.name}</Tab>
+            <Tab key={i}>{tab.display} <span className="label raised primary">{@state.lengths[i]}</span></Tab>
             }
       </TabList>
       {

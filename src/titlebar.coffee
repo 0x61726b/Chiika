@@ -53,7 +53,7 @@ module.exports = React.createClass
         </div>
         <div className="spotlightContainer">
             <div className="titlebar-stoplight">
-                <div className="titlebar-settings">
+                <div className="titlebar-settings" onClick={ () => window.location = "##{@props.location.pathname}?settings=true&location=App"}>
                 </div>
 
                 <div className="titlebar-divider">
@@ -70,13 +70,3 @@ module.exports = React.createClass
             </div>
         </div>
     </div>
-  # appendTitlebar: ->
-  #   @titlebar = new Titlebar()
-  #   @titlebar.appendTo(document.getElementById('titleBar'))
-  #
-  #   @titlebar.on 'close', () ->
-  #     remote.getCurrentWindow().close()
-  #   @titlebar.on 'minimize', () ->
-  #     remote.getCurrentWindow().minimize()
-  #   @titlebar.on 'maximize', () ->
-  #     remote.getCurrentWindow().maximize()

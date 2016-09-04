@@ -25,22 +25,62 @@ _indexOf                                  = require 'lodash/array/indexOf'
 _forEach                                  = require 'lodash.foreach'
 
 module.exports = class ListManager
-  deleteFromList: (callback) ->
+  updateProgress: (type,id,owner,item,status,viewName,callback) ->
+    onActionCompete = (params) =>
+      if params.args.success
+        callback?()
+        chiika.toastSuccess('Updated!',2000)
+
+
+    chiika.toastLoading('Updating..','infinite')
+    @listAction 'progress-update',{ layoutType: type, id: id,owner:owner, status: status,item:item,viewName: viewName },onActionCompete
+
+  updateStatus: (type,id,owner,item,viewName,callback) ->
+    onActionCompete = (params) =>
+      if params.args.success
+        callback?()
+        chiika.toastSuccess('Updated!',2000)
+
+
+    chiika.toastLoading('Updating..','infinite')
+    @listAction 'status-update',{ layoutType: type, id: id,owner:owner, item:item,viewName: viewName },onActionCompete
+
+  updateScore: (type,id,owner,item,viewName,callback) ->
+    onActionCompete = (params) =>
+      if params.args.success
+        callback?()
+        chiika.toastSuccess('Updated!',2000)
+
+
+    chiika.toastLoading('Updating..','infinite')
+    @listAction 'score-update',{ layoutType: type, id: id,owner:owner, item:item,viewName: viewName },onActionCompete
+
+  addToList: (type,id,owner,entry,callback) ->
+    onActionCompete = (params) =>
+      if params.args.success
+        callback?()
+        chiika.toastSuccess('Added!',2000)
+
+
+    chiika.toastLoading('Adding..','infinite')
+    @listAction 'add-entry',{ layoutType: type, id: id,owner:owner, rawEntry: entry },onActionCompete
+
+  deleteFromList: (type,id,owner,callback) ->
     chiika.notificationManager.deleteFromListConfirmation =>
       chiika.toastLoading('Deleting..','infinite')
       onDeleteReturn = (params) =>
         if params.args.success
           chiika.toastSuccess('Deleted!',2000)
-          callback(params.args)
+          callback?(params.args)
         else
           chiika.toastError("Could not delete. #{params.args.response}",2000)
-      @listAction('delete-entry', null, onDeleteReturn)
+      @listAction('delete-entry', { layoutType: type, id: id,owner:owner }, onDeleteReturn)
 
 
   listAction: (action,params,callback) ->
-    chiika.ipc.sendMessage 'list-action', { action: action, params: params, return: callback }
+    chiika.ipc.sendMessage 'list-action', { action: action, params: params }
 
     chiika.ipc.receive "list-action-response-#{action}",(event,args) =>
-      callback(args)
+      callback?(args)
 
       chiika.ipc.disposeListeners("list-action-response-#{action}")

@@ -20,6 +20,7 @@ _forEach                = require 'lodash.foreach'
 _assign                 = require 'lodash.assign'
 _when                   = require 'when'
 _find                   = require 'lodash/collection/find'
+_indexOf                = require 'lodash/array/indexOf'
 string                  = require 'string'
 
 
@@ -156,6 +157,23 @@ module.exports = class IpcManager
         chiika.logger.error("#{args.viewName} couldnt be found.")
 
 
+  listAction: ->
+    @receive 'list-action', (event,args) =>
+      action = args.action
+      params = args.params
+      owner  = params.owner
+
+      if !action?
+        chiika.logger.error("Can't perform action without action itself you baka!")
+
+      if !owner?
+        chiika.logger.error("Can't perform action knowing who to call")
+
+      returnFromScript = (args) =>
+        chiika.logger.verbose("Action performed for #{owner} - #{action}")
+        event.sender.send "list-action-response-#{action}", { action: action, args: args }
+
+      chiika.chiikaApi.emit 'list-action', { calling: owner, action: action, params: params, return: returnFromScript }
   #
   #
   #
@@ -350,10 +368,12 @@ module.exports = class IpcManager
   setUIData: ->
     @receive 'set-ui-config', (event,args) =>
       views = chiika.viewManager.getViews()
+      uiItems = chiika.uiManager.getUIItems()
 
       uiItem = args.item
 
       find = _find views, (o) -> o.name == uiItem.name
+      index = _indexOf views,find
       if find?
         find.config[find.displayType] = uiItem.config
         chiika.uiManager.saveUIItem(find.config)
@@ -429,11 +449,17 @@ module.exports = class IpcManager
   #
   getUserData: ->
     @receiveAnswer 'get-user-data', (event,args) =>
-      users = chiika.dbManager.usersDb.users
+      scripts = chiika.apiManager.getScripts()
 
-      if users.length > 0
-        users
+      users = []
 
+      onGetUser = (user) ->
+        users.push user
+      for script in scripts
+        if script.isService && script.isActive
+          chiika.chiikaApi.emit 'get-user', { calling: script.name, return: onGetUser }
+
+      users
 
   getServices: ->
     @receiveAnswer 'get-services', (event,args) =>
@@ -442,12 +468,34 @@ module.exports = class IpcManager
       services = []
       for script in scripts
         if script.isService && script.isActive
-          services.push script
+          service =
+            name: script.name
+            description: script.description
+            isActive: script.isActive
+            isService: script.isService
+            loginType: script.loginType
+            order: script.order
+            logo: script.logo
+          services.push service
+
 
       if services.length > 0
         return services
       else
         return undefined
+
+
+
+  #
+  #
+  #
+  syncService: ->
+    @receive 'sync-service', (event,args) =>
+      service = args.owner
+
+      onSync = (params) =>
+        event.sender.send 'sync-response', params
+      chiika.chiikaApi.emit 'sync', { calling: service, return: onSync }
 
   #
   #
@@ -468,6 +516,10 @@ module.exports = class IpcManager
       else
         return undefined
 
+
+  #
+  #
+  #
   handleEvents: ->
     @callWindowMethod()
     @getUIData()
@@ -494,3 +546,5 @@ module.exports = class IpcManager
     @notificationBar()
     @searching()
     @setUIData()
+    @listAction()
+    @syncService()

@@ -146,8 +146,8 @@ module.exports = class ViewManager
         display: view.displayName
         owner: view.owner
         displayType: 'TabGridView'
-        tabList: view.TabGridView.tabList
-        columns: view.TabGridView.gridColumnList
+        displayConfig: view.TabGridView
+        state: 1
 
 
       chiika.uiManager.addUIItem uiItem
@@ -157,6 +157,7 @@ module.exports = class ViewManager
     else if view.displayType == "subview"
       newView = new SubView(view)
 
+
     else if view.displayType == "CardListItem"
       uiItem =
         name: view.name
@@ -165,6 +166,7 @@ module.exports = class ViewManager
         owner: view.owner
         displayType: 'CardListItem'
         cardProperties: view.CardListItem
+        state: 0
 
       chiika.uiManager.addUIItem uiItem
       newView = new SubView(view)
@@ -182,6 +184,7 @@ module.exports = class ViewManager
         owner: view.owner
         displayType: 'CardFullEntry'
         cardProperties: view.CardFullEntry
+        state: 1
 
       chiika.uiManager.addUIItem uiItem
       newView = new SubView(view)
@@ -195,6 +198,7 @@ module.exports = class ViewManager
         owner: view.owner
         displayType: view.displayType
         cardProperties: view.CardStatistics
+        state: 1
 
       chiika.uiManager.addUIItem uiItem
       newView = new SubView(view)
@@ -208,6 +212,7 @@ module.exports = class ViewManager
         owner: view.owner
         displayType: 'CardListItemUpcoming'
         cardProperties: view.CardListItemUpcoming
+        state: 1
 
       chiika.uiManager.addUIItem uiItem
       newView = new SubView(view)
@@ -222,6 +227,7 @@ module.exports = class ViewManager
         owner: view.owner
         displayType: 'CardItemContinueWatching'
         cardProperties: view.CardItemContinueWatching
+        state: 1
 
       chiika.uiManager.addUIItem uiItem
       newView = new SubView(view)
@@ -235,6 +241,7 @@ module.exports = class ViewManager
         owner: view.owner
         displayType: 'CardItemNotRecognized'
         cardProperties: view.CardItemNotRecognized
+        state: 1
 
       chiika.uiManager.addUIItem uiItem
       newView = new SubView(view)

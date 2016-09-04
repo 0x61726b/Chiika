@@ -76,9 +76,11 @@ module.exports = class CardViews
       displayName: 'News'
       displayType: 'CardListItem'
       defaultDataSource: @chiika.settingsManager.appOptions.DefaultRssSource
+      noUpdate: true
       CardListItem: {
         redirectTitle: @chiika.settingsManager.appOptions.DefaultRssSource
         displayCategory: true
+        enabled: true
         display: 'description'
         alt: 'description'
         cardTitle: 'News'
@@ -123,6 +125,7 @@ module.exports = class CardViews
       noUpdate: true
       dynamic: true
       CardFullEntry: {
+        enabled: true
         viewName: 'myanimelist_animelist'
         order: @currentlyWatchingOrder
       }
@@ -138,6 +141,7 @@ module.exports = class CardViews
       noUpdate: true
       dynamic: true
       CardItemNotRecognized: {
+        enabled: true
         viewName: 'myanimelist_animelist'
         order: @currentlyWatchingOrder
       }
@@ -150,9 +154,10 @@ module.exports = class CardViews
       owner: @name
       displayName: 'Statistics'
       displayType: 'CardStatistics'
-      noUpdate: true
       CardStatistics: {
+        enabled: true
         order: @statisticsOrder
+        view: 'myanimelist_animelist'
       }
 
     @chiika.viewManager.addView statisticsCard
@@ -165,6 +170,7 @@ module.exports = class CardViews
       displayType: 'CardListItemUpcoming'
       noUpdate: true
       CardListItemUpcoming: {
+        enabled: true
         order:@upcomingOrder
       }
 
@@ -178,7 +184,9 @@ module.exports = class CardViews
       displayType: 'CardItemContinueWatching'
       noUpdate: true
       CardItemContinueWatching: {
+        enabled: true
         order:@continueWatchingOrder
+        view: 'myanimelist_animelist'
       }
 
     @chiika.viewManager.addView continueWatchingCard
@@ -245,9 +253,7 @@ module.exports = class CardViews
       async = []
 
 
-      waitForNews = _when.defer()
       waitForUpcoming = _when.defer()
-      async.push waitForNews.promise
       async.push waitForUpcoming.promise
 
       _when.all(async).then(init.defer.resolve)
@@ -256,9 +262,7 @@ module.exports = class CardViews
 
       if news? && news.getData().length == 0
         @chiika.requestViewUpdate 'cards_news',@name, (response) =>
-          waitForNews.resolve()
-      else
-        waitForNews.resolve()
+          @chiika.requestViewDataUpdate('cards','cards_news')
 
       if upcoming?
         @chiika.requestViewUpdate 'cards_upcoming',@name, (response) =>

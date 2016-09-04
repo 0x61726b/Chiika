@@ -103,8 +103,19 @@ SideMenu = React.createClass
       menuItemsOfThisCategory.map (menuItem,j) =>
         @renderMenuItem(menuItem,j + 1)
 
-  settingsClick: ->
-    window.location = @props.props.location.pathname + '/Settings'
+  getCoverImage: ->
+    defaultUser = _find chiika.users, (o) -> o.isDefault == true
+    if defaultUser?
+      defaultUser.profileImage
+    else
+      "../assets/images/avatar.jpg"
+
+  getDefaultUser: ->
+    defaultUser = _find chiika.users, (o) -> o.isDefault == true
+    if defaultUser?
+      defaultUser.realUserName
+    else
+      "Chiika"
 
   render: () ->
     (<div className="sidebar">
@@ -114,10 +125,10 @@ SideMenu = React.createClass
         </div>
         <Link to="User" className="userArea noDecoration">
           <div className="imageContainer">
-            <img id="userAvatar" className="img-circle avatar" src="../assets/images/avatar.jpg"/>
+            <img id="userAvatar" className="img-circle avatar" src="#{@getCoverImage()}"/>
           </div>
           <div className="userInfo">
-            Chiika
+            {@getDefaultUser()}
           </div>
         </Link>
       </div>
@@ -137,7 +148,6 @@ SideMenu = React.createClass
               </div>
           }
         </ul>
-        <Link className="button raised danger" to="#{@props.props.location.pathname}" query={{ settings:true,location:'App' }} id="settings-button">Settings</Link>
       </div>
     </div>)
 

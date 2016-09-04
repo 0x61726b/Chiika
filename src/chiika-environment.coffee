@@ -72,7 +72,7 @@ class ChiikaEnvironment
 
     @ipc.onReconstructUI()
     @ipc.spectron()
-    @refreshData()
+
 
     ipcRenderer.on 'show-toast', (event,args) =>
       message = args.message
@@ -101,6 +101,21 @@ class ChiikaEnvironment
 
   setUIViewConfig: (uiItem) ->
     chiika.ipc.sendMessage 'set-ui-config', { item: uiItem }
+
+  #
+  #
+  #
+  refreshViewByName: (view,owner) ->
+    # Find UI Item if it has one, mark its state
+    view = _find @viewData, (o) -> o.name == view
+
+    if view?
+      ui = _find @uiData, (o) -> o.name == view.name
+      ui.state = 0
+      console.log ui
+      @emitter.emit 'ui-data-refresh', { item: ui }
+
+    @ipc.refreshViewByName(view.name,owner)
 
   openShellUrl: (url) ->
     shell.openExternal(url)
@@ -161,6 +176,8 @@ class ChiikaEnvironment
     @appSettings[option] = value
     @ipc.setOption(option,value)
 
+    @viewManager.optionChanged(option,value)
+
   mediaAction: (owner,action,params,callback) ->
     @ipc.sendMessage 'media-action', { owner:owner, action:action, params: params }
 
@@ -192,25 +209,6 @@ class ChiikaEnvironment
   domReady: ->
     @searchManager.postInit()
 
-  getWorkingDirectory: ->
-    process.cwd()
-
-
-  getResourcesPath: ->
-    process.resourcesPath
-
-
-  getUserTimezone: ->
-    moment = require 'moment-timezone'
-    userTimezone = moment.tz(moment.tz.guess())
-    utcOffset = moment.parseZone(userTimezone).utcOffset() * 60# In seconds
-    return { timezone: userTimezone , offset: utcOffset }
-
-  refreshData: ->
-    ipcRenderer.on 'refresh-data', (event,args) =>
-      @ipc.sendMessage 'get-ui-data'
-      @ipc.sendMessage 'get-view-data'
-      @ipc.sendMessage 'get-settings-data'
 
   preload: ->
     waitForUI = _when.defer()
@@ -244,8 +242,18 @@ class ChiikaEnvironment
         console.log args.view
         @viewData.push args.view
 
-      @cardManager.refreshCards()
-      @emitter.emit 'view-refresh', { view: args.view }
+
+      @emitter.emit 'view-refresh', { view: name }
+
+      # Check UI item
+      findUiItem = _find @uiData, (o) -> o.name == name
+      index    = _indexOf @uiData, findUiItem
+
+      if index > -1
+        findUiItem.state = 1
+        @emitter.emit 'ui-data-refresh', { item: args.item }
+
+
 
 
     ##########################
@@ -283,7 +291,6 @@ class ChiikaEnvironment
             return 0
         return 0
 
-      @cardManager.refreshCards()
       @emitter.emit 'ui-data-refresh', { item: args.item }
 
 
@@ -308,7 +315,6 @@ class ChiikaEnvironment
             return 0
         return 0
 
-
       infoStr = ''
       for uiData in @uiData
         infoStr += " #{uiData.display} ( #{uiData.type} )"
@@ -324,13 +330,19 @@ class ChiikaEnvironment
 
       waitForViewData.resolve()
 
-      @cardManager.refreshCards()
-
     @ipc.sendMessage 'get-settings-data'
     @ipc.getSettings (args) =>
       @appSettings = args
 
       waitForSettingsData.resolve()
+
+    @ipc.sendMessage 'get-user-data'
+    @ipc.receive 'get-user-data-response', (event,args) =>
+      @users = args
+
+    @ipc.sendMessage 'get-services'
+    @ipc.receive 'get-services-response', (event,args) =>
+      @services = args
 
     @ipc.sendMessage 'post-init'
     ipcRenderer.on 'post-init-response', (event,args) =>

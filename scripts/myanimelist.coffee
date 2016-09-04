@@ -84,6 +84,7 @@ module.exports = class MyAnimelist
   #
   isActive: true
 
+
   order: 0
 
   #
@@ -357,6 +358,45 @@ module.exports = class MyAnimelist
       @createViewAnimeExtra()
       @createViewMangaExtra()
 
+    @on 'get-user', (args) =>
+      @malUser = @chiika.users.getDefaultUser(@name)
+
+      @malUser.profileImage = "https://myanimelist.cdn-dena.com/images/userimages/#{@malUser.malID}.jpg"
+      args.return(@malUser)
+
+
+    @on 'sync', (args) =>
+
+      syncAnimelist = (resolve) =>
+
+        @chiika.requestViewUpdate 'myanimelist_animelist',@name,(params) =>
+          error = !params.success
+          if params.success
+            @chiika.requestViewDataUpdate('myanimelist','myanimelist_animelist')
+
+          resolve(error)
+
+      syncMangalist = (resolve) =>
+        @chiika.requestViewUpdate 'myanimelist_mangalist',@name,(params) =>
+          error = !params.success
+          if params.success
+            @chiika.requestViewDataUpdate('myanimelist','myanimelist_mangalist')
+
+
+          resolve(error)
+
+      syncAnimelistPromise = _when.promise(syncAnimelist)
+      syncMangalistPromise = _when.promise(syncMangalist)
+
+      sync = _when.join(syncAnimelistPromise,syncMangalistPromise).then (error) =>
+        args.return(error)
+
+
+
+
+
+
+
     # This event is called each time the associated view needs to be updated then saved to DB
     # Note that its the actual data refreshing. Meaning for example, you need to SYNC your data to the remote one, this event occurs
     # This event won't be called each application launch unless "RefreshUponLaunch" option is ticked
@@ -430,9 +470,8 @@ module.exports = class MyAnimelist
         if animeEntry?
           args.return({ updated: false, layout: @getMangaDetailsLayout(animeEntry)})
 
-    @on 'details-action', (args) =>
+    @on 'list-action', (args) =>
       action = args.action
-      layout = args.layout
       params = args.params
 
       @chiika.logger.script("Receiving details-action - #{action} for #{@name}")
@@ -447,43 +486,46 @@ module.exports = class MyAnimelist
       switch action
         when 'progress-update'
           item = params.item
+          status = params.status
+
           if params.viewName == 'myanimelist_animelist'
-            @updateProgress layout.id,'anime',item.current, (result) =>
+            @updateProgress params.id,'anime',item.current, (result) =>
               args.return(result)
 
           if params.viewName == 'myanimelist_mangalist'
             newProgress = { }
             if item.title == 'Chapters'
-              newProgress = { chapters: item.current, volumes: layout.status.items[1].current,type: item.title }
+              newProgress = { chapters: item.current, volumes: status.items[1].current,type: item.title }
             if item.title == 'Volumes'
-              newProgress = { volumes: item.current, chapters: layout.status.items[0].current,type: item.title }
+              newProgress = { volumes: item.current, chapters: status.items[0].current,type: item.title }
 
-            @updateProgress layout.id,'manga',newProgress, (result) =>
+            @updateProgress params.id,'manga',newProgress, (result) =>
               args.return(result)
 
         when 'score-update'
           item = params.item
+          console.log params
           if params.viewName == 'myanimelist_animelist'
-            @updateScore layout.id,'anime',item.current, (result) =>
+            @updateScore params.id,'anime',item.current, (result) =>
               args.return(result)
 
           if params.viewName == 'myanimelist_mangalist'
-            @updateScore layout.id,'manga',item.current, (result) =>
+            @updateScore params.id,'manga',item.current, (result) =>
               args.return(result)
 
         when 'status-update'
           item = params.item
 
           if params.viewName == 'myanimelist_animelist'
-            @updateStatus layout.id,'anime',item.identifier, (result) =>
+            @updateStatus params.id,'anime',item.identifier, (result) =>
               args.return(result)
 
           if params.viewName == 'myanimelist_mangalist'
-            @updateStatus layout.id,'manga',item.identifier, (result) =>
+            @updateStatus params.id,'manga',item.identifier, (result) =>
               args.return(result)
 
         when 'cover-click'
-          id = layout.id
+          id = params.id
           if id?
             if params.viewName == 'myanimelist_animelist'
               result = shell.openExternal("http://myanimelist.net/anime/#{id}")
@@ -502,45 +544,45 @@ module.exports = class MyAnimelist
             args.return({ success:result })
 
         when 'delete-entry'
-          if !layout.id?
+          if !params.id?
             onActionError("Need ID for delete-entry")
           else
-            if layout.layoutType == 'anime'
+            if params.layoutType == 'anime'
               animeView = @chiika.viewManager.getViewByName('myanimelist_animelist')
               if animeView?
-                entry = _find animeView.getData(), (o) -> o.mal_id == layout.id
+                entry = _find animeView.getData(), (o) -> o.mal_id == params.id
                 if entry?
                   @removeAnime entry, (response) =>
                     if response.success
-                      animeView.remove 'mal_id',layout.id, (dbop) =>
+                      animeView.remove 'mal_id',params.id, (dbop) =>
                         if dbop.count > 0
                           # Update the local list
                           @animelist = animeView.getData()
                           @chiika.requestViewDataUpdate('myanimelist','myanimelist_animelist')
                           args.return(response)
 
-            if layout.layoutType == 'manga'
+            if params.layoutType == 'manga'
               mangaView = @chiika.viewManager.getViewByName('myanimelist_mangalist')
               if mangaView?
-                entry = _find mangaView.getData(), (o) -> o.mal_id == layout.id
+                entry = _find mangaView.getData(), (o) -> o.mal_id == params.id
                 if entry?
                   @removeManga entry, (response) =>
                     if response.success
-                      mangaView.remove 'mal_id',layout.id, (dbop) =>
+                      mangaView.remove 'mal_id',params.id, (dbop) =>
                         if dbop.count > 0
                           @mangalist = mangaView.getData()
                           @chiika.requestViewDataUpdate('myanimelist','myanimelist_mangalist')
                           args.return(response)
 
         when 'add-entry'
-          if !layout.id?
+          if !params.id?
             onActionError("Need ID for add-entry")
           else
-            if layout.layoutType == 'anime'
+            if params.layoutType == 'anime'
               animeView = @chiika.viewManager.getViewByName('myanimelist_animelist')
               if animeView?
-                rawEntry = layout.rawEntry
-                entry = @createAddedAnimeEntry(layout.id,rawEntry)
+                rawEntry = params.rawEntry
+                entry = @createAddedAnimeEntry(params.id,rawEntry)
                 console.log entry
                 @addAnime entry, (result) =>
                   if result.statusCode == 201
@@ -548,11 +590,11 @@ module.exports = class MyAnimelist
                       if result.updated > 0
                         @chiika.requestViewDataUpdate('myanimelist','myanimelist_animelist')
                         args.return(result)
-            if layout.layoutType == 'manga'
+            if params.layoutType == 'manga'
               mangaView = @chiika.viewManager.getViewByName('myanimelist_mangalist')
               if mangaView?
-                rawEntry = layout.rawEntry
-                entry = @createAddedMangaEntry(layout.id,rawEntry)
+                rawEntry = params.rawEntry
+                entry = @createAddedMangaEntry(params.id,rawEntry)
                 @addManga entry, (result) =>
                   if result.statusCode == 201
                     @updateViewAndRefresh 'myanimelist_mangalist',entry,'mal_id', (result) =>
@@ -767,7 +809,7 @@ module.exports = class MyAnimelist
               _when.all(async).then =>
                 args.return( { success: true })
 
-            newUser = { userName: args.user + "_" + @name,owner: @name, password: args.pass, realUserName: args.user }
+            newUser = { userName: args.user + "_" + @name,owner: @name, password: args.pass, realUserName: args.user, isDefault: true }
 
             @chiika.parser.parseXml(body)
                          .then (xmlObject) =>
@@ -2071,6 +2113,7 @@ module.exports = class MyAnimelist
       animeSeriesStartDate: rawEntry.animeSeriesStartDate
       animeSeriesEndDate: rawEntry.animeSeriesEndDate
       animeImage: rawEntry.animeImage
+      animeTotalEpisodes: rawEntry.animeTotalEpisodes
       animeWatchedEpisodes: "0"
       animeUserStatus: "6" # Ptw
       animeScore:"0"
@@ -2108,7 +2151,6 @@ module.exports = class MyAnimelist
       mangaLastUpdated: moment().valueOf()
       mangaTags: ""
 
-    console.log rawEntry
     entry.mangaType = @getMangaType('number',entry.mangaType)
     entry.mangaSeriesStatus = @getMangaStatus('number',entry.mangaSeriesStatus)
     entry
@@ -2204,6 +2246,10 @@ module.exports = class MyAnimelist
       owner: @name, #Script name, the updates for this view will always be called at 'owner'
       category: 'MyAnimelist',
       TabGridView: {
+        sortBy: 'animeTitle',
+        sortingPrefCol: 'animeTitle',
+        sortingPrefDir: 'asc',
+        lastTabIndex: 0,
         tabList: [
           { name:'al_watching', display: 'Watching' },
           { name:'al_completed', display: 'Completed'},
@@ -2248,6 +2294,9 @@ module.exports = class MyAnimelist
       owner: @name, #Script name, the updates for this view will always be called at 'owner'
       category: 'MyAnimelist',
       TabGridView: { #Must be the same name with displayType
+        sortingPrefCol: 'mangaTitle',
+        sortingPrefDir: 'asc',
+        lastTabIndex: 0,
         tabList: [
           { name:'ml_reading', display: 'Reading' },
           { name:'ml_completed', display: 'Completed'},

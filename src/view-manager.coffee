@@ -21,77 +21,39 @@ _indexOf                            = require 'lodash/array/indexOf'
 #Views
 
 module.exports = class ViewManager
-  #
-  # Records the tab index of a tab grid view
-  #
-  tabViewTabIndexCounter: []
 
   #
-  # Records the tab index of a sorted column with sort type/dir
   #
-  tabViewSortInfo: []
-
-
-  scrollData: []
-
+  #
   saveTabGridViewState: (view) ->
-    columns = view.columns
-    tabs    = view.tabList
+    chiika.setUIViewConfig { name:view.name, config: view.displayConfig }
 
-    chiika.setUIViewConfig { name:view.name, config: { gridColumnList: columns, tabList: tabs } }
+  optionChanged: (option,value) ->
+    chiika.logger.renderer("OnOptionChanged #{option} - #{value}")
+    if option == 'DisableCardNews'
+      view = _find chiika.uiData, (o) -> o.name == 'cards_news'
+      if view?
+        chiika.emitter.emit 'ui-data-refresh', { item: view }
+
+    if option == 'DisableCardContinueWatching'
+      view = _find chiika.uiData, (o) -> o.name == 'cards_continueWatching'
+      if view?
+        chiika.emitter.emit 'ui-data-refresh', { item: view }
+
+    if option == 'DisableCardUpcoming'
+      view = _find chiika.uiData, (o) -> o.name == 'cards_upcoming'
+      if view?
+        chiika.emitter.emit 'ui-data-refresh', { item: view }
+
+
+    if option == 'DisableCardStatistics'
+      view = _find chiika.uiData, (o) -> o.name == 'cards_statistics'
+      if view?
+        chiika.emitter.emit 'ui-data-refresh', { item: view }
+
+  #
+  #
+  #
   getComponent: (name) ->
     if name == 'TabGridView'
       return './view-tabgridview'
-
-  onTabSelect: (viewName,index,last) ->
-    @tabViewTabIndexCounter[viewName] = { index: index }
-    if @scrollData[viewName]?
-      @scrollData[viewName].scrollData[last] = $(".objbox").scrollTop()
-    else
-      @scrollData[viewName] = { scrollData: { } }
-      @scrollData[viewName].scrollData[last] = $(".objbox").scrollTop()
-
-  onTabViewUnmount: (viewName,index) ->
-    @tabViewTabIndexCounter[viewName] = { index: index }
-    if @scrollData[viewName]?
-      @scrollData[viewName].scrollData[index] = $(".objbox").scrollTop()
-
-
-
-
-  onTabSorted: (viewName,tabIndex,sortedColumn,type,direction) ->
-    oldData = _find @tabViewSortInfo, (o) -> o.viewName == viewName && o.tabIndex == tabIndex
-    index   = _indexOf @tabViewSortInfo, oldData
-
-    if oldData?
-      oldData.column = sortedColumn
-      oldData.direction = direction
-      @tabViewSortInfo.splice(index,1,oldData)
-    else
-      sortInfo = { viewName: viewName, tabIndex: tabIndex, column: sortedColumn, type: type, direction: direction }
-      @tabViewSortInfo.push sortInfo
-
-  getTabSortInfo: (viewName,tabIndex) ->
-    sortInfo = _find @tabViewSortInfo, (o) -> o.viewName == viewName && o.tabIndex == tabIndex
-
-    if sortInfo?
-      sortInfo
-    else
-      null
-  getTabScrollAmount: (viewName,index) ->
-    if @scrollData[viewName]?
-      scroll = @scrollData[viewName].scrollData[index]
-      if scroll?
-        scroll
-      else
-        null
-    else
-      null
-
-  getTabSelectedIndexByName: (viewName) ->
-    v = @tabViewTabIndexCounter[viewName]
-    if v?
-      v
-    else
-      { index: null }
-      #chiika.logger.error("There was a problem with remembering last tab index for #{viewName}")

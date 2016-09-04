@@ -66,7 +66,7 @@ Content = React.createClass
   render: () ->
     (<div className="main">
       <div id="titleBar">
-        <Titlebar />
+        <Titlebar {...this.props.props} />
       </div>
       <div className="content">
         {this.props.props.children}

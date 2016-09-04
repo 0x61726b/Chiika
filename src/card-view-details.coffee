@@ -131,38 +131,26 @@ module.exports = React.createClass
 
 
   deleteFromList: ->
-    chiika.notificationManager.deleteFromListConfirmation =>
-      chiika.toastLoading('Deleting..','infinite')
-      onDeleteReturn = (params) =>
-        if params.args.success
-          chiika.toastSuccess('Deleted!',2000)
-          @requestDetails()
-        else
-          chiika.toastError("Could not delete. #{params.args.response}",2000)
-      @onAction('delete-entry', null, onDeleteReturn)
+    id = @state.layout.id
+    viewName = @props.route.viewName
+    owner = @state.layout.owner
+    layoutType = @state.layout.layoutType
+    chiika.listManager.deleteFromList layoutType,id,owner, (params) =>
+      @requestDetails()
 
   addToList: ->
-    onActionCompete = (params) =>
-      if params.args.success
-        @requestDetails()
-        chiika.toastSuccess('Added!',2000)
-    @onAction 'add-entry',null,onActionCompete
-    chiika.toastLoading('Adding..','infinite')
-  #
-  #
-  #
-  onAction: (action,params,returnCallback) ->
-    chiika.ipc.detailsAction(action,@state.layout,params)
-
-    chiika.ipc.detailsActionResponse action,(args) =>
-      chiika.ipc.disposeListeners('details-action-response')
-      returnCallback?(args)
+    id = @state.layout.id
+    viewName = @props.route.viewName
+    owner = @state.layout.owner
+    layoutType = @state.layout.layoutType
+    chiika.listManager.addToList layoutType,id,owner,@state.layout.rawEntry, (params) =>
+      @requestDetails()
 
   #
   #
   #
   onCoverClick: ->
-    @onAction('cover-click', { viewName: @props.route.viewName })
+    chiika.listManager.listAction('cover-click', { viewName: @props.route.viewName, id: @state.layout.id,owner: @state.layout.owner })
 
 
   #
@@ -170,6 +158,7 @@ module.exports = React.createClass
   #
   onCharacterClick: (e) ->
     @onAction('character-click',{ id: $(e.target).parent().attr("data-character") })
+    chiika.listManager.listAction('character-click', { viewName: @props.route.viewName, id: $(e.target).parent().attr("data-character"),owner: @state.layout.owner })
 
   #
   #
@@ -197,10 +186,10 @@ module.exports = React.createClass
       if total? && total > 0 && (current) > total
         return
 
-      if current > 0
+      if current >= 0
         findItem.current = current
-        @onAction('progress-update',{ item: { title: itemTitle,current: current, total: total },viewName: @props.route.viewName },@onUpdate)
-        chiika.toastLoading("Updating..",'infinite')
+        chiika.listManager.updateProgress(@state.layout.layoutType,@state.layout.id,@state.layout.owner,
+        { title: itemTitle,current: current, total: total },@state.layout.status,@props.route.viewName)
 
         # Update input
         $($(e.target).next()).find('input').attr('placeholder',current)
@@ -226,8 +215,8 @@ module.exports = React.createClass
         current--
 
         findItem.current = current
-        @onAction('progress-update',{ item: { title:itemTitle, current: current, total: total },viewName: @props.route.viewName },@onUpdate)
-        chiika.toastLoading("Updating..",'infinite')
+        chiika.listManager.updateProgress(@state.layout.layoutType,@state.layout.id,@state.layout.owner,
+        { title: itemTitle,current: current, total: total },@state.layout.status,@props.route.viewName)
 
         # Update input
         $($(e.target).next()).find('input').attr('placeholder',current)
@@ -255,8 +244,8 @@ module.exports = React.createClass
         current++
 
         findItem.current = current
-        @onAction('progress-update',{ item: { title:itemTitle, current: current, total: total },viewName: @props.route.viewName },@onUpdate)
-        chiika.toastLoading("Updating..",'infinite')
+        chiika.listManager.updateProgress(@state.layout.layoutType,@state.layout.id,@state.layout.owner,
+        { title: itemTitle,current: current, total: total },@state.layout.status,@props.route.viewName)
 
         # Update input
         $($(e.target).prev()).find('input').attr('placeholder',current)
@@ -275,9 +264,8 @@ module.exports = React.createClass
       @chart.data.datasets[0].data[1] = 10 - parseInt($(e.target).val())
       @chart.update()
 
-
-    @onAction('score-update',{ item: { current: parseInt(value) },viewName: @props.route.viewName },@onUpdate)
-    chiika.toastLoading("Updating..",'infinite')
+    chiika.listManager.updateScore(@state.layout.layoutType,@state.layout.id,@state.layout.owner,
+    { current: parseInt(value) },@props.route.viewName)
 
   #
   #
@@ -292,31 +280,9 @@ module.exports = React.createClass
     $(".userStatusButton").html($(e.target).text())
     $('.userStatus').toggleClass('open')
 
-    @onAction('status-update',{ item: { identifier: action },viewName: @props.route.viewName },@onUpdate)
-    chiika.toastLoading("Updating..",'infinite')
-  #
-  #
-  #
-  onUpdate: (result) ->
-    if result.args.success
-      @onActionSuccess("Updated!")
+    chiika.listManager.updateStatus(@state.layout.layoutType,@state.layout.id,@state.layout.owner,
+    { identifier: action },@props.route.viewName)
 
-      #Refresh view data
-      chiika.ipc.sendMessage 'get-view-data-by-name', { name: @props.route.viewName }
-    else
-      @onActionError("Whoops..Something went wrong.")
-
-  #
-  #
-  #
-  onActionError: (error) ->
-    chiika.toastError(error,5000)
-
-  #
-  #
-  #
-  onActionSuccess: (message) ->
-    chiika.toastSuccess(message,2500)
 
   onCardActionCompleteCommon: (id,args) ->
     if args.state == 'not-found'

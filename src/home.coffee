@@ -18,34 +18,54 @@ React                               = require('react')
 
 Chart                               = require 'chart.js'
 _forEach                            = require 'lodash.foreach'
+Loading                             = require './loading'
+CardsNews                           = require './cards/cards-news'
+CardsUpcoming                       = require './cards/cards-upcoming'
+CardsRecognized                     = require './cards/cards-recognized-anime'
+CardStatistics                      = require './cards/cards-statistics-small'
+CardsContinueWatching               = require './cards/cards-continue-watching'
+_find                               = require 'lodash/collection/find'
+_assign                             = require 'lodash.assign'
 #Views
 
 module.exports = React.createClass
   getInitialState: ->
     cards: []
-  componentDidMount: ->
-    @setState { cards: chiika.cardManager.cards }
+  componentWillMount: ->
+    @refresh()
 
-    chiika.emitter.on 'view-refresh', =>
+    chiika.emitter.on 'ui-data-refresh', (item) =>
+      find = _find @state.cards, (o) -> o.name == item.name
+      find = item
       if @isMounted()
-        @setState { cards: chiika.cardManager.cards }
-
-    chiika.emitter.on 'ui-data-refresh', =>
-      if @isMounted()
-        @setState { cards: chiika.cardManager.cards }
+        @refresh()
+        @setState { }
 
 
 
-  componentDidUpdate: ->
-    # chart = this.state.chart;
-    # data = this.props.data;
-    #
-    # data.datasets.forEach((dataset, i) => chart.data.datasets[i].data = dataset.data);
-    #
-    # chart.data.labels = data.labels;
-  componentWillUnmount: ->
+  refresh: ->
+    @state.cards = []
+    _forEach chiika.uiData, (ui) =>
+      @state.cards.push ui
 
   render: ->
+    <div>
+    {
+      @state.cards.map (card,i) =>
+        if card.name == 'cards_continueWatching' && !chiika.getOption('DisableCardContinueWatching')
+          <CardsContinueWatching key={i} card={card} state={card.state}/>
+        else if card.name == 'cards_news' && !chiika.getOption('DisableCardNews')
+          <CardsNews key={i} card={card} state={card.state}/>
+        else if card.name == 'cards_statistics' && !chiika.getOption('DisableCardStatistics')
+          <CardStatistics key={i} card={card} state={card.state}/>
+        else if card.name == 'cards_upcoming' && !chiika.getOption('DisableCardUpcoming')
+          <CardsUpcoming key={i} card={card} state={card.state}/>
+        else if card.name == 'cards_currentlyWatching'
+          <CardsRecognized key={i} card={card} state={card.state}/>
+    }
+    </div>
+
+  renderTest: ->
     <div className="gridTest" id="homeGrid">
     {
       @state.cards.map (card,i) =>

@@ -18,6 +18,7 @@ React                               = require('react')
 {Link}                              = require('react-router')
 {dialog}                            = require('electron').remote
 _forEach                            = require 'lodash.foreach'
+_find                               = require 'lodash/collection/find'
 
 
 CheckboxOption = React.createClass
@@ -84,6 +85,15 @@ AppSettings = React.createClass
       <CheckboxOption label="Disable transparency (Transparency might not work on some OSes)" id="NoTransparentWindows" />
     </div>
 
+Cards = React.createClass
+  render: ->
+    <div className="card">
+      <CheckboxOption label="Disable News Card" id="DisableCardNews" />
+      <CheckboxOption label="Disable Continue Watching" id="DisableCardContinueWatching" />
+      <CheckboxOption label="Disable Upcoming" id="DisableCardUpcoming" />
+      <CheckboxOption label="Disable Statistics" id="DisableCardStatistics" />
+    </div>
+
 Recognition = React.createClass
   getInitialState: ->
     libraryPaths: chiika.getOption('LibraryPaths')
@@ -124,7 +134,7 @@ ListGeneral = React.createClass
           <h4>Tabs</h4>
         </div>
         <div>
-          <CheckboxOption label="Extra grid features" id="RememberSortingPreference" />
+          <CheckboxOption label="Remember Sorting Preference" id="RememberSortingPreference" />
         </div>
       </div>
     </div>
@@ -132,23 +142,46 @@ ListGeneral = React.createClass
 RSSSettings = React.createClass
   onRSSSourceChanged: (newSource) ->
     chiika.setOption('DefaultRssSource',newSource)
-    chiika.ipc.refreshViewByName('cards_news','cards')
+    chiika.refreshViewByName('cards_news','cards')
   render: ->
     <div className="card">
       <DropdownOption label="Default RSS Source" options={chiika.appSettings.RSSSources} id="DefaultRssSource" defaultValue="#{chiika.getOption('DefaultRssSource')}" onChange={@onRSSSourceChanged} />
     </div>
 
 AccountSettings = React.createClass
-  syncMyanimelist: ->
-    chiika.toastLoading('Syncing Myanimelist...','infinite')
+  sync: (service) ->
+    chiika.toastLoading("Syncing #{service.description}...",'infinite')
 
-    chiika.ipc.refreshViewByName 'myanimelist_animelist','myanimelist',null, =>
+    chiika.ipc.sendMessage 'sync-service', { owner: service.name }
+    chiika.ipc.receive 'sync-response', (params) =>
+      chiika.toastSuccess("Synced #{service.description}!",3000)
 
-    chiika.ipc.refreshViewByName 'myanimelist_mangalist','myanimelist',null, (params) =>
-      chiika.toastSuccess('Synced myanimelist!',3000)
+      chiika.ipc.disposeListeners("sync-response")
+
+    # chiika.ipc.refreshViewByName 'myanimelist_animelist','myanimelist',null, =>
+    #
+    # chiika.ipc.refreshViewByName 'myanimelist_mangalist','myanimelist',null, (params) =>
+    #   chiika.toastSuccess('Synced myanimelist!',3000)
+
+  getDefaultService: ->
+    defaultUser = _find chiika.users,(o) -> o.isDefault == true
+    if defaultUser?
+      defaultUser.owner
+
   render: ->
     <div className="card">
-      <button type="button" className="button raised primary" onClick={@syncMyanimelist}>Sync Myanimelist</button>
+    {
+      chiika.services.map (service,i) =>
+        <div className="card pink" key={i}>
+          <p>{ service.description } </p>
+          {
+            if service.name == @getDefaultService()
+              <span> Default </span>
+          }
+          <button type="button" className="button raised primary" onClick={() => @setDefault(service)}>Set Default</button>
+          <button type="button" className="button raised primary" onClick={() => @sync(service)}>Sync Myanimelist</button>
+        </div>
+    }
     </div>
 
 
@@ -173,6 +206,9 @@ module.exports = React.createClass
           <Link className="side-menu-link #{@isMenuItemActive('App')}" to="#{@props.props.location.pathname}" query={{ settings:true, location: 'App' }}>
             <li>Application</li>
           </Link>
+          <Link className="side-menu-link #{@isMenuItemActive('Cards')}" to="#{@props.props.location.pathname}" query={{ settings:true, location: 'Cards' }}>
+            <li>Cards</li>
+          </Link>
           <Link className="side-menu-link #{@isMenuItemActive('Recognition')}" to="#{@props.props.location.pathname}" query={{ settings:true, location: 'Recognition' }}>
             <li>Recognition</li>
           </Link>
@@ -196,6 +232,8 @@ module.exports = React.createClass
             <AppSettings />
           else if @state.currentRoute == 'ListGeneral'
             <ListGeneral {...@props} />
+          else if @state.currentRoute == 'Cards'
+            <Cards {...@props} />
           else if @state.currentRoute == 'RSSSettings'
             <RSSSettings {...@props} />
           else if @state.currentRoute == 'Account'
