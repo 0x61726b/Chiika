@@ -49,7 +49,7 @@ module.exports = React.createClass
       @state.cards.push ui
 
   render: ->
-    <div>
+    <div className="home-grid">
     {
       @state.cards.map (card,i) =>
         if card.name == 'cards_continueWatching' && !chiika.getOption('DisableCardContinueWatching')

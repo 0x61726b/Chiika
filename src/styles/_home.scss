@@ -1,18 +1,21 @@
-.gridTest {
+.home-grid {
   display: flex;
   flex-flow: row wrap;
   justify-content: flex-start;
 }
-.gridTest > .card {
+.home-grid > .card {
   flex-basis: 300px;
   flex-grow: 1;
   overflow: hidden;
 }
-.gridTest > .card:nth-of-type(3n+1) {
+.home-grid > .card:nth-of-type(3n+1) {
   flex-grow: 2;
 }
 #card-cw, #card-cnw {
   flex-basis: 100%;
+}
+#card-news {
+  flex-basis: 50%;
 }
 /**Card Title**/
 

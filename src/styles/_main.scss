@@ -59,6 +59,36 @@ td {
   align-content: center;
   align-items: center;
   height: calc(100%); // Hackz
+  background: #eee;
+}
+.loading-small > div {
+  position: relative;
+  z-index: 2;
+  //background:green;
+}
+.loading-small > div:before {
+  content: '';
+  width: 100%;
+  bottom: 5px;
+  top: 100%;
+  position: absolute;
+  background: linear-gradient($color-primary, $color-accent);
+  opacity: 0.5;
+  z-index: -1;
+  animation: chiikaFill 4s infinite ease-out;
+}
+@keyframes chiikaFill {
+  0%{}
+  80% {
+    top: 0;
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.loading-small svg {
+  z-index: 2;
 }
 .chiika-logo-path {
   stroke-dasharray: 3652;
