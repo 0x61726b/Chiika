@@ -28,6 +28,13 @@ module.exports = class SearchManager
   off: (message) ->
     @emitter.off message
 
+  getLastResults: ->
+    if @lastSearchString?
+      return { searchString: @lastSearchString, results: @lastSearchResults }
+    else
+      return null
+
+
   postInit: ->
     $("#gridSearch").on 'input', (e) =>
       value = e.target.value
@@ -41,6 +48,9 @@ module.exports = class SearchManager
           window.location = "#Search/#{value}?searchMode=list-remote&searchType=anime-manga&searchSource=myanimelist_animelist,myanimelist_mangalist"
         #@emitter.emit 'form-input-enter',$("#gridSearch").val()
 
+  searchAndGo: (searchString,mode,type,source,callback) ->
+    window.location = "#Search/#{searchString}?searchMode=#{mode}&searchType=#{type}&searchSource=#{source}"
+    $("#gridSearch").val(searchString)
 
   search: (searchString,mode,type,source,callback) ->
     chiika.ipc.sendMessage 'make-search', { searchString:searchString,searchType:type,searchSource:source,searchMode: mode }
@@ -49,3 +59,6 @@ module.exports = class SearchManager
       callback?(args)
 
       chiika.ipc.disposeListeners('make-search-response')
+
+      @lastSearchString = searchString
+      @lastSearchResults = args

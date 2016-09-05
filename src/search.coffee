@@ -21,7 +21,7 @@ _forEach                            = require 'lodash.foreach'
 
 module.exports = React.createClass
   getInitialState: ->
-    searchState: 'searching'
+    searchState: 'loading'
     searchResults: []
     searchAnime: true
     searchManga: true
@@ -55,10 +55,9 @@ module.exports = React.createClass
     if @state.searchState == 'searching'
       console.log "#{@state.searchString} - #{searchMode} - #{searchType} - #{@state.searchSource}"
       chiika.toastLoading("Searching #{@state.searchString}...",'infinite')
-      
+
       chiika.searchManager.search @state.searchString,searchMode,searchType,@state.searchSource, (results) =>
         chiika.closeToast()
-        console.log results
         @setState { searchResults: results, searchState: 'completed' }
     #
     # if @state.searchString.length > 0 && @state.searchMode?
@@ -68,14 +67,23 @@ module.exports = React.createClass
     #     @setState { searchString: '', searchResults: results }
 
   componentDidMount: ->
-    console.log "Mount"
-    @setSearchParams(@props.params.searchString,@props.location.query.searchMode,@props.location.query.searchType,@props.location.query.searchSource)
+    console.log "Mount #{@props.params.searchString}"
+
+    if @props.params.searchString != ":"
+      @setSearchParams(@props.params.searchString,@props.location.query.searchMode,@props.location.query.searchType,@props.location.query.searchSource)
 
   componentWillReceiveProps: (props) ->
     console.log props
-    @setSearchParams(props.params.searchString,props.location.query.searchMode,props.location.query.searchType,props.location.query.searchSource)
-    # chiika.searchManager.search value,'list','myanimelist_animelist', (results) =>
-    #   @setState { searchResults: results, searchState: 'completed' }
+
+    if props.params.searchString == ":"
+      lastResults = chiika.searchManager.getLastResults()
+      if lastResults?
+        $("#gridSearch").val(lastResults.searchString)
+        @setState { searchResults: lastResults.results, searchState: 'completed' }
+    else
+      @setSearchParams(props.params.searchString,props.location.query.searchMode,props.location.query.searchType,props.location.query.searchSource)
+      chiika.searchManager.search value,'list','myanimelist_animelist', (results) =>
+        @setState { searchResults: results, searchState: 'completed' }
 
   componentWillUnmount: ->
     $("#gridSearch").val('')
@@ -159,11 +167,11 @@ module.exports = React.createClass
         </div>
       </div>
       {
-        if @state.searchState == 'searching'
+        if @state.searchState == 'searching' or @state.searchState == 'loading'
           <Loading />
       }
       {
-        if @state.searchState != 'searching' && @state.searchResults.length > 0
+        if @state.searchState != 'searching' && @state.searchState != 'loading' && @state.searchResults.length > 0
           <div className="search-results">
           {
             @state.searchResults.map (sr,i) =>

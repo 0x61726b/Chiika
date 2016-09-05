@@ -135,7 +135,6 @@ SideMenu = React.createClass
       <div className="navigation">
         <ul>
           <Link className="side-menu-link #{@isMenuItemActive('Home')}" to="Home"><li className="side-menu-li">Home</li></Link>
-          <Link className="side-menu-link #{@isMenuItemActive('LoadingTest')}" to="LoadingTest"><li className="side-menu-li">Loading test room</li></Link>
           {
             @state.categories.map (category,i) =>
               <div key={i}>
@@ -147,6 +146,8 @@ SideMenu = React.createClass
               }
               </div>
           }
+          <p className="list-title" key={i}>Something</p>
+          <Link className="side-menu-link #{@isMenuItemActive('Search')}" to="Search/:"><li className="side-menu-li">Search</li></Link>
         </ul>
       </div>
     </div>)

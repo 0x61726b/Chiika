@@ -24,7 +24,7 @@ module.exports =
 
   # Tray
   MinimizeToTray: true
-  CloseToTray: true
+  CloseToTray: false
   LaunchMinimized: false
   NoTransparentWindows: false
 

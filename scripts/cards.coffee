@@ -62,7 +62,11 @@ module.exports = class CardViews
   # If you change this method things will break
   #
   on: (event,args...) ->
-    @chiika.on @name,event,args...
+    try
+      @chiika.on @name,event,args...
+    catch error
+      console.log error
+      throw error
 
   # Creates a 'view'
   # A view is something which will appear at the side menu which you can navigate to

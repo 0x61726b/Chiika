@@ -48,7 +48,11 @@ module.exports = class Media
   # If you change this method things will break
   #
   on: (event,args...) ->
-    @chiika.on @name,event,args...
+    try
+      @chiika.on @name,event,args...
+    catch error
+      console.log error
+      throw error
 
   scanFolder: (folder,callback) ->
     @chiika.logger.info("Scanning folder #{folder}")

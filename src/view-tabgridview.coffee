@@ -406,11 +406,16 @@ module.exports = React.createClass
     onDeleteFromList = (menuItem,browserWindow,event) =>
       chiika.listManager.deleteFromList('anime',item.id,'myanimelist')
 
+    onSearch = (menuItem,browserWindow,event) =>
+      chiika.searchManager.searchAndGo(item.animeTitle,'list-remote','anime-manga','myanimelist_animelist,myanimelist_mangalist')
+
     menuItems = []
     menuItems.push new MenuItem( { type: 'normal', label: "#{item.id}", enabled: false })
     menuItems.push new MenuItem( { type: 'separator'})
     menuItems.push new MenuItem( { type: 'normal', label: "Delete from list", click: onDeleteFromList })
+    menuItems.push new MenuItem( { type: 'normal', label: "Search", click: onSearch })
     chiika.popupContextMenu(menuItems)
+
 
   #
   #
