@@ -92,6 +92,8 @@ module.exports = class MyAnimelist
   #
   detailsSyncTimeRestriction:9
 
+  views: ['myanimelist_animelist','myanimelist_mangalist']
+
   # Will be called by Chiika with the API object
   # you can do whatever you want with this object
   # See the documentation for this object's methods,properties etc.

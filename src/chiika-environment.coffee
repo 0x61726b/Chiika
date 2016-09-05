@@ -178,6 +178,11 @@ class ChiikaEnvironment
 
     @viewManager.optionChanged(option,value)
 
+  getDefaultService: ->
+    defaultUser = _find @users,(o) -> o.isDefault == true
+    if defaultUser?
+      defaultUser.owner
+
   mediaAction: (owner,action,params,callback) ->
     @ipc.sendMessage 'media-action', { owner:owner, action:action, params: params }
 

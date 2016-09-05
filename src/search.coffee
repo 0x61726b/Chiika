@@ -75,15 +75,15 @@ module.exports = React.createClass
   componentWillReceiveProps: (props) ->
     console.log props
 
-    if props.params.searchString == ":"
-      lastResults = chiika.searchManager.getLastResults()
-      if lastResults?
-        $("#gridSearch").val(lastResults.searchString)
-        @setState { searchResults: lastResults.results, searchState: 'completed' }
-    else
-      @setSearchParams(props.params.searchString,props.location.query.searchMode,props.location.query.searchType,props.location.query.searchSource)
-      chiika.searchManager.search value,'list','myanimelist_animelist', (results) =>
-        @setState { searchResults: results, searchState: 'completed' }
+    # if props.params.searchString == ":"
+    #   lastResults = chiika.searchManager.getLastResults()
+    #   if lastResults?
+    #     $("#gridSearch").val(lastResults.searchString)
+    #     @setState { searchResults: lastResults.results, searchState: 'completed' }
+    # else
+    #   @setSearchParams(props.params.searchString,props.location.query.searchMode,props.location.query.searchType,props.location.query.searchSource)
+    #   chiika.searchManager.search value,'list','myanimelist_animelist', (results) =>
+    #     @setState { searchResults: results, searchState: 'completed' }
 
   componentWillUnmount: ->
     $("#gridSearch").val('')
@@ -103,8 +103,25 @@ module.exports = React.createClass
 
   onSourceChange: (source,e) ->
     value = $(e.target).prop('checked')
-    if source == 'list'
-      @setState { searchList: value, searchState: 'searching' }
+
+    sources = @state.searchSource
+
+    if !value
+      # Remove
+      _forEach sources.split(','), (s) =>
+        _forEach source.views, (v) =>git
+          sources = sources.replace(v,"")
+      console.log sources
+
+
+  sourceChecked: (views) ->
+    source = @state.searchSource
+
+    source.forEach (f) =>
+      views.split(',').forEach (v) =>
+        if v == f
+          return true
+    return false
 
   onCoverClick: (sourceView,id,title) ->
     window.location = "##{sourceView}_details/#{id}?title=#{title}"
@@ -138,33 +155,18 @@ module.exports = React.createClass
   render: ->
     <div style={{height: '100%'}}>
       <div className="search-filter">
-        <div className="filter-item">
-          <h1>Type</h1>
-          <div className="filter-dropdown">
-            <label className="checkbox">
-              <input type="checkbox" name="name" checked={@state.searchAnime} onChange={ (e) => @onTypeChange('anime',e)} /> Anime
+        <label className="checkbox">
+          <input type="checkbox" name="name" checked={@state.searchAnime} onChange={ (e) => @onTypeChange('anime',e)} /> Anime
+        </label>
+        <label className="checkbox">
+          <input type="checkbox" name="name" checked={@state.searchManga} onChange={ (e) => @onTypeChange('manga',e)} /> Manga
+        </label>
+        {
+          chiika.services.map (service,i) =>
+            <label className="checkbox" key={i}>
+              <input type="checkbox" name="name" onChange={ (e) => @onSourceChange(service,e)} /> {service.description}
             </label>
-            <label className="checkbox">
-              <input type="checkbox" name="name" checked={@state.searchManga} onChange={ (e) => @onTypeChange('manga',e)} /> Manga
-            </label>
-          </div>
-        </div>
-        <div className="filter-item">
-          <h1>Source</h1>
-          <div className="filter-dropdown">
-            <label className="checkbox">
-              <input type="checkbox" name="name" value="" onChange={ () => @onSourceChange('myanimelist_animelist')} /> Myanimelist
-            </label>
-            <label className="checkbox">
-              <input type="checkbox" name="name" checked={@state.searchList} onChange={ (e) => @onSourceChange('list',e)} /> Local List
-            </label>
-          </div>
-        </div>
-        <div className="filter-item filter-grid">
-          <h1>
-            GRID TYPE
-          </h1>
-        </div>
+        }
       </div>
       {
         if @state.searchState == 'searching' or @state.searchState == 'loading'

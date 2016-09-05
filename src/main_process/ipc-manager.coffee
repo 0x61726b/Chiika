@@ -461,6 +461,9 @@ module.exports = class IpcManager
 
       users
 
+  #
+  #
+  #
   getServices: ->
     @receiveAnswer 'get-services', (event,args) =>
       scripts = chiika.apiManager.getScripts()
@@ -476,6 +479,7 @@ module.exports = class IpcManager
             loginType: script.loginType
             order: script.order
             logo: script.logo
+            views: script.views
           services.push service
 
 

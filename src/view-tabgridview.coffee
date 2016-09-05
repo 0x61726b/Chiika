@@ -59,7 +59,7 @@ module.exports = React.createClass
   componentWillUnmount: ->
     @refreshData.dispose()
     $("#gridSearch").off 'input'
-  #
+  #ve
   #
   componentDidUpdate: ->
     uiItem = _find chiika.uiData, (o) => o.name == @state.viewName
@@ -69,50 +69,6 @@ module.exports = React.createClass
 
     if $(".list-item-expanded").length > 0
       $(".list-item-expanded").slideDown()
-
-
-
-    # pressed = false
-    # start   = 0
-    # startWidth = 0
-    # startElement = null
-    #
-    # $(".header-title").on 'mousemove', (e) ->
-    #   width = $(this).outerWidth(true)
-    #   borderRight = parseInt($(this).css('borderRightWidth'),10)
-    #
-    #   box = parseInt($(this).css('padding'),10) + borderRight
-    #   if parseInt(width,10) - borderRight <= e.offsetX
-    #     $(this).addClass 'resizing'
-    #   else
-    #     $(this).removeClass 'resizing'
-    #
-    #   if pressed
-    #     if startElement?
-    #       newWidth = startWidth + 4 + (e.pageX-start)
-    #       startElement.width(newWidth)
-    #       startElement.css('max-width',newWidth)
-    #       $(".col-list.#{startElement[0].classList[1]}").width(newWidth)
-    #       $(".col-list.#{startElement[0].classList[1]}").css('max-width',newWidth)
-    #
-    # $(".header-title").on 'mousedown', (e) ->
-    #   width = $(this).outerWidth(true)
-    #   borderRight = parseInt($(this).css('borderRightWidth'),10)
-    #   box = parseInt($(this).css('padding'),10) + borderRight
-    #
-    #   if parseInt(width,10) - borderRight <= e.offsetX
-    #     pressed = true
-    #     start = e.clientX
-    #     startWidth = $(this).width()
-    #     startElement = $(this)
-    #
-    #     e.preventDefault()
-    #
-    # $('body').on 'mouseup', (e) ->
-    #   pressed = false
-    #   startElement = null
-    #   start = 0
-    #   startWidth = 0
 
 
   #
@@ -323,7 +279,7 @@ module.exports = React.createClass
     @state.data.splice(index,1,@state.data[index])
 
     if @state.data[index].expanded == false
-      $(".list-item-expanded").slideToggle "slow", =>
+      $(e.target).parent().parent().find(".list-item-expanded").slideToggle "slow", =>
         @setState { data: @state.data }
     else
       @setState { data: @state.data }
@@ -407,7 +363,7 @@ module.exports = React.createClass
       chiika.listManager.deleteFromList('anime',item.id,'myanimelist')
 
     onSearch = (menuItem,browserWindow,event) =>
-      chiika.searchManager.searchAndGo(item.animeTitle,'list-remote','anime-manga','myanimelist_animelist,myanimelist_mangalist')
+      chiika.searchManager.searchAndGo(item.animeTitle,'list-remote','anime',"#{@state.viewName}")
 
     menuItems = []
     menuItems.push new MenuItem( { type: 'normal', label: "#{item.id}", enabled: false })
@@ -478,14 +434,17 @@ module.exports = React.createClass
           @state.columns.map (col,i) =>
             <div className="col-list col-#{col.name}" key={i}>
               {
-                @state.data[index][col.name]
+                if window["#{@state.viewName}_#{col.name}"]?
+                  window["#{@state.viewName}_#{col.name}"](@state.data[index][col.name])
+                else
+                  @state.data[index][col.name]
               }
             </div>
         }
       </div>
       {
         if @state.data[index]? && @state.data[index].expanded
-          @renderExpanded()
+          window["#{@state.viewName}_expanded"](@state.data[index])
       }
     </div>
 

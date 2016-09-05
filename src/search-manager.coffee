@@ -15,7 +15,7 @@
 #----------------------------------------------------------------------------
 {Emitter}                   = require 'event-kit'
 _when                       = require 'when'
-
+_forEach                    = require 'lodash.foreach'
 
 module.exports = class SearchManager
   emitter: null
@@ -45,20 +45,33 @@ module.exports = class SearchManager
       if e.keyCode == 13
         value = $("#gridSearch").val()
         if value.length > 0
-          window.location = "#Search/#{value}?searchMode=list-remote&searchType=anime-manga&searchSource=myanimelist_animelist,myanimelist_mangalist"
-        #@emitter.emit 'form-input-enter',$("#gridSearch").val()
+          sources = ""
+
+          _forEach chiika.services, (service) =>
+            sources += "#{x}," for x in service.views
+          sources = sources.substring(0,sources.length - 1)
+
+
+
+          window.location = "#Search/#{value}?searchMode=list-remote&searchType=anime-manga&searchSource=#{sources}"
+        @emitter.emit 'form-input-enter',$("#gridSearch").val()
 
   searchAndGo: (searchString,mode,type,source,callback) ->
+    console.log source
     window.location = "#Search/#{searchString}?searchMode=#{mode}&searchType=#{type}&searchSource=#{source}"
     $("#gridSearch").val(searchString)
 
   search: (searchString,mode,type,source,callback) ->
-    chiika.ipc.sendMessage 'make-search', { searchString:searchString,searchType:type,searchSource:source,searchMode: mode }
+    if source.split(',').length > 1
+      source = source.split(',')
 
-    chiika.ipc.receive 'make-search-response', (event,args) =>
-      callback?(args)
-
-      chiika.ipc.disposeListeners('make-search-response')
-
-      @lastSearchString = searchString
-      @lastSearchResults = args
+    console.log source
+    # chiika.ipc.sendMessage 'make-search', { searchString:searchString,searchType:type,searchSource:source,searchMode: mode }
+    #
+    # chiika.ipc.receive 'make-search-response', (event,args) =>
+    #   callback?(args)
+    #
+    #   chiika.ipc.disposeListeners('make-search-response')
+    #
+    #   @lastSearchString = searchString
+    #   @lastSearchResults = args

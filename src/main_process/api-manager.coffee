@@ -77,6 +77,7 @@ module.exports = class APIManager
       isService  = instance.isService ? false
       isActive   = instance.isActive ? false
       order      = instance.order ? 0
+      views      = instance.views ? []
 
       localInstance =
         name: scriptName
@@ -88,6 +89,7 @@ module.exports = class APIManager
         isActive: isActive
         instance: instance
         order: order
+        views: views
 
       @activeScripts.splice(index,1,localInstance)
 
