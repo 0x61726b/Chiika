@@ -131,8 +131,8 @@ module.exports = class NotificationBar
     console.log position
     @notfWindow.setPosition(position.x,position.y)
     @notfWindow.on 'ready-to-show', =>
-      @notfWindow.show()
       @notfWindow.setPosition(position.x,position.y)
+      @notfWindow.show()
 
       callback?()
 

@@ -49,5 +49,4 @@ module.exports =
         @prepare(@props)
         @updateDataSource()
 
-  componentWillReceiveProps: (props) ->
-    @prepare(props)
+  

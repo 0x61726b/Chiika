@@ -76,7 +76,7 @@ module.exports = class MyAnimelistRecognition
   #
   #
   doCache: (cacheData,recognize,parse,videoFile) ->
-    findInCache = _find cacheData, (o) => o.id == recognize.entry.mal_id
+    findInCache = _find cacheData, (o) => o.id == recognize.entry.id
     if findInCache?
       oneLevelBack = path.join(videoFile,'..')
 
@@ -96,7 +96,7 @@ module.exports = class MyAnimelistRecognition
         findInCache.files.push { file:videoFile, episode: parse.EpisodeNumber }
     else
       findInCache =
-        id: recognize.entry.mal_id
+        id: recognize.entry.id
         knownPaths: [
           path.join(videoFile,'..')
         ]
@@ -152,7 +152,7 @@ module.exports = class MyAnimelistRecognition
       result.recognized = recognized
       result.suggestions = suggestions
       _forEach animelist, (anime) =>
-        extra = _find animeextra, (o) -> o.mal_id == anime.mal_id
+        extra = _find animeextra, (o) -> o.id == anime.id
 
         synonyms = anime.animeSynonyms.split(';')
         animeTitle = @clear(anime.animeTitle)

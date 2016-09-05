@@ -403,24 +403,24 @@ module.exports = class CardViews
 
           cntWatchingLayouts = []
           _forEach animeHistory, (history) =>
-            mal_id = history.id
+            id = history.id
             ep     = history.episode
 
-            animeEntry = _find animelist, (o) -> o.mal_id == mal_id
+            animeEntry = _find animelist, (o) -> o.id == id
 
             if animeEntry?
               onReturn = (anime) =>
-                exists = _find cntWatchingLayouts, (p) -> p.id == mal_id
+                exists = _find cntWatchingLayouts, (p) -> p.id == id
                 index  = _indexOf cntWatchingLayouts,exists
 
                 if parseInt(anime.watchedEpisodes) == parseInt(anime.totalEpisodes)
                   return
                 if exists?
                   if history.updated > exists.time
-                    exists = { id: mal_id,time: history.updated,layout: anime }
+                    exists = { id: id,time: history.updated,layout: anime }
                     cntWatchingLayouts.splice(index,1,exists)
                 else
-                  cntWatchingLayouts.push { id: mal_id,time: history.updated,layout: anime }
+                  cntWatchingLayouts.push { id: id,time: history.updated,layout: anime }
 
               @chiika.emit 'get-anime-values', { calling: 'myanimelist',entry: animeEntry,return: onReturn }
 
@@ -498,12 +498,12 @@ module.exports = class CardViews
           colorCounter = 0
           _forEach upcomingData, (item) =>
             weeklyAirdate = item.weeklyAirdate
-            mal_id        = item.mal_id
+            id        = item.id
             airdate       = item.airdate
             simul         = item.simul
             simulDelay    = item.simuldelay
 
-            findInAnimelist = _find animelist, (o) -> o.mal_id == mal_id
+            findInAnimelist = _find animelist, (o) -> o.id == id
 
             if findInAnimelist? && findInAnimelist.animeUserStatus == "1"
               watchingListData.push { color: colors[colorCounter],title: item.title, weeklyAirdate: weeklyAirdate,day: weeklyAirdate.rd_weekday, time: weeklyAirdate.rd_time}
@@ -554,7 +554,7 @@ module.exports = class CardViews
                 cItem =
                   weeklyAirdate: userTimezoneAirdate
                   title: item.name
-                  mal_id: item.MALID
+                  id: item.MALID
                   ann_id: item.ANNID
                   airdate: item.airdate
                   simul: item.simulcast
@@ -595,7 +595,7 @@ module.exports = class CardViews
           @chiika.requestViewDataUpdate('cards','cards_currentlyWatching')
           @chiika.requestUIDataUpdate('cards_currentlyWatching')
 
-        @chiika.emit 'details-layout', { viewName: 'myanimelist_animelist', id: update.params.entry.mal_id, return: onAnimeDetailsLayout }
+        @chiika.emit 'details-layout', { viewName: 'myanimelist_animelist', id: update.params.entry.id, return: onAnimeDetailsLayout }
 
       else if update.view.name == 'cards_notRecognized'
         recognizeResult = update.params.result

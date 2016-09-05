@@ -110,11 +110,11 @@ NotificationBar = React.createClass
 
         @afterFade = setTimeout(afterFade,2000)
 
-      @fadeAfterSometime = setTimeout(fadeOutAfterSometime,4000)
-
-
-      remote.getCurrentWindow().on 'focus', () =>
-        @fadeAfterSometime = setTimeout(fadeOutAfterSometime,4000)
+      # @fadeAfterSometime = setTimeout(fadeOutAfterSometime,4000)
+      #
+      #
+      # remote.getCurrentWindow().on 'focus', () =>
+      #   @fadeAfterSometime = setTimeout(fadeOutAfterSometime,4000)
 
 
 
@@ -154,7 +154,7 @@ NotificationBar = React.createClass
         {
           @state.layout.suggestions.map (suggestion,i) =>
             <div className="img-guess" key={i}>
-              <img src="#{suggestion.entry.animeImage}" onClick={ () => @setSelected(suggestion.entry.mal_id)} onMouseEnter={ () => @onHover(suggestion.entry.animeTitle)} alt="" />
+              <img src="#{suggestion.entry.animeImage}" onClick={ () => @setSelected(suggestion.entry.id)} onMouseEnter={ () => @onHover(suggestion.entry.animeTitle)} alt="" />
             </div>
         }
       </div>

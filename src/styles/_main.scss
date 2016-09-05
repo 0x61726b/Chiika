@@ -32,9 +32,8 @@
   overflow-y: auto;
   background-color: $body-bg;
 }
-.clusterize-scroll {
-  max-height: 90vh !important;
-  overflow: auto;
+.blur {
+  -webkit-filter: blur(10px);
 }
 td {
   background-image: '';

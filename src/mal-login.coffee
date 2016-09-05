@@ -242,7 +242,7 @@ MalLogin = React.createClass
                 <h2>{ service.description }</h2>
               </div>
           }
-          <div className="provider" onClick={@selectProvider} data-provider="noaccount" key={i}>
+          <div className="provider" onClick={@selectProvider} data-provider="noaccount">
             <img src="./../assets/images/chiika.png" width="140" height="140" alt="" />
             <h2>No Account</h2>
           </div>

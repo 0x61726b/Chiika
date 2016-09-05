@@ -34,11 +34,15 @@ module.exports = React.createClass
 
     if @state.items.length > 0
       @state.state = 1
+    
 
 
   onExternalUrl: (e,url) ->
     e.preventDefault()
     chiika.openShellUrl(url)
+
+  componentDidMount: ->
+
 
   render: ->
     <div className="card grid indigo #{if @state.state == 0 then 'blur'}" id="card-news">

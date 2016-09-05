@@ -192,7 +192,7 @@ module.exports = class Media
         parse = layout.parse
         videoFile = layout.videoFile
 
-        findEntry = _find layout.suggestions, (o) -> o.entry.mal_id == entry
+        findEntry = _find layout.suggestions, (o) -> o.entry.id == entry
 
         if findEntry?
           onValues = (args) =>
@@ -217,7 +217,7 @@ module.exports = class Media
                   recognize = @recognition.recognize(findEntry.entry.animeTitle,animelist,animeextra)
 
                   if recognize.recognized
-                    layout = { title: findEntry.entry.animeTitle, episode: layout.episode,image: findEntry.entry.animeImage, imageLink: "myanimelist.net/anime/#{findEntry.entry.mal_id}" }
+                    layout = { title: findEntry.entry.animeTitle, episode: layout.episode,image: findEntry.entry.animeImage, imageLink: "myanimelist.net/anime/#{findEntry.entry.id}" }
                     @chiika.sendMessageToWindow 'notification','notf-bar-recognized', layout
 
                     @chiika.emit 'create-card', { name: 'cards_currentlyWatching' }
@@ -281,7 +281,7 @@ module.exports = class Media
             return false
 
         if cacheEntry?
-          findEntry = _find animelist, (o) -> o.mal_id == cacheEntry.id
+          findEntry = _find animelist, (o) -> o.id == cacheEntry.id
 
           if findEntry?
             recognize.recognized = true
@@ -293,7 +293,7 @@ module.exports = class Media
       if recognize.recognized
         if recognize.entry?
           @chiika.createNotificationWindow 200,() =>
-            layout = { title: anitomy.AnimeTitle, episode: anitomy.EpisodeNumber,image: recognize.entry.animeImage, imageLink: "myanimelist.net/anime/#{recognize.entry.mal_id}" }
+            layout = { title: anitomy.AnimeTitle, episode: anitomy.EpisodeNumber,image: recognize.entry.animeImage, imageLink: "myanimelist.net/anime/#{recognize.entry.id}" }
             @chiika.sendMessageToWindow 'notification','notf-bar-recognized', layout
 
           @chiika.emit 'create-card', { name: 'cards_currentlyWatching' }

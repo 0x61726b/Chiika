@@ -26,8 +26,6 @@ module.exports = React.createClass
   updateDataSource: ->
     @state.items = @state.data.dataSource
 
-    console.log @state.properties
-
   cntWatchingCardClick: (e) ->
     clicked = $(e.target).parent().parent()
 

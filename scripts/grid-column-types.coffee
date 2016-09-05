@@ -14,25 +14,34 @@
 #Description:
 #----------------------------------------------------------------------------
 
-moment                        = require 'moment'
-string                        = require 'string'
+path          = require 'path'
+fs            = require 'fs'
+{remote}        = scriptRequire 'electron'
 
-window.sortFunctions = {}
-###########
-#
-# TYPE ICON
-#
-###########
-eXcell_typeWithIcon = (cell)->
-  if cell
-    @cell = cell
-    @grid = @cell.parentNode.grid
+_forEach      = scriptRequire 'lodash.forEach'
+moment        = scriptRequire 'moment'
+string        = scriptRequire 'string'
 
-  @edit = ->
-    #
-  @isDisabled = ->
-    return true
-  @setValue = (val) ->
+module.exports = class CustomColumnTypes
+  name: "grid-column-types"
+  displayDescription: ""
+  isService: false
+  isActive: true
+  order: 99
+
+  # Will be called by Chiika with the API object
+  # you can do whatever you want with this object
+  # See the documentation for this object's methods,properties etc.
+  constructor: (chiika) ->
+    @chiika = chiika
+
+  # This method is controls the communication between app and script
+  # If you change this method things will break
+  #
+  on: (event,args...) ->
+    @chiika.on @name,event,args...
+
+  renderAnimeTypeText: (val) ->
     if val == 'TV'
       val = 'fa fa-television'
 
@@ -68,3 +77,19 @@ eXcell_typeWithIcon = (cell)->
 
     if val == 'Manhua'
       val = ''
+    return "<i class='#{val}'></i>"
+
+
+  # After the constructor run() method will be called immediately after.
+  # Use this method to do what you will
+  #
+  run: (chiika) ->
+    #This is the first event called here to let user do some initializing
+    @on 'initialize',=>
+
+
+
+    @on 'post-init', (init) =>
+      init.defer.resolve()
+
+      global['myanimelist_animelist_animeTypeText'] = @renderAnimeTypeText

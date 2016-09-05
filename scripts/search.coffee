@@ -49,7 +49,7 @@ module.exports = class Search
 
   animeSearchResultLayout: (entry,listEntry) ->
     layout =
-      id: entry.mal_id
+      id: entry.id
       image: entry.animeImage
       averageScore: entry.animeScoreAverage
       entryType: entry.animeType
@@ -76,7 +76,7 @@ module.exports = class Search
 
   mangaSearchResultLayout: (entry,listEntry) ->
     layout =
-      id: entry.mal_id
+      id: entry.id
       image: entry.mangaImage
       averageScore: entry.mangaScoreAverage
       entryType: entry.mangaType
@@ -156,7 +156,7 @@ module.exports = class Search
           onAnimeSearch = (response) =>
             results = []
             _forEach response, (entry) =>
-              findInAnimelist = _find sourceDataAnime,(o) -> o.mal_id == entry.mal_id
+              findInAnimelist = _find sourceDataAnime,(o) -> o.id == entry.id
               layout = @animeSearchResultLayout(entry,findInAnimelist)
               layout.sourceView = searchSource[0]
               results.push layout
@@ -168,7 +168,7 @@ module.exports = class Search
           onMangaSearch = (response) =>
             results = []
             _forEach response, (entry) =>
-              findInMangalist = _find sourceDataManga,(o) -> o.mal_id == entry.mal_id
+              findInMangalist = _find sourceDataManga,(o) -> o.id == entry.id
               layout = @mangaSearchResultLayout(entry,findInMangalist)
               layout.sourceView = searchSource[1]
               results.push layout
@@ -189,7 +189,7 @@ module.exports = class Search
             onAnimeSearch = (response) =>
               results = []
               _forEach response, (entry) =>
-                findInAnimelist = _find sourceDataAnime,(o) -> o.mal_id == entry.mal_id
+                findInAnimelist = _find sourceDataAnime,(o) -> o.id == entry.id
                 layout = @animeSearchResultLayout(entry,findInAnimelist)
                 layout.sourceView = searchSource[0]
                 results.push layout
@@ -205,7 +205,7 @@ module.exports = class Search
             onSearch = (response) =>
               results = []
               _forEach response, (entry) =>
-                findInMangalist = _find sourceData,(o) -> o.mal_id == entry.mal_id
+                findInMangalist = _find sourceData,(o) -> o.id == entry.id
                 layout = @mangaSearchResultLayout(entry,findInMangalist)
                 layout.sourceView = searchSource[0]
                 results.push layout

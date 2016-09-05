@@ -15,6 +15,7 @@
 #----------------------------------------------------------------------------
 
 React                                   = require('react')
+remote                                  = require('electron').remote
 {MenuItem}                              = require('electron').remote
 _find                                   = require 'lodash/collection/find'
 _forEach                                = require 'lodash.foreach'
@@ -65,6 +66,12 @@ module.exports = React.createClass
 
     sortingPrefCol = uiItem.sortingPrefCol
     sortingPrefDir = uiItem.sortingPrefDir
+
+    if $(".list-item-expanded").length > 0
+      $(".list-item-expanded").slideDown()
+
+
+
     # pressed = false
     # start   = 0
     # startWidth = 0
@@ -221,6 +228,7 @@ module.exports = React.createClass
     uiItem = _find chiika.uiData, (o) => o.name == viewName
     columns = uiItem.displayConfig.gridColumnList
 
+
     notHiddenColumns = []
     _forEach columns, (column) ->
       if !column.hidden
@@ -237,6 +245,8 @@ module.exports = React.createClass
 
     findDataSource = _find viewData.dataSource, (o) -> o.name == uiItem.displayConfig.tabList[index].name
     gridData = _find(viewData.dataSource, (o) => o.name == findDataSource.name)
+    _forEach gridData.data, (data) =>
+      _assign data, { expanded: false }
     gridData.data
 
   #
@@ -304,17 +314,22 @@ module.exports = React.createClass
   #
   #
   #
-  listItemClick: (e) ->
+  listItemClick: (e,index) ->
     $("#chiika-list").find(".list-item").each (e) ->
       $(this).removeClass "selected"
     $(e.target).parent().toggleClass "selected"
+
+    @state.data[index].expanded = !@state.data[index].expanded
+    @state.data.splice(index,1,@state.data[index])
+    @setState { data: @state.data }
+
 
   #
   #
   #
   listItemDblClick: (e,index) ->
     data = @state.data[index]
-    window.location = "##{@state.viewName}_details/#{data.mal_id}"
+    window.location = "##{@state.viewName}_details/#{data.id}"
 
 
   #
@@ -349,7 +364,7 @@ module.exports = React.createClass
         uiItem = _find chiika.uiData, (o) => o.name == @state.viewName
         uiItem.displayConfig.sortingPrefDir = if !orderAsc then "asc" else "dsc"
         uiItem.displayConfig.sortingPrefCol = name
-        console.log uiItem
+
         chiika.viewManager.saveTabGridViewState(uiItem)
 
         @setState { data: @sort(data,sortType,!orderAsc,name), sortingPrefDir:uiItem.displayConfig.sortingPrefDir,sortingPrefCol: uiItem.displayConfig.sortingPrefCol,sortingType: sortType  }
@@ -384,10 +399,10 @@ module.exports = React.createClass
     item = @state.data[index]
 
     onDeleteFromList = (menuItem,browserWindow,event) =>
-      chiika.listManager.deleteFromList('anime',item.mal_id,'myanimelist')
+      chiika.listManager.deleteFromList('anime',item.id,'myanimelist')
 
     menuItems = []
-    menuItems.push new MenuItem( { type: 'normal', label: "#{item.mal_id}", enabled: false })
+    menuItems.push new MenuItem( { type: 'normal', label: "#{item.id}", enabled: false })
     menuItems.push new MenuItem( { type: 'separator'})
     menuItems.push new MenuItem( { type: 'normal', label: "Delete from list", click: onDeleteFromList })
     chiika.popupContextMenu(menuItems)
@@ -401,14 +416,28 @@ module.exports = React.createClass
     else
       @renderTabs()
 
+  renderExpanded: (index,key) ->
+    <div className="hidden list-item-expanded">
+      <img src="http://i0.kym-cdn.com/photos/images/newsfeed/000/754/538/454.jpg" width="200" height="200"/>
+    </div>
   #
   #
   #
   renderSingleItem: (index,key) ->
-    <div className="list-item" key={key} onClick={@listItemClick} onDoubleClick={ (e) => @listItemDblClick(e,index)} onContextMenu={ (e) => @itemContextMenu(e,index)}>
+    <div key={key}>
+      <div className="list-item #{if @state.data[index]? && @state.data[index].expanded then 'expanded' else ''}" onClick={(e) => @listItemClick(e,index)} onDoubleClick={ (e) => @listItemDblClick(e,index)} onContextMenu={ (e) => @itemContextMenu(e,index)}>
+        {
+          @state.columns.map (col,i) =>
+            <div className="col-list col-#{col.name}" key={i}>
+              {
+                @state.data[index][col.name]
+              }
+            </div>
+        }
+      </div>
       {
-        @state.columns.map (col,i) =>
-          <div className="col-list col-#{col.name}" key={i}>{@state.data[index][col.name]}</div>
+        if @state.data[index]? && @state.data[index].expanded
+          @renderExpanded()
       }
     </div>
 
