@@ -29,7 +29,7 @@ $row-border-color: #DCDFE4;
   padding: 8px 0;
   padding-left: 2px;
   font-weight: bold;
-  flex-grow: 1;
+  flex-grow: 0;
 }
 .list-item {
   display: flex;
@@ -43,10 +43,11 @@ $row-border-color: #DCDFE4;
   padding-bottom: 6px;
   padding-left: $border-size;
   border-bottom: 1px solid $row-border-color;
-  flex-grow: 1;
+  flex-grow: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  color: $main-text;
 }
 
 .list-item > div {
@@ -54,21 +55,25 @@ $row-border-color: #DCDFE4;
 }
 
 .header-animeTypeText {
-  width: 50px;
+  width: 40px;
+  flex-basis: 40px;
+  flex-grow: 0!important;
 }
 .col-animeTypeText {
-  width: 50px;
+  width: 40px;
+  flex-basis: 40px;
+  flex-grow: 0!important;
 }
 
 .header-animeTitle {
   overflow: hidden;
-  min-width: 200px;
-  max-width: 200px;
+  width: 200px;
   white-space: nowrap;
+  flex-grow: 2!important;
 }
 .col-animeTitle {
-  min-width: 192px;
-  max-width: 192px;
+  width: 200px;
+  flex-grow: 2!important;
 }
 
 .header-animeProgress {
@@ -251,6 +256,9 @@ $row-border-color: #DCDFE4;
 .react-tabs [role=tab][aria-selected=false]:hover {
   color: $main-text;
   border-bottom: 2px solid $color-primary;
+}
+.react-tabs .tab span {
+  border: none;
 }
 .react-tabs [role=tab]:focus:after {
   content: "";
