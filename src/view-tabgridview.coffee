@@ -428,7 +428,45 @@ module.exports = React.createClass
 
   renderExpanded: (index,key) ->
     <div className="hidden list-item-expanded">
-      <img src="http://i0.kym-cdn.com/photos/images/newsfeed/000/754/538/454.jpg" width="200" height="200"/>
+      <div>
+        <div className="expanded-cover">
+        </div>
+        <div className="expanded-meta">
+          <div className="meta-row">
+            <h5>Rate</h5>
+            <div className="expanded-rate">
+              <span>1</span>
+              <span>2</span>
+              <span>3</span>
+              <span className="selected">4</span>
+              <span>5</span>
+              <span>6</span>
+              <span>7</span>
+              <span>8</span>
+              <span>9</span>
+              <span>10</span>
+            </div>
+          </div>
+          <div className="meta-row">
+            <h5>Watch</h5>
+            <div className="expanded-watch">
+              <span className="watched">6</span>
+              <span className="watched">7</span>
+              <span className="watched">8</span>
+              <span className="aired">9</span>
+            </div>
+          </div>
+          <div className="meta-row">
+            <h5>More</h5>
+            <div className="expanded-more">
+              <span className="button orange">Check Torrents</span>
+              <span className="button indigo">View on Web</span>
+              <span className="button green">Open Library</span>
+              <span className="button red">Open Details</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   #
   #
@@ -479,7 +517,7 @@ module.exports = React.createClass
             @renderHeader(i)
           }
           {
-              <div style={{'overflow':'auto',height: '100%'}} id="chiika-list">
+              <div style={{'overflow':'overlay',height: '100%'}} id="chiika-list">
                 <ReactList itemRenderer={@renderSingleItem} length={@state.data.length} type='simple' />
               </div>
           }

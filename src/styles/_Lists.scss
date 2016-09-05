@@ -22,12 +22,14 @@
   background: #eee;
 }
 $border-size: 2px;
+$row-border-color: #DCDFE4;
 .header-title {
   border-bottom: 1px solid #ddd;
   border-right: $border-size solid $grey-3;
   padding: 8px 0;
   padding-left: 2px;
   font-weight: bold;
+  flex-grow: 1;
 }
 .list-item {
   display: flex;
@@ -40,11 +42,15 @@ $border-size: 2px;
   padding-top: 6px;
   padding-bottom: 6px;
   padding-left: $border-size;
-  border-bottom: 1px solid #dcdfe4;
+  border-bottom: 1px solid $row-border-color;
+  flex-grow: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .list-item > div {
-  border-right: $border-size solid #dcdfe4;
+  border-right: $border-size solid $row-border-color;
 }
 
 .header-animeTypeText {
@@ -63,9 +69,6 @@ $border-size: 2px;
 .col-animeTitle {
   min-width: 192px;
   max-width: 192px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
 }
 
 .header-animeProgress {
@@ -73,11 +76,6 @@ $border-size: 2px;
 }
 .col-animeProgress {
   width: 120px;
-
-  /* Delete this after progress bars */
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
 }
 
 .header-animeScoreAverage {
@@ -99,9 +97,6 @@ $border-size: 2px;
 }
 .col-animeSeasonText {
   width: 120px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .header-animeLastUpdatedText {
@@ -109,8 +104,62 @@ $border-size: 2px;
 }
 .col-animeLastUpdatedText {
   width: 160px;
-  overflow: hidden;
-  white-space: nowrap;
+}
+
+
+/*******/
+.list-item-expanded {
+  border-bottom: 1px solid $row-border-color;
+}
+.list-item-expanded > div {
+  display: flex;
+}
+.expanded-cover {
+  width: 124px;
+  height: 186px;
+  display: inline-block;
+  background: linear-gradient($color-primary, $color-accent);
+}
+.expanded-meta {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  border-right: $border-size solid $row-border-color;
+}
+.expanded-meta h5 {
+  border-bottom: 1px solid $row-border-color;
+  padding-left: 8px;
+}
+.expanded-rate,
+.expanded-watch {
+  display: flex;
+  padding-left: 8px;
+}
+.expanded-rate span,
+.expanded-watch span {
+  width: 16px;
+  height: 16px;
+  padding: 4px;
+  background:  #dedee2;
+  color: $main-text;
+  text-align: center;
+  margin: 1px;
+  border-radius: 2px;
+  font-weight: 500;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.expanded-rate span.selected {
+  background: $color-info-main;
+  color: white;
+}
+.expanded-watch span.watched {
+  background:$color-success-main;
+  color: white;
+}
+.expanded-watch span.aired {
+  color:$color-info-main;
 }
 /* */
 /****************************************/
