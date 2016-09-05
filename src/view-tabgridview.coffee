@@ -321,7 +321,12 @@ module.exports = React.createClass
 
     @state.data[index].expanded = !@state.data[index].expanded
     @state.data.splice(index,1,@state.data[index])
-    @setState { data: @state.data }
+
+    if @state.data[index].expanded == false
+      $(".list-item-expanded").slideToggle "slow", =>
+        @setState { data: @state.data }
+    else
+      @setState { data: @state.data }
 
 
   #
