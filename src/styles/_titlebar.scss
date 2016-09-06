@@ -7,12 +7,12 @@
   justify-content: space-between;
   align-items: center;
   padding: 1px 16px;
-  background-color: $grey-1;
-  border-bottom: 1px solid $grey-2;
+  background-color: $grey-2;
+  border-bottom: 1px solid $grey-3;
   #gridSearch {
     padding: 6px 8px 6px 12px;
-    background-color: $grey-0;
-    border: 1px solid $grey-2;
+    background-color: $grey-1;
+    border: 1px solid $grey-3;
     border-radius: 2px;
     -webkit-app-region: no-drag;
     width: 150%;

@@ -63,8 +63,14 @@ myanimelist_animelist_animeTypeText = (val) ->
   <i className="#{val}"></i>
 
 myanimelist_animelist_animeProgress = (progress) ->
-  "Ctrl+Shift+F me"
-
+  <div>
+    <span className="list-progress-minus"></span>
+    <span>
+      <span className="list-progress-user">10</span>
+      <span className="list-progress-total">/20</span>
+    </span>
+    <span className="list-progress-plus"></span>
+  </div>
 
 myanimelist_animelist_expanded = (item) ->
   <div className="hidden list-item-expanded">

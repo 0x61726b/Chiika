@@ -19,17 +19,27 @@
 }
 .chiika-header {
   display: flex;
-  background: #eee;
+  background: $grey-0;
 }
-$border-size: 2px;
-$row-border-color: #DCDFE4;
+#chiika-list {
+  background: $body-bg;
+}
+$border-size: 1px;
+$row-border-color: $grey-2;
 .header-title {
   border-bottom: 1px solid #ddd;
-  border-right: $border-size solid $grey-3;
+  //border-right: $border-size solid $grey-3;
   padding: 8px 0;
-  padding-left: 2px;
-  font-weight: bold;
   flex-grow: 0;
+}
+.header-title span {
+  font-weight: 500;
+}
+.header-title:not(.col-animeTitle) {
+  text-align: center;
+}
+.list-item > div:not(.col-animeTitle) {
+  text-align: center;
 }
 .list-item {
   display: flex;
@@ -41,8 +51,8 @@ $row-border-color: #DCDFE4;
 .list-item > div {
   padding-top: 6px;
   padding-bottom: 6px;
-  padding-left: $border-size;
   border-bottom: 1px solid $row-border-color;
+  //border-right: $border-size solid $row-border-color;
   flex-grow: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -50,63 +60,79 @@ $row-border-color: #DCDFE4;
   color: $main-text;
 }
 
-.list-item > div {
-  border-right: $border-size solid $row-border-color;
-}
-
-.header-animeTypeText {
-  width: 40px;
-  flex-basis: 40px;
-  flex-grow: 0!important;
-}
 .col-animeTypeText {
   width: 40px;
   flex-basis: 40px;
   flex-grow: 0!important;
 }
 
-.header-animeTitle {
-  overflow: hidden;
-  width: 200px;
-  white-space: nowrap;
-  flex-grow: 2!important;
-}
 .col-animeTitle {
   width: 200px;
   flex-grow: 2!important;
 }
 
-.header-animeProgress {
-  width: 120px;
-}
 .col-animeProgress {
   width: 120px;
 }
-
-.header-animeScoreAverage {
-  width: 100px;
+#chiika-list .col-animeProgress {
+  padding: 0!important;
+}
+.col-animeProgress > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+}
+.list-progress-minus,
+.list-progress-plus {
+  width: 24px;
+  height: 100%;
+  font: normal normal normal 24px/1 "Material Design Icons";
+  display: flex;
+  align-items: center;
+  color: $grey-3;
+}
+.list-progress-minus {
+  margin-right: 2px;
+}
+.list-progress-plus {
+  margin-left: 2px;
+}
+.list-progress-minus:after {
+  content: "\F141";
+}
+.list-progress-minus:hover {
+  background: $color-warning-main;
+  color: #eee;
+}
+.list-progress-minus:active {
+  background: $color-warning-dark;
+  color: white;
+}
+.list-progress-plus:after  {
+  content: "\F142";
+}
+.list-progress-plus:hover {
+  background: $color-success-main;
+  color: #eee;
+}
+.list-progress-plus:active {
+  background: $color-success-dark;
+  color: white;
 }
 .col-animeScoreAverage {
   width: 100px;
 }
 
-.header-animeScore {
-  width: 100px;
-}
 .col-animeScore {
   width: 100px;
 }
 
-.header-animeSeason{
-  width: 120px;
-}
 .col-animeSeasonText {
   width: 120px;
+  text-align: right;
 }
 
-.header-animeLastUpdatedText {
-  width: 160px;
-}
 .col-animeLastUpdatedText {
   width: 160px;
 }
@@ -208,12 +234,15 @@ $row-border-color: #DCDFE4;
 .react-tabs {
   background-color: inherit;
 }
+.react-tabs .label {
+  border: none;
+}
 .react-tabs [role=tablist] {
   font-size: 16px;
   text-align: left;
   margin: 0;
-  background-color: $grey-0;
-  border-bottom: 1px solid $grey-1;
+  background-color: $grey-1;
+  border-bottom: 0 solid $grey-2;
 }
 .react-tabs ul {
   margin-bottom: 2px;
