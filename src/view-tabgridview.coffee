@@ -22,6 +22,7 @@ _forEach                                = require 'lodash.foreach'
 _indexOf                                = require 'lodash/array/indexOf'
 _remove                                 = require 'lodash/array/remove'
 _assign                                 = require 'lodash.assign'
+_cloneDeep                              = require 'lodash.cloneDeep'
 {ReactTabs,Tab,Tabs,TabList,TabPanel}   = require 'react-tabs'
 Loading                                 = require './loading'
 ReactList                               = require 'react-list'
@@ -36,6 +37,7 @@ module.exports = React.createClass
     tabs: []
     lengths: []
     columns: []
+    data: []
     state: 0 # Loading
     viewName: @props.route.viewName
 
@@ -50,8 +52,7 @@ module.exports = React.createClass
 
     @refreshData = chiika.emitter.on 'view-refresh', (params) =>
       if params.view == @state.viewName
-        data   = @constructData(@state.viewName,@state.index)
-        @setState { data: data }
+        @prepare(params.view,true)
 
     $("#gridSearch").on 'input', (e) =>
       @filter(e.target.value)
@@ -67,8 +68,25 @@ module.exports = React.createClass
     sortingPrefCol = uiItem.sortingPrefCol
     sortingPrefDir = uiItem.sortingPrefDir
 
-    if $(".list-item-expanded").length > 0
-      $(".list-item-expanded").slideDown()
+    # if $(".list-item-expanded").length > 0
+    #   $(".list-item-expanded").slideDown()
+
+    for i in [0...@state.data.length]
+      d = @state.data[i]
+      if d.expanded
+        element = $("#chiika-list div")
+        children = element.children()
+        child    = children[i]
+
+
+        #$(child).find(".list-item").toggleClass "selected"
+
+        if !$(child).hasClass("expanded")
+          $(child).find(".list-item-expanded").slideDown 500,->
+            $(child).toggleClass "expanded"
+
+
+
 
 
   #
@@ -79,8 +97,11 @@ module.exports = React.createClass
   #
   #
   #
-  prepare: (viewName) ->
-    if @state.state == 1 && @state.viewName == viewName
+  prepare: (viewName,force) ->
+    if !force?
+      force = false
+
+    if !force && @state.state == 1 && @state.viewName == viewName
       return
     chiika.logger.renderer("TabGridView - ViewName: #{viewName}")
 
@@ -139,7 +160,7 @@ module.exports = React.createClass
     if chiika.getOption('RememberSortingPreference')
       data    = @constructData(@state.viewName,index)
 
-      data = @sort(data,@state.sortingType,@state.sortingPrefDir,@state.sortingPrefCol)
+      data = @sort(data,@state.sortingType,!@state.sortingPrefDir,@state.sortingPrefCol)
       @setState { index: index,data:data }
     else
       data    = @constructData(@state.viewName,index)
@@ -201,8 +222,17 @@ module.exports = React.createClass
 
     findDataSource = _find viewData.dataSource, (o) -> o.name == uiItem.displayConfig.tabList[index].name
     gridData = _find(viewData.dataSource, (o) => o.name == findDataSource.name)
-    _forEach gridData.data, (data) =>
-      _assign data, { expanded: false }
+    for i in [0...gridData.data.length]
+      expand = false
+      select = false
+      if @state.data.length > 0
+        find = _find @state.data, (o) -> o.id == gridData.data[i].id
+        if find?
+          expand = find.expanded
+          select = find.selected
+
+      _assign gridData.data[i], { expanded: expand }
+      _assign gridData.data[i], { selected: select }
     gridData.data
 
   #
@@ -224,6 +254,7 @@ module.exports = React.createClass
   #
   #
   sort: (data,type,order,column) ->
+
     switch type
       when 'int'
         data.sort (a,b) =>
@@ -239,7 +270,7 @@ module.exports = React.createClass
         data.sort (a,b) =>
           if parseFloat(a[column]) > parseFloat(b[column])
             return (if order then (1) else (-1))
-          else if b > a
+          else if parseFloat(a[column]) < parseFloat(b[column])
             return (if order then (-1) else (1))
           return 0
       when 'str'
@@ -261,28 +292,81 @@ module.exports = React.createClass
           if a.isAfter(b)
             return (if order then (1) else (-1))
           else if b.isAfter(a)
-            return (if order then (1) else (-1))
+            return (if order then (-1) else (1))
           return 0
 
 
     data
 
+
+  dexpand: (index) ->
+    element = $("#chiika-list div")
+    children = element.children()
+    child    = children[index]
+
+    if $(child).find(".list-item").hasClass "selected"
+      $(child).find(".list-item").toggleClass "selected"
+    $(child).find(".list-item-expanded").slideToggle 400,->
+      $(child).toggleClass "expanded"
+
+  select: (index) ->
+    element = $("#chiika-list div")
+    children = element.children()
+    child    = children[index]
+
+    $(child).find(".list-item").toggleClass "selected"
+
+
+
+
   #
   #
   #
   listItemClick: (e,index) ->
-    $("#chiika-list").find(".list-item").each (e) ->
-      $(this).removeClass "selected"
-    $(e.target).parent().toggleClass "selected"
+    # if !e.ctrlKey
+    #   # De select everything
+    #
+    # if e.ctrlKey
+    #   @select(index)
 
-    @state.data[index].expanded = !@state.data[index].expanded
-    @state.data.splice(index,1,@state.data[index])
+    if $(e.target).hasClass("prevent-expand")
+      return
 
-    if @state.data[index].expanded == false
-      $(e.target).parent().parent().find(".list-item-expanded").slideToggle "slow", =>
-        @setState { data: @state.data }
-    else
-      @setState { data: @state.data }
+    if !e.ctrlKey
+      newExpandState = !@state.data[index].expanded
+      newSelectState = !@state.data[index].selected
+      old            = @state.data[index]
+      old.expanded = newExpandState
+      old.selected = newSelectState
+      @state.data.splice(index,1,old)
+
+      if !newExpandState
+        @dexpand(index)
+      else
+        @setState { }
+
+  # shouldComponentUpdate: (nextProps,nextState) ->
+  #   shouldUpdate = true
+  #   if @state.index == nextState.index
+  #     shouldUpdate = false
+  #     for i in [0...@state.data.length]
+  #       oldEntry = @state.data[i]
+  #       newEntry = nextState.data[i]
+  #
+  #       if oldEntry != newEntry
+  #         shouldUpdate = true
+  #       if oldEntry.expanded != newEntry.expanded && newEntry.expanded
+  #         shouldUpdate = true
+  #     console.log shouldUpdate
+  #
+  #   return shouldUpdate
+
+
+    # if @state.data[index].expanded == false
+    #   $(e.target).parent().parent().find(".list-item-expanded").slideToggle "slow", =>
+    #     @setState { data: @state.data }
+    # else
+    #   @setState { data: @state.data }
 
 
   #
@@ -290,7 +374,7 @@ module.exports = React.createClass
   #
   listItemDblClick: (e,index) ->
     data = @state.data[index]
-    window.location = "##{@state.viewName}_details/#{data.id}"
+    #window.location = "##{@state.viewName}_details/#{data.id}"
 
 
   #
@@ -363,7 +447,7 @@ module.exports = React.createClass
       chiika.listManager.deleteFromList('anime',item.id,'myanimelist')
 
     onSearch = (menuItem,browserWindow,event) =>
-      chiika.searchManager.searchAndGo(item.animeTitle,'list-remote','anime',"#{@state.viewName}")
+      chiika.searchManager.searchAndGo(item.animeTitle,'list-remote','anime-manga')
 
     menuItems = []
     menuItems.push new MenuItem( { type: 'normal', label: "#{item.id}", enabled: false })
@@ -371,6 +455,47 @@ module.exports = React.createClass
     menuItems.push new MenuItem( { type: 'normal', label: "Delete from list", click: onDeleteFromList })
     menuItems.push new MenuItem( { type: 'normal', label: "Search", click: onSearch })
     chiika.popupContextMenu(menuItems)
+
+  columnAction: (action,params) ->
+    if action == 'score-update'
+      e     = params.e
+      id    = params.id
+      score = parseInt(params.score)
+      column = params.column
+      type   = params.type
+
+      findEntry = _find @state.data, (o) -> o.id == id
+      if findEntry?
+        oldScore = parseInt(findEntry[column])
+
+        if score != oldScore
+          findEntry[column] = score
+          @setState {}
+
+          chiika.listManager.updateScore('anime',id,'myanimelist',
+          { current: score },@props.route.viewName)
+
+    if action == "progress-update"
+      current = parseInt(params.current)
+      total   = parseInt(params.total)
+      column  = params.column
+      id      = params.id
+      owner   = params.owner
+
+      if current > total
+        return
+
+      if current < 0
+        return
+
+
+      findEntry = _find @state.data, (o) -> o.id == id
+      if findEntry?
+        findEntry[column] = current
+        @setState { }
+
+        chiika.listManager.updateProgress('anime',id,owner,
+        { title: "Episodes",current: current, total: total },@props.route.viewName)
 
 
   #
@@ -381,61 +506,18 @@ module.exports = React.createClass
       <Loading />
     else
       @renderTabs()
-
-  renderExpanded: (index,key) ->
-    <div className="hidden list-item-expanded">
-      <div>
-        <div className="expanded-cover">
-        </div>
-        <div className="expanded-meta">
-          <div className="meta-row">
-            <h5>Rate</h5>
-            <div className="expanded-rate">
-              <span>1</span>
-              <span>2</span>
-              <span>3</span>
-              <span className="selected">4</span>
-              <span>5</span>
-              <span>6</span>
-              <span>7</span>
-              <span>8</span>
-              <span>9</span>
-              <span>10</span>
-            </div>
-          </div>
-          <div className="meta-row">
-            <h5>Watch</h5>
-            <div className="expanded-watch">
-              <span className="watched">6</span>
-              <span className="watched">7</span>
-              <span className="watched">8</span>
-              <span className="aired">9</span>
-            </div>
-          </div>
-          <div className="meta-row">
-            <h5>More</h5>
-            <div className="expanded-more">
-              <span className="button orange">Check Torrents</span>
-              <span className="button indigo">View on Web</span>
-              <span className="button green">Open Library</span>
-              <span className="button red">Open Details</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
   #
   #
   #
   renderSingleItem: (index,key) ->
     <div key={key}>
-      <div className="list-item #{if @state.data[index]? && @state.data[index].expanded then 'expanded' else ''}" onClick={(e) => @listItemClick(e,index)} onDoubleClick={ (e) => @listItemDblClick(e,index)} onContextMenu={ (e) => @itemContextMenu(e,index)}>
+      <div className="list-item" onClick={(e) => @listItemClick(e,index)} onDoubleClick={ (e) => @listItemDblClick(e,index)} onContextMenu={ (e) => @itemContextMenu(e,index)}>
         {
           @state.columns.map (col,i) =>
             <div className="col-list col-#{col.name}" key={i}>
               {
                 if window["#{@state.viewName}_#{col.name}"]?
-                  window["#{@state.viewName}_#{col.name}"](@state.data[index][col.name])
+                  window["#{@state.viewName}_#{col.name}"](@state.data[index],@columnAction)
                 else
                   @state.data[index][col.name]
               }
@@ -444,7 +526,7 @@ module.exports = React.createClass
       </div>
       {
         if @state.data[index]? && @state.data[index].expanded
-          window["#{@state.viewName}_expanded"](@state.data[index])
+          window["#{@state.viewName}_expanded"](@state.data[index],@columnAction)
       }
     </div>
 

@@ -24,7 +24,8 @@ window.sortFunctions = {}
 # TYPE ICON
 #
 ###########
-myanimelist_animelist_animeTypeText = (val) ->
+myanimelist_animelist_animeTypeText = (item) ->
+  val = item.animeTypeText
   if val == 'TV'
     val = 'fa fa-television'
 
@@ -62,17 +63,21 @@ myanimelist_animelist_animeTypeText = (val) ->
     val = ''
   <i className="#{val}"></i>
 
-myanimelist_animelist_animeProgress = (progress) ->
-  <div>
-    <span className="list-progress-minus"></span>
+myanimelist_animelist_animeProgress = (item,actions) ->
+  <div title="#{item.animeProgress}">
+    <span className="prevent-expand list-progress-minus" onClick={() =>
+      actions('progress-update',{id:item.id,current: parseInt(item.animeWatchedEpisodes) - 1, total: item.animeTotalEpisodes, owner: 'myanimelist', column: 'animeWatchedEpisodes'})
+      }></span>
     <span>
-      <span className="list-progress-user">10</span>
-      <span className="list-progress-total">/20</span>
+      <span className="prevent-expand list-progress-user">{item.animeWatchedEpisodes}</span>
+      <span className="list-progress-total">/{item.animeTotalEpisodes}</span>
     </span>
-    <span className="list-progress-plus"></span>
+    <span className="prevent-expand list-progress-plus" onClick={() =>
+      actions('progress-update',{id:item.id,current: parseInt(item.animeWatchedEpisodes) + 1, total: item.animeTotalEpisodes, owner: 'myanimelist', column: 'animeWatchedEpisodes'})
+      }></span>
   </div>
 
-myanimelist_animelist_expanded = (item) ->
+myanimelist_animelist_expanded = (item,actions) ->
   <div className="hidden list-item-expanded">
     <div>
       <img className="expanded-cover" src="#{item.animeImage}"></img>
@@ -82,7 +87,9 @@ myanimelist_animelist_expanded = (item) ->
           <div className="expanded-rate">
             {
               [1,2,3,4,5,6,7,8,9,10].map (score,i) =>
-                <span key={i} className="#{if item.animeScore == score then 'selected'}">{score}</span>
+                <span key={i} className="#{if item.animeScore == score then 'selected'}" onClick={(e) =>
+                  actions('score-update',{ e: e, score: score,id: item.id, column: 'animeScore'})
+                  }>{score}</span>
             }
           </div>
         </div>
@@ -109,7 +116,7 @@ myanimelist_animelist_expanded = (item) ->
   </div>
 
 # Uncomment next line to see how icons impact performance
-#window.myanimelist_animelist_animeTypeText = myanimelist_animelist_animeTypeText
+window.myanimelist_animelist_animeTypeText = myanimelist_animelist_animeTypeText
 
 # Repeat pattern of (viewName)_(columnName) = function (column_item)
 # to modify contents of each cell

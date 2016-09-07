@@ -82,6 +82,7 @@ MalLogin = React.createClass
 
     # #This callback only gets called if error on login
     ipcRenderer.on 'login-response',(event,response) =>
+      $("#log-btn").prop("disabled",false)
 
       if !response.success
         message = "We couldn't login you with the selected service!"
@@ -156,7 +157,7 @@ MalLogin = React.createClass
 
     if (user != "" && pass != "")
       loginData = { user: user, pass: pass }
-      console.log loginData
+      $("#log-btn").prop("disabled",true)
       ipcRenderer.send 'set-user-login',{ login: loginData, service: @state.loggingInTo.name }
 
 

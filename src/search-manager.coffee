@@ -30,7 +30,7 @@ module.exports = class SearchManager
 
   getLastResults: ->
     if @lastSearchString?
-      return { searchString: @lastSearchString, results: @lastSearchResults }
+      return { searchString: @lastSearchString, results: @lastSearchResults,searchSource:@lastSearchSource, searchType: @lastSearchType }
     else
       return null
 
@@ -45,33 +45,23 @@ module.exports = class SearchManager
       if e.keyCode == 13
         value = $("#gridSearch").val()
         if value.length > 0
-          sources = ""
 
-          _forEach chiika.services, (service) =>
-            sources += "#{x}," for x in service.views
-          sources = sources.substring(0,sources.length - 1)
-
-
-
-          window.location = "#Search/#{value}?searchMode=list-remote&searchType=anime-manga&searchSource=#{sources}"
+          window.location = "#Search/#{value}?searchType=default"
         @emitter.emit 'form-input-enter',$("#gridSearch").val()
 
-  searchAndGo: (searchString,mode,type,source,callback) ->
-    console.log source
-    window.location = "#Search/#{searchString}?searchMode=#{mode}&searchType=#{type}&searchSource=#{source}"
+  searchAndGo: (searchString,mode,type,callback) ->
+    window.location = "#Search/#{searchString}?searchType=default"
     $("#gridSearch").val(searchString)
 
   search: (searchString,mode,type,source,callback) ->
-    if source.split(',').length > 1
-      source = source.split(',')
+    chiika.ipc.sendMessage 'make-search', { searchString:searchString,searchType:type,searchSource:source,searchMode: mode }
 
-    console.log source
-    # chiika.ipc.sendMessage 'make-search', { searchString:searchString,searchType:type,searchSource:source,searchMode: mode }
-    #
-    # chiika.ipc.receive 'make-search-response', (event,args) =>
-    #   callback?(args)
-    #
-    #   chiika.ipc.disposeListeners('make-search-response')
-    #
-    #   @lastSearchString = searchString
-    #   @lastSearchResults = args
+    chiika.ipc.receive 'make-search-response', (event,args) =>
+      callback?(args)
+
+      chiika.ipc.disposeListeners('make-search-response')
+
+      @lastSearchString = searchString
+      @lastSearchResults = args
+      @lastSearchType = type
+      @lastSearchSource = source

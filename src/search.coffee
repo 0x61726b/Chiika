@@ -17,23 +17,27 @@
 React                               = require('react')
 Loading                             = require './loading'
 _forEach                            = require 'lodash.foreach'
+_indexOf                            = require 'lodash/array/indexOf'
+_find                               = require 'lodash/collection/find'
 #Views
 
 module.exports = React.createClass
   getInitialState: ->
-    searchState: 'loading'
+    searchState: 'no-input'
+    searchString: @props.params.searchString
     searchResults: []
-    searchAnime: true
-    searchManga: true
+    searchAnime: false
+    searchManga: false
     searchList : false
-
-  setSearchParams: (searchString,searchMode,searchType,searchSource) ->
-    if searchString.length > 0 && searchMode?
-      console.log "Creating search request for #{searchString} - #{searchMode} - #{searchType} - #{searchSource}"
-
-      @setState { searchString: searchString, searchMode: searchMode, searchType: searchType, searchSource: searchSource, searchState: 'searching' }
+    services: chiika.services
 
   componentDidUpdate: ->
+    if @state.searchState != 'no-input'
+      @doSearch()
+
+
+
+  doSearch: ->
     if @state.searchAnime && @state.searchManga
       searchType = 'anime-manga'
 
@@ -49,16 +53,18 @@ module.exports = React.createClass
       searchMode = 'list-remote'
 
 
+
     if !@state.searchAnime && !@state.searchManga
       return
-
+    #
     if @state.searchState == 'searching'
-      console.log "#{@state.searchString} - #{searchMode} - #{searchType} - #{@state.searchSource}"
+      console.log "#{@state.searchString} - #{searchMode} - #{searchType}"
       chiika.toastLoading("Searching #{@state.searchString}...",'infinite')
-
-      chiika.searchManager.search @state.searchString,searchMode,searchType,@state.searchSource, (results) =>
+    #
+      chiika.searchManager.search @state.searchString,searchMode,searchType,@state.services, (results) =>
         chiika.closeToast()
         @setState { searchResults: results, searchState: 'completed' }
+        console.log results
     #
     # if @state.searchString.length > 0 && @state.searchMode?
     #   console.log "Creating search request for #{@state.searchString} - #{@state.searchMode} - #{@state.searchType} - #{@state.searchSource}"
@@ -66,20 +72,61 @@ module.exports = React.createClass
     #   chiika.searchManager.search @state.searchString,@state.searchType,@state.searchSource, (results) =>
     #     @setState { searchString: '', searchResults: results }
 
-  componentDidMount: ->
-    console.log "Mount #{@props.params.searchString}"
+  componentWillMount: ->
+    searchString = @props.params.searchString
+    searchType = @props.location.query.searchType
 
-    if @props.params.searchString != ":"
-      @setSearchParams(@props.params.searchString,@props.location.query.searchMode,@props.location.query.searchType,@props.location.query.searchSource)
+    if searchString != ":"
+      @state.searchState = 'searching'
+      @state.searchString = searchString
+
+      if searchType == 'default'
+        @state.searchAnime = true
+        @state.searchManga = true
+      else if searchType == 'anime'
+        @state.searchAnime = true
+      else if searchType == 'manga'
+        @state.searchManga = true
+      else if searchType == 'list'
+        @state.searchList = true
+
+
+      @doSearch()
+
+
+  getSearchType: (type) ->
+    searchAnime = false
+    searchManga = false
+    searchList = false
+    if type == 'default' or type == 'anime-manga'
+      searchAnime = true
+      searchManga = true
+    else if type == 'anime'
+      searchAnime = true
+    else if type == 'manga'
+      searchManga = true
+    else if type == 'list'
+      searchList = true
+
+    return { searchAnime: searchAnime,searchManga:searchManga,searchList:searchList }
+
+
+
+
+
+    # if @props.params.searchString != ":"
+    #   @setSearchParams(@props.params.searchString,@props.location.query.searchMode,@props.location.query.searchType,@props.location.query.searchSource)
 
   componentWillReceiveProps: (props) ->
-    console.log props
+    # console.log props
 
-    # if props.params.searchString == ":"
-    #   lastResults = chiika.searchManager.getLastResults()
-    #   if lastResults?
-    #     $("#gridSearch").val(lastResults.searchString)
-    #     @setState { searchResults: lastResults.results, searchState: 'completed' }
+    if props.params.searchString == ":"
+      lastResults = chiika.searchManager.getLastResults()
+      if lastResults?
+        $("#gridSearch").val(lastResults.searchString)
+
+        searchType = @getSearchType(lastResults.searchType)
+        @setState { searchResults: lastResults.results, searchState: 'completed',searchAnime:searchType.searchAnime, searchManga: searchType.searchManga, searchList:searchType.searchList,searchSource: lastResults.searchSource }
     # else
     #   @setSearchParams(props.params.searchString,props.location.query.searchMode,props.location.query.searchType,props.location.query.searchSource)
     #   chiika.searchManager.search value,'list','myanimelist_animelist', (results) =>
@@ -103,25 +150,9 @@ module.exports = React.createClass
 
   onSourceChange: (source,e) ->
     value = $(e.target).prop('checked')
+    source.useInSearch = value
+    @setState { }
 
-    sources = @state.searchSource
-
-    if !value
-      # Remove
-      _forEach sources.split(','), (s) =>
-        _forEach source.views, (v) =>git
-          sources = sources.replace(v,"")
-      console.log sources
-
-
-  sourceChecked: (views) ->
-    source = @state.searchSource
-
-    source.forEach (f) =>
-      views.split(',').forEach (v) =>
-        if v == f
-          return true
-    return false
 
   onCoverClick: (sourceView,id,title) ->
     window.location = "##{sourceView}_details/#{id}?title=#{title}"
@@ -152,8 +183,13 @@ module.exports = React.createClass
           </div>
         </div>
       </div>
+
   render: ->
     <div style={{height: '100%'}}>
+      <div className="detailsPage-back" onClick={this.props.history.goBack}>
+        <i className="mdi mdi-arrow-left"></i>
+        Back
+      </div>
       <div className="search-filter">
         <label className="checkbox">
           <input type="checkbox" name="name" checked={@state.searchAnime} onChange={ (e) => @onTypeChange('anime',e)} /> Anime
@@ -164,20 +200,28 @@ module.exports = React.createClass
         {
           chiika.services.map (service,i) =>
             <label className="checkbox" key={i}>
-              <input type="checkbox" name="name" onChange={ (e) => @onSourceChange(service,e)} /> {service.description}
+              <input type="checkbox" name="name" checked={service.useInSearch} onChange={ (e) => @onSourceChange(service,e)} /> {service.description}
             </label>
         }
       </div>
       {
-        if @state.searchState == 'searching' or @state.searchState == 'loading'
+        if @state.searchState == 'searching'
           <Loading />
+        else if @state.searchState == 'no-input'
+          <div>Type something in the input box to search!</div>
       }
       {
-        if @state.searchState != 'searching' && @state.searchState != 'loading' && @state.searchResults.length > 0
+        if @state.searchState != 'searching' && @state.searchState != 'loading'
           <div className="search-results">
           {
-            @state.searchResults.map (sr,i) =>
-              @resultItem(sr,i)
+            if @state.searchResults.length == 0
+              <div className="search-results-no-entry">
+                <div>We couldnt find anything whoops..</div>
+                <img src="http://i.imgur.com/wNl0LHE.jpg"></img>
+              </div>
+            else if @state.searchResults.length > 0
+              @state.searchResults.map (sr,i) =>
+                @resultItem(sr,i)
           }
           </div>
       }

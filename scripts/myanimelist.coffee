@@ -94,6 +94,8 @@ module.exports = class MyAnimelist
 
   views: ['myanimelist_animelist','myanimelist_mangalist']
 
+  useInSearch: true
+
   # Will be called by Chiika with the API object
   # you can do whatever you want with this object
   # See the documentation for this object's methods,properties etc.
@@ -639,6 +641,7 @@ module.exports = class MyAnimelist
           newAnime.animeSeason                   = animeValues.season
           newAnime.animeSeasonText               = animeValues.seasonText
           newAnime.animeLastUpdatedText          = animeValues.lastUpdatedText
+          newAnime.animeSeriesStatusText         = @getAnimeStatus('text',anime.animeSeriesStatus)
 
           if status == "1"
             watching.push newAnime
@@ -2265,13 +2268,14 @@ module.exports = class MyAnimelist
           { name:'al_ptw', display: 'Plan to Watch'}
           ],
         gridColumnList: [
-          { name: 'animeTypeText',display: 'Type', sort: 'int', width:'40',align: 'center',headerAlign: 'center' },
-          { name: 'animeTitle',display: 'Title', sort: 'str', widthP:'60', align: 'left', headerAlign: 'left' },
-          { name: 'animeProgress',display: 'Progress', sort: 'float', widthP:'40', align: 'center',headerAlign: 'center' },
-          { name: 'animeScore',display: 'Score', sort: 'int', width:'100',align: 'center',headerAlign: 'center' },
-          { name: 'animeScoreAverage',display: 'Avg Score', sort: 'float', width:'100', align: 'center',headerAlign: 'center' },
-          { name: 'animeSeasonText',display: 'Season', sort: 'date', width:'100', align: 'center',headerAlign: 'center'},
-          { name: 'animeLastUpdatedText',display: 'Last Updated', sort: 'int', width:'140', align: 'center',headerAlign: 'center' },
+          { name: 'animeTypeText',display: 'Type', sort: 'int'},
+          { name: 'animeTitle',display: 'Title', sort: 'str'},
+          { name: 'animeProgress',display: 'Progress', sort: 'float'},
+          { name: 'animeScore',display: 'Score', sort: 'int'},
+          { name: 'animeScoreAverage',display: 'Avg Score', sort: 'float'},
+          { name: 'animeSeasonText',display: 'Season', sort: 'date'},
+          { name: 'animeSeriesStatusText',display: 'Airing Status', sort: 'int'},
+          { name: 'animeLastUpdatedText',display: 'Last Updated', sort: 'int'},
           { name: 'animeId',hidden: true }
         ]
       }

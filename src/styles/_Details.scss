@@ -368,3 +368,17 @@
 .fab-container.active .fab-little {
   transform: scale(1);
 }
+
+.progress-test:hover:after {
+  content: attr(title);
+  position: relative;
+  background: black;
+  color: white;
+  padding: 4px;
+  font-size: 14px;
+  right: 50px;
+  border-radius: 4px;
+  width: auto;
+  white-space: nowrap;
+  top: 8px;
+}

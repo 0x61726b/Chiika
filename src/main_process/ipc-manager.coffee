@@ -480,6 +480,7 @@ module.exports = class IpcManager
             order: script.order
             logo: script.logo
             views: script.views
+            useInSearch: script.useInSearch
           services.push service
 
 

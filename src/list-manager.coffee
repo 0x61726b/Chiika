@@ -25,7 +25,7 @@ _indexOf                                  = require 'lodash/array/indexOf'
 _forEach                                  = require 'lodash.foreach'
 
 module.exports = class ListManager
-  updateProgress: (type,id,owner,item,status,viewName,callback) ->
+  updateProgress: (type,id,owner,item,viewName,callback) ->
     onActionCompete = (params) =>
       if params.args.success
         callback?()
@@ -33,7 +33,7 @@ module.exports = class ListManager
 
 
     chiika.toastLoading('Updating..','infinite')
-    @listAction 'progress-update',{ layoutType: type, id: id,owner:owner, status: status,item:item,viewName: viewName },onActionCompete
+    @listAction 'progress-update',{ layoutType: type, id: id,owner:owner,item:item,viewName: viewName },onActionCompete
 
   updateStatus: (type,id,owner,item,viewName,callback) ->
     onActionCompete = (params) =>
