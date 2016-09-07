@@ -115,6 +115,42 @@ myanimelist_animelist_expanded = (item,actions) ->
     </div>
   </div>
 
+myanimelist_mangalist_expanded = (item,actions) ->
+  <div className="hidden list-item-expanded">
+    <div>
+      <img className="expanded-cover" src="#{item.mangaImage}"></img>
+      <div className="expanded-meta">
+        <div className="meta-row">
+          <h5>Rate</h5>
+          <div className="expanded-rate">
+            {
+              [1,2,3,4,5,6,7,8,9,10].map (score,i) =>
+                <span key={i} className="#{if item.mangaScore == score then 'selected'}" onClick={(e) =>
+                  actions('score-update',{ e: e, score: score,id: item.id, column: 'mangaScore'})
+                  }>{score}</span>
+            }
+          </div>
+        </div>
+        <div className="meta-row">
+          <h5>Watch</h5>
+          <div className="expanded-watch">
+            <span className="watched">6</span>
+            <span className="watched">7</span>
+            <span className="watched">8</span>
+            <span className="aired">9</span>
+          </div>
+        </div>
+        <div className="meta-row">
+          <h5>More</h5>
+          <div className="expanded-more">
+            <span className="button indigo" onClick={ () => chiika.openShellUrl("https://myanimelist.net/manga/#{item.id}")}>View on Web</span>
+            <span className="button red" onClick={() => window.location="#myanimelist_mangalist_details/#{item.id}"}>Open Details</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 # Uncomment next line to see how icons impact performance
 window.myanimelist_animelist_animeTypeText = myanimelist_animelist_animeTypeText
 
@@ -122,3 +158,4 @@ window.myanimelist_animelist_animeTypeText = myanimelist_animelist_animeTypeText
 # to modify contents of each cell
 window.myanimelist_animelist_animeProgress = myanimelist_animelist_animeProgress
 window.myanimelist_animelist_expanded = myanimelist_animelist_expanded
+window.myanimelist_mangalist_expanded = myanimelist_mangalist_expanded

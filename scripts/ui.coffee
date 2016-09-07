@@ -21,6 +21,8 @@ fs            = require 'fs'
 _forEach      = scriptRequire 'lodash.forEach'
 moment        = scriptRequire 'moment'
 string        = scriptRequire 'string'
+momentTz      = scriptRequire 'moment-timezone'
+_find         = scriptRequire 'lodash/collection/find'
 
 module.exports = class UI
   name: "ui"
@@ -81,6 +83,53 @@ module.exports = class UI
     @on 'get-view-data', (args) =>
       @chiika.logger.script("[yellow](#{@name}) get-view-data")
 
+      if args.view.name == 'calendar_senpai'
+        calendarView = @chiika.viewManager.getViewByName('calendar_senpai')
+        if calendarView?
+          calendarData = calendarView.getData()
+
+          currentSeason = "2016 Summer" # Fix l8r
+          if calendarData?
+            thisSeason = _find calendarData, (o) -> o.season == currentSeason
+
+            if thisSeason?
+              senpai = thisSeason.senpai
+              season = thisSeason.season
+
+              animelist  = senpai.items
+
+              userTimezone = momentTz.tz(momentTz.tz.guess())
+              utcOffset = momentTz.parseZone(userTimezone).utcOffset() * 60# In seconds
+
+              viewData = {}
+
+              days = ["Sat","Sun","Mon","Tue","Wed","Thu","Fri"]
+              days.map (day,i) =>
+                viewData[day] = []
+
+
+              _forEach animelist, (anime) =>
+                if anime.airdates[utcOffset]?
+                  day = anime.airdates[utcOffset].rd_weekday
+                  time = anime.airdates[utcOffset].rd_time
+                  simulDelay = anime.simulcast_delay
+                  MALID = anime.MALID
+                  ANNID = anime.ANNID
+                  simul = anime.simulcast
+                  name = anime.name
+
+                  time = moment(time,'HH:mm').add(simulDelay,'hours').format('HH:mm')
+
+                  calendarAnime =
+                    name: name
+                    simul: simul
+                    day: day
+                    time: time
+                  viewData[day].push calendarAnime
+
+              console.log viewData
+              args.return(viewData)
+
     @on 'view-update', (update) =>
       @chiika.logger.script("[yellow](#{@name}) view-update")
 
@@ -88,12 +137,6 @@ module.exports = class UI
         calendarFile = "#{process.env.CHIIKA_RESOURCES_SRC}/prettifiedSenpai.json"
         calendarData = @chiika.utility.readFileSync(calendarFile)
         seasonData = JSON.parse(calendarData)
-        parsedCalendarData = { season: '2016 Sumner', senpai: seasonData }
+        parsedCalendarData = { season: '2016 Summer', senpai: seasonData }
         update.view.setData(parsedCalendarData, 'season').then (args) =>
           update.return()
-
-
-
-
-  requestViewRefresh: ->
-    @chiika.sendMessageToWindow 'main','refresh-data'

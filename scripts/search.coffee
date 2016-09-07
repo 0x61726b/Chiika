@@ -162,7 +162,7 @@ module.exports = class Search
               _forEach response, (entry) =>
                 findInMangalist = _find sourceDataManga,(o) -> o.id == entry.id
                 layout = @mangaSearchResultLayout(entry,findInMangalist)
-                layout.sourceView = viewsToSearch[0]
+                layout.sourceView = viewsToSearch[1]
                 results.push layout
 
               resolve(results)

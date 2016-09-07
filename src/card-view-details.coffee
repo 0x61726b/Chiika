@@ -167,6 +167,9 @@ module.exports = React.createClass
     $('.userStatus').toggleClass('open')
     $('.userStatusButton').toggleClass('open')
 
+  updateProgress: (itemType,current,total) ->
+    chiika.listManager.updateProgress(@state.layout.layoutType,@state.layout.id,@state.layout.owner,
+    { title: itemType,current: current, total: total },@props.route.viewName)
   #
   #
   #
@@ -188,8 +191,7 @@ module.exports = React.createClass
 
       if current >= 0
         findItem.current = current
-        chiika.listManager.updateProgress(@state.layout.layoutType,@state.layout.id,@state.layout.owner,
-        { title: itemTitle,current: current, total: total },@state.layout.status,@props.route.viewName)
+        @updateProgress(itemTitle,current,total)
 
         # Update input
         $($(e.target).next()).find('input').attr('placeholder',current)
@@ -215,8 +217,7 @@ module.exports = React.createClass
         current--
 
         findItem.current = current
-        chiika.listManager.updateProgress(@state.layout.layoutType,@state.layout.id,@state.layout.owner,
-        { title: itemTitle,current: current, total: total },@state.layout.status,@props.route.viewName)
+        @updateProgress(itemTitle,current,total)
 
         # Update input
         $($(e.target).next()).find('input').attr('placeholder',current)
@@ -244,8 +245,7 @@ module.exports = React.createClass
         current++
 
         findItem.current = current
-        chiika.listManager.updateProgress(@state.layout.layoutType,@state.layout.id,@state.layout.owner,
-        { title: itemTitle,current: current, total: total },@state.layout.status,@props.route.viewName)
+        @updateProgress(itemTitle,current,total)
 
         # Update input
         $($(e.target).prev()).find('input').attr('placeholder',current)

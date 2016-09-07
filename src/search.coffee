@@ -58,19 +58,12 @@ module.exports = React.createClass
       return
     #
     if @state.searchState == 'searching'
-      console.log "#{@state.searchString} - #{searchMode} - #{searchType}"
       chiika.toastLoading("Searching #{@state.searchString}...",'infinite')
     #
       chiika.searchManager.search @state.searchString,searchMode,searchType,@state.services, (results) =>
         chiika.closeToast()
         @setState { searchResults: results, searchState: 'completed' }
-        console.log results
-    #
-    # if @state.searchString.length > 0 && @state.searchMode?
-    #   console.log "Creating search request for #{@state.searchString} - #{@state.searchMode} - #{@state.searchType} - #{@state.searchSource}"
-    #
-    #   chiika.searchManager.search @state.searchString,@state.searchType,@state.searchSource, (results) =>
-    #     @setState { searchString: '', searchResults: results }
+
 
   componentWillMount: ->
     searchString = @props.params.searchString
@@ -135,6 +128,11 @@ module.exports = React.createClass
   componentWillUnmount: ->
     $("#gridSearch").val('')
     chiika.ipc.disposeListeners('make-search-response')
+    @formInputSub.dispose()
+
+  componentDidMount: ->
+    @formInputSub = chiika.searchManager.on 'form-input-enter', (input) =>
+      @setState { searchString: input, searchState: 'searching' }
 
   onTypeChange: (type,e) ->
     value = $(e.target).prop('checked')

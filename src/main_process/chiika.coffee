@@ -22,6 +22,7 @@
 {BrowserWindow, ipcMain,globalShortcut,Tray,Menu,app} = require 'electron'
 path                              = require 'path'
 
+
 {Emitter,Disposable}              = require 'event-kit'
 string                            = require 'string'
 
@@ -45,6 +46,8 @@ Utility                           = require './utility'
 AppOptions                        = require './options'
 AppDelegate                       = require './app-delegate'
 NotificationBar                   = require './notification-bar'
+
+
 
 
 process.on 'uncaughtException',(err) ->

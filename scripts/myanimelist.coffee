@@ -462,6 +462,7 @@ module.exports = class MyAnimelist
           timeSinceLastUpdate = diff
         if timeSinceLastUpdate < @detailsSyncTimeRestriction - 1
           @chiika.logger.script("#{args.id} was last updated #{timeSinceLastUpdate} hours ago.There is no need to update")
+          args.return({ updated: false, layout: @getMangaDetailsLayout(animeEntry)})
         else
           @handleMangaDetailsRequest id, params, (response) =>
             mangaExtraView = @chiika.viewManager.getViewByName('myanimelist_mangaextra')
@@ -474,7 +475,10 @@ module.exports = class MyAnimelist
               @chiika.requestViewDataUpdate('myanimelist','myanimelist_mangalist')
 
             if response.success && !response.list
+              console.log response.entry
               args.return({ updated: false, layout: @getMangaDetailsLayout(response.entry)})
+
+              @chiika.requestViewDataUpdate('myanimelist','myanimelist_mangalist')
 
         if animeEntry?
           args.return({ updated: false, layout: @getMangaDetailsLayout(animeEntry)})
@@ -495,18 +499,18 @@ module.exports = class MyAnimelist
       switch action
         when 'progress-update'
           item = params.item
-          status = params.status
 
           if params.viewName == 'myanimelist_animelist'
             @updateProgress params.id,'anime',item.current, (result) =>
               args.return(result)
 
           if params.viewName == 'myanimelist_mangalist'
+            mangaEntry = _find @mangalist, (o) -> o.id == params.id
             newProgress = { }
             if item.title == 'Chapters'
-              newProgress = { chapters: item.current, volumes: status.items[1].current,type: item.title }
+              newProgress = { chapters: item.current, volumes: mangaEntry.mangaUserReadVolumes,type: item.title }
             if item.title == 'Volumes'
-              newProgress = { volumes: item.current, chapters: status.items[0].current,type: item.title }
+              newProgress = { volumes: item.current, chapters: mangaEntry.mangaUserReadChapters,type: item.title }
 
             @updateProgress params.id,'manga',newProgress, (result) =>
               args.return(result)
