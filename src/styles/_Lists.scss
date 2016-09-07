@@ -26,38 +26,36 @@
 }
 $border-size: 1px;
 $row-border-color: $grey-2;
+
 .header-title {
   border-bottom: 1px solid #ddd;
-  //border-right: $border-size solid $grey-3;
-  padding: 8px 0;
+  border-right: $border-size solid $grey-3;
+  padding: 8px 4px;
   flex-grow: 0;
-}
-.header-title span {
-  font-weight: 500;
-}
-.header-title:not(.col-animeTitle) {
   text-align: center;
-}
-.list-item > div:not(.col-animeTitle) {
-  text-align: center;
+  span {
+    font-weight: 500;
+  }
+  &.col-animeTitle {
+    text-align: left;
+  }
 }
 .list-item {
   display: flex;
   width: auto;
-}
-.list-item.selected {
-  background: rgba($color-accent,0.1);
-}
-.list-item > div {
-  padding-top: 6px;
-  padding-bottom: 6px;
-  border-bottom: 1px solid $row-border-color;
-  //border-right: $border-size solid $row-border-color;
-  flex-grow: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: $main-text;
+  &.selected {
+    background: rgba($color-accent,0.1);
+  }
+  > div {
+    padding: 6px 4px;
+    border-bottom: 1px solid $row-border-color;
+    border-right: $border-size solid $row-border-color;
+    flex-grow: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: $main-text;
+  }
 }
 
 .col-animeTypeText {
@@ -74,8 +72,12 @@ $row-border-color: $grey-2;
 .col-animeProgress {
   width: 120px;
 }
-#chiika-list .col-animeProgress {
+.col-animeProgress {
   padding: 0!important;
+}
+.header-title.col-animeProgress {
+  padding-top: 8px!important;
+  padding-bottom: 8px!important;
 }
 .col-animeProgress > div {
   display: flex;
@@ -83,7 +85,6 @@ $row-border-color: $grey-2;
   align-items: center;
   height: 100%;
 }
-.list-progress-minus,
 .list-progress-plus {
   width: 24px;
   height: 100%;
@@ -91,35 +92,41 @@ $row-border-color: $grey-2;
   display: flex;
   align-items: center;
   color: $grey-3;
+  margin-left: 2px;
+  &:after  {
+    content: "\F142";
+  }
+  &:hover {
+    background: $color-success-main;
+    color: #eee;
+  }
+  &:active {
+    background: $color-success-dark;
+    color: white;
+  }
 }
 .list-progress-minus {
+  width: 24px;
+  height: 100%;
+  font: normal normal normal 24px/1 "Material Design Icons";
+  display: flex;
+  align-items: center;
+  color: $grey-3;
   margin-right: 2px;
+  &:after {
+    content: "\F141";
+  }
+  &:hover {
+    background: $color-warning-main;
+    color: #eee;
+  }
+  &:active {
+    background: $color-warning-dark;
+    color: white;
+  }
 }
-.list-progress-plus {
-  margin-left: 2px;
-}
-.list-progress-minus:after {
-  content: "\F141";
-}
-.list-progress-minus:hover {
-  background: $color-warning-main;
-  color: #eee;
-}
-.list-progress-minus:active {
-  background: $color-warning-dark;
-  color: white;
-}
-.list-progress-plus:after  {
-  content: "\F142";
-}
-.list-progress-plus:hover {
-  background: $color-success-main;
-  color: #eee;
-}
-.list-progress-plus:active {
-  background: $color-success-dark;
-  color: white;
-}
+
+
 .col-animeScoreAverage {
   width: 100px;
 }
@@ -130,7 +137,23 @@ $row-border-color: $grey-2;
 
 .col-animeSeasonText {
   width: 120px;
-  text-align: right;
+}
+#chiika-list {
+  .col-animeSeasonText,
+  .col-animeLastUpdatedText {
+    text-align: right;
+    font-weight: 500;
+    color: #666;
+  }
+}
+#chiika-list {
+  .col-animeScore,
+  .col-animeScoreAverage,
+  .col-animeTypeText {
+    text-align: center;
+    font-weight: 500;
+    color: #666;
+  }
 }
 
 .col-animeLastUpdatedText {

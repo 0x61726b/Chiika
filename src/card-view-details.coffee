@@ -455,8 +455,8 @@ module.exports = React.createClass
           {
             if @state.layout.list
               <div>
-                <div className="fab fab-little emphasis" title="Delete from list" onClick={@deleteFromList}>
-                  <i className="mdi mdi-folder"></i>
+                <div className="fab fab-little danger" title="Delete from list" onClick={@deleteFromList}>
+                  <i className="mdi mdi-close"></i>
                 </div>
                 <div className="fab fab-little emphasis" title="Open Folder" onClick={@openFolder}>
                   <i className="mdi mdi-folder"></i>
