@@ -22,50 +22,58 @@ _find                               = require 'lodash/collection/find'
 
 
 module.exports = React.createClass
-  componentWillMount: ->
-    @refreshData()
+  getInitialState: ->
+    library: []
+    selectedLibraryEntry: null
 
-    @refreshView = chiika.emitter.on 'view-refresh', (view) ->
-      if view == 'chiika_library'
-        @refreshData()
+  componentWillMount: ->
+    @state.library = @refreshData()
+
+    @refreshView = chiika.emitter.on 'view-refresh', (view) =>
+      if view.view == 'chiika_library'
+        @setState { library: @refreshData() }
 
   componentWillUnmount: ->
     @refreshView.dispose()
 
+  componentDidUpdate: ->
+    $(".bookshelf-book").addClass "open"
+
+  onLibraryEntryClick: (e,item) ->
+    if $(".bookshelf-book").hasClass "open"
+      # Change entry
+      @setState { selectedLibraryEntry: { anime: item.entries[0].entry, files: item.files } }
+    else
+      @setState { selectedLibraryEntry: { anime: item.entries[0].entry, files: item.files } }
+
+
   refreshData: ->
     libraryData =  _find chiika.viewData, (o) -> o.name == 'chiika_library'
-    console.log libraryData
+    libraryData = libraryData.dataSource
 
+    # _forEach libraryData, (lib) =>
+    #   entries = lib.entries
+    #
+    #   _forEach entries, (entry) =>
+    #     owner = entry.owner
+    #     anime = entry.entry
 
-  renderSingleItem: (item,index) ->
-    <div className="day-series" key={index}>
-      <div className="series-hour">
-        {item.time}
-      </div>
-      <div className="series-episode">
-        Ep. 3
-      </div>
-      <div className="series-title">
-        {item.name} | {item.simulcast}
-      </div>
-      <div className="series-buttons">
-        <button type="button" className="button lightblue">Details</button>
-        <button type="button" className="button lightblue">Library</button>
-      </div>
+    libraryData
+
+  renderSingleItem: (lib,i) ->
+    <div className="bookshelf-item" key={i}>
+      <img src="#{lib.entries[0].entry.animeImage}" onClick={(e) => @onLibraryEntryClick(e,lib) }></img>
+      <span>{lib.entries[0].entry.animeTitle}</span>
     </div>
-
   render: ->
     <div className="bookshelf" id="library">
-      <div className="bookshelf-item"><img src="img/cover1.jpg" />test</div>
-      <div className="bookshelf-item"><img src="img/cover1.jpg" />test123</div>
-      <div className="bookshelf-item"><img src="img/cover1.jpg" /></div>
-      <div className="bookshelf-item"><img src="img/cover1.jpg" /></div>
-      <div className="bookshelf-item"><img src="img/cover1.jpg" /></div>
-      <div className="bookshelf-item"><img src="img/cover1.jpg" /></div>
-      <div className="bookshelf-item"><img src="img/cover1.jpg" /></div>
-      <div className="bookshelf-item"><img src="img/cover1.jpg" /></div>
-      <div className="bookshelf-item"><img src="img/cover1.jpg" /></div>
-      <div className="bookshelf-item"><img src="img/cover1.jpg" /></div>
-      <div className="bookshelf-item"><img src="img/cover1.jpg" /></div>
-      <div className="bookshelf-item"><img src="img/cover1.jpg" /></div>
+      <div>
+        {
+          @state.library.map (lib,i) =>
+            @renderSingleItem(lib,i)
+        }
+        {
+          window.myanimelist_animelist_library(@state.selectedLibraryEntry)
+        }
+      </div>
     </div>

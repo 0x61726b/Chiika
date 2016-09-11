@@ -51,19 +51,18 @@ module.exports = class MediaManager
   #
   #
   #
-  runLibraryProcess: (libraryPaths,animelist,animeextra,callback) ->
-
+  runLibraryProcess: (libraryPaths,animelist,callback) ->
     chiika.logger.verbose("Spawning library process")
+
+    if @libraryProcess?
+      chiika.logger.error("Library process is already running.")
+      return
+
     animelistStr = JSON.stringify(animelist)
     @libraryProcess = cp.fork("#{__dirname}/media-library-process.js",[JSON.stringify(libraryPaths)])
 
-    extraStr = JSON.stringify([])
 
-    if animeextra.length > 0
-      extraStr = JSON.stringify(animeextra)
-
-
-    @libraryProcess.send { message: 'set-anime-list', animelist: animelistStr, extra: extraStr }
+    @libraryProcess.send { message: 'set-anime-list', animelist: animelistStr }
 
     @libraryProcess.on 'close',(code,signal) =>
       if signal == 'SIGTERM'

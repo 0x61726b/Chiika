@@ -35,6 +35,18 @@
   transition: opacity .6s, transform .6s;
   transform: translateX(-110%);
 }
+.bookshelf-item {
+  transform: scale(0.75);
+  animation: openBookshelf .3s forwards;
+  animation-delay: 1s;
+}
+@keyframes openBookshelf {
+  from {}
+  to {
+    transform: scale(1);
+  }
+}
+
 .bookshelf-book.open {
   opacity: 1;
   transition: opacity .6s, transform .6s;

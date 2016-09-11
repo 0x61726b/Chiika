@@ -117,6 +117,8 @@ class Application
 
     @ipcManager.handleEvents()
 
+
+
     app.commandLine.appendSwitch('--disable-2d-canvas-image-chromium');
     app.commandLine.appendSwitch('--disable-accelerated-2d-canvas');
     app.commandLine.appendSwitch('--disable-gpu');
@@ -124,7 +126,6 @@ class Application
     app.commandLine.appendSwitch('--version-string.FileDescription=test')
 
     @appDelegate.run()
-
 
 
     @appDelegate.ready =>

@@ -330,6 +330,47 @@ hummingbird_animelist_contextMenu = (item) ->
 
   chiika.popupContextMenu(menuItems)
 
+
+myanimelist_animelist_library = (entry) ->
+  close = (e) =>
+    $(".bookshelf-book").removeClass "open"
+  <div>
+  {
+    if entry?
+      <div className="bookshelf-book">
+        <div className="book-cover">
+          <img src={entry.anime.animeImage} width="200" height="300" onClick={close} />
+          <div className="book-meta">
+            <h3>{entry.anime.animeTitle}</h3>
+            <label className="checkbox">
+              <input type="checkbox" name="name" value="" /> Rewatching
+            </label>
+            <form>
+              <label>Folder</label>
+              <input type="text" className="text-input" />
+              <button type="button" className="button raised lightblue" id="folder-button"></button>
+            </form>
+            <form>
+              <label>Tags</label>
+              <input type="text" className="text-input" />
+              <button type="button" className="button raised lightblue" id="folder-button"></button>
+            </form>
+          </div>
+        </div>
+
+        <div className="book-inside">
+          <h5>Total Episodes: {entry.files.length}</h5>
+          <ul className="book-index">
+          {
+            entry.files.map (file,i) =>
+              <li className="book-chapter exists" ep={file.episode} key={i}>{file.episode}</li>
+          }
+          </ul>
+        </div>
+        <div className="bookshelf-back"></div>
+      </div>
+  }
+  </div>
 # Uncomment next line to see how icons impact performance
 window.myanimelist_animelist_animeTypeText = myanimelist_animelist_animeTypeText
 
@@ -344,3 +385,5 @@ window.hummingbird_animelist_expanded = hummingbird_animelist_expanded
 
 window.myanimelist_animelist_contextMenu = myanimelist_animelist_contextMenu
 window.hummingbird_animelist_contextMenu = hummingbird_animelist_contextMenu
+
+window.myanimelist_animelist_library = myanimelist_animelist_library

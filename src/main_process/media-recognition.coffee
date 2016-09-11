@@ -77,19 +77,18 @@ module.exports = class MyAnimelistRecognition
   #
   doCache: (cached,entry) ->
     parseResult = entry.parse
-    recognize   = entry.recognize
-    recognized  = recognize.recognized
+    results = entry.results
 
-    if recognized
-      recognizedAnimeEntry = recognize.entry
-    else
-      suggestions = recognize.suggestions
+    # if recognized
+    #   recognizedAnimeEntry = recognize.entry
+    # else
+    #   suggestions = recognize.suggestions
 
     videoFile = entry.videoFile
-    owner     = entry.owner
 
 
     title = @clear(parseResult.AnimeTitle)
+
 
     if title.length > 0
       findInCache = _find cached,(o) -> o.title == title
@@ -97,7 +96,10 @@ module.exports = class MyAnimelistRecognition
         cacheEntry = {}
         cacheEntry.title = title
         cacheEntry.files = []
-        cacheEntry.owners = [ { name: owner } ]
+        cacheEntry.owners = []
+        _forEach results, (r) =>
+          cacheEntry.owners.push { name: r.owner }
+
         cacheEntry.folder = ""
 
         cacheEntry.files.push { episode: parseResult.EpisodeNumber, file: videoFile }
@@ -112,11 +114,13 @@ module.exports = class MyAnimelistRecognition
 
         # Check if same owner is there
         owners = findInCache.owners
-        findOwner = _find owners, (o) => o.name == owner
 
-        #If not , insert
-        if !findOwner?
-          owners.push owner
+        _forEach results, (r) =>
+          findOwner = _find owners, (o) => o.name == r.owner
+
+          #If not , insert
+          if !findOwner?
+            owners.push r.owner
 
         # Add a folder for 'open-folder' stuff
         # At this point, a file exists,use its parent folder
@@ -137,18 +141,6 @@ module.exports = class MyAnimelistRecognition
 
     detectCache.setDataArray(cached)
 
-
-
-
-    # clearEntries = []
-    # for i in [0...cacheEntries.length]
-    #   cache = cacheEntries[i]
-    #   find = _find clearEntries, (o) -> o["#{entry.owner}_id"] == cache["#{entry.owner}_id"]
-    #
-    #   if !find?
-    #     clearEntries.push cache
-
-    #detectCache.setDataArray(cacheEntries)
   #
   #
   #
@@ -159,7 +151,16 @@ module.exports = class MyAnimelistRecognition
 
     title
 
-  recognize: (title,animelist,animeextra) ->
+  doRecognize: (title,library) ->
+    results = []
+    _forEach library, (lib) =>
+      owner = lib.owner
+      list = lib.library
+
+      results.push { owner: owner, recognize: @recognize(title,list) }
+    results
+
+  recognize: (title,animelist) ->
     title = @clear(title)
 
     if chiika? && chiika.logger?
@@ -177,18 +178,19 @@ module.exports = class MyAnimelistRecognition
       result.recognized = recognized
       result.suggestions = suggestions
       _forEach animelist, (anime) =>
-        extra = _find animeextra, (o) -> o.id == anime.id
 
-        synonyms = anime.animeSynonyms.split(';')
         animeTitle = @clear(anime.animeTitle)
+        # MAL has synoynms
+        if anime.animeSynonyms?
+          synonyms = anime.animeSynonyms.split(';')
 
-        _forEach synonyms, (syn) =>
-          syn = @clear(syn)
-          if syn == title
-            recognized = true
-            result.recognized = recognized
-            result.entry = anime
-            return false
+          _forEach synonyms, (syn) =>
+            syn = @clear(syn)
+            if syn == title
+              recognized = true
+              result.recognized = recognized
+              result.entry = anime
+              return false
 
         if recognized
           return false
@@ -201,14 +203,12 @@ module.exports = class MyAnimelistRecognition
           if string(animeTitle).contains(title) or string(animeTitle).contains(title)
             weight += 10
 
-          if extra? && string(@clear(extra.animeEnglish)).contains(title)
-            weight += 5
+          if anime.animeSynonyms?
+            _forEach synonyms, (syn) =>
+              syn = @clear(syn)
 
-          _forEach synonyms, (syn) =>
-            syn = @clear(syn)
-
-            if string(syn).contains(title)
-              weight += 7
+              if string(syn).contains(title)
+                weight += 7
 
 
           words = title.split(' ')
@@ -217,14 +217,15 @@ module.exports = class MyAnimelistRecognition
             if string(@clear(animeTitle)).contains(word)
               weight += 2
 
-            _forEach synonyms, (syn) =>
-              syn = @clear(syn)
+            if anime.animeSynonyms?
+              _forEach synonyms, (syn) =>
+                syn = @clear(syn)
 
-              if string(syn).contains(word)
-                weight += 2
+                if string(syn).contains(word)
+                  weight += 2
 
           if weight > 0
-            suggestions.push { weight: weight, entry: anime, extra: extra }
+            suggestions.push { weight: weight, entry: anime }
 
             if weight > 10
               return false

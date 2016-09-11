@@ -101,7 +101,7 @@ class ChiikaEnvironment
 
       @ipc.disposeListeners('scan-library-response')
 
-      chiika.toastSuccess("#{result.recognizedSeries} video files has been successfuly recognized!",4000)
+      chiika.toastSuccess("#{result.recognizedFiles} video files has been successfuly recognized!",4000)
 
   openFolderByEntry: (title) ->
     @scriptAction 'media','open-folder', { title: title }, (args) =>

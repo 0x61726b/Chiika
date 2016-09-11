@@ -69,6 +69,10 @@ module.exports = class Hummingbird
 
   useInSearch: true
 
+  animeView: 'hummingbird_animelist'
+
+  mangaView: 'hummingbird_mangalist'
+
   views: ['hummingbird_animelist']
 
   # Will be called by Chiika with the API object

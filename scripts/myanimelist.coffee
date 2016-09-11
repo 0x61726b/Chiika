@@ -92,6 +92,10 @@ module.exports = class MyAnimelist
   #
   detailsSyncTimeRestriction:9
 
+  animeView: 'myanimelist_animelist'
+
+  mangaView: 'myanimelist_mangalist'
+
   views: ['myanimelist_animelist','myanimelist_mangalist']
 
   useInSearch: true

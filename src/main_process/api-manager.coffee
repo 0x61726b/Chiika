@@ -79,6 +79,8 @@ module.exports = class APIManager
       order      = instance.order ? 0
       views      = instance.views ? []
       useInSearch = instance.useInSearch ? false
+      animeView = instance.animeView ? ""
+      mangaView = instance.mangaView ? ""
 
       localInstance =
         name: scriptName
@@ -92,6 +94,8 @@ module.exports = class APIManager
         order: order
         views: views
         useInSearch: useInSearch
+        animeView:animeView
+        mangaView:mangaView
 
       @activeScripts.splice(index,1,localInstance)
 

@@ -51,10 +51,9 @@ class LibraryScanner
 
     process.on 'message', (message) =>
       if message.message == 'set-anime-list'
-        @animelist = JSON.parse(message.animelist)
-        @animeextra = JSON.parse(message.extra)
-        process.send "Media Process library length #{@animelist.length}"
-        process.send "Media Process extra library length #{@animeextra.length}"
+        @libraryOwnerMap = JSON.parse(message.animelist)
+
+        process.send "Media Process library length #{@libraryOwnerMap.length}"
         @start = process.hrtime()
         @init()
 
@@ -93,11 +92,18 @@ class LibraryScanner
 
         title = parse.AnimeTitle.toLowerCase()
 
-        recognized = @recognition.recognize(title,@animelist,@animeextra)
-        if recognized.recognized
-          recognizedList.push { parse: parse,recognize:recognized, videoFile: videoFile }
+        libRecognizeResults = @recognition.doRecognize(title,@libraryOwnerMap)
+
+        recognized = false
+        _forEach libRecognizeResults, (libRecognize) =>
+          if libRecognize.recognize.recognized
+            recognized = true
+            return false
+
+        if recognized
+          recognizedList.push { parse: parse,results:libRecognizeResults,videoFile: videoFile }
         else
-          unRecognizedList.push { parse: parse,recognize:recognized, videoFile: videoFile }
+          unRecognizedList.push { parse: parse,results:libRecognizeResults, videoFile: videoFile }
       catch error
         process.send error.stack
         process.send error.message

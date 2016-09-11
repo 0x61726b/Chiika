@@ -491,6 +491,8 @@ module.exports = class IpcManager
             logo: script.logo
             views: script.views
             useInSearch: script.useInSearch
+            animeView: script.animeView
+            mangaView: script.mangaView
           services.push service
 
 

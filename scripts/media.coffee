@@ -45,6 +45,26 @@ module.exports = class Media
     @recognition = new Recognition()
     @anitomy = new AnitomyNode.Root()
 
+  libraryDataByOwner: ->
+    services = @chiika.getServices()
+
+    libraryDataByOwner = []
+
+    views = []
+    _forEach services, (service) =>
+      views.push { viewName: service.animeView, owner: service.name }
+
+    _forEach views, (viewOwnerMap) =>
+      view = @chiika.viewManager.getViewByName(viewOwnerMap.viewName)
+
+      if view?
+        viewData = view.getData()
+
+        if viewData.length > 0
+          libraryDataByOwner.push { owner: viewOwnerMap.owner, library: viewData }
+
+    libraryDataByOwner
+
   # This method is controls the communication between app and script
   # If you change this method things will break
   #
@@ -54,30 +74,6 @@ module.exports = class Media
     catch error
       console.log error
       throw error
-
-  scanFolder: (folder,title,callback) ->
-    @chiika.logger.info("Scanning folder #{folder}")
-
-    detectCache = @chiika.viewManager.getViewByName('anime_detect_cache')
-    animelistView = @chiika.viewManager.getViewByName('myanimelist_animelist')
-    animeExtraView = @chiika.viewManager.getViewByName('myanimelist_animeextra')
-
-    if animelistView?
-      animelist = animelistView.getData()
-      animeextra = animeExtraView.getData()
-
-      @recognition.getVideoFilesFromFolder folder,['.mkv','.mp4'], (files) =>
-        cache = []
-        _forEach files, (videoFile) =>
-          seperate = videoFile.split(path.sep)
-          videoName = seperate[seperate.length - 1]
-          parse =  @anitomy.Parse videoName
-          recognize = @recognition.recognize(title,animelist,animeextra)
-          parse.AnimeTitle = title
-
-          cachedEntry = { parse: parse,recognize:recognize, videoFile: videoFile,owner: 'myanimelist' }
-          cache.push cachedEntry
-        callback?(cache)
 
 
 
@@ -107,8 +103,43 @@ module.exports = class Media
         if detectCache?
           data = detectCache.getData()
 
-          # Group by owner
-          args.return(data)
+          libraryDataByOwner = @libraryDataByOwner()
+
+          libraryView = []
+
+          _forEach data,(d) =>
+            title = d.title
+
+            entryFound = false
+            animeEntry = null
+
+            viewByOwner = []
+
+            # Find in service data
+
+            libraryDataByOwnerLength = libraryDataByOwner.length
+
+            _forEach libraryDataByOwner, (lib) =>
+              library = lib.library
+              owner = lib.owner
+
+              findInList = _find library, (o) => @recognition.clear(o.animeTitle) == title
+
+              if findInList?
+                viewByOwner.push { owner: owner, entry: findInList }
+
+                if libraryDataByOwnerLength <= viewByOwner.length
+                  return false
+
+            if viewByOwner.length > 0
+              libraryView.push { entries: viewByOwner, files: d.files, owners: d.owners,title: title }
+
+
+
+
+
+
+          args.return(libraryView)
 
 
     @on 'play-episode', (args) =>
@@ -163,8 +194,8 @@ module.exports = class Media
     @on 'scan-folder', (args) =>
       folder = args.folder
 
-      @scanFolder folder, (cache) =>
-        args.return(cache)
+      # @scanFolder folder, (cache) =>
+      #   args.return(cache)
 
     @on 'open-folder', (args) =>
       @chiika.logger.script("[yellow](#{@name}) open-folder")
@@ -190,25 +221,20 @@ module.exports = class Media
     @on 'scan-library', (args) =>
       libraryPaths = @chiika.settingsManager.getOption('LibraryPaths')
 
-      animelistView = @chiika.viewManager.getViewByName('myanimelist_animelist')
-      animeExtraView = @chiika.viewManager.getViewByName('myanimelist_animeextra')
+      libraryDataByOwner = @libraryDataByOwner()
 
-      if animelistView?
-        animelist = animelistView.getData()
-
-        animeextra = animeExtraView.getData()
-
-        @chiika.media.runLibraryProcess libraryPaths,animelist,animeextra, (results) =>
+      if libraryDataByOwner.length > 0
+        @chiika.media.runLibraryProcess libraryPaths,libraryDataByOwner, (results) =>
           detectCache = @chiika.viewManager.getViewByName('anime_detect_cache')
-          _forEach results, (r) =>
-            _assign r,{ owner: 'myanimelist' }
+
 
           @recognition.cacheInBulk(detectCache,results)
 
 
-          args.return({ recognizedSeries: results.length })
+          args.return({ recognizedFiles: results.length })
 
           @chiika.requestViewDataUpdate('media','chiika_library')
+
 
     @on 'system-event', (event) =>
       @chiika.logger.script("[yellow](#{@name}) system-event - #{event.name}")
@@ -360,50 +386,3 @@ module.exports = class Media
 
         # Create a search
         @chiika.emit 'make-search', { calling: 'myanimelist', title: anitomy.AnimeTitle, type: 'anime',return: onSearch }
-
-
-
-
-      # if recognize.recognized
-      #   if recognize.entry?
-      #     @chiika.createNotificationWindow 200,() =>
-      #       layout = { title: anitomy.AnimeTitle, episode: anitomy.EpisodeNumber,image: recognize.entry.animeImage, imageLink: "myanimelist.net/anime/#{recognize.entry.id}" }
-      #       @chiika.sendMessageToWindow 'notification','notf-bar-recognized', layout
-      #
-      #     @chiika.emit 'create-card', { name: 'cards_currentlyWatching' }
-      #
-      #     # Save this file to cache
-      #     detectCache = @chiika.viewManager.getViewByName('anime_detect_cache')
-      #
-      #     @recognition.cache(detectCache,recognize,anitomy,videoFile)
-      #
-      #     @chiika.requestViewUpdate 'cards_currentlyWatching','cards', null, { entry: recognize.entry,parse: anitomy }
-      # else
-      #   # Not recognized
-      #   #@chiika.emit 'create-card', { name: 'cards_notRecognized' }
-      #   #@chiika.requestViewUpdate 'cards_notRecognized','cards', null, { result: recognize,parse: anitomy }
-      #
-      #   @chiika.createNotificationWindow 250, =>
-      #     layout = { title: anitomy.AnimeTitle, episode: anitomy.EpisodeNumber, suggestions: recognize.suggestions,videoFile: videoFile, parse: anitomy }
-      #     @chiika.sendMessageToWindow 'notification','notf-bar-not-recognized', layout
-      #
-      #   onSearch = (results) =>
-      #     suggestions = []
-      #     if results.length > 0
-      #       _forEach results, (entry) =>
-      #         weight = @recognition.predict(entry,title)
-      #         recognize.suggestions.push { weight: weight, entry: entry }
-      #
-      #     recognize.suggestions.sort (a,b) =>
-      #       if a.weight > b.weight
-      #         return -1
-      #       else
-      #         return 1
-      #       return 0
-      #     # @chiika.requestViewUpdate 'cards_notRecognized','cards', null, { result: recognize,parse: anitomy }
-      #     layout = { title: anitomy.AnimeTitle, episode: anitomy.EpisodeNumber, suggestions: recognize.suggestions,videoFile: recognize.videoFile }
-      #     @chiika.sendMessageToWindow 'notification','notf-bar-not-recognized', layout
-      #
-      #
-      #   # Create a search
-      #   @chiika.emit 'make-search', { calling: 'myanimelist', title: anitomy.AnimeTitle,return: onSearch }
