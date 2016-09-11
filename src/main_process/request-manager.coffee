@@ -48,10 +48,22 @@ module.exports = class RequestManager
     request { url: url, headers: headers },onRequestReturn
 
 
-  makePostRequest: (url,headers,callback) ->
+  makePostRequest: (url,headers,body,callback) ->
+    form = {  }
+    defaultHeaders = {
+      'User-Agent': 'ChiikaDesktopApplication',
+      'Content-Type' : 'application/x-www-form-urlencoded'
+    }
+
+    if body?
+      contentLength = Buffer.byteLength(body)
+      _assign form, { data: body }
+
 
     if headers?
-      _assign headers, @defaultHeaders
+      _assign headers, defaultHeaders
+    else
+      headers = defaultHeaders
 
     onRequestReturn = (error,response,body) ->
       if error
@@ -69,7 +81,7 @@ module.exports = class RequestManager
       callback(error,response,body)
 
     chiika.logger.verbose("POST request on #{url}")
-    request.post { url: url, headers: headers },onRequestReturn
+    request.post { url: url, headers: headers, form: form },onRequestReturn
 
 
 

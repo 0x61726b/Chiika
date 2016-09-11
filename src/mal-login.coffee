@@ -239,7 +239,7 @@ MalLogin = React.createClass
           {
             @state.services.map (service,i) =>
               <div className="provider" onClick={@selectProvider} data-provider="#{service.name}" key={i}>
-                <img src="./../assets/images/login/mal1.png" width="140" height="140" alt="" />
+                <img src="#{service.logo}" width="140" height="140" alt="" />
                 <h2>{ service.description }</h2>
               </div>
           }

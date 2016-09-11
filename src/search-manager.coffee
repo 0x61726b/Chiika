@@ -49,12 +49,12 @@ module.exports = class SearchManager
           window.location = "#Search/#{value}?searchType=default"
         @emitter.emit 'form-input-enter',$("#gridSearch").val()
 
-  searchAndGo: (searchString,mode,type,callback) ->
+  searchAndGo: (searchString,type,callback) ->
     window.location = "#Search/#{searchString}?searchType=default"
     $("#gridSearch").val(searchString)
 
-  search: (searchString,mode,type,source,callback) ->
-    chiika.ipc.sendMessage 'make-search', { searchString:searchString,searchType:type,searchSource:source,searchMode: mode }
+  search: (searchString,type,source,callback) ->
+    chiika.ipc.sendMessage 'make-search', { searchString:searchString,searchType:type,searchSource:source }
 
     chiika.ipc.receive 'make-search-response', (event,args) =>
       callback?(args)
@@ -62,6 +62,6 @@ module.exports = class SearchManager
       chiika.ipc.disposeListeners('make-search-response')
 
       @lastSearchString = searchString
-      @lastSearchResults = args
+      @lastSearchResults = args.results
       @lastSearchType = type
       @lastSearchSource = source

@@ -113,6 +113,7 @@ module.exports = class ChiikaPublicApi
   closeNotificationWindow: ->
     chiika.notificationBar.close()
 
+
   #
   #
   #
@@ -181,6 +182,33 @@ module.exports = class ChiikaPublicApi
     options.name += 'modal' # service/owner name + modal , anilistmodal etc.
     chiika.windowManager.createModalWindow(options,returnCall)
 
+
+  #
+  #
+  #
+  getServices: ->
+    scripts = chiika.apiManager.getScripts()
+
+    services = []
+    for script in scripts
+      if script.isService && script.isActive
+        service =
+          name: script.name
+          description: script.description
+          isActive: script.isActive
+          isService: script.isService
+          loginType: script.loginType
+          order: script.order
+          logo: script.logo
+          views: script.views
+          useInSearch: script.useInSearch
+        services.push service
+
+
+    if services.length > 0
+      return services
+    else
+      return undefined
 
 
   #

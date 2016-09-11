@@ -443,36 +443,28 @@ module.exports = React.createClass
   itemContextMenu: (e,index) ->
     item = @state.data[index]
 
-    onDeleteFromList = (menuItem,browserWindow,event) =>
-      chiika.listManager.deleteFromList('anime',item.id,'myanimelist')
+    window["#{@state.viewName}_contextMenu"](item)
 
-    onSearch = (menuItem,browserWindow,event) =>
-      chiika.searchManager.searchAndGo(item.animeTitle,'list-remote','anime-manga')
-
-    menuItems = []
-    menuItems.push new MenuItem( { type: 'normal', label: "#{item.id}", enabled: false })
-    menuItems.push new MenuItem( { type: 'separator'})
-    menuItems.push new MenuItem( { type: 'normal', label: "Delete from list", click: onDeleteFromList })
-    menuItems.push new MenuItem( { type: 'normal', label: "Search", click: onSearch })
-    chiika.popupContextMenu(menuItems)
+    # chiika.popupContextMenu(menuItems)
 
   columnAction: (action,params) ->
     if action == 'score-update'
       e     = params.e
       id    = params.id
-      score = parseInt(params.score)
+      score = parseFloat(params.score)
       column = params.column
       type   = params.type
+      owner = params.owner
 
       findEntry = _find @state.data, (o) -> o.id == id
       if findEntry?
-        oldScore = parseInt(findEntry[column])
+        oldScore = parseFloat(findEntry[column])
 
         if score != oldScore
           findEntry[column] = score
           @setState {}
 
-          chiika.listManager.updateScore('anime',id,'myanimelist',
+          chiika.listManager.updateScore('anime',id,owner,
           { current: score },@props.route.viewName)
 
     if action == "progress-update"

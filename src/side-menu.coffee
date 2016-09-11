@@ -69,7 +69,15 @@ SideMenu = React.createClass
       @pendingUiItems = []
       @pendingCategories = []
 
-      _forEach menuItems, (v,k) =>
+      menuItemsWithViews = []
+      _forEach menuItems, (menu) =>
+        if menu.type == 'side-menu-item'
+          findInViews = _find chiika.viewData, (o) -> o.name == menu.name
+
+          if findInViews? && findInViews.dataSource.length > 0
+            menuItemsWithViews.push menu
+
+      _forEach menuItemsWithViews, (v,k) =>
         #Add category
 
         if v? && v.type == 'side-menu-item'
@@ -149,6 +157,7 @@ SideMenu = React.createClass
           <p className="list-title" key={i}>Something</p>
           <Link className="side-menu-link #{@isMenuItemActive('Search')}" to="Search/:"><li className="side-menu-li">Search</li></Link>
           <Link className="side-menu-link #{@isMenuItemActive('Calendar')}" to="Calendar"><li className="side-menu-li">Calendar</li></Link>
+          <Link className="side-menu-link #{@isMenuItemActive('Library')}" to="Library"><li className="side-menu-li">Library</li></Link>
         </ul>
       </div>
     </div>)

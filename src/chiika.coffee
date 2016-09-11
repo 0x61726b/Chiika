@@ -29,6 +29,7 @@ HistoryComponent                    = require './history'
 SearchComponent                     = require './search'
 Loading                             = require './loading'
 Calendar                            = require './calendar'
+Library                             = require './library'
 
 TabGridView = require './view-tabgridview'
 CardView = require './card-view'
@@ -119,6 +120,7 @@ ChiikaRouter = React.createClass
           { name:'History', path: '/History', component: HistoryComponent, onEnter: @onEnter }
           { name:'Search', path: '/Search/:searchString', component: SearchComponent, onEnter: @onEnter }
           { name:'Search', path: '/Calendar', component: Calendar, onEnter: @onEnter }
+          { name:'Library', path: '/Library', component: Library, onEnter: @onEnter }
         ]
     }
 

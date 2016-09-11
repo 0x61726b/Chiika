@@ -56,6 +56,9 @@ NotificationBar = React.createClass
       ipcRenderer.send 'notf-bar-pick', { layout: @state.layout, entry: @selectedEntry }
       @onHover("Hello ?")
 
+  search: () ->
+    ipcRenderer.send 'notf-bar-search',{ layout: @state.layout }
+
   componentDidMount: ->
     ipcRenderer.on 'notf-bar-not-recognized', (event,args) =>
       layout = { title: args.title, episode: args.episode, videoFile: args.videoFile, parse: args.parse }
@@ -160,7 +163,7 @@ NotificationBar = React.createClass
       </div>
       <div className="notification-actions">
         <button type="button" className="notification-button" onClick={@pick}>Pick</button>
-        <button type="button" className="notification-button">Search</button>
+        <button type="button" className="notification-button" onClick={@search}>Search</button>
         <button type="button" className="notification-button" onClick={@onDismiss}>Dismiss</button>
       </div>
     </div>

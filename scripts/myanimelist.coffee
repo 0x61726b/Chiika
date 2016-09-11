@@ -189,6 +189,8 @@ module.exports = class MyAnimelist
       if result.success && result.response == "Updated"
         callback(result)
 
+        @chiika.requestViewDataUpdate('myanimelist','myanimelist_animelist')
+
         #Save history
         historyView = @chiika.viewManager.getViewByName('myanimelist_animelist_history')
 
@@ -201,9 +203,10 @@ module.exports = class MyAnimelist
             id: anime.id
             episode: anime.animeWatchedEpisodes
 
+
+
           historyView.setData( historyItem, 'history_id').then (args) =>
             @chiika.requestViewDataUpdate('cards','cards_statistics')
-            @chiika.requestViewDataUpdate('myanimelist','myanimelist_animelist')
             @chiika.requestViewDataUpdate('cards','cards_continueWatching')
       else
         # It can return status code 200 but if the body isn't updated,it failed.
@@ -275,17 +278,17 @@ module.exports = class MyAnimelist
     if @malUser?
       onSearchComplete = (error,response,body) =>
         if response.statusCode != 200
-          callback?([])
+          callback( { success: false,error: 'request' })
         else
           @chiika.parser.parseXml(body)
                         .then (result) =>
                           if type == 'anime'
-                            callback(result.anime.entry)
+                            callback({ success: true, results: result.anime.entry })
                           else if type == 'manga'
-                            callback(result.manga.entry)
+                            callback({ success: true, results: result.manga.entry})
     else
       @chiika.logger.error("User can't be retrieved.Aborting search request.")
-      callback( { success: false })
+      callback( { success: false,error: 'no-user' })
 
 
      @chiika.makeGetRequestAuth getSearchUrl(type,keywords.split(" ").join("+")),{ userName: @malUser.realUserName, password: @malUser.password },null, onSearchComplete
@@ -318,41 +321,44 @@ module.exports = class MyAnimelist
 
     @chiika.makeGetRequest mangaPageUrl + id,null,onRequest
 
+  initialize: ->
+    @malUser = @chiika.users.getDefaultUser(@name)
+
+    if @malUser?
+      @chiika.logger.info("Default user : #{@malUser.realUserName}")
+    else
+      @chiika.logger.warn("Default user for myanimelist doesn't exist. If this is the first time launch, you can ignore this.")
+
+    animelistView   = @chiika.viewManager.getViewByName('myanimelist_animelist')
+    animeExtraView  = @chiika.viewManager.getViewByName('myanimelist_animeextra')
+
+    mangalistView = @chiika.viewManager.getViewByName('myanimelist_mangalist')
+    mangaExtraView  = @chiika.viewManager.getViewByName('myanimelist_mangaextra')
+
+    if animelistView?
+      @animelist = animelistView.getData()
+      @chiika.logger.script("[yellow](#{@name}) Animelist data length #{@animelist.length} #{@name}")
+
+    if mangalistView?
+      @mangalist = mangalistView.getData()
+      @chiika.logger.script("[yellow](#{@name}) Mangalist data length #{@mangalist.length} #{@name}")
+
+
+    if animeExtraView?
+      @animeextra = animeExtraView.getData()
+      @chiika.logger.script("[yellow](#{@name}) AnimeExtra data length #{@animeextra.length} #{@name}")
+
+    if mangaExtraView?
+      @mangaextra = mangaExtraView.getData()
+      @chiika.logger.script("[yellow](#{@name}) MangaExtra data length #{@mangaextra.length} #{@name}")
+
 
   # After the constructor run() method will be called immediately after.
   # Use this method to do what you will
   #
   run: () ->
     @on 'initialize', =>
-      @malUser = @chiika.users.getDefaultUser(@name)
-
-      if @malUser?
-        @chiika.logger.info("Default user : #{@malUser.realUserName}")
-      else
-        @chiika.logger.warn("Default user for myanimelist doesn't exist. If this is the first time launch, you can ignore this.")
-
-      animelistView   = @chiika.viewManager.getViewByName('myanimelist_animelist')
-      animeExtraView  = @chiika.viewManager.getViewByName('myanimelist_animeextra')
-
-      mangalistView = @chiika.viewManager.getViewByName('myanimelist_mangalist')
-      mangaExtraView  = @chiika.viewManager.getViewByName('myanimelist_mangaextra')
-
-      if animelistView?
-        @animelist = animelistView.getData()
-        @chiika.logger.script("[yellow](#{@name}) Animelist data length #{@animelist.length} #{@name}")
-
-      if mangalistView?
-        @mangalist = mangalistView.getData()
-        @chiika.logger.script("[yellow](#{@name}) Mangalist data length #{@mangalist.length} #{@name}")
-
-
-      if animeExtraView?
-        @animeextra = animeExtraView.getData()
-        @chiika.logger.script("[yellow](#{@name}) AnimeExtra data length #{@animeextra.length} #{@name}")
-
-      if mangaExtraView?
-        @mangaextra = mangaExtraView.getData()
-        @chiika.logger.script("[yellow](#{@name}) MangaExtra data length #{@mangaextra.length} #{@name}")
+      @initialize()
 
     @on 'post-init',(init) =>
       init.defer.resolve()
@@ -370,8 +376,9 @@ module.exports = class MyAnimelist
     @on 'get-user', (args) =>
       @malUser = @chiika.users.getDefaultUser(@name)
 
-      @malUser.profileImage = "https://myanimelist.cdn-dena.com/images/userimages/#{@malUser.malID}.jpg"
-      args.return(@malUser)
+      if @malUser?
+        @malUser.profileImage = "https://myanimelist.cdn-dena.com/images/userimages/#{@malUser.malID}.jpg"
+        args.return(@malUser)
 
 
     @on 'sync', (args) =>
@@ -623,6 +630,8 @@ module.exports = class MyAnimelist
       data = args.data
 
       @chiika.logger.script("[yellow](#{@name}) Requesting View Data for #{view.name}")
+      if !@malUser?
+        return
 
       if view.name == 'myanimelist_animelist'
         watching    = []
@@ -822,6 +831,7 @@ module.exports = class MyAnimelist
 
               _when.all(async).then =>
                 args.return( { success: true })
+                @initialize()
 
             newUser = { userName: args.user + "_" + @name,owner: @name, password: args.pass, realUserName: args.user, isDefault: true }
 
@@ -958,7 +968,7 @@ module.exports = class MyAnimelist
       newAnimeEntry.animeType = v.type
       newAnimeEntry.animeSeriesStartDate = v.start_date
       newAnimeEntry.animeSeriesEndDate = v.end_date
-      newAnimeEntry.animeStatus = v.status
+      newAnimeEntry.animeSeriesStatus = v.status
       newAnimeEntry.animeImage = v.image
       newAnimeEntry.animeScoreAverage = v.score
       newAnimeEntry.animeSynopsis = v.synopsis
@@ -985,20 +995,21 @@ module.exports = class MyAnimelist
     results = []
 
     @search type,title, (list) =>
-      if _isArray list
-        _forEach list, (entry) =>
-          if type == 'anime'
-            results.push searchMatchAnime(entry)
-          else
-            results.push searchMatchManga(entry)
-      else
-        if type == 'anime'
-          results.push searchMatchAnime(list)
+      if list.success
+        if _isArray list.results
+          _forEach list.results, (entry) =>
+            if type == 'anime'
+              results.push searchMatchAnime(entry)
+            else
+              results.push searchMatchManga(entry)
         else
-          results.push searchMatchManga(list)
-        entryFound = true
+          if type == 'anime'
+            results.push searchMatchAnime(list.results)
+          else
+            results.push searchMatchManga(list.results)
+          entryFound = true
 
-      callback?(results)
+      callback?({ success: list.success, error: list.error, results: results })
 
   doSearchExtended: (type,id,callback) ->
     matchManga = (v) ->
@@ -1077,7 +1088,7 @@ module.exports = class MyAnimelist
         newAnimeEntry.animeType = v.type
         newAnimeEntry.animeSeriesStartDate = v.start_date
         newAnimeEntry.animeSeriesEndDate = v.end_date
-        newAnimeEntry.animeStatus = v.status
+        newAnimeEntry.animeSeriesStatus = v.status
         newAnimeEntry.animeImage = v.image
         newAnimeEntry.animeScoreAverage = v.score
         newAnimeEntry.animeSynopsis = v.synopsis
@@ -2123,7 +2134,7 @@ module.exports = class MyAnimelist
       animeTitle: rawEntry.animeTitle
       animeSynonyms: rawEntry.animeSynonyms
       animeType: rawEntry.animeType
-      animeSeriesStatus: rawEntry.animeStatus
+      animeSeriesStatus: rawEntry.animeSeriesStatus
       animeSeriesStartDate: rawEntry.animeSeriesStartDate
       animeSeriesEndDate: rawEntry.animeSeriesEndDate
       animeImage: rawEntry.animeImage

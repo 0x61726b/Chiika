@@ -49,12 +49,13 @@ module.exports = class DbUsers extends IDb
   #
   #
   getDefaultUser: (owner) ->
-    match = _find @users,(o) -> o.isDefault == true
+    match = _find @users,(o) -> o.owner == owner
 
     if match?
       match
     else
       chiika.logger.warn("Default user does not exist.")
+      return null
 
 
   getUser: (userName) ->

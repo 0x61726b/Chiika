@@ -60,7 +60,7 @@ module.exports = class Search
       type:'Anime'
       episodes: "#{entry.animeTotalEpisodes} EPs"
       title: entry.animeTitle
-      airing: entry.animeStatus
+      airing: entry.animeSeriesStatus
     if listEntry?
       userStatusText = ""
       if listEntry.animeUserStatus == "1"
@@ -129,6 +129,8 @@ module.exports = class Search
       searchSource = params.searchSource
       searchMode   = params.searchMode
 
+      services = @chiika.getServices()
+
       if searchType == 'anime-manga'
         viewsToSearch = []
         _forEach searchSource, (service) =>
@@ -178,177 +180,90 @@ module.exports = class Search
 
       else if searchType == 'anime'
         viewsToSearch = []
-        _forEach searchSource, (service) =>
-          if service.useInSearch
+        _forEach services, (service) =>
+          if service.useInSearch && service.name == searchSource
             viewsToSearch.push x for x in service.views
 
         sourceViewAnime = @chiika.viewManager.getViewByName(viewsToSearch[0])
 
-        if sourceViewAnime?
-          sourceDataAnime = sourceViewAnime.getData()
+        searchAnime = (resolve) =>
+          onAnimeSearch = (response) =>
+            results = []
+            sourceDataAnime = []
 
-          searchAnime = (resolve) =>
-            onAnimeSearch = (response) =>
-              results = []
-              _forEach response, (entry) =>
-                findInAnimelist = _find sourceDataAnime,(o) -> o.id == entry.id
+            success = response.success
+            if success
+              if sourceViewAnime?
+                sourceDataAnime = sourceViewAnime.getData()
+              _forEach response.results, (entry) =>
+                if sourceDataAnime.length > 0
+                  findInAnimelist = _find sourceDataAnime,(o) -> o.id == entry.id
                 layout = @animeSearchResultLayout(entry,findInAnimelist)
                 layout.sourceView = viewsToSearch[0]
                 results.push layout
+              resolve({ success: success, results: results })
+            else
+              resolve({ success: success, error: response.error })
 
-              resolve(results)
-            @chiika.emit 'make-search', { calling: sourceViewAnime.owner, title: searchString, type: 'anime',return: onAnimeSearch }
+          @chiika.emit 'make-search', { calling: searchSource, title: searchString, type: 'anime',return: onAnimeSearch }
 
-          _when.promise(searchAnime).then (results) =>
-            params.return(results)
+        _when.promise(searchAnime).then (results) =>
+          if results.success
+            params.return({ success: results.success, results: results.results })
+          else
+            errorMessage = ""
+            errorCode = results.error
+            if errorCode == "no-user"
+              errorMessage = "This service doesn't allow searching without a user.Please login before trying to search."
+
+            if errorCode == "request"
+              errorMessage = "Search request has failed. Either there is no connection or the service is down."
+            console.log results
+
+            params.return({ success: results.success, error: errorMessage})
+
+
 
       else if searchType == 'manga'
         viewsToSearch = []
-        _forEach searchSource, (service) =>
-          if service.useInSearch
+        _forEach services, (service) =>
+          if service.useInSearch && service.name == searchSource
             viewsToSearch.push x for x in service.views
 
-        sourceViewManga = @chiika.viewManager.getViewByName(viewsToSearch[1])
+        sourceView = @chiika.viewManager.getViewByName(viewsToSearch[1])
 
-        if sourceViewManga?
-          sourceDataManga = sourceViewManga.getData()
+        searchManga = (resolve) =>
+          onAnimeSearch = (response) =>
+            results = []
+            sourceData = []
 
-          searchManga = (resolve) =>
-            onMangaSearch = (response) =>
-              results = []
-              _forEach response, (entry) =>
-                findInMangalist = _find sourceDataManga,(o) -> o.id == entry.id
-                layout = @mangaSearchResultLayout(entry,findInMangalist)
-                layout.sourceView = viewsToSearch[0]
+            success = response.success
+            if success
+              if sourceView?
+                sourceData = sourceView.getData()
+              _forEach response.results, (entry) =>
+                if sourceData.length > 0
+                  findInList = _find sourceData,(o) -> o.id == entry.id
+                layout = @mangaSearchResultLayout(entry,findInList)
+                layout.sourceView = viewsToSearch[1]
                 results.push layout
+              resolve({ success: success, results: results })
+            else
+              resolve({ success: success, error: response.error })
 
-              resolve(results)
-            @chiika.emit 'make-search', { calling: sourceViewManga.owner, title: searchString, type: 'manga',return: onMangaSearch }
+          @chiika.emit 'make-search', { calling: searchSource, title: searchString, type: 'manga',return: onAnimeSearch }
 
-          _when.promise(searchManga).then (results) =>
-            params.return(results)
+        _when.promise(searchManga).then (results) =>
+          if results.success
+            params.return({ success: results.success, results: results.results })
+          else
+            errorMessage = ""
+            errorCode = results.error
+            if errorCode == "no-user"
+              errorMessage = "This service doesn't allow searching without a user.Please login before trying to search."
 
+            if errorCode == "request"
+              errorMessage = "Search request has failed. Either there is no connection or the service is down."
+            console.log results
 
-
-
-      # if searchMode == 'list-remote'
-      #   if searchType == 'anime-manga'
-      #     sourceViewAnime = @chiika.viewManager.getViewByName(searchSource[0])
-      #     sourceViewManga = @chiika.viewManager.getViewByName(searchSource[1])
-      #
-      #     sourceDataAnime = []
-      #     if sourceViewAnime?
-      #       sourceDataAnime = sourceViewAnime.getData()
-      #
-      #     sourceDataManga = []
-      #     if sourceViewManga?
-      #       sourceDataManga = sourceViewManga.getData()
-      #
-      #
-      #     waitForAnime = _when.defer()
-      #     waitForManga = _when.defer()
-      #
-      #     combineResults = []
-      #
-      #     async = []
-      #     async.push waitForManga.promise
-      #     async.push waitForAnime.promise
-      #
-      #     _when.all(async).then =>
-      #       params.return(combineResults)
-      #
-      #     onAnimeSearch = (response) =>
-      #       results = []
-      #       _forEach response, (entry) =>
-      #         findInAnimelist = _find sourceDataAnime,(o) -> o.id == entry.id
-      #         layout = @animeSearchResultLayout(entry,findInAnimelist)
-      #         layout.sourceView = searchSource[0]
-      #         results.push layout
-      #
-      #       combineResults.push x for x in results
-      #       waitForAnime.resolve(results)
-      #
-      #
-      #     onMangaSearch = (response) =>
-      #       results = []
-      #       _forEach response, (entry) =>
-      #         findInMangalist = _find sourceDataManga,(o) -> o.id == entry.id
-      #         layout = @mangaSearchResultLayout(entry,findInMangalist)
-      #         layout.sourceView = searchSource[1]
-      #         results.push layout
-      #
-      #       combineResults.push x for x in results
-      #       waitForManga.resolve(results)
-      #     # Create search request
-      #     @chiika.emit 'make-search', { calling: sourceViewAnime.owner, title: searchString, type: 'anime',return: onAnimeSearch }
-      #     @chiika.emit 'make-search', { calling: sourceViewManga.owner, title: searchString, type: 'manga',return: onMangaSearch }
-      #
-      #
-      #   else if searchType == 'anime'
-      #     sourceViewAnime = @chiika.viewManager.getViewByName(searchSource)
-      #     sourceDataAnime = []
-      #     if sourceViewAnime?
-      #       sourceDataAnime = sourceViewAnime.getData()
-      #
-      #       onAnimeSearch = (response) =>
-      #         results = []
-      #         _forEach response, (entry) =>
-      #           findInAnimelist = _find sourceDataAnime,(o) -> o.id == entry.id
-      #           layout = @animeSearchResultLayout(entry,findInAnimelist)
-      #           layout.sourceView = searchSource[0]
-      #           results.push layout
-      #         params.return(results)
-      #       @chiika.emit 'make-search', { calling: sourceViewAnime.owner, title: searchString, type: 'anime',return: onAnimeSearch }
-      #
-      #   else if searchType == 'manga'
-      #     sourceView = @chiika.viewManager.getViewByName(searchSource[1])
-      #     sourceData = []
-      #     if sourceView?
-      #       sourceData = sourceView.getData()
-      #
-      #       onSearch = (response) =>
-      #         results = []
-      #         _forEach response, (entry) =>
-      #           findInMangalist = _find sourceData,(o) -> o.id == entry.id
-      #           layout = @mangaSearchResultLayout(entry,findInMangalist)
-      #           layout.sourceView = searchSource[0]
-      #           results.push layout
-      #         params.return(results)
-      #       @chiika.emit 'make-search', { calling: sourceView.owner, title: searchString, type: 'manga',return: onSearch }
-      #
-      # else if searchMode == 'list'
-      #   sourceViewAnime = @chiika.viewManager.getViewByName(searchSource[0])
-      #   sourceViewManga = @chiika.viewManager.getViewByName(searchSource[1])
-      #
-      #   sourceDataAnime = []
-      #   if sourceViewAnime?
-      #     sourceDataAnime = sourceViewAnime.getData()
-      #
-      #   sourceDataManga = []
-      #   if sourceViewManga?
-      #     sourceDataManga = sourceViewManga.getData()
-      #
-      #   combine = []
-      #   animeResults = []
-      #   mangaResults = []
-      #   if sourceDataManga.length > 0
-      #     findByTitle = _filter sourceDataManga, (o) => string(@recognition.clear(o.mangaTitle)).contains(searchString)
-      #
-      #     _forEach findByTitle, (entry) =>
-      #       combine.push @mangaSearchResultLayout(entry,entry)
-      #       mangaResults.push @mangaSearchResultLayout(entry,entry)
-      #
-      #   if sourceDataAnime.length > 0
-      #     findByTitle = _filter sourceDataAnime, (o) => string(@recognition.clear(o.animeTitle)).contains(searchString)
-      #
-      #     _forEach findByTitle, (entry) =>
-      #       combine.push @animeSearchResultLayout(entry,entry)
-      #       animeResults.push @animeSearchResultLayout(entry,entry)
-      #
-      #   if searchType == 'anime-manga'
-      #     params.return(combine)
-      #
-      #   if searchType == 'anime'
-      #     params.return(animeResults)
-      #   if searchType == 'manga'
-      #     params.return(mangaResults)
+            params.return({ success: results.success, error: errorMessage})

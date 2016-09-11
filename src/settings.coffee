@@ -158,28 +158,57 @@ AccountSettings = React.createClass
 
       chiika.ipc.disposeListeners("sync-response")
 
+  login: (service) ->
+    userName = $("#userName-#{service.name}")
+    pass = $("#password-#{service.name}")
+
+    if userName.val().length > 0 && pass.val().length > 0
+      chiika.toastLoading("Logging in #{service.description}...",'infinite')
+
+      loginData = { user: userName.val(), pass: pass.val() }
+      $("#log-btn").prop("disabled",true)
+      chiika.ipc.sendMessage 'set-user-login',{ login: loginData, service: service.name }
+
+      chiika.ipc.receive 'login-response',(event,response) =>
+        if !response.success
+          chiika.toastError("Failed! #{response.error}",5000)
+        else
+          chiika.toastSuccess("Logging in successful! Reloading...",5000)
+
+          reload = ->
+            window.location.reload()
+          setTimeout(reload,1000)
+    else
+      userName.addClass "highlightred"
+      pass.addClass "highlightred"
+
+
+  getUser: (service) ->
+    findUser = _find chiika.users, (o) -> o.owner == service.name
+    if findUser?
+      findUser
+    else
+      return { realUserName: "?", password: ""}
+
     # chiika.ipc.refreshViewByName 'myanimelist_animelist','myanimelist',null, =>
     #
     # chiika.ipc.refreshViewByName 'myanimelist_mangalist','myanimelist',null, (params) =>
     #   chiika.toastSuccess('Synced myanimelist!',3000)
 
-  getDefaultService: ->
-    defaultUser = _find chiika.users,(o) -> o.isDefault == true
-    if defaultUser?
-      defaultUser.owner
-
   render: ->
-    <div className="card">
+    <div>
+    <p>Succesfully logging in to a service will RELOAD Chiika automatically. Please be aware.</p>
     {
       chiika.services.map (service,i) =>
         <div className="card pink" key={i}>
           <p>{ service.description } </p>
-          {
-            if service.name == @getDefaultService()
-              <span> Default </span>
-          }
-          <button type="button" className="button raised primary" onClick={() => @setDefault(service)}>Set Default</button>
-          <button type="button" className="button raised primary" onClick={() => @sync(service)}>Sync Myanimelist</button>
+          <p><img src={service.logo} style={{ width: 200,height: 200}}></img></p>
+          <label htmlFor="log-usr">Username</label>
+          <input type="text" className="text-input" id="userName-#{service.name}" defaultValue={@getUser(service).realUserName} required autofocus/>
+          <label htmlFor="log-psw">Password</label>
+          <input type="Password" className="text-input" id="password-#{service.name}" required />
+          <button type="button" className="button raised primary" id="log-btn" onClick={() => @login(service)}>Login</button>
+          <button type="button" className="button raised primary" onClick={() => @sync(service)}>Sync</button>
         </div>
     }
     </div>

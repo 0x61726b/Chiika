@@ -144,8 +144,12 @@ module.exports = class IDb
       key = Object.keys(doc)[0]
 
       if key == Object.keys(record)[0] && record[key] == doc[key]
-        _forOwn record,(v,k) =>
-          doc[k] = v
+        # _forOwn record,(v,k) =>
+        #   doc[k] = v
+
+        # Behold the most advanced updating algorithm ahead
+        doc = record
+
         affectedRows++
       doc
 

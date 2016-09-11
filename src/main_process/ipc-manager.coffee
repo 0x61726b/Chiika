@@ -264,6 +264,16 @@ module.exports = class IpcManager
       entry  = args.entry
 
       chiika.chiikaApi.emit 'system-event', { calling: 'media', name:'md-pick', params: { layout: layout, entry: entry } }
+
+    @receive 'notf-bar-search', (event,args) =>
+      layout = args.layout
+
+      mainWindow = chiika.windowManager.getWindowByName('main')
+      @send mainWindow, 'navigate-to', { route: "#Search/#{layout.title}?searchType=picking"}
+
+      mainWindow.focus()
+
+
   #
   # We receive a user pass here, redirect it to the user script and let them process it
   #
@@ -271,7 +281,7 @@ module.exports = class IpcManager
     @receive 'set-user-login', (event,args) =>
       returnFromLogin = (result) =>
         _assign result,args
-        @send(chiika.windowManager.getLoginWindow(), 'login-response', result)
+        event.sender.send('login-response', result)
       if args.login?
         chiika.chiikaApi.emit 'set-user-login',{ calling: args.service, user: args.login.user, pass: args.login.pass, return: returnFromLogin}
       else

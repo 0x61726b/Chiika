@@ -44,8 +44,10 @@ module.exports = React.createClass
   componentWillMount: ->
     @requestDetails()
 
-    console.log @props.history
 
+  #
+  #
+  #
   requestDetails: (id)->
     id = @props.params.id
 
@@ -98,36 +100,42 @@ module.exports = React.createClass
     remainder = 10
 
     if @state.layout.cover?
+      remainderCoeff = 0
       if scoring.type == 'normal' #0-10
-        userScore = scoring.userScore ? 0
-        average = scoring.average ? 0
-        remainder = 10 - userScore
-        options = {
-          type: 'doughnut',
-          options: { legend: { display: false}, cutoutPercentage: 60 },
-          data: {
-            datasets: [{
-              data: [userScore,remainder],
-              backgroundColor: [$('.primary').css('background-color')]
-              },{
-              data: [average,10 - average],
-              backgroundColor: [$('.emphasis').css('color')]
-            }]
-            labels: ["Average","y"]
-          }
+        remainderCoeff = 10
+      else
+        remainderCoeff = 5
+
+      userScore = scoring.userScore ? 0
+      average = scoring.average ? 0
+      remainder = remainderCoeff - userScore
+      options = {
+        type: 'doughnut',
+        options: { legend: { display: false}, cutoutPercentage: 60 },
+        data: {
+          datasets: [{
+            data: [userScore,remainder],
+            backgroundColor: [$('.primary').css('background-color')]
+            },{
+            data: [average,remainderCoeff - average],
+            backgroundColor: [$('.emphasis').css('color')]
+          }]
+          labels: ["Average","y"]
         }
-        @chart = new Chart(document.getElementById("score-circle"),options)
+      }
+      @chart = new Chart(document.getElementById("score-circle"),options)
 
 
-        # jQuery stuff
-        $("#scoreSelect option[value=#{@state.layout.scoring.userScore}]").attr('selected','selected')
+      # jQuery stuff
+      $("#scoreSelect option[value=#{@state.layout.scoring.userScore}]").attr('selected','selected')
 
-        $(".number input").bind 'keypress', (e) =>
-          if e.keyCode == 13 #Enter
-            @onProgressValueChange(e)
+      $(".number input").bind 'keypress', (e) =>
+        if e.keyCode == 13 #Enter
+          @onProgressValueChange(e)
 
-        $(".number input").focus ->
-          $(this).val("")
+      $(".number input").focus ->
+        $(this).val("")
+
 
 
   deleteFromList: ->
@@ -280,6 +288,8 @@ module.exports = React.createClass
     $(".userStatusButton").html($(e.target).text())
     $('.userStatus').toggleClass('open')
 
+    console.log action
+
     chiika.listManager.updateStatus(@state.layout.layoutType,@state.layout.id,@state.layout.owner,
     { identifier: action },@props.route.viewName)
 
@@ -297,7 +307,7 @@ module.exports = React.createClass
   #
   #
   openFolder: ->
-    chiika.mediaAction 'cards','open-folder', { id: @state.layout.id }, (args) => @onCardActionCompleteCommon(@state.layout.id,args)
+    chiika.mediaAction 'cards','open-folder', { title: @state.layout.title }, (args) => @onCardActionCompleteCommon(@state.layout.id,args)
 
   playNextEpisode: ->
     nextEpisode = parseInt(@state.layout.status.items[0].current) + 1
@@ -405,6 +415,13 @@ module.exports = React.createClass
                     <select id="scoreSelect" className="button primary" name="" onChange={@onScoreChange}>
                     {
                       [0,1,2,3,4,5,6,7,8,9,10].map (score,i) =>
+                        <option value={score} key={i}>{score}</option>
+                    }
+                    </select>
+                  else if @state.layout.scoring.type == "onefive"
+                    <select id="scoreSelect" className="button primary" name="" onChange={@onScoreChange}>
+                    {
+                      [0,1,2,3,4,5].map (score,i) =>
                         <option value={score} key={i}>{score}</option>
                     }
                     </select>

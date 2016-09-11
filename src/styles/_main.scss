@@ -15,6 +15,7 @@
 @import "_scrollbar";
 @import "_desktop-notification";
 @import "_search";
+@import "_Library";
 
 .hidden {
   display: none;
@@ -35,6 +36,13 @@
 .blur {
   -webkit-filter: blur(10px);
 }
+.highlightred {
+  border: red 1px solid !important;
+}
+.highlightgreen {
+  border: green 1px solid !important;
+}
+
 td {
   background-image: '';
 }

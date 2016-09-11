@@ -1,0 +1,150 @@
+.bookshelf {
+  margin: 0 auto;
+  width: 95%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.bookshelf-item {
+  display: inline-block;;
+  width: 150px;
+  height: 225px;
+  margin: 2px;
+}
+.bookshelf-item img {
+  z-index: 1;
+  width: 150px;
+  height: 225px;
+  transition: all .5s;
+  top: 0;
+  left: 0;
+}
+.bookshelf-book {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 75%;
+  background: rgba(0, 0, 0, 0.83);
+  animation: takeBook .75s forwards;
+  overflow-x: hidden;
+  overflow-y: auto;
+  color: white;
+  box-shadow: 2px 0px 4px rgba(0, 0, 0, 0.4);
+  transition: opacity .6s, transform .6s;
+  transform: translateX(-110%);
+}
+.bookshelf-book.open {
+  opacity: 1;
+  transition: opacity .6s, transform .6s;
+  transform: translateX(0%);
+}
+.bookshelf-book h3 {
+  width: 80%;
+}
+.book-cover {
+  display: flex;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.3);
+}
+.book-meta {
+  flex-grow: 1;
+  padding: 0 8px;
+}
+
+.book-index {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0;
+}
+.book-inside {
+  padding: 0 8px;
+}
+.book-inside {
+  white-space: nowrap;
+}
+.book-chapter {
+  margin: 0 2px 2px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 500;
+  width: 66px;
+  height: 66px;
+  background: #eee;
+  border-radius: 2px;
+  flex-grow: 0;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.book-chapter::before{
+  content: attr(ep);
+  transition: transform .2s;
+  position: absolute;
+}
+.book-chapter.exists:hover::before,
+.book-chapter.available:hover::before {
+  transform: scale(0);
+}
+.book-chapter.exists:hover::after {
+  content: "\f01d";
+  font: normal normal normal 24px/1 FontAwesome;
+  transform: scale(0);
+  animation: changeBook .2s forwards;
+}
+.book-chapter.available:hover::after {
+  content: "\f09e";
+  font: normal normal normal 24px/1 FontAwesome;
+  transform: scale(0);
+  animation: changeBook .2s forwards;
+}
+@keyframes changeBook {
+  from{}
+  to {
+    transform: scale(1);
+  }
+}
+.book-chapter.exists {
+  color: green;
+}
+.book-chapter.exists:hover {
+  background: green;
+  color: white;
+}
+.book-chapter.available {
+  color: blue;
+}
+.book-chapter.available:hover {
+  background: blue;
+  color: white;
+}
+.book-chapter.not-available {
+  color: grey;
+}
+.bookshelf-back {
+  width: 30px;
+  height: 30px;
+  background: red;
+  position: absolute;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  top: 0;
+  right: 0;
+}
+.book-meta form .text-input {
+  display: inline-block;
+  width: calc(100% - 50px);
+}
+.book-meta form button {
+  height: 33px;
+}
+#folder-button::after {
+  content: "\f07b";
+  font: normal normal normal 14px/1 FontAwesome;
+}

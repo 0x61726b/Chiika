@@ -127,7 +127,7 @@ module.exports = class UI
                     time: time
                   viewData[day].push calendarAnime
 
-              console.log viewData
+              
               args.return(viewData)
 
     @on 'view-update', (update) =>

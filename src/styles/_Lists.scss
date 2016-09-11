@@ -27,6 +27,11 @@
 $border-size: 1px;
 $row-border-color: $grey-2;
 
+.expanded-row {
+  display:flex;
+
+}
+
 .header-title {
   border-bottom: 1px solid #ddd;
   border-right: $border-size solid $grey-3;
@@ -59,6 +64,11 @@ $row-border-color: $grey-2;
 }
 
 .col-animeTypeText {
+  width: 40px;
+  flex-basis: 40px;
+  flex-grow: 0!important;
+}
+.col-animeType {
   width: 40px;
   flex-basis: 40px;
   flex-grow: 0!important;

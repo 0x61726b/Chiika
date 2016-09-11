@@ -66,64 +66,89 @@ module.exports = class MyAnimelistRecognition
   #
   #
   #
-  cache: (detectCache,recognize,parse,videoFile) ->
+  cache: (detectCache,recognize,parse,videoFile,owner) ->
     cache = @doCache(detectCache.getData(),recognize,parse,videoFile)
-    detectCache.setData(cache,'id')
+    detectCache.setData(cache,"id")
     cache
 
 
   #
   #
   #
-  doCache: (cacheData,recognize,parse,videoFile) ->
-    findInCache = _find cacheData, (o) => o.id == recognize.entry.id
-    if findInCache?
-      oneLevelBack = path.join(videoFile,'..')
+  doCache: (cached,entry) ->
+    parseResult = entry.parse
+    recognize   = entry.recognize
+    recognized  = recognize.recognized
 
-      pathExists = _find findInCache.knownPaths, (o) -> o == oneLevelBack
-      knownPathIndex = _indexOf findInCache.knownPaths,pathExists
-      if pathExists?
-        findInCache.knownPaths.splice(knownPathIndex,1,oneLevelBack)
-      else
-        findInCache.knownPaths.push path.join(videoFile,'..')
-
-      fileExists = _find findInCache.files, (o) -> o.file == videoFile
-      fileIndex = _indexOf findInCache.files,fileExists
-
-      if fileExists?
-        findInCache.files.splice(fileIndex,1,{ file:videoFile, episode: parse.EpisodeNumber })
-      else
-        findInCache.files.push { file:videoFile, episode: parse.EpisodeNumber }
+    if recognized
+      recognizedAnimeEntry = recognize.entry
     else
-      findInCache =
-        id: recognize.entry.id
-        knownPaths: [
-          path.join(videoFile,'..')
-        ]
-        files: [
-          { file:videoFile, episode: parse.EpisodeNumber }
-        ]
-    findInCache
+      suggestions = recognize.suggestions
+
+    videoFile = entry.videoFile
+    owner     = entry.owner
+
+
+    title = @clear(parseResult.AnimeTitle)
+
+    if title.length > 0
+      findInCache = _find cached,(o) -> o.title == title
+      if !findInCache?
+        cacheEntry = {}
+        cacheEntry.title = title
+        cacheEntry.files = []
+        cacheEntry.owners = [ { name: owner } ]
+        cacheEntry.folder = ""
+
+        cacheEntry.files.push { episode: parseResult.EpisodeNumber, file: videoFile }
+        cached.push cacheEntry
+      else
+        # Check same episode exists
+        files = findInCache.files
+
+        findEpi = _find files, (o) => o.episode == parseResult.EpisodeNumber
+        if !findEpi?
+          findInCache.files.push { episode: parseResult.EpisodeNumber, file: videoFile }
+
+        # Check if same owner is there
+        owners = findInCache.owners
+        findOwner = _find owners, (o) => o.name == owner
+
+        #If not , insert
+        if !findOwner?
+          owners.push owner
+
+        # Add a folder for 'open-folder' stuff
+        # At this point, a file exists,use its parent folder
+        findInCache.folder = path.join(videoFile,'..')
+
 
   #
   #
   #
   cacheInBulk: (detectCache,list) ->
-    cacheEntries = detectCache.getData()
+    # cacheEntries = detectCache.getData()
+    # _forEach list,(entry) =>
+    #   cacheEntries.push @doCache(cacheEntries,entry.recognize,entry.parse,entry.videoFile,entry.owner)
+
+    cached = detectCache.getData()
     _forEach list,(entry) =>
-      cacheEntries.push @doCache(cacheEntries,entry.recognize,entry.parse,entry.videoFile)
+      @doCache(cached,entry)
+
+    detectCache.setDataArray(cached)
 
 
-    clearEntries = []
-    for i in [0...cacheEntries.length]
-      cache = cacheEntries[i]
-      find = _find clearEntries, (o) -> o.id == cache.id
 
-      if !find?
-        clearEntries.push cache
 
-    detectCache.setDataArray(clearEntries)
+    # clearEntries = []
+    # for i in [0...cacheEntries.length]
+    #   cache = cacheEntries[i]
+    #   find = _find clearEntries, (o) -> o["#{entry.owner}_id"] == cache["#{entry.owner}_id"]
+    #
+    #   if !find?
+    #     clearEntries.push cache
 
+    #detectCache.setDataArray(cacheEntries)
   #
   #
   #
@@ -219,6 +244,9 @@ module.exports = class MyAnimelistRecognition
       chiika.logger.debug("Recognition returned #{result.recognized} with suggestion count #{result.suggestions.length}")
     return result
 
+  #
+  #
+  #
   getVideoFilesFromFolder: (folder,fileTypes,callback) ->
     videoFiles = []
     dir.files folder, (err,files) =>

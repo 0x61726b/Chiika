@@ -284,9 +284,9 @@ module.exports = class CardViews
       @chiika.logger.script("[yellow](#{@name}) reconstruct-ui")
 
       @createNewsCard()
-      @createUpcomingAnimeCard()
-      @createStatisticsCard()
-      @createContinueWatchingCard()
+      # @createUpcomingAnimeCard()
+      # @createStatisticsCard()
+      # @createContinueWatchingCard()
 
       detectionCache =
         name: "anime_detect_cache"
@@ -360,21 +360,25 @@ module.exports = class CardViews
             @chiika.emit 'scan-folder', { id: params.id, folder: folders[0], return: onReturn }
 
       else if actionName == 'open-folder'
-        detectCache = @chiika.viewManager.getViewByName('anime_detect_cache')
+        @chiika.logger.script("[yellow](#{@name}) open-folder")
 
-        if detectCache?
-          cache = detectCache.getData()
+        animeTitle = params.title
 
-          findEntry = _find cache, (o) -> o.id == params.id
+        @chiika.emit 'open-folder', { calling: 'media', title: animeTitle, return: action.return }
 
-          if findEntry?
-            knownPaths = findEntry.knownPaths
-            @chiika.openExternal(knownPaths[0])
-
-            @chiika.logger.info("Opening folder #{knownPaths}")
-          else
-            @chiika.logger.info("No known folders for #{params.id}")
-            action.return({ state: 'not-found'})
+        # if detectCache?
+        #   cache = detectCache.getData()
+        #
+        #   findEntry = _find cache, (o) -> o.title == animeTitle
+        #
+        #   if findEntry?
+        #     knownPaths = findEntry.knownPaths
+        #     @chiika.openExternal(knownPaths[0])
+        #
+        #     @chiika.logger.info("Opening folder #{knownPaths}")
+        #   else
+        #     @chiika.logger.info("No known folders for #{params.id}")
+        #     action.return({ state: 'not-found'})
 
 
 

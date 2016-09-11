@@ -46,11 +46,11 @@ module.exports = React.createClass
     if args.state == 'not-found'
       chiika.notificationManager.folderNotFound =>
         folders = dialog.showOpenDialog({
-          properties: ['openDirectory','multiSelections']
+          properties: ['openDirectory']
         })
 
         if folders?
-          chiika.scriptAction('media','set-folders-for-entry', { id: item.id,folders: folders })
+          chiika.scriptAction('media','set-folders-for-entry', { title: item.layout.title,folder: folders })
 
   handleNextEpisode: (card,item) ->
     nextEpisode = parseInt(item.layout.watchedEpisodes) + 1
@@ -71,7 +71,7 @@ module.exports = React.createClass
     chiika.mediaAction 'cards','play-next-episode', { nextEpisode: parseInt(item.layout.watchedEpisodes) + 1, id: item.id }, onActionCompete
 
   handleOpenFolder: (card,item) ->
-    chiika.mediaAction 'cards','open-folder', { id: item.id }, (args) => @onActionCompleteCommon(item,args)
+    chiika.mediaAction 'cards','open-folder', { title: item.layout.title }, (args) => @onActionCompleteCommon(item,args)
 
   render: ->
     <div className="card grid continue-watching" id="card-cnw">

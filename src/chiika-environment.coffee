@@ -16,7 +16,7 @@
 {Emitter}                                 = require 'event-kit'
 {ipcRenderer,remote,shell}                = require 'electron'
 remote                                    = require('electron').remote
-{Menu,MenuItem}                           = require('electron').remote
+{Menu,MenuItem,dialog}                           = require('electron').remote
 
 _when                                     = require 'when'
 Logger                                    = require './main_process/logger'
@@ -88,6 +88,11 @@ class ChiikaEnvironment
       if type == 'info'
         chiika.toastInfo(message,duration)
 
+    ipcRenderer.on 'navigate-to', (event,args) =>
+      url = args.route
+      if url?
+        window.location = url
+
 
   scanLibrary: () ->
     chiika.ipc.sendMessage 'start-library-scan'
@@ -97,6 +102,33 @@ class ChiikaEnvironment
       @ipc.disposeListeners('scan-library-response')
 
       chiika.toastSuccess("#{result.recognizedSeries} video files has been successfuly recognized!",4000)
+
+  openFolderByEntry: (title) ->
+    @scriptAction 'media','open-folder', { title: title }, (args) =>
+      if args.state == 'not-found'
+        @notificationManager.folderNotFound =>
+          folders = dialog.showOpenDialog({
+            properties: ['openDirectory']
+          })
+
+          if folders?
+            chiika.scriptAction('media','set-folders-for-entry', { title: title,folder: folders })
+
+  setFolderByEntry: (title) ->
+    folders = dialog.showOpenDialog({
+      properties: ['openDirectory']
+    })
+
+    if folders?
+      chiika.scriptAction('media','set-folders-for-entry', { title: title,folder: folders })
+
+  playEpisodeByNumber: (title,episode) ->
+    chiika.scriptAction 'media','play-episode', { title: title,episode: episode }, (args) =>
+      if args.state == 'episode-not-found'
+        @notificationManager.episodeNotFound(title,episode)
+
+
+
 
 
   setUIViewConfig: (uiItem) ->
@@ -123,7 +155,7 @@ class ChiikaEnvironment
   popupContextMenu: (config) ->
     menu = new Menu()
     _forEach config,(item) ->
-      menu.append item
+      menu.append (new MenuItem item)
     menu.popup(remote.getCurrentWindow())
 
   notification: (notf) ->
@@ -198,6 +230,10 @@ class ChiikaEnvironment
       params = {}
 
     @ipc.sendMessage 'script-action', { owner: owner, action: action, params: params, return: callback }
+    @ipc.receive "script-action-#{action}-response", (event,args) =>
+      callback?(args)
+
+      @ipc.disposeListeners("script-action-#{action}-response")
 
   sendNotification: (title,body,icon) ->
     if !icon?
@@ -223,7 +259,7 @@ class ChiikaEnvironment
     waitForViewByName = _when.defer()
     waitForUIDataByName = _when.defer()
 
-    async = [ waitForUI.promise, waitForViewData.promise,waitForSettingsData.promise,waitForPostInit.promise,waitForViewByName.promise ]
+    async = [ waitForUI.promise, waitForViewData.promise,waitForSettingsData.promise,waitForPostInit.promise ]
 
     ipcRenderer.on 'get-view-data-by-name-response', (event,args) =>
       @logger.renderer("get-view-data-by-name-response - #{args.name}")
@@ -333,6 +369,8 @@ class ChiikaEnvironment
     @ipc.getViewData (args) =>
       @viewData = args
 
+      console.log @viewData
+
       waitForViewData.resolve()
 
     @ipc.sendMessage 'get-settings-data'
@@ -344,6 +382,8 @@ class ChiikaEnvironment
     @ipc.sendMessage 'get-user-data'
     @ipc.receive 'get-user-data-response', (event,args) =>
       @users = args
+
+      console.log @users
 
     @ipc.sendMessage 'get-services'
     @ipc.receive 'get-services-response', (event,args) =>
