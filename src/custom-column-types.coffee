@@ -93,7 +93,7 @@ hummingbird_animelist_animeProgress = (item,actions) ->
 
 myanimelist_animelist_expanded = (item,actions) ->
   <div className="hidden list-item-expanded">
-    <div>
+    <div className="card">
       <img className="expanded-cover" src="#{item.animeImage}"></img>
       <div className="expanded-meta">
         <div className="meta-row">
@@ -363,7 +363,7 @@ myanimelist_animelist_library = (entry) ->
           <ul className="book-index">
           {
             entry.files.map (file,i) =>
-              <li className="book-chapter exists" ep={file.episode} key={i}>{file.episode}</li>
+              <li className="book-chapter exists" data-ep={file.episode} key={i}></li>
           }
           </ul>
         </div>

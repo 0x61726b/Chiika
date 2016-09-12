@@ -7,7 +7,7 @@
 }
 
 .bookshelf-item {
-  display: inline-block;;
+  display: inline-block;
   width: 150px;
   height: 225px;
   margin: 2px;
@@ -32,9 +32,22 @@
   overflow-y: auto;
   color: white;
   box-shadow: 2px 0px 4px rgba(0, 0, 0, 0.4);
-  transition: opacity .6s, transform .6s;
   transform: translateX(-110%);
+  animation: openBook .6s forwards;
 }
+
+.bookshelf-book.open {
+  opacity: 1;
+  transition: opacity .6s, transform .6s;
+}
+@keyframes openBook {
+  from {}
+  to {
+    opacity: 1;
+    transform: translateX(0%);
+  }
+}
+/*
 .bookshelf-item {
   transform: scale(0.75);
   animation: openBookshelf .3s forwards;
@@ -46,12 +59,8 @@
     transform: scale(1);
   }
 }
+*/
 
-.bookshelf-book.open {
-  opacity: 1;
-  transition: opacity .6s, transform .6s;
-  transform: translateX(0%);
-}
 .bookshelf-book h3 {
   width: 80%;
 }
@@ -94,7 +103,7 @@
   cursor: pointer;
 }
 .book-chapter::before{
-  content: attr(ep);
+  content: attr(data-ep);
   transition: transform .2s;
   position: absolute;
 }
@@ -121,17 +130,17 @@
   }
 }
 .book-chapter.exists {
-  color: green;
+  color: $color-success-dark;
 }
 .book-chapter.exists:hover {
-  background: green;
+  background:  $color-success-dark;
   color: white;
 }
 .book-chapter.available {
-  color: blue;
+  color: $color-info-main;
 }
 .book-chapter.available:hover {
-  background: blue;
+  background: $color-info-main;
   color: white;
 }
 .book-chapter.not-available {

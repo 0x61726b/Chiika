@@ -29,20 +29,23 @@ $row-border-color: $grey-2;
 
 .expanded-row {
   display:flex;
-
 }
-
-.header-title {
-  border-bottom: 1px solid #ddd;
-  border-right: $border-size solid $grey-3;
-  padding: 8px 4px;
-  flex-grow: 0;
-  text-align: center;
-  span {
-    font-weight: 500;
+.chiika-header{
+  .header-title {
+    border-bottom: 1px solid #ddd;
+    border-right: $border-size solid $grey-3;
+    padding: 8px 4px;
+    flex-grow: 0;
+    text-align: center;
+    span {
+      font-weight: 500;
+    }
+    &.col-animeTitle {
+      text-align: left;
+    }
   }
-  &.col-animeTitle {
-    text-align: left;
+  .header-title:last-child {
+    padding-right: 8px;
   }
 }
 .list-item {
@@ -60,6 +63,9 @@ $row-border-color: $grey-2;
     text-overflow: ellipsis;
     white-space: nowrap;
     color: $main-text;
+  }
+  > div:last-child {
+    padding-right: 8px;
   }
 }
 
@@ -190,7 +196,7 @@ $row-border-color: $grey-2;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  border-right: $border-size solid $row-border-color;
+  //border-right: $border-size solid $row-border-color;
 }
 .expanded-meta h5 {
   border-bottom: 1px solid $row-border-color;
