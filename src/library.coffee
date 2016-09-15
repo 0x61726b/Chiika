@@ -71,6 +71,23 @@ module.exports = React.createClass
     </div>
   render: ->
     <div className="bookshelf" id="library">
+      <div className="library-sign">
+        <div className="library-info">
+          <h3>Total Series</h3>
+          <i className="mdi mdi-play-box-outline success"></i>
+          <span className="library-count success">12</span>
+        </div>
+        <div className="library-info">
+          <h3>Total Episodes</h3>
+          <i className="mdi mdi-pound-box info"></i>
+          <span className="library-count info">12</span>
+        </div>
+        <div className="library-info">
+          <h3>Unrecognized Files</h3>
+          <i className="mdi mdi-alert-box danger"></i>
+          <span className="library-count danger">12</span>
+        </div>
+      </div>
       <div>
         {
           @state.library.map (lib,i) =>
