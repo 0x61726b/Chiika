@@ -44,10 +44,11 @@ module.exports = React.createClass
 
   refreshData: ->
     libraryData =  _find chiika.viewData, (o) -> o.name == 'torrents_feeds'
-    libraryData = libraryData.dataSource
-
-    console.log libraryData
-    libraryData
+    if libraryData?
+      libraryData = libraryData.dataSource
+      libraryData
+    else
+      return []
 
   refreshTorrents: ->
     chiika.ipc.refreshViewByName('torrents_feeds','torrent',{ feedName: 'Nyaa1'})
@@ -104,17 +105,21 @@ module.exports = React.createClass
       <div className="header-title col-animeScore"><span>Description</span></div>
     </div>
   render: ->
-    if @state.loading
-      <Loading />
-    else
-      <div>
-        <button type="button" className="button raised primary" onClick={@refreshTorrents}>Refresh Torrents..</button>
-        {
-          @renderHeader()
-        }
-        {
-          <div style={{height: '100%'}} id="chiika-torrent">
-            <ReactList itemRenderer={@renderSingleItem} length={@state.data.length} type='simple' />
+    <div>
+      <button type="button" className="button raised primary" onClick={@refreshTorrents}>Refresh Torrents..</button>
+      {
+        if @state.loading
+          <Loading />
+        else
+          <div>
+            {
+              @renderHeader()
+            }
+            {
+              <div style={{height: '100%'}} id="chiika-torrent">
+                <ReactList itemRenderer={@renderSingleItem} length={@state.data.length} type='simple' />
+              </div>
+            }
           </div>
-        }
-      </div>
+      }
+    </div>
