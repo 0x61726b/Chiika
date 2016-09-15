@@ -18,6 +18,7 @@ path      = require 'path'
 _forOwn   = require 'lodash.forown'
 _forEach  = require 'lodash.foreach'
 _isArray  = require 'lodash.isarray'
+_assign   = require 'lodash.assign'
 _when     = require 'when'
 colors    = require 'colors'
 {Emitter} = require 'event-kit'
@@ -126,6 +127,7 @@ module.exports = class IDb
     @checkIfKeyValueExists(record,onKeyExistsCheck)
 
 
+
   #
   # Updates record/records
   # @param {Object} record Record Object
@@ -148,7 +150,9 @@ module.exports = class IDb
         #   doc[k] = v
 
         # Behold the most advanced updating algorithm ahead
-        doc = record
+        #doc = record
+        # Ok the above doesnt work obviously
+        _assign doc,record
 
         affectedRows++
       doc

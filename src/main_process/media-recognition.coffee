@@ -86,9 +86,7 @@ module.exports = class MyAnimelistRecognition
 
     videoFile = entry.videoFile
 
-
     title = @clear(parseResult.AnimeTitle)
-
 
     if title.length > 0
       findInCache = _find cached,(o) -> o.title == title
@@ -148,6 +146,8 @@ module.exports = class MyAnimelistRecognition
     title = title.toLowerCase()
     title = title.trim()
     title = title.replace(/[^\w\s]/gi, '')
+    title = title.split(':').join('')
+    title = title.split(' ').join('') # Lets go
 
     title
 
@@ -160,6 +160,9 @@ module.exports = class MyAnimelistRecognition
       results.push { owner: owner, recognize: @recognize(title,list) }
     results
 
+  #
+  #
+  #
   recognize: (title,animelist) ->
     title = @clear(title)
 

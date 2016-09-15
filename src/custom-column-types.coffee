@@ -17,6 +17,7 @@
 moment                        = require 'moment'
 string                        = require 'string'
 React                               = require('react')
+_find         = require 'lodash/collection/find'
 
 window.sortFunctions = {}
 ###########
@@ -92,6 +93,10 @@ hummingbird_animelist_animeProgress = (item,actions) ->
   </div>
 
 myanimelist_animelist_expanded = (item,actions) ->
+  playEpisode = (e) ->
+    ep = parseInt($(e.target).attr("data-ep"))
+    chiika.playEpisodeByNumber(item.animeTitle,ep)
+
   <div className="hidden list-item-expanded">
     <div className="card">
       <img className="expanded-cover" src="#{item.animeImage}"></img>
@@ -110,10 +115,24 @@ myanimelist_animelist_expanded = (item,actions) ->
         <div className="meta-row">
           <h5>Watch</h5>
           <div className="expanded-watch">
-            <span className="watched">6</span>
-            <span className="watched">7</span>
-            <span className="watched">8</span>
-            <span className="aired">9</span>
+            {
+              for i in [1...parseInt(item.animeTotalEpisodes)+1]
+                watched = false
+                exists = false
+                if parseInt(item.animeWatchedEpisodes) >= i
+                  watched = true
+
+                if !watched && item.animeEpisodes?
+                  findInEpisodes = _find item.animeEpisodes, (o) -> parseInt(o.episode) == i
+
+                  if findInEpisodes?
+                    exists = true
+                <span className="#{if watched then 'watched' else (if exists then 'aired_exists' else 'aired_not_exists')}"
+                key={i}
+                data-ep = i
+                onClick={ (e) -> playEpisode(e) }
+                >{i}</span>
+            }
           </div>
         </div>
         <div className="meta-row">
@@ -168,7 +187,7 @@ myanimelist_mangalist_expanded = (item,actions) ->
 hummingbird_animelist_expanded = (item,actions) ->
   <div className="hidden list-item-expanded">
     <div>
-      <img className="expanded-cover" src="#{item.animeImage}"></img>
+      <img className="expanded-cover" src="#{item.animeImage}" onClick={ () => chiika.openShellUrl(item.animeUrl)}></img>
       <div className="expanded-meta">
         <div className="meta-row">
           <h5>Rate</h5>
@@ -188,10 +207,24 @@ hummingbird_animelist_expanded = (item,actions) ->
         <div className="meta-row">
           <h5>Watch</h5>
           <div className="expanded-watch">
-            <span className="watched">6</span>
-            <span className="watched">7</span>
-            <span className="watched">8</span>
-            <span className="aired">9</span>
+            {
+              for i in [1...parseInt(item.animeTotalEpisodes)+1]
+                watched = false
+                exists = false
+                if parseInt(item.animeWatchedEpisodes) >= i
+                  watched = true
+
+                if !watched && item.animeEpisodes?
+                  findInEpisodes = _find item.animeEpisodes, (o) -> parseInt(o.episode) == i
+
+                  if findInEpisodes?
+                    exists = true
+                <span className="#{if watched then 'watched' else (if exists then 'aired_exists' else 'aired_not_exists')}"
+                key={i}
+                data-ep = i
+                onClick={ (e) -> playEpisode(e) }
+                >{i}</span>
+            }
           </div>
         </div>
         <div className="meta-row">

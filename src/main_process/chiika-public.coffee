@@ -34,6 +34,9 @@ module.exports = class ChiikaPublicApi
     @media                                      = chiika.mediaManager
 
 
+  #
+  #
+  #
   openExternal: (uri) ->
     shell.openExternal(uri)
 
@@ -136,12 +139,12 @@ module.exports = class ChiikaPublicApi
       #   else
       #     chiika.logger.warn("#{viewName} doesn't have UI item.")
       callback?(result)
+      @requestViewDataUpdate(owner,viewName)
 
     if view?
       @emit 'view-update', { calling: owner, view: view, return: onUpdateComplete, params: params }
     else
       chiika.logger.error("Can't update a non-existent view.")
-
 
 
   #
@@ -204,7 +207,7 @@ module.exports = class ChiikaPublicApi
           useInSearch: script.useInSearch
           animeView: script.animeView
           mangaView: script.mangaView
-          
+
         services.push service
 
 

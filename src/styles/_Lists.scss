@@ -69,6 +69,9 @@ $row-border-color: $grey-2;
   }
 }
 
+.col-torrentCheck {
+  width: 50px;
+}
 .col-animeTypeText {
   width: 40px;
   flex-basis: 40px;
@@ -230,8 +233,11 @@ $row-border-color: $grey-2;
   background:$color-success-main;
   color: white;
 }
-.expanded-watch span.aired {
-  color:$color-info-main;
+.expanded-watch span.aired_exists {
+  color:$color-success-main;
+}
+.expanded-watch span.aired_not_exists {
+  color:$color-danger-light;
 }
 /* */
 /****************************************/

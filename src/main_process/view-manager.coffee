@@ -78,14 +78,14 @@ module.exports = class ViewManager
           else
             chiika.logger.info("View #{view.name} has data length of #{data.length}")
             view.setDataSource(data)
-      _when.all(async).then =>
-        chiika.logger.info("#{needUpdateCount} views need update.")
-        wait = []
-        _forEach @views, (view) =>
-          if view.needUpdate
-            if !view.noUpdate?
-              wait.push view.update()
-        _when.all(wait).then(resolve)
+      _when.all(async).then(resolve)
+        # chiika.logger.info("#{needUpdateCount} views need update.")
+        # wait = []
+        # _forEach @views, (view) =>
+        #   if view.needUpdate
+        #     if !view.noUpdate?
+        #       wait.push view.update()
+        # _when.all(wait).then(resolve)
 
   removeView: (name) ->
     findView = _find @views,(o) -> o.name == name

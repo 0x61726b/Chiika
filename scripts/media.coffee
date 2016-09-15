@@ -65,6 +65,33 @@ module.exports = class Media
 
     libraryDataByOwner
 
+  scanFolder: (folder,title,callback) ->
+    libraryDataByOwner = @libraryDataByOwner()
+
+    results = []
+
+    @recognition.getVideoFilesFromFolder folder, ['.mkv','.mp4'], (files) =>
+      error = false
+      errorMessage = "An error occured while recognizing entries for #{title}."
+      _forEach files, (videoFile) =>
+        seperate = videoFile.split(path.sep)
+        videoName = seperate[seperate.length - 1]
+        try
+          parse =  @anitomy.Parse videoName
+          parse.AnimeTitle = title
+          episode = parse.EpisodeNumber
+          if episode == ""
+            error = true
+            errorMessage = "Some of the video files are either badly named or Chiika could not identify them."
+
+          libRecognizeResults = @recognition.doRecognize(title,libraryDataByOwner)
+          results.push { parse: parse,results:libRecognizeResults,videoFile: videoFile }
+
+      callback?({ results: results, success: !error, errorMessage: errorMessage})
+
+
+
+
   # This method is controls the communication between app and script
   # If you change this method things will break
   #
@@ -186,16 +213,15 @@ module.exports = class Media
           findInCache = { title: title, folder: folder}
 
         @scanFolder folder,title, (args) =>
-          @recognition.cacheInBulk(detectCache,args)
+          if !args.success
+            @chiika.showToast args.errorMessage, 8000, 'error'
+
+            detectCache.setData(findInCache,'title')
+          else
+            @recognition.cacheInBulk(detectCache,args.results)
 
         @chiika.openExternal(folder)
 
-
-    @on 'scan-folder', (args) =>
-      folder = args.folder
-
-      # @scanFolder folder, (cache) =>
-      #   args.return(cache)
 
     @on 'open-folder', (args) =>
       @chiika.logger.script("[yellow](#{@name}) open-folder")

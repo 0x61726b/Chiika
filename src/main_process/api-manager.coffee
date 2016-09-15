@@ -113,6 +113,7 @@ module.exports = class APIManager
         return -1
       return 0
 
+
     if chiika.chiikaApi
       _forEach @activeScripts, (script) =>
         @initializeScript(script.name)
@@ -167,37 +168,39 @@ module.exports = class APIManager
                 resolve()
                 throw err
 
+              try
+                @compileScript jsCode,v,fileFullPath, (err,script) =>
+                  processedFiles = processedFiles + 1
+                  if err
+                    resolve()
+                    throw err
+                  rScript = require(script)
+                  try
+                    instance = new rScript(chiika.chiikaApi)
+                  catch error
+                    chiika.logger.error("There is a problem with script #{script}")
 
-              @compileScript jsCode,v,fileFullPath, (err,script) =>
-                processedFiles = processedFiles + 1
-                if err
-                  resolve()
-                  throw err
+                    if processedFiles == fileCount
+                      resolve()
+                    return false
 
+                  if instance?
+                    isService  = instance.isService
+                    isActive = instance.isActive
 
-                rScript = require(script)
-                try
-                  instance = new rScript(chiika.chiikaApi)
-                catch error
-                  chiika.logger.error("There is a problem with script #{script}")
+                    if isActive && !disabled
+                      @activeScripts.push instance
+
+                    if !disabled
+                      @compiledScripts.push instance
+
 
                   if processedFiles == fileCount
                     resolve()
-                  return false
 
-                if instance?
-                  isService  = instance.isService
-                  isActive = instance.isActive
-
-                  if isActive && !disabled
-                    @activeScripts.push instance
-
-                  if !disabled
-                    @compiledScripts.push instance
-
-
-                if processedFiles == fileCount
-                  resolve()
+              catch error
+                console.log error
+                throw error
 
   #
   # Compiles javascript code

@@ -503,7 +503,7 @@ module.exports = React.createClass
   #
   renderSingleItem: (index,key) ->
     <div key={key}>
-      <div className="list-item" onClick={(e) => @listItemClick(e,index)} onDoubleClick={ (e) => @listItemDblClick(e,index)} onContextMenu={ (e) => @itemContextMenu(e,index)}>
+      <div className="list-item" style={{borderLeft: "4px solid #{@state.data[index].listBorderColor}"}} onClick={(e) => @listItemClick(e,index)} onDoubleClick={ (e) => @listItemDblClick(e,index)} onContextMenu={ (e) => @itemContextMenu(e,index)}>
         {
           @state.columns.map (col,i) =>
             <div className="col-list col-#{col.name}" key={i}>

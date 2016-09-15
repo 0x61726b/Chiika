@@ -644,9 +644,16 @@ module.exports = class MyAnimelist
         dropped     = []
         completed   = []
 
+        cacheEpisodeData = []
+
+        detectCacheView = @chiika.viewManager.getViewByName('anime_detect_cache')
+
+        if detectCacheView?
+          cacheEpisodeData = detectCacheView.getData()
+
         _forEach data, (anime) =>
           status = anime.animeUserStatus
-
+          title  = anime.animeTitle
           animeValues = @getAnimeValues(anime)
 
           newAnime = _cloneDeep anime
@@ -660,6 +667,35 @@ module.exports = class MyAnimelist
           newAnime.animeLastUpdatedText          = animeValues.lastUpdatedText
           newAnime.animeSeriesStatusText         = @getAnimeStatus('text',anime.animeSeriesStatus)
 
+          green = "#48c85e" #success-main
+          red   = "#F13527" #danger-main
+          gray  = "#B7B7B7"
+          blue  = "#6D9EEB"
+
+          airingColor = gray
+          # if anime.animeSeriesStatus == "1"
+          #   airingColor = green
+          # if anime.animeSeriesStatus == "2"
+          #   airingColor = green
+
+          newAnime.animeAiringColor = airingColor
+          # Get episode stuff
+          if cacheEpisodeData.length > 0
+            findInCache = _find cacheEpisodeData, (o) -> o.title == title.trim().toLowerCase().replace(/[^\w\s]/gi, '')
+
+            if findInCache?
+              newAnime.animeEpisodes = findInCache.files
+
+              _forEach newAnime.animeEpisodes, (episodes) =>
+                episode = parseInt(episodes.episode)
+
+                if episode > parseInt(anime.animeWatchedEpisodes)
+                  airingColor = green
+
+          if anime.animeSeriesStatus == "3"
+            airingColor = red
+
+          newAnime.listBorderColor = airingColor
           if status == "1"
             watching.push newAnime
           else if status == "2"
@@ -1105,32 +1141,17 @@ module.exports = class MyAnimelist
       # Mal API Search
       #
       #
-      @search 'anime',animeEntry.animeTitle, (list) =>
-        isArray = false
-        if _isArray list
-          isArray = true
-          _forEach list, (v,k) =>
-            if v.id == animeEntry.id
-              newAnimeEntry = searchMatch(v)
-              entryFound = true
-              return false
-        else
-          if list.id == animeEntry.id
-            newAnimeEntry = searchMatch(list)
+      @doSearch 'anime',animeEntry.animeTitle, (list) =>
+        _forEach list.results, (v,k) =>
+          if v.id == animeEntry.id
+            newAnimeEntry = v
             entryFound = true
+            return false
 
 
-        if isArray && list.length > 0 && entryFound
+        if entryFound
           newAnimeEntry.lastSync = moment().valueOf()
           @chiika.logger.script("[yellow](#{@name}-Anime-Search) Search returned #{list.length} entries")
-          animeExtraView.setData(newAnimeEntry,'id').then (args) =>
-            if args.rows > 0
-              @chiika.logger.script("[yellow](#{@name}-Anime-Search) Updated #{args.rows} entries.")
-              animeExtraView.reload().then =>
-                callback?({ success: true, entry: newAnimeEntry, updated: args.rows, list: true })
-        else if _size(list) > 0 && entryFound
-          newAnimeEntry.lastSync = moment().valueOf()
-          @chiika.logger.script("[yellow](#{@name}-Anime-Search) Search returned 1 entry")
           animeExtraView.setData(newAnimeEntry,'id').then (args) =>
             if args.rows > 0
               @chiika.logger.script("[yellow](#{@name}-Anime-Search) Updated #{args.rows} entries.")
@@ -1776,7 +1797,7 @@ module.exports = class MyAnimelist
     if type == "6"
       typeText = "Music"
 
-    userStatusText = ""
+    userStatusText = "Not In List"
     if userStatus == "1"
       userStatusText = "Watching"
     else if userStatus == "2"

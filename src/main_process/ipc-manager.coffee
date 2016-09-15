@@ -152,11 +152,14 @@ module.exports = class IpcManager
       if view?
         onUpdateComplete = (params) =>
           event.sender.send "#{args.viewName}-refresh-response",params
-        chiika.chiikaApi.requestViewUpdate(view.name,args.service,onUpdateComplete)
+        chiika.chiikaApi.requestViewUpdate(view.name,args.service,onUpdateComplete,params)
       else
         chiika.logger.error("#{args.viewName} couldnt be found.")
 
 
+  #
+  #
+  #
   listAction: ->
     @receive 'list-action', (event,args) =>
       action = args.action

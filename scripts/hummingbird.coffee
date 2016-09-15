@@ -783,7 +783,7 @@ module.exports = class Hummingbird
 
     averageScore = averageScore.toFixed(2)
 
-    userStatusText = ""
+    userStatusText = "Not In List"
 
     if userStatus == "currently-watching"
       userStatusText = "Watching"

@@ -18,7 +18,6 @@ React                   = require('react')
 
 _find                   = require 'lodash/collection/find'
 
-CardView                = require './card-view'
 Loading                 = require './loading'
 
 
