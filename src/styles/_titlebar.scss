@@ -61,13 +61,13 @@
 .titlebar-close:hover,
 .titlebar-fullscreen:hover,
 .titlebar-minimize:hover {
-  background-color: $grey-2;
+  background-color: rgba(0,0,0,0.15);
 }
 .titlebar-settings:active,
 .titlebar-close:active,
 .titlebar-fullscreen:active,
 .titlebar-minimize:active {
-  background-color: $grey-3;
+  background-color: rgba(0,0,0,0.3);
 }
 
 .titlebar-settings:after {

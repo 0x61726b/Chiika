@@ -21,6 +21,9 @@
   display: flex;
   background: $grey-0;
 }
+.chiika-header div:first-child {
+  padding-left: 8px;
+}
 #chiika-list {
   background: $body-bg;
 }

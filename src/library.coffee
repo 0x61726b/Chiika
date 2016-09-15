@@ -63,7 +63,11 @@ module.exports = React.createClass
   renderSingleItem: (lib,i) ->
     <div className="bookshelf-item" key={i}>
       <img src="#{lib.entries[0].entry.animeImage}" onClick={(e) => @onLibraryEntryClick(e,lib) }></img>
-      <span>{lib.entries[0].entry.animeTitle}</span>
+      <span className="bookshelf-title">{lib.entries[0].entry.animeTitle}</span>
+      <span className="service-list">
+        <span className="service-label myanimelist">MAL</span>
+        <span className="service-label anilist">ANI</span>
+      </span>
     </div>
   render: ->
     <div className="bookshelf" id="library">

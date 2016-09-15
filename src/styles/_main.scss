@@ -20,9 +20,7 @@
 .hidden {
   display: none;
 }
-* {
-  font-family: roboto;
-}
+
 .main {
   height: 100vh;
   float: right;
@@ -42,7 +40,9 @@
 .highlightgreen {
   border: green 1px solid !important;
 }
-
+.label {
+  padding: 4px 6px;
+}
 td {
   background-image: '';
 }
