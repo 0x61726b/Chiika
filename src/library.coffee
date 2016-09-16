@@ -27,14 +27,24 @@ module.exports = React.createClass
     selectedLibraryEntry: null
 
   componentWillMount: ->
-    @state.library = @refreshData()
+    data = @refreshData()
+    @state.library = data.library
+    @state.stats = data.stats
 
     @refreshView = chiika.emitter.on 'view-refresh', (view) =>
       if view.view == 'chiika_library'
-        @setState { library: @refreshData() }
+        @setState { library: @refreshData().library, stats: @refreshData().stats }
+
+  componentDidMount: ->
+    @searchInput = chiika.searchManager.on 'form-input', (val) =>
+      filterByTitle = (value) ->
+        value.entries[0].entry.animeTitle.toLowerCase().indexOf(val) > -1
+
+      @setState { library: @refreshData().filter(filterByTitle) }
 
   componentWillUnmount: ->
     @refreshView.dispose()
+    @searchInput.dispose()
 
   componentDidUpdate: ->
     $(".bookshelf-book").addClass "open"
@@ -75,17 +85,17 @@ module.exports = React.createClass
         <div className="library-info">
           <h3>Total Series</h3>
           <i className="mdi mdi-play-box-outline success"></i>
-          <span className="library-count success">12</span>
+          <span className="library-count success">{@state.stats.series}</span>
         </div>
         <div className="library-info">
           <h3>Total Episodes</h3>
           <i className="mdi mdi-pound-box info"></i>
-          <span className="library-count info">12</span>
+          <span className="library-count info">{@state.stats.episodes}</span>
         </div>
         <div className="library-info">
           <h3>Unrecognized Files</h3>
           <i className="mdi mdi-alert-box danger"></i>
-          <span className="library-count danger">12</span>
+          <span className="library-count danger">{@state.stats.notRecognized}</span>
         </div>
       </div>
       <div>

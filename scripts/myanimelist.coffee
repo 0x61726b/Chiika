@@ -53,6 +53,7 @@ string        = scriptRequire 'string'
 xml2js        = scriptRequire 'xml2js'
 moment        = scriptRequire 'moment'
 {shell}       = require 'electron'
+Recognition   = require "#{mainProcessHome}/media-recognition"
 
 
 module.exports = class MyAnimelist
@@ -105,6 +106,7 @@ module.exports = class MyAnimelist
   # See the documentation for this object's methods,properties etc.
   constructor: (chiika) ->
     @chiika = chiika
+    @recognition = new Recognition()
 
   # This method is controls the communication between app and script
   # If you change this method things will break
@@ -673,33 +675,29 @@ module.exports = class MyAnimelist
           blue  = "#6D9EEB"
 
           airingColor = gray
-          # if anime.animeSeriesStatus == "1"
-          #   airingColor = green
-          # if anime.animeSeriesStatus == "2"
-          #   airingColor = green
+          if anime.animeSeriesStatus == "1"
+            airingColor = gray
+          if anime.animeSeriesStatus == "2"
+            airingColor = gray
+          if anime.animeSeriesStatus == "3"
+            airingColor = red
+
+          # To-do torrent available
+
 
           #newAnime.animeAiringColor = airingColor
           # Get episode stuff
           if cacheEpisodeData.length > 0
-            findInCache = _find cacheEpisodeData, (o) -> o.title == title.trim().toLowerCase().replace(/[^\w\s]/gi, '')
+            findInCache = _find cacheEpisodeData, (o) => o.title == @recognition.clear(title)
 
             if findInCache?
               newAnime.animeEpisodes = findInCache.files
 
               _forEach newAnime.animeEpisodes, (episodes) =>
-                episode = parseInt(episodes.episode)
+                episode = parseInt(episodes.episode,10)
 
-                if episode > parseInt(anime.animeWatchedEpisodes)
+                if episode > parseInt(anime.animeWatchedEpisodes,10) && episode <= parseInt(anime.animeTotalEpisodes,10)
                   airingColor = green
-
-          if anime.animeSeriesStatus == "3"
-            airingColor = red
-
-          if airingColor == gray
-            if anime.animeSeriesStatus == "1"
-              airingColor = green
-            if anime.animeSeriesStatus == "2"
-              airingColor = blue
 
 
 

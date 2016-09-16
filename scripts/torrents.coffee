@@ -182,7 +182,7 @@ module.exports = class Torrents
           if result
             conditionOutputs.push { condition: condition, result: result }
 
-          console.log "#{condType} #{anitomyParse.AnimeTitle} #{operator} #{value} #{result}"
+          # console.log "#{condType} #{anitomyParse.AnimeTitle} #{operator} #{value} #{result}"
 
 
 

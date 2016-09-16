@@ -37,17 +37,20 @@ module.exports = class APIManager
   activeScripts: []
   compiledScripts: []
 
-
   constructor: () ->
     global.api = this
     @emitter = new Emitter
 
     @scriptsCacheDir = path.join(chiika.getAppHome(),"cache","scripts")
 
-
-    @scriptsDirs.push path.join(__dirname,'..',"scripts")
+    if process.env.DEV_MODE
+      @scriptsDirs.push path.join(process.cwd(),"scripts")
+    else
+      @scriptsDirs.push path.join(__dirname,'..',"scripts")
 
     chiika.logger.info("Current script directory: #{@scriptsDirs[0]}")
+
+    @scriptsConfig = chiika.settingsManager.readConfigFile('scripts')
 
   getScriptByName: (name) ->
     instance = _find @activeScripts, { name: name }
@@ -198,11 +201,15 @@ module.exports = class APIManager
 
 
                   if processedFiles == fileCount
+                    console.log @scriptsConfig
+                    chiika.logger.info("Saving config file scripts")
+                    chiika.settingsManager.saveConfigFile('scripts',@scriptsConfig)
                     resolve()
 
               catch error
                 console.log error
                 throw error
+
 
   #
   # Compiles javascript code
@@ -210,13 +217,13 @@ module.exports = class APIManager
   compileScript: (js,file,fileFullPath,callback) ->
     stripExtension = string(file).chompRight('.coffee').s
 
-    scriptsConfig = chiika.settingsManager.readConfigFile('scripts')
+    # scriptsConfig = chiika.settingsManager.readConfigFile('scripts')
 
     cachedScriptPath = path.join(@scriptsCacheDir,stripExtension + '_cache.js')
 
-    if scriptsConfig?
-      findScript = _find scriptsConfig.scripts,(o) -> o.name == file
-      indexScript = _indexOf scriptsConfig.scripts,findScript
+    if @scriptsConfig?
+      findScript = _find @scriptsConfig.scripts,(o) -> o.name == file
+      indexScript = _indexOf @scriptsConfig.scripts,findScript
 
       if !chiika.utility.fileExists(cachedScriptPath)
         indexScript = -1
@@ -227,30 +234,29 @@ module.exports = class APIManager
         lastModified = chiika.utility.getLastModifiedTime(fileFullPath)
 
         if moment(lastModified).isAfter(moment(timestamp))
-          chiika.logger.info("#{file} has changed since last compilation. Recompiling - Last Modified #{moment(lastModified).format('DD/MM/YYYY HH:mm:ss')}")
+          chiika.logger.info("#{file} has changed since last compilation. Recompiling - Last Modified #{moment(lastModified).format('DD/MM/YYYY HH:mm:ss')} vs #{moment(timestamp).format('DD/MM/YYYY HH:mm:ss')}")
 
           @internalCompile js,file, (error,scriptPath) =>
             findScript.timestamp = moment().add(10,'seconds').valueOf()
-            chiika.logger.info("Saving config file scripts")
-            chiika.settingsManager.saveConfigFile('scripts',scriptsConfig)
             callback(null,path.join(chiika.getScriptCachePath(),stripExtension + '_cache.js'))
         else
           chiika.logger.info("#{file} did not change since last launch.Skipping...")
           callback(null,path.join(chiika.getScriptCachePath(),stripExtension + '_cache.js'))
       else
         #Script not found. Compile
+
         @internalCompile js,file, (error,scriptPath) =>
-          scriptsConfig.scripts.push { name: file,timestamp: moment().add(10,'seconds').valueOf()}
-          chiika.logger.info("Saving config file scripts")
-          chiika.settingsManager.saveConfigFile('scripts',scriptsConfig)
+          @scriptsConfig.scripts.push { name: file,timestamp: moment().add(10,'seconds').valueOf()}
+          # chiika.logger.info("Saving config file scripts")
+          # chiika.settingsManager.saveConfigFile('scripts',scriptsConfig)
           callback(null,path.join(chiika.getScriptCachePath(),stripExtension + '_cache.js'))
     else
-      scriptsConfig = { scripts: [] }
+      @scriptsConfig = { scripts: [] }
 
       @internalCompile js,file, (error,scriptPath) =>
-        scriptsConfig.scripts.push { name: file, timestamp: moment().add(10,'seconds').valueOf()}
-        chiika.logger.info("Saving config file scripts")
-        chiika.settingsManager.saveConfigFile('scripts',scriptsConfig)
+        @scriptsConfig.scripts.push { name: file, timestamp: moment().add(10,'seconds').valueOf()}
+        # chiika.logger.info("Saving config file scripts")
+        # chiika.settingsManager.saveConfigFile('scripts',@scriptsConfig)
         callback(null,path.join(chiika.getScriptCachePath(),stripExtension + '_cache.js'))
 
 

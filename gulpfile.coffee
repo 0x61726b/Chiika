@@ -67,9 +67,6 @@ Inject_css___compiled_and_depedent___files_into_html = () ->
 Copy_assets = () ->
   gulp.task 'misc', () ->
     debug  = require 'gulp-debug-streams'
-    gulp.src(srcDir + '/../scripts/**/*')
-        .pipe(gulp.dest(serveDir + '/scripts'))
-        .pipe(gulp.dest(distDir + '/scripts'))
 
     gulp.src(srcDir + '/assets/**/*')
       .pipe(gulp.dest(serveDir + '/assets'))
@@ -141,7 +138,7 @@ Compile_scripts_for_distribution = () ->
     #     .pipe(gulp.dest(distDir))
 
 Inject_renderer_bundle_file_and_concatnate_css_files = () ->
-  gulp.task 'html',['inject:css'], () ->
+  gulp.task 'html', ['inject:css'], () ->
 
     useref = require "gulp-useref"
     gulpif = require "gulp-if"

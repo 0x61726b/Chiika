@@ -124,6 +124,7 @@
     "main-bower-files": "^2.8.0",
     "mkdirp": "^0.5.1",
     "mocha": "^3.0.2",
+    "rcedit": "^0.7.0",
     "react-fontawesome": "^0.3.3",
     "slick-carousel": "^1.6.0",
     "spectron": "^3.3.0"

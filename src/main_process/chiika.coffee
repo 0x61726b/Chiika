@@ -29,6 +29,7 @@ menubar                           = require './menubar'
 Logger                            = require './logger'
 #
 
+
 APIManager                        = require './api-manager'
 DbManager                         = require './database-manager'
 RequestManager                    = require './request-manager'
@@ -187,6 +188,8 @@ class Application
                     chiika.windowManager.createLoginWindow()
 
 
+
+
     # If there are no users but there are view data
     # preload view data first, this way scripts can instantly access view data without waiting
     #
@@ -200,6 +203,7 @@ class Application
           @apiManager.postInit()
           chiika.windowManager.createLoginWindow()
 
+
     if userCount > 0 && viewCount > 0
       # If there are no UI items
       # compile scripts first
@@ -212,12 +216,12 @@ class Application
         @apiManager.postCompile()
 
 
+
         @viewManager.preload().then =>
           chiika.logger.verbose("Preloading UI complete!")
           @apiManager.postInit()
 
           chiika.windowManager.createMainWindow()
-
 
 
   #

@@ -133,6 +133,7 @@ module.exports = class Media
           libraryDataByOwner = @libraryDataByOwner()
 
           libraryView = []
+          episodeCount = 0
 
           _forEach data,(d) =>
             title = d.title
@@ -159,14 +160,18 @@ module.exports = class Media
                   return false
 
             if viewByOwner.length > 0
+              episodeCount += d.files.length
               libraryView.push { entries: viewByOwner, files: d.files, owners: d.owners,title: title }
 
 
 
 
 
-
-          args.return(libraryView)
+          stats =
+            series: libraryView.length
+            episodes: episodeCount
+            notRecognized: 0
+          args.return({ stats: stats, library: libraryView})
 
 
     @on 'play-episode', (args) =>
