@@ -154,7 +154,7 @@ SideMenu = React.createClass
               }
               </div>
           }
-          <p className="list-title" key={i}>Something</p>
+          <p className="list-title">Something</p>
           <Link className="side-menu-link #{@isMenuItemActive('Search')}" to="Search/:"><li className="side-menu-li">Search</li></Link>
           <Link className="side-menu-link #{@isMenuItemActive('Calendar')}" to="Calendar"><li className="side-menu-li">Calendar</li></Link>
           <Link className="side-menu-link #{@isMenuItemActive('Library')}" to="Library"><li className="side-menu-li">Library</li></Link>

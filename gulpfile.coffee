@@ -44,32 +44,40 @@ Inject_css___compiled_and_depedent___files_into_html = () ->
     concat = require "gulp-concat"
     gulpif = require "gulp-if"
     gulpIgnore = require 'gulp-ignore'
-    files = mainBowerFiles('**/*.css').concat([serveDir + '/styles/MainDefault.css'])
+    files = mainBowerFiles('**/*.css').concat([serveDir + '/styles/**/*.css'])
     options =
       relative: true
       ignorePath: ['../../.serve', '..']
       addPrefix: '..'
 
     stream = gulp.src(mainBowerFiles('**/*.js'))
-        .pipe(concat('bundleJs.js'))
-        .pipe(gulp.dest(serveDir))
+                .pipe(concat('bundleJs.js'))
+                .pipe(gulp.dest(serveDir))
 
     files = files.concat([serveDir + '/bundleJs.js' ])
 
-    stream.on 'end',->
+    stream.on 'end', =>
       str = gulp.src(srcDir + '/**/*.html')
           .pipe(inject(gulp.src(files),options))
           .pipe(gulp.dest(serveDir))
       str.on 'end', done
-      dummy = 42
     dummy = 42
 
 
 Copy_assets = () ->
   gulp.task 'misc', () ->
+    debug  = require 'gulp-debug-streams'
+    gulp.src(srcDir + '/../scripts/**/*')
+        .pipe(gulp.dest(serveDir + '/scripts'))
+        .pipe(gulp.dest(distDir + '/scripts'))
+
     gulp.src(srcDir + '/assets/**/*')
       .pipe(gulp.dest(serveDir + '/assets'))
       .pipe(gulp.dest(distDir + '/assets'))
+
+
+Copy_scripts = () ->
+
 
 Copy_vendor = () ->
   gulp.task 'copy:vendor', () ->
@@ -100,13 +108,6 @@ Incremental_compile_cjsx_coffee_files_with_sourcemaps = () ->
       .pipe(sourcemaps.write('.'))
       .pipe(gulp.dest(serveDir))
 
-
-
-    gulp.src('src/*.js')
-        .pipe(gulp.dest(serveDir))
-    gulp.src('src/browser/tools/src/*.js')
-        .pipe(gulp.dest(serveDir))
-
     test = 42
 
 
@@ -120,6 +121,9 @@ Compile_scripts_for_distribution = () ->
       .pipe(plumber())
       .pipe(coffee())
       .pipe(gulp.dest(distDir))
+
+    gulp.src(serveDir + '/bundleJs.js')
+        .pipe(gulp.dest(distDir))
 
 
   gulp.task 'compile:scripts:not:watch', () ->
@@ -137,20 +141,25 @@ Compile_scripts_for_distribution = () ->
     #     .pipe(gulp.dest(distDir))
 
 Inject_renderer_bundle_file_and_concatnate_css_files = () ->
-  gulp.task 'html', ['inject:css'], () ->
+  gulp.task 'html',['inject:css'], () ->
 
     useref = require "gulp-useref"
     gulpif = require "gulp-if"
     minify = require "gulp-minify-css"
 
-    assets = useref.assets({searchPath: ['bower_components', serveDir + '/styles']});
+    debug  = require 'gulp-debug-streams'
 
-    gulp.src(serveDir + '/**/*.html')
-    .pipe(assets)
-    .pipe(gulpif('*.css', minify()))
-    .pipe(assets.restore())
-    .pipe(useref())
-    .pipe(gulp.dest(distDir))
+    assets = useref.assets({searchPath: ['bower_components', serveDir + '/styles']})
+
+
+    gulp.src(serveDir + '/static/*.html')
+      .pipe(debug('First'))
+      .pipe(assets)
+      .pipe(debug('2'))
+      .pipe(assets.restore())
+      .pipe(debug('3'))
+      .pipe(useref())
+      .pipe(gulp.dest(distDir + "/static"))
 
 Copy_fonts_file = () ->
 
@@ -162,36 +171,13 @@ Copy_fonts_file = () ->
       .pipe(flatten())
       .pipe(gulp.dest(distDir + '/fonts'))
 
-Copy_Node_modules = () ->
-  gulp.task 'copy:dependencies', () ->
+    gulp.src('bower_components/**/fonts/*.woff2')
+      .pipe(flatten())
+      .pipe(gulp.dest(distDir + '/fonts'))
 
-    dependencies = []
-
-    recursiveDepFinder = (moduleName,dependencies) ->
-      modulePath = './node_modules/' + moduleName + '/'
-      existsInFolder = false
-      try
-        pjson = require modulePath + 'package.json'
-        existsInFolder = true
-      catch
-        #console.log "Couldnt find " + modulePath
-
-      # if pjson? && existsInFolder
-      #   for innerModule of pjson.dependencies
-      #     dependencies.push innerModule
-      #     recursiveDepFinder innerModule,dependencies
-      return
-
-    for name of packageJson.dependencies
-      dependencies.push(name)
-      #Find dependencies of this module
-      recursiveDepFinder name,dependencies
-
-    gulp.src('node_modules/{' + dependencies.join(',') + '}/**/*')
-      .pipe(gulp.dest(distDir + '/node_modules'))
 
 Write_a_package_json_for_distribution = () ->
-  gulp.task 'packageJson', ['copy:dependencies'], (done) ->
+  gulp.task 'packageJson', (done) ->
 
     _ = require('lodash')
 
@@ -213,18 +199,33 @@ Package_for_each_platforms = () ->
         arch: arch
         platform: platform
         out: releaseDir + '/' + platform + '-' + arch
-        version: '0.36.7'
+        version: '1.3.1'
+        icon: './resources/windows/icon.ico'
         asar: false
       , (err) -> console.log err
 
     return taskName
 
-gulp.task 'ci', () ->
-  createInstaller = require('electron-installer-squirrel-windows')
-  createInstaller( {
-    path: './release/win32-x64/Chiika-win32',
-    "authors": 'arkenthera'
-    } )
+
+gulp.task 'ci:win32', () ->
+  electronInstaller = require('electron-winstaller')
+  resultPromise = electronInstaller.createWindowsInstaller({
+    appDirectory: './release/win32-x64/Chiika-win32',
+    outputDirectory: './release/installer',
+    authors: 'arkenthera',
+    exe: 'Chiika.exe',
+    iconUrl: "#{process.cwd()}/resources/windows/icon.ico",
+    noMsi: true,
+    remoteReleases: 'http://chiika.herokuapp.com/'
+    loadingGif: './src/assets/installer.gif',
+    setupExe: 'Chiika-Windows-Installer.exe' })
+
+  success = () =>
+    console.log "Installer for #{taskName} has been created"
+  error = (e) =>
+    console.log "Whoops... #{e.message}"
+
+  resultPromise.then(success,error)
 
 do Your_Application_will_ = () ->
   Compile_scss_files_with_sourcemaps()
@@ -232,11 +233,11 @@ do Your_Application_will_ = () ->
   Inject_css___compiled_and_depedent___files_into_html()
   Copy_assets()
   Copy_vendor()
+  Copy_scripts()
   Incremental_compile_cjsx_coffee_files_with_sourcemaps()
   Compile_scripts_for_distribution()
   Inject_renderer_bundle_file_and_concatnate_css_files()
   Copy_fonts_file()
-  Copy_Node_modules()
   Write_a_package_json_for_distribution()
   Package_for_each_platforms()
 
@@ -269,6 +270,7 @@ do Your_Application_will_ = () ->
     electron.start([], () => {})
     gulp.watch(['bower.json', srcDir + '/index.html',srcDir + '/MyAnimeListLogin.html'], ['inject:css'])
     gulp.watch([srcDir + '/styles/*.scss'],['inject:css'])
+    gulp.watch([srcDir + '/../scripts/*.coffee'],['misc'])
     gulp.watch([serveDir + '/styles/**/*.css', serveDir + '/**/*.html', serveDir + '/**/*.js'], electron.reload)
     gulp.watch([serveDir + '/main_process/chiika.js'], electron.restart)
     gulp.watch([serveDir + '/main_process/api-manager.js'], electron.restart)

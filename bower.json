@@ -16,6 +16,6 @@
     "roboto-fontface": "~0.4.3",
     "components-font-awesome": "~4.5.0",
     "yui-css": "0.0.17",
-    "mdi": "~1.6.50"
+    "mdi": "~1.7.22"
   }
 }

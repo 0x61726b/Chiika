@@ -24,8 +24,8 @@ moment                  = require 'moment'
 string                  = require 'string'
 
 
-mdPath = process.cwd() + '/vendor/media-detect-helpers/MediaDetect'
-anitomyPath = process.cwd() + '/vendor/anitomy-node/AnitomyNode'
+mdPath = __dirname + '/../vendor/media-detect-helpers/MediaDetect'
+anitomyPath = '../vendor/anitomy-node/AnitomyNode'
 
 
 class Win32MediaDetect

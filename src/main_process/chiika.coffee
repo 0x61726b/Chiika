@@ -45,6 +45,7 @@ Utility                           = require './utility'
 AppOptions                        = require './options'
 AppDelegate                       = require './app-delegate'
 NotificationBar                   = require './notification-bar'
+UpdateManager                     = require './update-manager'
 
 
 
@@ -84,6 +85,9 @@ class Application
   # Entry point of Chiika
   #
   constructor: () ->
+    if require('electron-squirrel-startup')
+      return
+
     global.chiika          = this
     global.__base          = process.cwd() + '/'
     global.mainProcessHome = __dirname
@@ -91,14 +95,25 @@ class Application
     process.env.CHIIKA_APPDATA = app.getPath('appData')
     process.env.CHIIKA_RESOURCES_SRC = path.join(__dirname,'..','assets')
 
+    module.paths.push(path.resolve('node_modules'))
+    module.paths.push(path.resolve('../node_modules'))
+    module.paths.push(path.resolve(__dirname, '..', '..', '..', 'resources', 'app', 'node_modules'))
+    module.paths.push(path.resolve(__dirname, '..', '..', '..', 'resources', 'app.asar', 'node_modules'))
+
+    if process.env.DEV_MODE
+      scriptRequirePath = path.join(process.cwd(),'node_modules')
+    else
+      scriptRequirePath = path.join(__dirname,'..','node_modules')
+
     global.scriptRequire = (name) ->
-      require(path.join(process.cwd(), 'node_modules',name))
+      require(path.join(scriptRequirePath,name))
 
     @chiikaHome         = path.join(app.getPath('appData'),"chiika")
 
     @logger             = new Logger("verbose").logger
     global.logger       = @logger #Share with renderer
 
+    chiika.logger.info "#{scriptRequirePath} Global Script Require path"
 
 
     @emitter            = new Emitter
@@ -117,6 +132,7 @@ class Application
     @ipcManager         = new IpcManager()
     @shortcutManager    = new ShortcutManager()
     @notificationBar    = new NotificationBar()
+    @updateManager      = new UpdateManager()
 
     @ipcManager.handleEvents()
 
@@ -226,6 +242,22 @@ class Application
           @ipcManager.systemEvent('md-detect',player)
       else
         @ipcManager.systemEvent('md-detect',player)
+
+    @emitter.on 'update-available', =>
+      @ipcManager.systemEvent('squirrel','update-available')
+
+    @emitter.on 'update-not-available', =>
+      @ipcManager.systemEvent('squirrel','update-not-available')
+
+    @emitter.on 'checking-for-update', =>
+      @ipcManager.systemEvent('squirrel','checking-for-update')
+
+    @emitter.on 'update-downloaded', =>
+      @ipcManager.systemEvent('squirrel','update-downloaded')
+
+    @emitter.on 'update-error', (error) =>
+      @ipcManager.systemEvent('squirrel',error.toString())
+
 
     #
     #

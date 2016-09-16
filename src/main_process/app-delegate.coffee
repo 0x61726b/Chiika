@@ -30,6 +30,7 @@ module.exports = class AppDelegate
   onReady: ->
     defer = _when.defer()
     app.on 'ready', =>
+      app.setAppUserModelId('com.arkenthera.chiika')
       chiika.settingsManager.initialize().then =>
         defer.resolve()
         chiika.logger.verbose("Electron app is ready")

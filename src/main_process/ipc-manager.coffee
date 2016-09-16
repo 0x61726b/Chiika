@@ -63,6 +63,10 @@ module.exports = class IpcManager
   systemEvent: (event,params) ->
     chiika.chiikaApi.emit 'system-event',{ name: event, params: params }
 
+    chiika.logger.verbose("System Event - #{event}")
+    if event == 'squirrel'
+      @send chiika.windowManager.getWindowByName('main'), 'squirrel',params
+
   #
   #
   #
@@ -293,9 +297,11 @@ module.exports = class IpcManager
         chiika.chiikaApi.emit 'set-user-login',params
 
     @receive 'continue-from-login', (event,args) =>
-      chiika.windowManager.getWindowByName('login').close()
+      chiika.windowManager.getWindowByName('login').hide()
       chiika.windowManager.createMainWindow()
       chiika.apiManager.postInit()
+      chiika.windowManager.getWindowByName('login').close()
+
 
 
   #
@@ -517,6 +523,10 @@ module.exports = class IpcManager
         event.sender.send 'sync-response', params
       chiika.chiikaApi.emit 'sync', { calling: service, return: onSync }
 
+  checkForUpdates: ->
+    @receive 'check-for-updates', (event,args) =>
+      chiika.updateManager.checkForUpdates()
+
   #
   #
   #
@@ -568,3 +578,4 @@ module.exports = class IpcManager
     @setUIData()
     @listAction()
     @syncService()
+    @checkForUpdates()

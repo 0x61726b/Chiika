@@ -20,31 +20,36 @@ React = require('react')
 {Emitter} = require 'event-kit'
 
 module.exports = React.createClass
-  emitter:null
+
+  getInitialState: ->
+    updateAvailable: false
+
   componentWillMount: ->
     @emitter = new Emitter
+
   componentDidMount: () ->
     $('.titlebar').addClass("webkit-draggable")
-    close = $('.titlebar-close',$('.titlebar'))[0]
-    fullscreen = $('.titlebar-fullscreen',$('.titlebar'))[0]
-    minimize = $('.titlebar-minimize',$('.titlebar'))[0]
 
-    $('.titlebar').on 'click', (e) =>
-      if close.contains(e.target)
-        @emitter.emit 'titlebar-close'
-        remote.getCurrentWindow().close()
-      else if fullscreen.contains(e.target)
-        @emitter.emit 'titlebar-maximize'
-        remote.getCurrentWindow().maximize()
-      else if minimize.contains(e.target)
-        @emitter.emit 'titlebar-minimize'
-        remote.getCurrentWindow().minimize()
-    $('.titlebar').on 'dblclick', (e) =>
-      if close.contains(target) || minimize.contains(target) || fullscreen.contains(target)
-        return
-      remote.getCurrentWindow().maximize()
-      @emitter.emit 'titlebar-maximize'
+    chiika.emitter.on 'update-available', =>
+      @setState { updateAvailable: true }
 
+    chiika.emitter.on 'update-not-available', =>
+      @setState { updateAvailable: false }
+
+
+  minimize: ->
+    @emitter.emit 'titlebar-minimize'
+    remote.getCurrentWindow().minimize()
+
+  maximize: ->
+    @emitter.emit 'titlebar-maximize'
+    remote.getCurrentWindow().maximize()
+
+  close: ->
+    @emitter.emit 'titlebar-close'
+    remote.getCurrentWindow().close()
+
+  update: ->
 
   render: ->
     <div className="titlebar">
@@ -53,19 +58,27 @@ module.exports = React.createClass
         </div>
         <div className="spotlightContainer">
             <div className="titlebar-stoplight">
+                {
+                  if @state.updateAvailable
+                    <div className="titlebar-update" onClick={@update}>
+                    </div>
+                }
+                <div className="titlebar-devtools" onClick={ () => chiika.toggleDevTools() }>
+                </div>
+
                 <div className="titlebar-settings" onClick={ () => window.location = "##{@props.location.pathname}?settings=true&location=App"}>
                 </div>
 
                 <div className="titlebar-divider">
                 </div>
 
-                <div className="titlebar-minimize">
+                <div className="titlebar-minimize" onClick={@minimize}>
                 </div>
 
-                <div className="titlebar-fullscreen">
+                <div className="titlebar-fullscreen" onClick={@maximize}>
                 </div>
 
-                <div className="titlebar-close">
+                <div className="titlebar-close" onClick={@close}>
                 </div>
             </div>
         </div>

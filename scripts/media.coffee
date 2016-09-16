@@ -26,7 +26,7 @@ _indexOf      = scriptRequire 'lodash/array/indexOf'
 _assign       = scriptRequire 'lodash.assign'
 moment        = scriptRequire 'moment'
 string        = scriptRequire 'string'
-AnitomyNode   = require "#{mainProcessHome}/../../vendor/anitomy-node/AnitomyNode"
+AnitomyNode   = require "#{mainProcessHome}/../vendor/anitomy-node/AnitomyNode"
 Recognition   = require "#{mainProcessHome}/media-recognition"
 
 module.exports = class Media

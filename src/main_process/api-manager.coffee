@@ -45,7 +45,9 @@ module.exports = class APIManager
     @scriptsCacheDir = path.join(chiika.getAppHome(),"cache","scripts")
 
 
-    @scriptsDirs.push path.join(process.cwd(),"scripts")
+    @scriptsDirs.push path.join(__dirname,'..',"scripts")
+
+    chiika.logger.info("Current script directory: #{@scriptsDirs[0]}")
 
   getScriptByName: (name) ->
     instance = _find @activeScripts, { name: name }

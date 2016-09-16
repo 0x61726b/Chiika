@@ -678,7 +678,7 @@ module.exports = class MyAnimelist
           # if anime.animeSeriesStatus == "2"
           #   airingColor = green
 
-          newAnime.animeAiringColor = airingColor
+          #newAnime.animeAiringColor = airingColor
           # Get episode stuff
           if cacheEpisodeData.length > 0
             findInCache = _find cacheEpisodeData, (o) -> o.title == title.trim().toLowerCase().replace(/[^\w\s]/gi, '')
@@ -694,6 +694,14 @@ module.exports = class MyAnimelist
 
           if anime.animeSeriesStatus == "3"
             airingColor = red
+
+          if airingColor == gray
+            if anime.animeSeriesStatus == "1"
+              airingColor = green
+            if anime.animeSeriesStatus == "2"
+              airingColor = blue
+
+
 
           newAnime.listBorderColor = airingColor
           if status == "1"

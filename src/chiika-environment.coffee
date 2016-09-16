@@ -16,7 +16,8 @@
 {Emitter}                                 = require 'event-kit'
 {ipcRenderer,remote,shell}                = require 'electron'
 remote                                    = require('electron').remote
-{Menu,MenuItem,dialog}                           = require('electron').remote
+{Menu,MenuItem,dialog}                    = require('electron').remote
+animejs                                   = require 'animejs'
 
 _when                                     = require 'when'
 Logger                                    = require './main_process/logger'
@@ -33,16 +34,11 @@ ListManager                               = require './list-manager'
 
 class ChiikaEnvironment
   emitter: null
+
   constructor: (params={}) ->
     {@applicationDelegate, @window,@chiikaHome} = params
 
     window.chiika = this
-
-    # scribe = require 'scribe-js'
-    # express = require 'express'
-    #
-    # scribe = scribe()
-    # console = process.console
 
     @emitter          = new Emitter
     @logger           = remote.getGlobal('logger')
@@ -57,21 +53,15 @@ class ChiikaEnvironment
 
 
 
-      # @uiData.sort (a,b) =>
-      #   if a.type.indexOf('card') == -1
-      #     return 0
-      #   else
-      #     if a.cardProperties.order > b.cardProperties.order
-      #       return -1
-      #     else
-      #       return 1
-      #   return 0
-
-
-
 
     @ipc.onReconstructUI()
     @ipc.spectron()
+
+    ipcRenderer.on 'squirrel', (event,args) =>
+      console.log args
+
+      if args == 'update-available'
+        @emitter.emit 'update-available'
 
 
     ipcRenderer.on 'show-toast', (event,args) =>
@@ -152,6 +142,17 @@ class ChiikaEnvironment
   openShellUrl: (url) ->
     shell.openExternal(url)
 
+  toggleDevTools: ->
+    isDevToolsOpen = remote.getCurrentWindow().isDevToolsOpened()
+    if isDevToolsOpen
+      @ipc.sendMessage 'call-window-method','closeDevTools'
+    else
+      @ipc.sendMessage 'call-window-method','openDevTools'
+
+  checkForUpdates: ->
+    @ipc.sendMessage 'check-for-updates'
+
+
   popupContextMenu: (config) ->
     menu = new Menu()
     _forEach config,(item) ->
@@ -166,7 +167,6 @@ class ChiikaEnvironment
     window.yuiToast(toast)
 
   closeToast: () ->
-    console.log $(".toast")
     $(".toast").remove()
 
   toastSuccess: (message,duration) ->

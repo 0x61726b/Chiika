@@ -26,7 +26,7 @@ path                    = require 'path'
 fs                      = require 'fs'
 MediaRecognition        = require './media-recognition'
 
-AnitomyNode             = require process.cwd() + '/vendor/anitomy-node/AnitomyNode'
+AnitomyNode             = require '../vendor/anitomy-node/AnitomyNode'
 
 process.on 'exit', ->
   process.send "Exit"

@@ -32,12 +32,14 @@
 }
 .titlebar.webkit-draggable .titlebar-settings,
 .titlebar.webkit-draggable .titlebar-close,
+.titlebar.webkit-draggable .titlebar-devtools,
 .titlebar.webkit-draggable .titlebar-fullscreen,
 .titlebar.webkit-draggable .titlebar-minimize {
   -webkit-app-region: no-drag;
 }
 .titlebar-divider,
 .titlebar-settings,
+.titlebar-devtools,
 .titlebar-close,
 .titlebar-fullscreen,
 .titlebar-minimize {
@@ -58,12 +60,14 @@
   background: $grey-3;
 }
 .titlebar-settings:hover,
+.titlebar-devtools:hover,
 .titlebar-close:hover,
 .titlebar-fullscreen:hover,
 .titlebar-minimize:hover {
   background-color: rgba(0,0,0,0.15);
 }
 .titlebar-settings:active,
+.titlebar-devtools:active,
 .titlebar-close:active,
 .titlebar-fullscreen:active,
 .titlebar-minimize:active {
@@ -73,11 +77,20 @@
 .titlebar-settings:after {
   content: "\F493";
 }
+.titlebar-update:after {
+  content: "\F6AF";
+}
+.titlebar-devtools:after {
+  content: "\F169";
+}
 
 .titlebar-close {
   margin-left: 6px;
 }
 .titlebar-close:active {
+  z-index: 2;
+}
+.titlebar-devtools:active {
   z-index: 2;
 }
 .titlebar-close:after {
