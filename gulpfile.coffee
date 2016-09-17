@@ -183,22 +183,23 @@ Write_a_package_json_for_distribution = () ->
 
 Package_for_each_platforms = () ->
 
-  gulp.task 'package', ['win32'].map (platform) ->
+  gulp.task 'package', ['linux'].map (platform) ->
 
     taskName = 'package:' + platform
 
     gulp.task taskName, ['build'], (done) ->
       arch = 'x64'
-      packager options =
+      options =
         dir: distDir
         name: 'Chiika'
         arch: arch
         platform: platform
         out: releaseDir + '/' + platform + '-' + arch
         version: '1.3.1'
-        icon: './resources/windows/icon.ico'
         asar: false
-        'version-string': {
+      if platform == 'win32'
+        options.icon = './resources/windows/icon.ico'
+        options['version-string'] = {
           'CompanyName': 'arkenthera',
           'LegalCopyright': 'Whatever',
           'FileDescription' : 'Chiika',
@@ -208,7 +209,10 @@ Package_for_each_platforms = () ->
           'ProductName' : 'Chiika',
           'InternalName' : 'Chiika.exe'
         }
-      , (err) -> console.log err
+      else if platform == 'darwin'
+        icon = './resources/osx/icon.ico'
+
+      packager options, (err) -> console.log err
 
     return taskName
 
@@ -228,11 +232,24 @@ gulp.task 'ci:win32', () ->
     setupExe: 'Chiika-Windows-Installer.exe' })
 
   success = () =>
-    console.log "Installer for #{taskName} has been created"
+    console.log "Installer for has been created"
   error = (e) =>
     console.log "Whoops... #{e.message}"
 
   resultPromise.then(success,error)
+
+gulp.task 'ci:linux', () ->
+  installer = require 'electron-installer-debian'
+  options =
+    src: 'release/linux-x64/Chiika-linux',
+    dest: 'dist/installers/',
+    arch: 'amd64'
+
+  installer options, (err) =>
+    if err
+      console.log err
+      process.exit(1)
+    console.log "Created deb package"
 
 do Your_Application_will_ = () ->
   Compile_scss_files_with_sourcemaps()
