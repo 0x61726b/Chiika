@@ -78,10 +78,9 @@ Copy_scripts = () ->
 
 Copy_vendor = () ->
   gulp.task 'copy:vendor', () ->
-    if process.platform == 'win32'
-      gulp.src(rootDir + '/vendor/**/*')
-      .pipe(gulp.dest(serveDir + '/vendor'))
-      .pipe(gulp.dest(distDir + '/vendor'))
+    gulp.src(rootDir + '/vendor/**/*')
+    .pipe(gulp.dest(serveDir + '/vendor'))
+    .pipe(gulp.dest(distDir + '/vendor'))
 
 Incremental_compile_cjsx_coffee_files_with_sourcemaps = () ->
   gulp.task 'compile:scripts:watch', (done) ->

@@ -32,7 +32,7 @@ _assign       = scriptRequire 'lodash.assign'
 _find         = scriptRequire 'lodash/collection/find'
 _isArray      = scriptRequire 'lodash.isarray'
 _forEach      = scriptRequire 'lodash.foreach'
-_cloneDeep    = scriptRequire 'lodash.cloneDeep'
+_cloneDeep    = scriptRequire 'lodash.clonedeep'
 _size         = scriptRequire 'lodash/collection/size'
 
 _when         = scriptRequire 'when'

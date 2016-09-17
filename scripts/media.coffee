@@ -26,8 +26,7 @@ _indexOf      = scriptRequire 'lodash/array/indexOf'
 _assign       = scriptRequire 'lodash.assign'
 moment        = scriptRequire 'moment'
 string        = scriptRequire 'string'
-AnitomyNode   = require "#{mainProcessHome}/../vendor/anitomy-node/AnitomyNode"
-Recognition   = require "#{mainProcessHome}/media-recognition"
+
 
 module.exports = class Media
   name: "media"
@@ -42,8 +41,12 @@ module.exports = class Media
   constructor: (chiika) ->
     @chiika = chiika
 
-    @recognition = new Recognition()
-    @anitomy = new AnitomyNode.Root()
+    if process.platform == 'win32'
+      AnitomyNode   = require "#{mainProcessHome}/../vendor/anitomy-node/AnitomyNode"
+      Recognition   = require "#{mainProcessHome}/media-recognition"
+
+      @recognition = new Recognition()
+      @anitomy = new AnitomyNode.Root()
 
   libraryDataByOwner: ->
     services = @chiika.getServices()
@@ -125,6 +128,8 @@ module.exports = class Media
       @chiika.viewManager.addView libraryView
 
     @on 'get-view-data', (args) =>
+      if process.platform != 'win32'
+        return
       if args.view.name == 'chiika_library'
         detectCache = @chiika.viewManager.getViewByName('anime_detect_cache')
         if detectCache?
