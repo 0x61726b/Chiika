@@ -609,7 +609,6 @@ module.exports = class MyAnimelist
               if animeView?
                 rawEntry = params.rawEntry
                 entry = @createAddedAnimeEntry(params.id,rawEntry)
-                console.log entry
                 @addAnime entry, (result) =>
                   if result.statusCode == 201
                     @updateViewAndRefresh 'myanimelist_animelist',entry,'id', (result) =>
@@ -1207,8 +1206,9 @@ module.exports = class MyAnimelist
       newAnimeEntry.animeImage = cover
       callback({ success: true, entry: newAnimeEntry, updated: 1,list: false })
 
-      @doSearch 'anime',title, (results) =>
-        _forEach results, (entry) =>
+      @doSearch 'anime',title, (list) =>
+        _forEach list.results, (entry) =>
+          console.log entry
           if entry.id == animeId
             _assign newAnimeEntry, entry
             callback({ success: true, entry: newAnimeEntry, updated: 1,list: false })

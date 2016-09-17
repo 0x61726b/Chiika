@@ -163,7 +163,7 @@ module.exports = class MediaManager
   #
   enableRecognition: ->
     if !@processAlive
-      @spawnChild()
+      @startDetectorProcess()
 
   #
   #

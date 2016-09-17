@@ -43,8 +43,10 @@ module.exports = React.createClass
       @setState { library: @refreshData().filter(filterByTitle) }
 
   componentWillUnmount: ->
-    @refreshView.dispose()
-    @searchInput.dispose()
+    if @refreshView?
+      @refreshView.dispose()
+    if @searchInput?
+      @searchInput.dispose()
 
   componentDidUpdate: ->
     $(".bookshelf-book").addClass "open"

@@ -163,8 +163,8 @@ module.exports = class WindowManager
         @removeWindow(window)
 
     window.on 'focus', =>
-      if window.name == 'main'
-        chiika.shortcutManager.register(window)
+      # if window.name == 'main'
+      #   chiika.shortcutManager.register(window)
 
     window.on 'minimize', =>
       if window.name == 'main' && chiika.settingsManager.getOption('MinimizeToTray')
