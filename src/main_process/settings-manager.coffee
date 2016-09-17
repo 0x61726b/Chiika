@@ -63,6 +63,9 @@ module.exports = class SettingsManager
         #Open the file for writing
         cf = chiika.utility.openFileWSmart @configFilePath
 
+        if process.platform == "win32"
+          DefaultOptions.DisableAnimeRecognition = true
+
         #Write the default options
         chiika.utility.writeFileSmart @configFilePath, JSON.stringify(DefaultOptions)
 
@@ -72,6 +75,7 @@ module.exports = class SettingsManager
         @appOptions = DefaultOptions
 
         @firstLaunch = true
+
 
       defer.resolve()
       chiika.logger.info "[cyan](Settings-Manager) Settings initialized"

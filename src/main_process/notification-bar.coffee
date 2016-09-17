@@ -76,6 +76,8 @@ module.exports = class NotificationBar
   #
   #
   create: ->
+    if process.platform != "win32" && process.platform != "darwin"
+      return
     @createTray()
 
   #
