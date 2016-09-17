@@ -18,7 +18,7 @@ path          = require 'path'
 fs            = require 'fs'
 
 
-_forEach      = scriptRequire 'lodash.forEach'
+_forEach      = scriptRequire 'lodash.foreach'
 _find         = scriptRequire 'lodash/collection/find'
 _indexOf      = scriptRequire 'lodash/array/indexOf'
 _filter       = scriptRequire 'lodash/collection/filter'

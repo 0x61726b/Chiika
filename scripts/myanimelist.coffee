@@ -44,7 +44,7 @@ getSearchExtendedUrl = (type,id) ->
 _assign       = scriptRequire 'lodash.assign'
 _find         = scriptRequire 'lodash/collection/find'
 _isArray      = scriptRequire 'lodash.isarray'
-_forEach      = scriptRequire 'lodash.forEach'
+_forEach      = scriptRequire 'lodash.foreach'
 _cloneDeep    = scriptRequire 'lodash.cloneDeep'
 _size         = scriptRequire 'lodash/collection/size'
 
