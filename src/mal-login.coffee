@@ -84,6 +84,8 @@ MalLogin = React.createClass
     ipcRenderer.on 'login-response',(event,response) =>
       $("#log-btn").prop("disabled",false)
 
+      console.log response
+
       if !response.success
         message = "We couldn't login you with the selected service!"
         window.yuiToast(message,'top',5000,'dark')

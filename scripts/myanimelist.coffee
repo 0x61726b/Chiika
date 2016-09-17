@@ -431,6 +431,9 @@ module.exports = class MyAnimelist
         #view.setData(@getAnimelistData())
         @getAnimelistData (result) =>
           if result.success
+            if !result.library.myanimelist.anime.length
+              update.return({ success: true })
+              return
             @setAnimelistTabViewData(result.library.myanimelist.anime,update.view).then =>
               update.return({ success: result.success })
 
@@ -444,12 +447,17 @@ module.exports = class MyAnimelist
       else if update.view.name == 'myanimelist_mangalist'
         @getMangalistData (result) =>
           if result.success
+            if !result.library.myanimelist.manga?
+              update.return({ success: true })
+              return
+
             @setMangalistTabViewData(result.library.myanimelist.manga,update.view).then =>
               update.return({ success: result.success })
 
               @chiika.custom.addKey { name: "#{update.view.name}_updated", value:moment() }
           else
             update.return({ success: result.success })
+            @chiika.logger.warn("[yellow](#{@name}) view-update has failed.")
 
 
     @on 'details-layout', (args) =>
@@ -861,21 +869,22 @@ module.exports = class MyAnimelist
 
               deferUpdate1 = _when.defer()
               deferUpdate2 = _when.defer()
-              deferUpdate3 = _when.defer()
-              deferUpdate4 = _when.defer()
+              # deferUpdate3 = _when.defer()
+              # deferUpdate4 = _when.defer()
               async.push deferUpdate1.promise
               async.push deferUpdate2.promise
-              async.push deferUpdate3.promise
-              async.push deferUpdate4.promise
+              # async.push deferUpdate3.promise
+              # async.push deferUpdate4.promise
 
               @chiika.requestViewUpdate 'myanimelist_animelist',@name,() => deferUpdate1.resolve()
               @chiika.requestViewUpdate('myanimelist_mangalist',@name,() => deferUpdate2.resolve())
 
-              @importHistoryFromMAL('anime', () => deferUpdate3.resolve() )
-              @importHistoryFromMAL('manga', () => deferUpdate4.resolve() )
+              # @importHistoryFromMAL('anime', () => deferUpdate3.resolve() )
+              # @importHistoryFromMAL('manga', () => deferUpdate4.resolve() )
 
               _when.all(async).then =>
                 args.return( { success: true })
+                console.log "?"
                 @initialize()
 
             newUser = { userName: args.user + "_" + @name,owner: @name, password: args.pass, realUserName: args.user, isDefault: true }

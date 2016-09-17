@@ -183,7 +183,7 @@ Write_a_package_json_for_distribution = () ->
 
 Package_for_each_platforms = () ->
 
-  gulp.task 'package', ['linux'].map (platform) ->
+  gulp.task 'package', ['win32','linux','darwin'].map (platform) ->
 
     taskName = 'package:' + platform
 
