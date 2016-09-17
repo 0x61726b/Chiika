@@ -867,13 +867,13 @@ module.exports = class Hummingbird
           { name:'al_ptw', display: 'Plan to Watch'}
           ],
         gridColumnList: [
-          { name: 'animeType',display: 'Type', sort: 'int'},
-          { name: 'animeTitle',display: 'Title', sort: 'str'},
-          { name: 'animeProgress',display: 'Progress', sort: 'float'},
-          { name: 'animeScore',display: 'Score', sort: 'float'},
-          { name: 'animeScoreAverage',display: 'Avg Score', sort: 'float'},
-          { name: 'animeSeasonText',display: 'Season', sort: 'date'},
-          { name: 'animeLastUpdatedText',display: 'Last Updated', sort: 'int'}
+          { name: 'animeType',display: 'Type', sort: 'int', css: 'grid-40'},
+          { name: 'animeTitle',display: 'Title', sort: 'str',css: 'grid-title'},
+          { name: 'animeProgress',display: 'Progress', sort: 'float', css: 'grid-progress'},
+          { name: 'animeScore',display: 'Score', sort: 'int', css: 'grid-80'},
+          { name: 'animeScoreAverage',display: 'Avg Score', sort: 'float',css: 'grid-80'},
+          { name: 'animeSeasonText',display: 'Season', sort: 'date', css: 'grid-160'},
+          { name: 'animeLastUpdatedText',display: 'Last Updated', sort: 'int', css: 'grid-160'}
         ]
       }
      }

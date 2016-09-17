@@ -46,6 +46,9 @@ $row-border-color: $grey-2;
     &.col-animeTitle {
       text-align: left;
     }
+    &.grid-title {
+      text-align: left;
+    }
   }
   .header-title:last-child {
     padding-right: 8px;
@@ -72,6 +75,47 @@ $row-border-color: $grey-2;
   }
 }
 
+.grid-airing-color-gray {
+  border-left: 4px solid #B7B7B7;
+}
+.grid-airing-color-green {
+  border-left: 4px solid #48c85e;
+}
+.grid-airing-color-red {
+  border-left: 4px solid #F13527;
+}
+.grid-airing-color-blue {
+  border-left: 4px solid #6D9EEB;
+}
+
+.grid-80 {
+  width: 80px;
+}
+.grid-160 {
+  width: 160px;
+}
+.grid-120 {
+  width: 120px;
+}
+.grid-title {
+  width: 200px;
+  flex-grow: 2!important;
+}
+.grid-progress {
+  width: 120px;
+  padding: 0!important;
+}
+.header-title.grid-progress {
+  padding-top: 8px!important;
+  padding-bottom: 8px!important;
+}
+.grid-progress > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+}
+
 .col-torrentCheck {
   width: 50px;
 }
@@ -91,10 +135,9 @@ $row-border-color: $grey-2;
   flex-grow: 2!important;
 }
 
+
 .col-animeProgress {
   width: 120px;
-}
-.col-animeProgress {
   padding: 0!important;
 }
 .col-animeSeriesStatusText {
@@ -104,6 +147,7 @@ $row-border-color: $grey-2;
   padding-top: 8px!important;
   padding-bottom: 8px!important;
 }
+
 .col-animeProgress > div {
   display: flex;
   justify-content: space-between;
@@ -174,6 +218,7 @@ $row-border-color: $grey-2;
 #chiika-list {
   .col-animeScore,
   .col-animeScoreAverage,
+  .grid-80,
   .col-animeTypeText {
     text-align: center;
     font-weight: 500;

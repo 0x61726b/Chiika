@@ -199,6 +199,16 @@ Package_for_each_platforms = () ->
         version: '1.3.1'
         icon: './resources/windows/icon.ico'
         asar: false
+        'version-string': {
+          'CompanyName': 'arkenthera',
+          'LegalCopyright': 'Whatever',
+          'FileDescription' : 'Chiika',
+          'OriginalFilename' : 'Chiika.exe',
+          'FileVersion' : '0.0.1',
+          'ProductVersion' : '0.0.1',
+          'ProductName' : 'Chiika',
+          'InternalName' : 'Chiika.exe'
+        }
       , (err) -> console.log err
 
     return taskName
@@ -209,11 +219,12 @@ gulp.task 'ci:win32', () ->
   resultPromise = electronInstaller.createWindowsInstaller({
     appDirectory: './release/win32-x64/Chiika-win32',
     outputDirectory: './release/installer',
+    description: 'Ultimate Anime/Manga scrobbler',
+    title: "chiika",
     authors: 'arkenthera',
     exe: 'Chiika.exe',
     iconUrl: "#{process.cwd()}/resources/windows/icon.ico",
     noMsi: true,
-    remoteReleases: 'http://chiika.herokuapp.com/'
     loadingGif: './src/assets/installer.gif',
     setupExe: 'Chiika-Windows-Installer.exe' })
 

@@ -118,7 +118,7 @@ module.exports = React.createClass
         $("#gridSearch").val(lastResults.searchString)
 
         searchType = @getSearchType(lastResults.searchType)
-        @setState { searchSuccess: true,searchResults: lastResults.results, searchState: 'completed',searchAnime:searchType.searchAnime, searchManga: searchType.searchManga,searchSource: lastResults.searchSource }
+        @setState {searchString: $("#gridSearch").val(), searchSuccess: true,searchResults: lastResults.results, searchState: 'completed',searchAnime:searchType.searchAnime, searchManga: searchType.searchManga,searchSource: lastResults.searchSource }
     # else
     #   @setSearchParams(props.params.searchString,props.location.query.searchMode,props.location.query.searchType,props.location.query.searchSource)
     #   chiika.searchManager.search value,'list','myanimelist_animelist', (results) =>
@@ -162,15 +162,15 @@ module.exports = React.createClass
 
 
 
-  onCoverClick: (sourceView,id,title) ->
-    window.location = "##{sourceView}_details/#{id}?title=#{title}"
+  onCoverClick: (sr) ->
+    window.location = "##{sr.sourceView}_details/#{sr.id}?title=#{sr.title}&cover=#{sr.image}"
 
 
   pickAnime: (sr) ->
 
 
   resultItem: (sr,i) ->
-    <div className="search-result" key={i}>
+    <div className="search-result" key={i} onClick={() => @onCoverClick(sr)}>
       <div className="result-cover">
         <img src="#{sr.image}" alt="" />
       </div>

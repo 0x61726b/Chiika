@@ -669,10 +669,10 @@ module.exports = class MyAnimelist
           newAnime.animeLastUpdatedText          = animeValues.lastUpdatedText
           newAnime.animeSeriesStatusText         = @getAnimeStatus('text',anime.animeSeriesStatus)
 
-          green = "#48c85e" #success-main
-          red   = "#F13527" #danger-main
-          gray  = "#B7B7B7"
-          blue  = "#6D9EEB"
+          green = "grid-airing-color-green" #success-main
+          red   = "grid-airing-color-red" #danger-main
+          gray  = "grid-airing-color-gray"
+          blue  = "grid-airing-color-blue"
 
           airingColor = gray
           if anime.animeSeriesStatus == "1"
@@ -1125,21 +1125,6 @@ module.exports = class MyAnimelist
       #
       # For search to occur, we need a title
       #
-      searchMatch = (v) ->
-        newAnimeEntry = {}
-        newAnimeEntry.id = v.id
-        newAnimeEntry.animeEnglish = v.english
-        newAnimeEntry.animeTitle = v.title
-        newAnimeEntry.animeSynonyms = v.synonyms
-        newAnimeEntry.animeType = v.type
-        newAnimeEntry.animeSeriesStartDate = v.start_date
-        newAnimeEntry.animeSeriesEndDate = v.end_date
-        newAnimeEntry.animeSeriesStatus = v.status
-        newAnimeEntry.animeImage = v.image
-        newAnimeEntry.animeScoreAverage = v.score
-        newAnimeEntry.animeSynopsis = v.synopsis
-        newAnimeEntry
-
       newAnimeEntry = {}
       entryFound = false
       #
@@ -1216,7 +1201,11 @@ module.exports = class MyAnimelist
       # Not in list
       # ID is not enough alone, there must be something else!
       title = params.title
+      cover = params.cover
       newAnimeEntry = {}
+      newAnimeEntry.animeTitle = title
+      newAnimeEntry.animeImage = cover
+      callback({ success: true, entry: newAnimeEntry, updated: 1,list: false })
 
       @doSearch 'anime',title, (results) =>
         _forEach results, (entry) =>
@@ -1347,6 +1336,7 @@ module.exports = class MyAnimelist
       # ID is not enough alone, there must be something else!
       title = params.title
       newMangaEntry = {}
+      newMangaEntry.animeTitle = title
 
       @doSearch 'manga',title, (results) =>
         _forEach results, (entry) =>
@@ -2314,15 +2304,14 @@ module.exports = class MyAnimelist
           { name:'al_ptw', display: 'Plan to Watch'}
           ],
         gridColumnList: [
-          { name: 'animeTypeText',display: 'Type', sort: 'int'},
-          { name: 'animeTitle',display: 'Title', sort: 'str'},
-          { name: 'animeProgress',display: 'Progress', sort: 'float'},
-          { name: 'animeScore',display: 'Score', sort: 'int'},
-          { name: 'animeScoreAverage',display: 'Avg Score', sort: 'float'},
-          { name: 'animeSeasonText',display: 'Season', sort: 'date'},
-          { name: 'animeSeriesStatusText',display: 'Airing Status', sort: 'int'},
-          { name: 'animeLastUpdatedText',display: 'Last Updated', sort: 'int'},
-          { name: 'animeId',hidden: true }
+          { name: 'animeTypeText',display: 'Type', sort: 'int', css: 'grid-40'},
+          { name: 'animeTitle',display: 'Title', sort: 'str',css: 'grid-title'},
+          { name: 'animeProgress',display: 'Progress', sort: 'float', css: 'grid-progress'},
+          { name: 'animeScore',display: 'Score', sort: 'int', css: 'grid-80'},
+          { name: 'animeScoreAverage',display: 'Avg Score', sort: 'float',css: 'grid-80'},
+          { name: 'animeSeasonText',display: 'Season', sort: 'date', css: 'grid-160'},
+          { name: 'animeSeriesStatusText',display: 'Airing Status', sort: 'int', css: 'grid-160'},
+          { name: 'animeLastUpdatedText',display: 'Last Updated', sort: 'int', css: 'grid-160'}
         ]
       }
      }
@@ -2362,12 +2351,11 @@ module.exports = class MyAnimelist
           { name:'ml_ptr', display: 'Plan to Read'}
           ],
         gridColumnList: [
-          { name: 'mangaTitle',display: 'Title', sort: 'str', widthP:'60', align: 'left',headerAlign: 'left' },
-          { name: 'mangaProgress',display: 'Progress', sort: 'int', widthP:'40', align: 'center',headerAlign: 'center' },
-          { name: 'mangaScore',display: 'Score', sort: 'int', width:'100', align: 'center',headerAlign: 'center' },
-          { name: 'mangaScoreAverage',display: 'Avg Score', sort: 'int', width:'100', align: 'center',headerAlign: 'center' },
-          { name: 'mangaLastUpdatedText',display: 'Last Updated', sort: 'int', width:'140', align: 'center',headerAlign: 'center' },
-          { name: 'mangaId',hidden: true }
+          { name: 'mangaTitle',display: 'Title', sort: 'str',css: 'grid-title'},
+          { name: 'mangaProgress',display: 'Progress', sort: 'int', css: 'grid-progress'},
+          { name: 'mangaScore',display: 'Score', sort: 'int', css: 'grid-80'},
+          { name: 'mangaScoreAverage',display: 'Avg Score', sort: 'int', css: 'grid-80'},
+          { name: 'mangaLastUpdatedText',display: 'Last Updated', sort: 'int', css: 'grid-160'}
         ]
       }
      }

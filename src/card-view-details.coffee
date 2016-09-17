@@ -56,10 +56,12 @@ module.exports = React.createClass
 
     if @props.location.query.title?
       title = @props.location.query.title
+      cover = @props.location.query.cover
     else if @state.layout.title?
       title = @state.layout.title
+      cover = @state.layout.cover
 
-    chiika.ipc.getDetailsLayout id,@props.route.viewName,owner,{ title: title }, (args) =>
+    chiika.ipc.getDetailsLayout id,@props.route.viewName,owner,{ title: title,cover: cover }, (args) =>
       @setState { layout: args.layout }
 
       console.log args.layout
@@ -74,8 +76,8 @@ module.exports = React.createClass
   componentWillUnmount:->
     chiika.ipc.disposeListeners('details-layout-request-response')
     chiika.ipc.disposeListeners('details-action-response')
-
-    @chart.destroy()
+    if @chart?
+      @chart.destroy()
 
   #
   #

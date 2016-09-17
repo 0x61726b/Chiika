@@ -160,7 +160,12 @@ module.exports = React.createClass
     if chiika.getOption('RememberSortingPreference')
       data    = @constructData(@state.viewName,index)
 
-      data = @sort(data,@state.sortingType,!@state.sortingPrefDir,@state.sortingPrefCol)
+      sortAsc = null
+      if @state.sortingPrefDir == "asc"
+        sortAsc = true
+      else
+        sortAsc = false
+      data = @sort(data,@state.sortingType,sortAsc,@state.sortingPrefCol)
       @setState { index: index,data:data }
     else
       data    = @constructData(@state.viewName,index)
@@ -254,7 +259,7 @@ module.exports = React.createClass
   #
   #
   sort: (data,type,order,column) ->
-
+    chiika.logger.info("Sorting #{column} - #{type} - #{order}")
     switch type
       when 'int'
         data.sort (a,b) =>
@@ -345,29 +350,6 @@ module.exports = React.createClass
       else
         @setState { }
 
-  # shouldComponentUpdate: (nextProps,nextState) ->
-  #   shouldUpdate = true
-  #   if @state.index == nextState.index
-  #     shouldUpdate = false
-  #     for i in [0...@state.data.length]
-  #       oldEntry = @state.data[i]
-  #       newEntry = nextState.data[i]
-  #
-  #       if oldEntry != newEntry
-  #         shouldUpdate = true
-  #       if oldEntry.expanded != newEntry.expanded && newEntry.expanded
-  #         shouldUpdate = true
-  #     console.log shouldUpdate
-  #
-  #   return shouldUpdate
-
-
-    # if @state.data[index].expanded == false
-    #   $(e.target).parent().parent().find(".list-item-expanded").slideToggle "slow", =>
-    #     @setState { data: @state.data }
-    # else
-    #   @setState { data: @state.data }
-
 
   #
   #
@@ -386,35 +368,63 @@ module.exports = React.createClass
     if tag == 'SPAN'
       # Sorting
       sortType = col.sort
-      orderAsc = $(e.target).parent().hasClass("order-asc")
-      orderDsc = $(e.target).parent().hasClass("order-dsc")
       name     = col.name
-
-      if orderAsc
-        $(e.target).parent().removeClass "order-asc"
-        $(e.target).parent().addClass "order-dsc"
-
-      if orderDsc
-        $(e.target).parent().removeClass "order-dsc"
-        $(e.target).parent().addClass "order-asc"
-
-      data = @state.data
+      lastSort = @state.sortingPrefDir
 
       if name.lastIndexOf('Text') > -1
         name = name.substring(0,name.lastIndexOf('Text'))
 
-      chiika.logger.info("Sorting #{name} - #{sortType} - #{orderAsc} - #{orderDsc}")
+      thisSort = ""
+
+      if lastSort == "asc"
+        thisSort = "dsc"
+      else
+        thisSort = "asc"
+
+      sortAsc = null
+      if thisSort == "asc"
+        sortAsc = true
+      else
+        sortAsc = false
+      @setState { data: @sort(@state.data,sortType,sortAsc,name), sortingPrefDir: thisSort,sortingPrefCol: name, sortingType: sortType }
 
       if chiika.getOption('RememberSortingPreference')
         uiItem = _find chiika.uiData, (o) => o.name == @state.viewName
-        uiItem.displayConfig.sortingPrefDir = if !orderAsc then "asc" else "dsc"
+        uiItem.displayConfig.sortingPrefDir = thisSort
         uiItem.displayConfig.sortingPrefCol = name
 
         chiika.viewManager.saveTabGridViewState(uiItem)
 
-        @setState { data: @sort(data,sortType,!orderAsc,name), sortingPrefDir:uiItem.displayConfig.sortingPrefDir,sortingPrefCol: uiItem.displayConfig.sortingPrefCol,sortingType: sortType  }
-      else
-        @setState { data: @sort(data,sortType,!orderAsc,name) }
+
+      # orderAsc = $(e.target).parent().hasClass("order-asc")
+      # orderDsc = $(e.target).parent().hasClass("order-dsc")
+      # name     = col.name
+      #
+      # if orderAsc
+      #   $(e.target).parent().removeClass "order-asc"
+      #   $(e.target).parent().addClass "order-dsc"
+      #
+      # if orderDsc
+      #   $(e.target).parent().removeClass "order-dsc"
+      #   $(e.target).parent().addClass "order-asc"
+      #
+      # data = @state.data
+      #
+      # if name.lastIndexOf('Text') > -1
+      #   name = name.substring(0,name.lastIndexOf('Text'))
+      #
+      # chiika.logger.info("Sorting #{name} - #{sortType} - #{orderAsc} - #{orderDsc}")
+      #
+      # if chiika.getOption('RememberSortingPreference')
+      #   uiItem = _find chiika.uiData, (o) => o.name == @state.viewName
+      #   uiItem.displayConfig.sortingPrefDir = if !orderAsc then "asc" else "dsc"
+      #   uiItem.displayConfig.sortingPrefCol = name
+      #
+      #   chiika.viewManager.saveTabGridViewState(uiItem)
+      #
+      #   @setState { data: @sort(data,sortType,!orderAsc,name), sortingPrefDir:uiItem.displayConfig.sortingPrefDir,sortingPrefCol: uiItem.displayConfig.sortingPrefCol,sortingType: sortType  }
+      # else
+      #   @setState { data: @sort(data,sortType,!orderAsc,name) }
 
 
 
@@ -503,10 +513,14 @@ module.exports = React.createClass
   #
   renderSingleItem: (index,key) ->
     <div key={key}>
-      <div className="list-item" style={{borderLeft: "4px solid #{@state.data[index].listBorderColor}"}} onClick={(e) => @listItemClick(e,index)} onDoubleClick={ (e) => @listItemDblClick(e,index)} onContextMenu={ (e) => @itemContextMenu(e,index)}>
+      <div
+      className="list-item #{if @state.data[index].listBorderColor? then @state.data[index].listBorderColor else ''}"
+      onClick={(e) => @listItemClick(e,index)}
+      onDoubleClick={ (e) => @listItemDblClick(e,index)}
+      onContextMenu={ (e) => @itemContextMenu(e,index)}>
         {
           @state.columns.map (col,i) =>
-            <div className="col-list col-#{col.name}" key={i}>
+            <div className="col-list col-#{col.name} #{if col.css? then col.css else ''}" key={i}>
               {
                 if window["#{@state.viewName}_#{col.name}"]?
                   window["#{@state.viewName}_#{col.name}"](@state.data[index],@columnAction)
@@ -529,7 +543,7 @@ module.exports = React.createClass
     <div className="chiika-header" key={index}>
     {
         @state.columns.map (col,i) =>
-          <div className="header-title col-#{col.name} order-#{@state.sortingPrefDir}" onContextMenu={ (e) => @headerContextMenu(e,col)} onClick={ (e) => @headerClick(e,col)} key={i}><span>{col.display}</span></div>
+          <div className="header-title col-#{col.name} order-#{@state.sortingPrefDir} #{if col.css? then col.css else ''}" onContextMenu={ (e) => @headerContextMenu(e,col)} onClick={ (e) => @headerClick(e,col)} key={i}><span>{col.display}</span></div>
     }
     </div>
 

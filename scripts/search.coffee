@@ -124,7 +124,7 @@ module.exports = class Search
       @chiika.logger.script("[yellow](#{@name}) search")
       console.log params
 
-      searchString = @recognition.clear(params.searchString)
+      searchString = params.searchString.toLowerCase().trim().replace(/[^\w\s]/gi, '')
       searchType   = params.searchType
       searchSource = params.searchSource
       searchMode   = params.searchMode

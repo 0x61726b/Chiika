@@ -78,6 +78,20 @@ myanimelist_animelist_animeProgress = (item,actions) ->
       }></span>
   </div>
 
+myanimelist_mangalist_mangaProgress = (item,actions) ->
+  <div title="#{item.mangaProgress}">
+    <span className="prevent-expand list-progress-minus" onClick={() =>
+      actions('progress-update',{id:item.id,current: parseInt(item.mangaUserReadChapters) - 1, total: item.mangaSeriesChapters, owner: 'myanimelist', column: 'animeWatchedEpisodes'})
+      }></span>
+    <span>
+      <span className="prevent-expand list-progress-user">{item.mangaUserReadChapters}</span>
+      <span className="list-progress-total">/{item.mangaSeriesChapters}</span>
+    </span>
+    <span className="prevent-expand list-progress-plus" onClick={() =>
+      actions('progress-update',{id:item.id,current: parseInt(item.mangaUserReadChapters) + 1, total: item.mangaSeriesChapters, owner: 'myanimelist', column: 'animeWatchedEpisodes'})
+      }></span>
+  </div>
+
 hummingbird_animelist_animeProgress = (item,actions) ->
   <div title="#{item.animeProgress}">
     <span className="prevent-expand list-progress-minus" onClick={() =>
@@ -299,7 +313,7 @@ myanimelist_animelist_contextMenu = (item) ->
   menuItems.push ( { type: 'normal', label: "Set Folder", click: onSetFolder })
   menuItems.push ( { type: 'separator'})
   episodes = []
-  for i in [0...totalEpisodes]
+  for i in [1...totalEpisodes+1]
     checked = false
     if i <= currentEpisode
       checked = true
@@ -411,6 +425,7 @@ window.myanimelist_animelist_animeTypeText = myanimelist_animelist_animeTypeText
 # to modify contents of each cell
 window.myanimelist_animelist_animeProgress = myanimelist_animelist_animeProgress
 window.hummingbird_animelist_animeProgress = hummingbird_animelist_animeProgress
+window.myanimelist_mangalist_mangaProgress = myanimelist_mangalist_mangaProgress
 
 window.myanimelist_animelist_expanded = myanimelist_animelist_expanded
 window.myanimelist_mangalist_expanded = myanimelist_mangalist_expanded
