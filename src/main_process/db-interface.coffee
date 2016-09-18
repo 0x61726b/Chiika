@@ -192,7 +192,7 @@ module.exports = class IDb
 
     removeCallback = (err,count) ->
       chiika.logger.verbose("[magenta](#{@name}) - Removed keys - #{count}")
-      callback({ count: count })
+      callback?({ count: count })
 
     @nosql.remove removeFnc,removeCallback,"Remove records"
 

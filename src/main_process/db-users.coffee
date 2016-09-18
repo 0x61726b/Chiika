@@ -107,9 +107,30 @@ module.exports = class DbUsers extends IDb
   # @param [Object] callback Function which will be called upon update
   # @todo Add parameter validation
   removeUser: (user,callback) ->
-    onUpdateComplete = (result) ->
-      callback?()
+    onRemove = =>
+      @reload().then =>
+        callback?()
+    @remove 'userName',user,onRemove
+
+  #
+  #
+  #
+  remove: (key,entry,callback) ->
+    @removeRecord(key,entry,callback)
 
 
+  reload: ->
+    new Promise (resolve) =>
+      onAll = (data) =>
+        @users = data
+        chiika.logger.debug("[yellow](Database) #{@name} loaded. Data Count #{@users.length} ")
+        chiika.logger.info("[yellow](Database) #{@name} has been succesfully loaded.")
+      loadDatabase = =>
+        @all(onAll).then =>
+          resolve()
 
-    @removeRecords user,onUpdateComplete,1
+      if @isReady()
+        loadDatabase()
+      else
+        @on 'load', =>
+          loadDatabase()

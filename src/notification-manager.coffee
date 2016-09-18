@@ -42,9 +42,9 @@ module.exports = class NotificationManager
   deleteFromListConfirmation: (callback) ->
     notification =
       title: 'Are you sure?'
-      message: 'Ima delete this u sure?'
+      message: 'Delete this entry from your list?'
       color: 'red'
       actions: [
-        { name: 'Do whatever', clickAction: callback }
+        { name: 'Delete', clickAction: callback }
       ]
     chiika.notification(notification)

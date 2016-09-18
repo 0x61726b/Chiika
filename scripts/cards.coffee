@@ -286,7 +286,7 @@ module.exports = class CardViews
       @createNewsCard()
       # @createUpcomingAnimeCard()
       # @createStatisticsCard()
-      # @createContinueWatchingCard()
+      @createContinueWatchingCard()
 
       detectionCache =
         name: "anime_detect_cache"

@@ -869,37 +869,47 @@ module.exports = class MyAnimelist
 
               deferUpdate1 = _when.defer()
               deferUpdate2 = _when.defer()
-              # deferUpdate3 = _when.defer()
-              # deferUpdate4 = _when.defer()
+              deferUpdate3 = _when.defer()
+              deferUpdate4 = _when.defer()
               async.push deferUpdate1.promise
               async.push deferUpdate2.promise
-              # async.push deferUpdate3.promise
-              # async.push deferUpdate4.promise
+              async.push deferUpdate3.promise
+              async.push deferUpdate4.promise
 
               @chiika.requestViewUpdate 'myanimelist_animelist',@name,() => deferUpdate1.resolve()
               @chiika.requestViewUpdate('myanimelist_mangalist',@name,() => deferUpdate2.resolve())
 
-              # @importHistoryFromMAL('anime', () => deferUpdate3.resolve() )
-              # @importHistoryFromMAL('manga', () => deferUpdate4.resolve() )
+              @importHistoryFromMAL('anime', () => deferUpdate3.resolve() )
+              @importHistoryFromMAL('manga', () => deferUpdate4.resolve() )
 
               _when.all(async).then =>
                 args.return( { success: true })
-                console.log "?"
                 @initialize()
 
             newUser = { userName: args.user + "_" + @name,owner: @name, password: args.pass, realUserName: args.user, isDefault: true }
 
-            @chiika.parser.parseXml(body)
-                         .then (xmlObject) =>
-                           @malUser = @chiika.users.getUser(args.user + "_" + @name)
+            @chiika.parser.parseXml(body).then (xmlObject) =>
+              assignNewUser = =>
+                _assign newUser, { malID: xmlObject.user.id }
+                if @malUser?
+                  _assign @malUser,newUser
+                  @chiika.users.updateUser @malUser,userAdded
+                else
+                  @malUser = newUser
+                  @chiika.users.addUser @malUser,userAdded
 
-                           _assign newUser, { malID: xmlObject.user.id }
-                           if @malUser?
-                             _assign @malUser,newUser
-                             @chiika.users.updateUser @malUser,userAdded
-                           else
-                             @malUser = newUser
-                             @chiika.users.addUser @malUser,userAdded
+              if !@malUser?
+                @malUser = @chiika.users.getUser(args.user + "_" + @name)
+                assignNewUser()
+              else
+                onRemovePreviousUser = () =>
+                  console.log "Removed previous user"
+                  console.log @malUser
+                  @malUser = null
+                  assignNewUser()
+                @chiika.users.removeUser @malUser,onRemovePreviousUser
+
+
 
             #  if chiika.users.getUser(malUser.userName)?
             #    chiika.users.updateUser malUser
@@ -2472,6 +2482,9 @@ module.exports = class MyAnimelist
             historyData.push historyItem
             counter++
       historyView.clear().then =>
+        if historyData.length == 0
+          callback()
+          return
         historyView.setDataArray(historyData).then(callback)
 
 
