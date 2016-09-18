@@ -64,7 +64,7 @@ module.exports = class Media
         viewData = view.getData()
 
         if viewData.length > 0
-          libraryDataByOwner.push { owner: viewOwnerMap.owner, library: viewData }
+          libraryDataByOwner.push { owner: viewOwnerMap.owner, library: viewData,viewName: viewOwnerMap.viewName }
 
     libraryDataByOwner
 
@@ -295,7 +295,26 @@ module.exports = class Media
 
       if event.name == 'md-update'
         layout = event.params
-        console.log layout
+        episode = layout.episode
+        title = layout.title
+
+        libraryData = @libraryDataByOwner()
+
+        _forEach libraryData,(lib) =>
+          library = lib.library
+          owner = lib.owner
+          viewName = lib.viewName
+
+          # Find
+          entry = _find library, (o) -> o.animeTitle == title
+
+          if entry?
+            listActionParams =
+              viewName: viewName
+              id: entry.id
+              item:
+                current: episode
+            @chiika.emit 'list-action', { calling: owner, action: 'progress-update', params: listActionParams }
 
       if event.name == 'md-pick'
         entry = event.params.entry

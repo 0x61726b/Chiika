@@ -18,7 +18,7 @@
 #--------------------
 #
 #--------------------
-{app}                             = require 'electron'
+{app,BrowserWindow}               = require 'electron'
 path                              = require 'path'
 
 
@@ -78,8 +78,6 @@ class Application
   ready: false
 
   scriptsPaths: []
-
-
 
 
 
@@ -264,6 +262,9 @@ class Application
       @ipcManager.systemEvent('squirrel',error.toString())
 
 
+
+
+
     #
     #
     #
@@ -280,6 +281,19 @@ class Application
     path.join(@chiikaHome,"data","database")
   getScriptCachePath: ->
     path.join(@chiikaHome,'cache','scripts')
+
+  installerWindow: ->
+    options =
+      width: 600
+      height: 600
+      backgroundColor: '#2e2c29'
+      frame: false
+      icon: "resources/icon.png"
+      title: 'Chiika'
+    installerWindow = new BrowserWindow options
+    installerWindow.loadURL("file://#{__dirname}/../static/update-window.html")
+    installerWindow.openDevTools({ detach: true })
+
 
 
 app = new Application()

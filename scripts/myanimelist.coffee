@@ -212,8 +212,8 @@ module.exports = class MyAnimelist
 
 
           historyView.setData( historyItem, 'history_id').then (args) =>
-            @chiika.requestViewDataUpdate('cards','cards_statistics')
             @chiika.requestViewDataUpdate('cards','cards_continueWatching')
+            @chiika.requestViewDataUpdate('cards','cards_statistics')
       else
         # It can return status code 200 but if the body isn't updated,it failed.
         result.success = false
