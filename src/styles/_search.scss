@@ -15,7 +15,6 @@
 .search-result-list h1 {
   padding: 4px;
   border-bottom: 1px solid #666;
-  background: #f5f5f5;
   margin-bottom: 0;
   position: sticky;
   top: 0px;
@@ -26,7 +25,8 @@
   width: 80px;
   height: 80px;
   overflow: hidden;
-  border-radius: 50%
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .result-cover img {
@@ -40,17 +40,18 @@
   border: 1px solid #ddd;
   margin: 4px;
   border-radius: 2px;
-  background: #fff;
+  background: transparent;
 }
 
 .result-meta {
   flex-grow: 1;
   padding: 8px;
-}
-
-.result-meta h2 {
-  margin-bottom: 0;
-  padding-left: 8px;
+  h2 {
+    margin-bottom: 0;
+    padding-left: 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 .result-meta ul, .result-meta li {

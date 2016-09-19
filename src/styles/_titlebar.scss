@@ -4,26 +4,45 @@
   min-height: 44px;
   width: inherit;
   display: flex;
-  justify-content: space-between;
+  //justify-content: space-between;
   align-items: center;
-  padding: 1px 16px;
-  background-color: $grey-2;
-  border-bottom: 1px solid $grey-3;
+  padding-right: 16px;
+  background-color: $sidebar;
+  border-bottom: 1px solid $sidebar-hover;
+  .searchContainer {
+    display: flex;
+    flex-grow: 1;
+    position: relative;
+  }
+  .searchContainer:before {
+    content: "\F349";
+    font: normal normal normal 24px/1 "Material Design Icons";
+    position: absolute;
+    left: 8px;
+    top: 10px;
+    color: #A9A9A4;
+  }
   #gridSearch {
-    padding: 6px 8px 6px 12px;
-    background-color: $grey-1;
-    border: 1px solid $grey-3;
-    border-radius: 2px;
+    padding: 6px 8px 7px 36px;
+    background-color: rgba(0,0,0,0.55);
+    //border: 1px solid $grey-3;
+    border: none;
+    //border-radius: 2px;
     -webkit-app-region: no-drag;
-    width: 150%;
+    width: 100%;
+    height: 33px;
+    margin: 0;
+    font-size: 16px;
+    color: #A9A9A4;
   }
   #gridSearch:hover {
-    background-color: $body-bg;
+  background-color: rgba(0,0,0,0.75);
   }
   #gridSearch:active,
   #gridSearch:focus {
-    background-color: white;
+  background-color: rgba(255,255,255,0.15);
     outline: none;
+    color: white;
   }
 }
 .titlebar-stoplight {
@@ -50,7 +69,7 @@
   margin: 6px 4px;
   line-height: 0;
   font: normal normal normal 18px/1 "Material Design Icons";
-  color: rgba($main-text, 0.5);
+  color: $grey-3;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -64,14 +83,14 @@
 .titlebar-close:hover,
 .titlebar-fullscreen:hover,
 .titlebar-minimize:hover {
-  background-color: rgba(0,0,0,0.15);
+  background-color: rgba(255,255,255,0.15);
 }
 .titlebar-settings:active,
 .titlebar-devtools:active,
 .titlebar-close:active,
 .titlebar-fullscreen:active,
 .titlebar-minimize:active {
-  background-color: rgba(0,0,0,0.3);
+  background-color: rgba(255,255,255,0.3);
 }
 
 .titlebar-settings:after {

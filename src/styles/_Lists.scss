@@ -25,7 +25,7 @@
   padding-left: 8px;
 }
 #chiika-list {
-  background: $body-bg;
+  background: $body-bg-2;
 }
 $border-size: 1px;
 $row-border-color: $grey-2;
@@ -35,11 +35,12 @@ $row-border-color: $grey-2;
 }
 .chiika-header{
   .header-title {
-    border-bottom: 1px solid #ddd;
-    border-right: $border-size solid $grey-3;
+    border-bottom: 1px solid  $grey-2;
+    border-right: $border-size solid $grey-2;
     padding: 8px 4px;
     flex-grow: 0;
     text-align: center;
+    color: $main-text;
     span {
       font-weight: 500;
     }
@@ -119,36 +120,43 @@ $row-border-color: $grey-2;
 .col-torrentCheck {
   width: 50px;
 }
-.col-animeTypeText {
+.col-animeTypeText,
+.col-mangaTypeText {
   width: 40px;
   flex-basis: 40px;
   flex-grow: 0!important;
 }
-.col-animeType {
+.col-animeType,
+.col-mangaType {
   width: 40px;
   flex-basis: 40px;
   flex-grow: 0!important;
 }
 
-.col-animeTitle {
+.col-animeTitle,
+.col-mangaTitle {
   width: 200px;
   flex-grow: 2!important;
 }
 
-
-.col-animeProgress {
+.col-animeProgress,
+.col-mangaProgress {
   width: 120px;
   padding: 0!important;
 }
-.col-animeSeriesStatusText {
-  width: 160px;
-}
-.header-title.col-animeProgress {
+.header-title.col-animeProgress,
+.header-title.col-mangaProgress  {
   padding-top: 8px!important;
   padding-bottom: 8px!important;
 }
 
-.col-animeProgress > div {
+.col-animeSeriesStatusText,
+.col-mangaSeriesStatusText {
+  width: 160px;
+}
+
+.col-animeProgress > div,
+.col-mangaProgress > div {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -196,37 +204,46 @@ $row-border-color: $grey-2;
 }
 
 
-.col-animeScoreAverage {
+.col-animeScoreAverage,
+.col-mangaScoreAverage {
   width: 100px;
 }
 
-.col-animeScore {
+.col-animeScore,
+.col-mangaScore {
   width: 100px;
 }
 
-.col-animeSeasonText {
+.col-animeSeasonText,
+.col-mangaSeasonText {
   width: 120px;
 }
 #chiika-list {
   .col-animeSeasonText,
-  .col-animeLastUpdatedText {
+  .col-animeLastUpdatedText,
+  .col-mangaSeasonText,
+  .col-mangaLastUpdatedText  {
     text-align: right;
     font-weight: 500;
-    color: #666;
+    color: rgba($main-text,0.8);
   }
 }
 #chiika-list {
   .col-animeScore,
   .col-animeScoreAverage,
-  .grid-80,
-  .col-animeTypeText {
+  .col-animeTypeText,
+  .col-mangaScore,
+  .col-mangaScoreAverage,
+  .col-mangaTypeText,
+  .grid-80 {
     text-align: center;
     font-weight: 500;
-    color: #666;
+    color: rgba($main-text,0.8);
   }
 }
 
-.col-animeLastUpdatedText {
+.col-animeLastUpdatedText,
+.col-mangaLastUpdatedText {
   width: 160px;
 }
 
@@ -330,15 +347,17 @@ $row-border-color: $grey-2;
 .react-tabs {
   background-color: inherit;
 }
-.react-tabs .label {
+.react-tabs * {
   border: none;
 }
 .react-tabs [role=tablist] {
   font-size: 16px;
   text-align: left;
   margin: 0;
-  background-color: $grey-1;
-  border-bottom: 0 solid $grey-2;
+  //background-color: $grey-1;
+  background: darken($grey-0,20);
+  //border-bottom: 0 solid $grey-2;
+  border: none;
 }
 .react-tabs ul {
   margin-bottom: 2px;
@@ -350,22 +369,28 @@ $row-border-color: $grey-2;
 .react-tabs ul li {
   text-align: center;
   margin-left: 25px;
+  top: 0;
 }
 .react-tabs [role=tab] {
   display: inline-block;
   cursor: default;
   background-color: inherit;
-  padding: 4px;
+  padding: 6px 8px;
   text-align: center;
+  color: $main-text;
+}
+.react-tabs [role=tab] span:not(.label) {
+  color: $main-text;
 }
 .react-tabs [role=tab][aria-selected=true] {
   color: $main-text;
   background-color: inherit;
   border: none;
-  border-bottom: 2px solid $color-primary;
+  //border-bottom: 2px solid $color-primary;
+  border: none;
 }
 .react-tabs [role=tab][aria-selected=false] {
-  color: $main-text;
+  color: $inverse-text;
   border: none;
 }
 .react-tabs [role=tab]:focus,
@@ -375,11 +400,17 @@ $row-border-color: $grey-2;
   background-color: inherit;
   outline: none;
   box-shadow: none;
-  border-bottom: 2px solid $color-primary;
+  //border-bottom: 2px solid $color-primary;
+  border: none;
+  background: $grey-0;
+  color: $main-text;
+  border-radius: 0;
+
 }
 .react-tabs [role=tab][aria-selected=false]:hover {
-  color: $main-text;
-  border-bottom: 2px solid $color-primary;
+  //color: $inverse-text;
+  //border-bottom: 2px solid $color-primary;
+  border: none;
 }
 .react-tabs .tab span {
   border: none;
@@ -387,9 +418,8 @@ $row-border-color: $grey-2;
 .react-tabs [role=tab]:focus:after {
   content: "";
   position: absolute;
-  height: 5px;
+  height: 0;
   left: 0;
   right: 0;
   bottom: -5px;
-  background: $color-primary;
 }

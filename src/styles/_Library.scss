@@ -43,9 +43,11 @@
   border-radius: 4px;
   background: white;
   border: 1px solid #ddd;
+  transition: .2s box-shadow ease-out, .2s transform;
 }
 .bookshelf-item:hover {
   box-shadow: 0px 0px 16px rgba(0, 0, 0, 0.2);
+  transform: translateY(-5px);
   /*background: rgba(255, 255, 255, 0.7);*/
 }
 .bookshelf-item img {
