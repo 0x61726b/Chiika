@@ -1858,24 +1858,24 @@ module.exports = class MyAnimelist
     @chiika.logger.script("Updating #{type} score - #{id} - to #{newScore}")
     switch type
       when 'anime'
-        animeEntry = _find @animelist, (o) -> (o.id) == id
+        animeEntry = _find @animelist, (o) -> (o.mal_id) == id
         if animeEntry?
           animeEntry.animeScore = newScore
           @updateAnime animeEntry, (result) =>
             if result.success
-              @updateViewAndRefresh 'myanimelist_animelist',animeEntry,'id', (result) =>
+              @updateViewAndRefresh 'myanimelist_animelist',animeEntry,'mal_id', (result) =>
                 onUpdateView(result)
             else
               callback({ success: false, updated: 0, error: "Update request has failed.",errorDetailed: "Something went wrong with the http request. #{result.response}" })
 
 
       when 'manga'
-        mangaEntry = _find @mangalist, (o) -> (o.id) == id
+        mangaEntry = _find @mangalist, (o) -> (o.mal_id) == id
         if mangaEntry?
           mangaEntry.mangaScore = newScore
           @updateManga mangaEntry, (result) =>
             if result.success
-              @updateViewAndRefresh 'myanimelist_mangalist',mangaEntry,'id', (result) =>
+              @updateViewAndRefresh 'myanimelist_mangalist',mangaEntry,'mal_id', (result) =>
                 onUpdateView(result)
             else
               callback({ success: false, updated: 0, error: "Update request has failed.",errorDetailed: "Something went wrong with the http request. #{result.response}" })
@@ -1892,9 +1892,9 @@ module.exports = class MyAnimelist
 
     switch type
       when 'anime'
-        entry = _find @animelist, (o) -> (o.id) == id
+        entry = _find @animelist, (o) -> (o.mal_id) == id
       when 'manga'
-        entry = _find @mangalist, (o) -> (o.id) == id
+        entry = _find @mangalist, (o) -> (o.mal_id) == id
 
     switch type
       when 'anime'
@@ -1904,7 +1904,7 @@ module.exports = class MyAnimelist
 
           @updateAnime entry, (result) =>
             if result.success
-              @updateViewAndRefresh 'myanimelist_animelist',entry,'id', (result) =>
+              @updateViewAndRefresh 'myanimelist_animelist',entry,'mal_id', (result) =>
                 if result.updated > 0
                   callback({ success: true, updated: result.updated })
                 else
@@ -1919,7 +1919,7 @@ module.exports = class MyAnimelist
 
           @updateManga entry, (result) =>
             if result.success
-              @updateViewAndRefresh 'myanimelist_mangalist',entry,'id', (result) =>
+              @updateViewAndRefresh 'myanimelist_mangalist',entry,'mal_id', (result) =>
                 if result.updated > 0
                   callback({ success: true, updated: result.updated })
                 else
