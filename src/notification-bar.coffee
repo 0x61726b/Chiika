@@ -87,7 +87,7 @@ NotificationBar = React.createClass
         @updateInterval.clear()
         @updateInterval = null
 
-      time = 5
+      time = 120
       updateTimer = =>
         time = time - 1
         $("#updateButton").html("Update in #{time}")

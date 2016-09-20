@@ -68,15 +68,33 @@ module.exports = class SubView extends View
 
       chiika.logger.debug("Setting data for #{@name}")
 
-      @dataSource = data
+      key = 'id'
+      if data.length > 0
+        key = Object.keys(data[0])[0]
 
-      for i in [0...@dataSource.length]
-        if i == @dataSource.length - 1
+      _forEach data, (record) =>
+        find = _find @dataSource, (o) -> o[key] == record[key]
+        index = _indexOf @dataSource, find
+
+        if find?
+          chiika.logger.debug("Existing row found for #{@name}-#{key} at #{index}")
+          @dataSource.splice(index,1,record)
+        else
+          chiika.logger.debug("Adding new row for #{@name}")
+          @dataSource.push record
+
+      syncArray = []
+
+      for i in [0...data.length]
+        saveToDb = (resolve) =>
           onSaved = (args) =>
             resolve(args)
-          @db.save @dataSource[i], onSaved
-        else
-          @db.save @dataSource[i], null
+          @db.save data[i], onSaved
+        syncSave = _when.promise(saveToDb)
+        syncArray.push syncSave
+
+      _when.all(syncArray).then =>
+        resolve()
 
 
   #

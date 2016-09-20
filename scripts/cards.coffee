@@ -315,6 +315,7 @@ module.exports = class CardViews
 
     @on 'get-view-data', (args) =>
       @chiika.logger.script("[yellow](#{@name}) get-view-data #{args.view.name}")
+
       if args.view.name == 'cards_news'
         dataSource = {}
         source = @chiika.settingsManager.appOptions.DefaultRssSource

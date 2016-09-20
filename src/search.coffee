@@ -26,7 +26,7 @@ module.exports = React.createClass
     searchState: 'no-input'
     searchString: @props.params.searchString
     searchType: 'default'
-    searchSource: 'myanimelist'
+    searchSource: chiika.users[0].owner
     searchResults: []
     searchAnime: true
     searchManga: false

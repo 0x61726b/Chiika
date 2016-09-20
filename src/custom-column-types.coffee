@@ -164,7 +164,7 @@ myanimelist_animelist_expanded = (item,actions) ->
 
 myanimelist_mangalist_expanded = (item,actions) ->
   <div className="hidden list-item-expanded">
-    <div>
+    <div className="card">
       <img className="expanded-cover" src="#{item.mangaImage}"></img>
       <div className="expanded-meta">
         <div className="meta-row">
@@ -172,19 +172,10 @@ myanimelist_mangalist_expanded = (item,actions) ->
           <div className="expanded-rate">
             {
               [1,2,3,4,5,6,7,8,9,10].map (score,i) =>
-                <span key={i} className="#{if item.mangaScore == score then 'selected'}" onClick={(e) =>
+                <span key={i} className="#{if parseInt(item.mangaScore) == parseInt(score) then 'selected'}" onClick={(e) =>
                   actions('score-update',{ e: e, score: score,id: item.id, column: 'mangaScore',owner: 'myanimelist'})
                   }>{score}</span>
             }
-          </div>
-        </div>
-        <div className="meta-row">
-          <h5>Watch</h5>
-          <div className="expanded-watch">
-            <span className="watched">6</span>
-            <span className="watched">7</span>
-            <span className="watched">8</span>
-            <span className="aired">9</span>
           </div>
         </div>
         <div className="meta-row">

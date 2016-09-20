@@ -51,6 +51,7 @@
   height: $titlebar-height;
   background-color: $sidebar-hover;
   border-bottom: 1px solid $sidebar-active;
+  -webkit-app-region: drag;
 }
 img.chiikaLogo {
   display: block;

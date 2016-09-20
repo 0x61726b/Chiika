@@ -78,7 +78,24 @@ module.exports = class UI
         displayName: ''
         displayType: 'none'
         noUpdate: true
+
+      animeDb =
+        name: 'anime_db'
+        owner: @name
+        displayName: 'AnimeList Db'
+        displayType: 'none'
+        noUpdate: true
+
+      mangaDb =
+        name: 'manga_db'
+        owner: @name
+        displayName: 'MangaList Db'
+        displayType: 'none'
+        noUpdate: true
+
       @chiika.viewManager.addView calendarView
+      @chiika.viewManager.addView animeDb
+      @chiika.viewManager.addView mangaDb
 
     @on 'get-view-data', (args) =>
       @chiika.logger.script("[yellow](#{@name}) get-view-data")
@@ -127,7 +144,7 @@ module.exports = class UI
                     time: time
                   viewData[day].push calendarAnime
 
-              
+
               args.return(viewData)
 
     @on 'view-update', (update) =>

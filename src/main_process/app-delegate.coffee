@@ -29,6 +29,20 @@ module.exports = class AppDelegate
 
   onReady: ->
     defer = _when.defer()
+    shouldQuit = app.makeSingleInstance (commandLine, workingDirectory) =>
+      console.log "second instance detected"
+      if chiika.windowManager && chiika.windowManager.getWindowByName('main')
+        mainWindow = chiika.windowManager.getWindowByName('main')
+
+        if mainWindow? && mainWindow.isMinimized()
+          mainWindow.restore()
+        if mainWindow?
+          mainWindow.focus()
+
+
+    if shouldQuit
+      app.quit()
+
     app.on 'ready', =>
       app.setAppUserModelId('com.arkenthera.chiika')
       chiika.settingsManager.initialize().then =>

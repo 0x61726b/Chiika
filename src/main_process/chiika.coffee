@@ -215,12 +215,12 @@ class Application
         @apiManager.postCompile()
 
 
-
         @viewManager.preload().then =>
           chiika.logger.verbose("Preloading UI complete!")
           @apiManager.postInit()
 
           chiika.windowManager.createMainWindow()
+
 
 
   #
@@ -260,7 +260,6 @@ class Application
 
     @emitter.on 'update-error', (error) =>
       @ipcManager.systemEvent('squirrel',error.toString())
-
 
 
 

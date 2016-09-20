@@ -51,56 +51,63 @@ module.exports = class Search
       console.log error
       throw error
 
-  animeSearchResultLayout: (entry,listEntry) ->
+  entryInList: (owner,entry,type) ->
+    inList = false
+    onIsInList = (response) ->
+      inList = response
+    @chiika.emit 'is-in-list', { calling: owner, entry: entry, type: type, return: onIsInList }
+    return inList
+
+  entryUserStatus: (owner,entry,type) ->
+    status = ""
+
+    onStatusQuery = (response) =>
+      status = response
+
+    @chiika.emit 'get-entry-user-status', { calling: owner, entry: entry, type: type, statusType:'text', return: onStatusQuery }
+    return status
+
+  entryType: (owner,entry,type) ->
+    typeText = "Unknown"
+
+    onTypeQuery = (response) =>
+      typeText = response
+
+    @chiika.emit 'get-entry-type', { calling: owner, entry: entry, type: type, statusType:'text', return: onTypeQuery }
+    return typeText
+
+
+
+  animeSearchResultLayout: (entry,owner) ->
     layout =
-      id: entry.id
+      id: entry[Object.keys(entry)[0]]
       image: entry.animeImage
       averageScore: entry.animeScoreAverage
-      entryType: entry.animeType
+      entryType: @entryType(owner,entry,'anime')
       type:'Anime'
       episodes: "#{entry.animeTotalEpisodes} EPs"
       title: entry.animeTitle
       airing: entry.animeSeriesStatus
-    if listEntry?
-      userStatusText = ""
-      if listEntry.animeUserStatus == "1"
-        userStatusText = "Watching"
-      else if listEntry.animeUserStatus == "2"
-        userStatusText = "Completed"
-      else if listEntry.animeUserStatus == "3"
-        userStatusText = "On Hold"
-      else if listEntry.animeUserStatus == "4"
-        userStatusText = "Dropped"
-      else if listEntry.animeUserStatus == "6"
-        userStatusText = "Plan to Watch"
-      layout.status = userStatusText
+
+    if @entryInList(owner,entry,'anime')
+      layout.status = @entryUserStatus(owner,entry,'anime')
     else
       layout.status = "Not In List"
     return layout
 
-  mangaSearchResultLayout: (entry,listEntry) ->
+  mangaSearchResultLayout: (entry,owner) ->
     layout =
-      id: entry.id
+      id: entry[Object.keys(entry)[0]]
       image: entry.mangaImage
       averageScore: entry.mangaScoreAverage
-      entryType: entry.mangaType
+      entryType: @entryType(owner,entry,'manga')
       type:'Manga'
       episodes: "15"
       title: entry.mangaTitle
       airing: entry.mangaStatus
-    if listEntry?
-      userStatusText = ""
-      if listEntry.mangaUserStatus == "1"
-        userStatusText = "Reading"
-      else if listEntry.mangaUserStatus == "2"
-        userStatusText = "Completed"
-      else if listEntry.mangaUserStatus == "3"
-        userStatusText = "On Hold"
-      else if listEntry.mangaUserStatus == "4"
-        userStatusText = "Dropped"
-      else if listEntry.mangaUserStatus == "6"
-        userStatusText = "Plan to Read"
-      layout.status = userStatusText
+
+    if @entryInList(owner,entry,'manga')
+      layout.status = @entryUserStatus(owner,entry,'manga')
     else
       layout.status = "Not In List"
     return layout
@@ -132,51 +139,6 @@ module.exports = class Search
       services = @chiika.getServices()
 
       if searchType == 'anime-manga'
-        viewsToSearch = []
-        _forEach searchSource, (service) =>
-          if service.useInSearch
-            viewsToSearch.push x for x in service.views
-
-        sourceViewAnime = @chiika.viewManager.getViewByName(viewsToSearch[0])
-        sourceViewManga = @chiika.viewManager.getViewByName(viewsToSearch[1])
-
-        if sourceViewAnime? && sourceViewManga?
-          sourceDataAnime = sourceViewAnime.getData()
-          sourceDataManga = sourceViewManga.getData()
-
-          combineResults = []
-
-          searchAnime = (resolve) =>
-            onAnimeSearch = (response) =>
-              results = []
-              _forEach response, (entry) =>
-                findInAnimelist = _find sourceDataAnime,(o) -> o.id == entry.id
-                layout = @animeSearchResultLayout(entry,findInAnimelist)
-                layout.sourceView = viewsToSearch[0]
-                results.push layout
-
-              resolve(results)
-            @chiika.emit 'make-search', { calling: sourceViewAnime.owner, title: searchString, type: 'anime',return: onAnimeSearch }
-
-          searchManga = (resolve) =>
-            onMangaSearch = (response) =>
-              results = []
-              _forEach response, (entry) =>
-                findInMangalist = _find sourceDataManga,(o) -> o.id == entry.id
-                layout = @mangaSearchResultLayout(entry,findInMangalist)
-                layout.sourceView = viewsToSearch[1]
-                results.push layout
-
-              resolve(results)
-            @chiika.emit 'make-search', { calling: sourceViewManga.owner, title: searchString, type: 'manga',return: onMangaSearch }
-
-          doSearchAnime = _when.promise(searchAnime)
-          doSearchManga = _when.promise(searchManga)
-
-          doSearch = _when.join(doSearchAnime,doSearchManga).then (values) =>
-            combineResults.push x for x in values[0]
-            combineResults.push x for x in values[1]
-            params.return(combineResults)
 
       else if searchType == 'anime'
         viewsToSearch = []
@@ -195,12 +157,12 @@ module.exports = class Search
             if success
               if sourceViewAnime?
                 sourceDataAnime = sourceViewAnime.getData()
-              _forEach response.results, (entry) =>
-                if sourceDataAnime.length > 0
-                  findInAnimelist = _find sourceDataAnime,(o) -> o.id == entry.id
-                layout = @animeSearchResultLayout(entry,findInAnimelist)
-                layout.sourceView = viewsToSearch[0]
-                results.push layout
+
+                _forEach response.results, (entry) =>
+                  layout = @animeSearchResultLayout(entry,searchSource)
+                  layout.sourceView = viewsToSearch[0]
+                  results.push layout
+
               resolve({ success: success, results: results })
             else
               resolve({ success: success, error: response.error })
@@ -241,12 +203,12 @@ module.exports = class Search
             if success
               if sourceView?
                 sourceData = sourceView.getData()
-              _forEach response.results, (entry) =>
-                if sourceData.length > 0
-                  findInList = _find sourceData,(o) -> o.id == entry.id
-                layout = @mangaSearchResultLayout(entry,findInList)
-                layout.sourceView = viewsToSearch[1]
-                results.push layout
+
+                _forEach response.results, (entry) =>
+                  layout = @mangaSearchResultLayout(entry,searchSource)
+                  layout.sourceView = viewsToSearch[1]
+                  results.push layout
+
               resolve({ success: success, results: results })
             else
               resolve({ success: success, error: response.error })

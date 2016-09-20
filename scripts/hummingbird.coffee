@@ -156,17 +156,37 @@ module.exports = class Hummingbird
   # Also they need to have a unique ID
   # For animeList object, see https://github.com/hummingbird-me/hummingbird/wiki/API-v1-Structures#library-entry-object
   setAnimelistTabViewData: (animeList,view) ->
+    animeDb = @chiika.viewManager.getViewByName('anime_db')
+
+    if animeDb?
+      data = animeDb.getData()
+
+      if data.length > 0
+        animeDbArray = data
+      else
+        animeDbArray = []
 
     commonFormatList = []
     _forEach animeList, (anime) =>
+      newAnime = {}
+      newAnime.id = animeDbArray.length
+      _assign newAnime, @toAnimeDbFormat(anime)
+      animeDbArray.push newAnime
+
       commonFormatList.push @libraryToCommonFormat(anime)
 
+    animeDb.setDataArray(animeDbArray)
     view.setDataArray(commonFormatList)
+
+  toAnimeDbFormat: (v) ->
+    anime = {}
+    anime = @animeToCommonFormat(v.anime)
+    anime
 
   animeToCommonFormat: (v) ->
     anime = {}
 
-    anime.id                        = v.id
+    anime.hmb_id                    = v.id
     anime.mal_id                    = v.mal_id
     anime.animeSlug                 = v.slug
     anime.animeSeriesStatus         = v.status
@@ -188,9 +208,8 @@ module.exports = class Hummingbird
   #
   #
   libraryToCommonFormat: (v) ->
-    anime = @animeToCommonFormat(v.anime)
-
-
+    anime = {}
+    anime.hmb_id                    = v.anime.id
     anime.animeUserLastWatched      = v.last_watched
     anime.animeLastUpdated          = moment(v.updated_at,'YYYY-MM-DDTHH:mm:ss').valueOf()
     anime.animeWatchedEpisodes      = v.episodes_watched
@@ -225,10 +244,15 @@ module.exports = class Hummingbird
       @chiika.logger.warn("Default user for #{@name} doesn't exist. If this is the first time launch, you can ignore this.")
 
     animelistView   = @chiika.viewManager.getViewByName('hummingbird_animelist')
+    animeDbView  = @chiika.viewManager.getViewByName('anime_db')
 
     if animelistView?
       @animelist = animelistView.getData()
       @chiika.logger.script("[yellow](#{@name}) Animelist data length #{@animelist.length} #{@name}")
+
+    if animeDbView?
+      @animedb = animeDbView.getData()
+      @chiika.logger.script("[yellow](#{@name}) Anime DB data length #{@animedb.length} #{@name}")
 
   # After the constructor run() method will be called immediately after.
   # Use this method to do what you will
@@ -282,6 +306,13 @@ module.exports = class Hummingbird
           newAnime = _cloneDeep anime
 
           #Pre process - add some more columns
+          newAnime.id                            = animeValues.id # Renderer should not know which ID its dealing with.
+          newAnime.animeTitle                    = animeValues.title
+          newAnime.animeWatchedEpisodes          = animeValues.watchedEpisodes
+          newAnime.animeTotalEpisodes            = animeValues.totalEpisodes
+          newAnime.animeImage                    = animeValues.image
+          newAnime.animeScoreAverage             = animeValues.averageScore
+          newAnime.animeType                     = animeValues.type
           newAnime.animeProgress                 = (parseInt(anime.animeWatchedEpisodes) / parseInt(anime.animeTotalEpisodes)) * 100
           newAnime.animeSeasonText               = animeValues.seasonText
           newAnime.animeScoreAverage             = animeValues.averageScore
@@ -350,11 +381,11 @@ module.exports = class Hummingbird
             if params.layoutType == 'anime'
               animeView = @chiika.viewManager.getViewByName(@views[0])
               if animeView?
-                entry = _find animeView.getData(), (o) -> o.id == params.id
+                entry = _find animeView.getData(), (o) -> o.hmb_id == params.id
                 if entry?
                   @removeAnime entry, (response) =>
                     if response.success
-                      animeView.remove 'id',params.id, (dbop) =>
+                      animeView.remove 'hmb_id',params.id, (dbop) =>
                         if dbop.count > 0
                           # Update the local list
                           @animelist = animeView.getData()
@@ -412,6 +443,42 @@ module.exports = class Hummingbird
 
       @doSearch type,title, (results) =>
         args.return(results)
+
+    @on 'is-in-list', (args) =>
+      entry = args.entry
+      listType = args.type
+
+      inList = false
+
+      if listType == 'anime'
+        animeEntry = _find @animelist, (o) -> (o.hmb_id) == entry.hmb_id
+        if animeEntry?
+          inList = true
+
+
+      @chiika.logger.script("[yellow](#{@name}) #{entry.mal_id} - is-in-list #{args.type} -> #{inList}")
+      args.return(inList)
+
+    @on 'get-entry-user-status', (args) =>
+      @chiika.logger.script("[yellow](#{@name}) get-entry-user-status #{args.type} - #{args.statusType}")
+      entry = args.entry
+      type = args.type
+      statusType = args.statusType
+
+      if type == 'anime'
+        animeEntry = _find @animelist, (o) -> (o.mal_id) == entry.mal_id
+        if animeEntry?
+          status = animeEntry.animeUserStatus
+          args.return(@getAnimeUserStatus(status))
+
+    @on 'get-entry-type', (args) =>
+      @chiika.logger.script("[yellow](#{@name}) get-entry-type #{args.type} - #{args.statusType}")
+      entry = args.entry
+      type = args.type
+      statusType = args.statusType
+
+      if type == 'anime'
+        args.return(entry.animeType)
 
     @on 'set-user-login', (args,callback) =>
       @chiika.logger.script("[yellow](#{@name}) Auth in process " + args.user)
@@ -475,18 +542,43 @@ module.exports = class Hummingbird
         _forEach list.results, (entry) =>
           results.push @animeToCommonFormat(entry)
 
-      callback?({success: list.success, error: list.error, results: results})
+      @lastAnimeSearch = results
+      # Save to anime db
+      animeDbView = @chiika.viewManager.getViewByName('anime_db')
+
+      if animeDbView?
+        animeDbData = animeDbView.getData()
+
+        animeDbFormat = []
+        _forEach results, (anime) =>
+          newAnime = {}
+          hmb_id = anime.hmb_id
+          # Check if this exists on db
+          findInDb = _find animeDbData, (o) -> o.hmb_id == hmb_id
+          if findInDb?
+            newAnime.id = findInDb.id
+          else
+            newAnime.id = (animeDbData.length + animeDbFormat.length).toString()
+          _assign newAnime,anime
+
+          animeDbFormat.push newAnime
+
+        animeDbView.setDataArray(animeDbFormat).then =>
+          # Update local animedb
+          animeDbView = @chiika.viewManager.getViewByName('anime_db')
+          @animedb = animeDbView.getData()
+          callback?({ success: list.success, error: list.error, results: results })
 
   updateProgress:(id,type,newProgress,callback) ->
     @chiika.logger.script("Updating #{type} progress - #{id} - to #{newProgress}")
     switch type
       when 'anime'
-        animeEntry = _find @animelist, (o) -> (o.id) == id
+        animeEntry = _find @animelist, (o) -> (o.hmb_id) == id
         if animeEntry?
           animeEntry.animeWatchedEpisodes = newProgress
           @updateAnime animeEntry, (result) =>
             if result.success
-              @updateViewAndRefresh @views[0],animeEntry,'id', (result) =>
+              @updateViewAndRefresh @views[0],animeEntry,'hmb_id', (result) =>
                 if result.updated > 0
                   callback({ success: true, updated: result.updated })
                 else
@@ -529,9 +621,9 @@ module.exports = class Hummingbird
 
     switch type
       when 'anime'
-        entry = _find @animelist, (o) -> (o.id) == id
+        entry = _find @animelist, (o) -> (o.hmb_id) == id
       when 'manga'
-        entry = _find @mangalist, (o) -> (o.id) == id
+        entry = _find @mangalist, (o) -> (o.hmb_id) == id
 
     switch type
       when 'anime'
@@ -541,7 +633,7 @@ module.exports = class Hummingbird
 
           @updateAnime entry, (result) =>
             if result.success
-              @updateViewAndRefresh @views[0],entry,'id', (result) =>
+              @updateViewAndRefresh @views[0],entry,'hmb_id', (result) =>
                 if result.updated > 0
                   callback({ success: true, updated: result.updated })
                 else
@@ -558,7 +650,7 @@ module.exports = class Hummingbird
     anime.animeLastUpdated = moment().valueOf()
     data = @buildUrlForUpdating(anime)
 
-    @post "#{updateAnime}#{anime.id}?#{data}",data,(result) =>
+    @post "#{updateAnime}#{anime.hmb_id}?#{data}",data,(result) =>
       if result.success
         callback(result)
 
@@ -590,7 +682,7 @@ module.exports = class Hummingbird
   removeAnime: (anime,callback) ->
     token = @chiika.custom.getKey('hummingbirdToken')
 
-    url = "#{removeAnime}#{anime.id}?auth_token=#{token.value}"
+    url = "#{removeAnime}#{anime.hmb_id}?auth_token=#{token.value}"
     @post url,"",(result) =>
       if result.statusCode == 201
         callback?(result)
@@ -600,13 +692,13 @@ module.exports = class Hummingbird
 
   updateViewAndRefresh: (viewName,newEntry,key,callback) ->
     view = @chiika.viewManager.getViewByName(viewName)
-    view.setData(newEntry,'id').then =>
+    view.setData(newEntry,key).then =>
       callback?({ success: true,updated: 1 })
 
   buildUrlForUpdating: (entry) ->
     token = @chiika.custom.getKey('hummingbirdToken')
     body = ""
-    body += "id=#{entry.id}&"
+    body += "id=#{entry.hmb_id}&"
     body += "auth_token=#{token.value}&"
     body += "status=#{entry.animeUserStatus}&"
     body += "rating=#{entry.animeScore}&"
@@ -615,10 +707,21 @@ module.exports = class Hummingbird
 
 
   onAnimeDetailsLayout: (id,params,callback) ->
-    animeEntry = _find @animelist, (o) -> o.id == parseInt(id)
-
+    animeEntry = _find @animelist, (o) -> parseInt(o.hmb_id) == parseInt(id)
     if animeEntry?
       callback({ updated:false, layout:@getAnimeDetailsLayout(animeEntry)})
+    else
+      # Not in list
+      findInLastSearch = _find @lastAnimeSearch, (o) -> parseInt(o.hmb_id) == parseInt(id)
+
+      console.log @lastAnimeSearch
+
+      if findInLastSearch?
+        callback({ updated:false, layout:@getAnimeDetailsLayout(findInLastSearch)})
+
+      # @doSearch type,title, (results) =>
+      #   args.return(results)
+
 
   getAnimeDetailsLayout: (entry) ->
     av    = @getAnimeValues(entry)
@@ -695,29 +798,35 @@ module.exports = class Hummingbird
 
   getAnimeValues: (entry) ->
     if entry?
-      findInAnimelist = _find @animelist, (o) -> o.id == entry.id
+      findInAnimelist = _find @animelist, (o) -> o.hmb_id == entry.hmb_id
+      animeDbEntry    = _find @animedb, (o) -> o.hmb_id == entry.hmb_id
 
+    if !animeDbEntry?
+      animeDbEntry = {}
 
     if findInAnimelist?
       list = true
     else
       list = false
 
-    slug                = entry.animeSlug ? ""
-    seriesStatus        = entry.animeSeriesStatus ? "unknown"
-    seriesUrl           = entry.animeUrl ? ""
-    title               = entry.animeTitle ? ""
-    alternateTitle      = entry.animeAlternateTitle ? ""
-    totalEpisodes       = entry.animeTotalEpisodes ? "0"
-    duration            = entry.animeDuration ? ""
-    image               = entry.animeImage ? "../assets/images/chitoge.png"
-    synopsis            = entry.animeSynopsis ? ""
-    type                = entry.animeType ? ""
-    seriesStartDate     = entry.animeSeriesStartDate ? ""
-    seriesEndDate       = entry.animeSeriesEndDate ? ""
-    averageScore        = entry.animeScoreAverage ? "-"
-    ageRating           = entry.animeAgeRating ? ""
-    genres              = entry.animeGenres ? ""
+    if !findInAnimelist?
+      findInAnimelist = {}
+
+    slug                = animeDbEntry.animeSlug ? ""
+    seriesStatus        = animeDbEntry.animeSeriesStatus ? "unknown"
+    seriesUrl           = animeDbEntry.animeUrl ? ""
+    title               = animeDbEntry.animeTitle ? ""
+    alternateTitle      = animeDbEntry.animeAlternateTitle ? ""
+    totalEpisodes       = animeDbEntry.animeTotalEpisodes ? "0"
+    duration            = animeDbEntry.animeDuration ? ""
+    image               = animeDbEntry.animeImage ? "../assets/images/chitoge.png"
+    synopsis            = animeDbEntry.animeSynopsis ? ""
+    type                = animeDbEntry.animeType ? ""
+    seriesStartDate     = animeDbEntry.animeSeriesStartDate ? ""
+    seriesEndDate       = animeDbEntry.animeSeriesEndDate ? ""
+    averageScore        = animeDbEntry.animeScoreAverage ? "-"
+    ageRating           = animeDbEntry.animeAgeRating ? ""
+    genres              = animeDbEntry.animeGenres ? ""
     lastUpdated         = entry.animeLastUpdated ? ""
     watchedEpisodes     = entry.animeWatchedEpisodes ? "0"
     userStatus          = entry.animeUserStatus ? "0"
@@ -730,7 +839,7 @@ module.exports = class Hummingbird
 
 
     # Change the season from date to text
-    startDate = entry.animeSeriesStartDate
+    startDate = animeDbEntry.animeSeriesStartDate
 
     if startDate?
       parts = startDate.split("-");
@@ -784,24 +893,10 @@ module.exports = class Hummingbird
     averageScore = averageScore.toFixed(2)
 
     userStatusText = "Not In List"
-
-    if userStatus == "currently-watching"
-      userStatusText = "Watching"
-
-    if userStatus == "plan-to-watch"
-      userStatusText = "Plan to Watch"
-
-    if userStatus == "completed"
-      userStatusText = "Completed"
-
-    if userStatus == "dropped"
-      userStatusText = "Dropped"
-
-    if userStatus == "on-hold"
-      userStatus = "On Hold"
+    userStatusText = @getAnimeUserStatus(userStatus)
 
     anime =
-      id: entry.id
+      id: entry.hmb_id
       list: list
       slug: slug
       seriesStatus: seriesStatus
@@ -832,6 +927,25 @@ module.exports = class Hummingbird
       season: season
       seasonText: season
 
+
+  getAnimeUserStatus: (status) ->
+    userStatusText = "Not In List"
+    if status == "currently-watching"
+      userStatusText = "Watching"
+
+    if status == "plan-to-watch"
+      userStatusText = "Plan to Watch"
+
+    if status == "completed"
+      userStatusText = "Completed"
+
+    if status == "dropped"
+      userStatusText = "Dropped"
+
+    if status == "on-hold"
+      userStatusText = "On Hold"
+
+    userStatusText
 
 
   post: (url,body,callback) ->

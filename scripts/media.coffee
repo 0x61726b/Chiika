@@ -130,6 +130,8 @@ module.exports = class Media
     @on 'get-view-data', (args) =>
       if process.platform != 'win32'
         return
+      @chiika.logger.script("[yellow](#{@name}) get-view-data #{args.view.name}")
+      return
       if args.view.name == 'chiika_library'
         detectCache = @chiika.viewManager.getViewByName('anime_detect_cache')
         if detectCache?

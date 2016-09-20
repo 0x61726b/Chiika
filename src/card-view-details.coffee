@@ -61,7 +61,7 @@ module.exports = React.createClass
       title = @state.layout.title
       cover = @state.layout.cover
 
-    chiika.ipc.getDetailsLayout id,@props.route.viewName,owner,{ title: title,cover: cover }, (args) =>
+    chiika.ipc.getDetailsLayout id,@props.route.viewName,owner,{ title: title,cover: cover, id: id }, (args) =>
       @setState { layout: args.layout }
 
       console.log args.layout
@@ -236,30 +236,21 @@ module.exports = React.createClass
   #
   #
   #
-  onPlus: (e) ->
-    itemTitle = $(e.target).parent().parent().attr("data-item")
+  onPlus: (e,itemTitle,current,total) ->
+    current = parseInt(current)
+    total = parseInt(total)
 
-    findItem = _find @state.layout.status.items, (o) -> o.title == itemTitle
+    if total? && total > 0 && (current + 1) > total
+      return
 
+    console.log current
+    console.log total
+    if current >= 0
+      current++
+      @updateProgress(itemTitle,current,total)
 
-    if findItem?
-      current = parseInt(findItem.current)
-      total = parseInt(findItem.total)
-
-      if total? && total > 0 && (current + 1) > total
-        return
-
-
-      if current >= 0
-        current++
-
-        findItem.current = current
-        @updateProgress(itemTitle,current,total)
-
-        # Update input
-        $($(e.target).prev()).find('input').attr('placeholder',current)
-    else
-      @onActionError("There was a problem updating the progress.")
+      # Update input
+      $($(e.target).prev()).find('input').attr('placeholder',current)
 
   #
   #
@@ -373,7 +364,7 @@ module.exports = React.createClass
                           <input type="number" name="name" placeholder="#{item.current}"/>
                           <span>/ { item.total }</span>
                         </div>
-                        <button className="plus" onClick={@onPlus}>
+                        <button className="plus" onClick={(e) => @onPlus(e,item.title,item.current,item.total)}>
                           +
                         </button>
                       </div>

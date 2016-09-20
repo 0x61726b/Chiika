@@ -28,8 +28,6 @@ module.exports = React.createClass
     @emitter = new Emitter
 
   componentDidMount: () ->
-    $('.titlebar').addClass("webkit-draggable")
-
     chiika.emitter.on 'update-available', =>
       @setState { updateAvailable: true }
 

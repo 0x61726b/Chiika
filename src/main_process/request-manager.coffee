@@ -24,25 +24,32 @@ module.exports = class RequestManager
       'User-Agent': 'ChiikaDesktopApplication',
       'Content-Type' : 'application/x-www-form-urlencoded'
     }
+
+  onRequestResponseCommon: (error,response,body,callback) ->
+    if error?
+      code = error.code
+      errno = error.errno
+      syscall = error.syscall
+      chiika.logger.warn("Request has failed #{code} - #{errno} - #{syscall}")
+    else
+      if response?
+        if response.statusCode? && response.statusCode != 200
+          chiika.logger.warn("Request returned successful but the status code is #{response.statusCode}")
+        else if response.statusCode?
+          chiika.logger.info("Request complete! Return code: #{response.statusCode}")
+      else
+        chiika.logger.error("Null response")
+        chiika.logger.error(body)
+
+    callback(error,response,body)
+
   makeGetRequest: (url,headers,callback) ->
 
     if headers?
       _assign headers, @defaultHeaders
 
-    onRequestReturn = (error,response,body) ->
-      if error
-        chiika.logger.warn("Request has failed with status code: #{response.statusCode}")
-      else
-        if response?
-          if response.statusCode != 200
-            chiika.logger.warn("Request returned successful but the status code is #{response.statusCode}")
-          else
-            chiika.logger.info("Request complete! Return code: #{response.statusCode}")
-        else
-          chiika.logger.error("Somehow response is null. WTF ?")
-          chiika.logger.error(body)
-
-      callback(error,response,body)
+    onRequestReturn = (error,response,body) =>
+      @onRequestResponseCommon(error,response,body,callback)
 
     chiika.logger.verbose("GET request on #{url}")
     request { url: url, headers: headers },onRequestReturn
@@ -65,20 +72,8 @@ module.exports = class RequestManager
     else
       headers = defaultHeaders
 
-    onRequestReturn = (error,response,body) ->
-      if error
-        chiika.logger.warn("Request has failed with status code: #{response.statusCode}")
-      else
-        if response?
-          if response.statusCode != 200
-            chiika.logger.warn("Request returned successful but the status code is #{response.statusCode}")
-          else
-            chiika.logger.info("Request complete! Return code: #{response.statusCode}")
-        else
-          chiika.logger.error("Somehow response is null. WTF ?")
-          chiika.logger.error(body)
-
-      callback(error,response,body)
+    onRequestReturn = (error,response,body) =>
+      @onRequestResponseCommon(error,response,body,callback)
 
     chiika.logger.verbose("POST request on #{url}")
     request.post { url: url, headers: headers, form: form },onRequestReturn
@@ -93,21 +88,10 @@ module.exports = class RequestManager
       _assign headers, @defaultHeaders
 
 
-    chiika.logger.info("Creating a GET request to URL #{url}")
-    onRequestReturn = (error,response,body) ->
-      if error
-        chiika.logger.warn("Request has failed with status code: #{response.statusCode}")
-      else
-        if response?
-          if response.statusCode != 200
-            chiika.logger.warn("Request returned successful but the status code is #{response.statusCode}")
-          else
-            chiika.logger.info("Request complete! Return code: #{response.statusCode}")
-        else
-          chiika.logger.error("Somehow response is null. WTF ?")
-          chiika.logger.error(body)
+    chiika.logger.info("Creating a GET(Auth) request to URL #{url}")
 
-      callback(error,response,body)
+    onRequestReturn = (error,response,body) =>
+      @onRequestResponseCommon(error,response,body,callback)
 
     request { url: url, form: form, headers:headers, auth: auth }, onRequestReturn
 
@@ -132,19 +116,9 @@ module.exports = class RequestManager
     else
       headers = defaultHeaders
 
-    onRequestReturn = (error,response,body) ->
-      if error
-        chiika.logger.warn("Request has failed with status code: #{response.statusCode}")
-      else
-        if response?
-          if response.statusCode != 200
-            chiika.logger.warn("Request returned successful but the status code is #{response.statusCode}")
-          else
-            chiika.logger.info("Request complete! Return code: #{response.statusCode}")
-        else
-          chiika.logger.error("Somehow response is null. WTF ?")
-          chiika.logger.error(body)
-      callback(error,response,body)
+    onRequestReturn = (error,response,body) =>
+      @onRequestResponseCommon(error,response,body,callback)
+
     chiika.logger.info("Creating a POSTAUTH request to URL #{url}")
     chiika.logger.verbose("Creating a POSTAUTH request to URL #{url} - #{user.userName} - #{user.password} - Content length #{contentLength}")
 
