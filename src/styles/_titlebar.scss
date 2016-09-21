@@ -67,14 +67,14 @@
   margin: 6px 4px;
   line-height: 0;
   font: normal normal normal 18px/1 "Material Design Icons";
-  color: $grey-3;
+  color: $titlebar-icons;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 .titlebar-divider {
   width: 1px;
-  background: $grey-3;
+  background: $titlebar-icons;
 }
 .titlebar-settings:hover,
 .titlebar-devtools:hover,

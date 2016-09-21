@@ -9,18 +9,18 @@
   text-align: center;
   margin: 4px;
   display: inline-block;
-}
-.library-info i {
-  font-size: 24px;
-  margin-right: 4px;
-}
-.library-info span,
-.library-info i {
-  vertical-align: middle;
-  text-align: center;
-}
-.library-info .library-count {
-  font-size: 28px;
+  i {
+    font-size: 24px;
+    margin-right: 4px;
+  }
+  span,
+  i {
+    vertical-align: middle;
+    text-align: center;
+  }
+  .library-count {
+    font-size: 28px;
+  }
 }
 .bookshelf {
   margin: 0 auto;
@@ -41,7 +41,7 @@
   margin: 8px;
   padding: 4px;
   border-radius: 4px;
-  background: white;
+  background: rgba(255,255,255,0.5);
   border: 1px solid #ddd;
   transition: .2s box-shadow ease-out, .2s transform;
 }

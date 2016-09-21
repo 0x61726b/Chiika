@@ -61,7 +61,7 @@ module.exports = class CardViews
 
     @lastToggle = clicked
 
-  
+
 
 
 
@@ -72,11 +72,13 @@ module.exports = class CardViews
   # @option card {Object} value
   #
   miniCard: (card,i) ->
-    <div className="card purple" key={i}>
+    <div className="sticker purple" key={i}>
       <div className="title">
-        <p className="mini-card-title">{ card.title }</p>
+        { card.title }
       </div>
-      <p>{ card.content }</p>
+      <div className="text">
+        { card.content }
+      </div>
     </div>
 
   #

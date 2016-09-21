@@ -72,6 +72,7 @@ img.chiikaLogo {
   list-style-type: none;
   margin: 0;
   padding: 0;
+  z-index: 2;
 }
 .side-menu-link {
   text-decoration: none;
@@ -101,4 +102,26 @@ img.chiikaLogo {
   margin: 8px 0 2px;
   text-transform: uppercase;
   border-bottom: 1px dashed rgba($sidebar-title,0.2);
+}
+.sidebar-image {
+  position: absolute;
+  width: 160px;
+  height: auto;
+  bottom: 0;
+  z-index: 1;
+}
+.sidebar-image:after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 25%;
+  background: linear-gradient(to bottom, rgba(40,43,48,1),rgba(40,43,48,0));
+  z-index: 1;
+}
+.sidebar-image img {
+  width: 160px;
+  height: auto;
+  z-index: 1;
 }

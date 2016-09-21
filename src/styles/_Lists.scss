@@ -21,9 +21,6 @@
   display: flex;
   background: $grey-0;
 }
-.chiika-header div:first-child {
-  padding-left: 8px;
-}
 #chiika-list {
   background: $body-bg-2;
 }
@@ -50,6 +47,13 @@ $row-border-color: $grey-2;
     &.grid-title {
       text-align: left;
     }
+  }
+  &:before{
+    content: '';
+    width: 5px;
+    background: transparent;
+    height: inherit;
+    border-bottom: 1px solid $grey-2;
   }
   .header-title:last-child {
     padding-right: 8px;

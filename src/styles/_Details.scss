@@ -12,7 +12,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: #E4E4E5;
+  background: $grey-2;
   padding: 8px 8px;
 }
 
@@ -24,11 +24,12 @@
   border-radius: 2px;
   margin-bottom: 2px;
   align-items: center;
-  border-bottom: 1px solid #D9D9D9;
+  border-bottom: 1px solid $grey-3;
+  color: $main-text;
 }
 
 .detailsPage-back:hover {
-  background-color: #D9D9D9;
+  background-color: darken($grey-3, 10);
 }
 .detailsPage-left img {
   cursor: pointer;
@@ -58,16 +59,17 @@
 }
 .userStatus .status {
   font-weight: bold;
-  border-bottom: 1px solid #D9D9D9;
+  border-bottom: 1px solid $grey-3;
   border-radius: 2px;
   padding: 6px 4px;
   cursor: pointer;
+  color: $main-text;
 }
 .userStatus .status:last-child {
   border-bottom: none;
 }
 .userStatus .status:hover {
-  background-color: #D9D9D9;
+  background-color: $grey-3;
 }
 .userStatus .status.current {
   color: $color-primary;
@@ -91,6 +93,7 @@
 .detailsPage-row > h1,
 .detailsPage-row > h2 {
   margin-bottom: 2px;
+  color: $main-text;
 }
 .detailsPage-row > h2 {
   font-size: 20px;
@@ -104,7 +107,7 @@
   display: inline;
   padding: 0px 4px;
   opacity: 0.6;
-  color: black;
+  color: $main-text;
 }
 .detailsPage-genre > ul > li:first-child {
   padding: 0px 4px 0px 0px;
@@ -125,13 +128,16 @@
   display: inline-flex;
   justify-content: center;
   align-items: center;
+  color: $main-text;
 }
 .detailsPage-score-info > span > h5 {
   margin: 0;
+  color: $main-text;
   margin-right: 4px;
 }
 .detailsPage-score-info h5 span {
   font-size: 20px;
+  color: $main-text;
 }
 .detailsPage-score-info h5 span:nth-child(2) {
   color: $color-emphasis;
@@ -199,7 +205,7 @@
 /* Progress Interactions */
 .progressInteractions {
   width: 100%;
-  background-color: white;
+  background-color: rgba(255,255,255,0.5);
   box-shadow: 0px 2px 4px rgba(128, 128, 128, 0.3);
   margin: 4px 0px;
   border-radius: 4px;
@@ -218,7 +224,7 @@
   }
 }
 .progressInteractions > .title {
-  border-bottom: 1px solid rgba(128, 128, 128, 0.3);
+  border-bottom: 1px solid rgba($main-text, 0.25);
   text-align: center;
   padding: 4px 0px;
   height: 19px;
@@ -233,17 +239,18 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: white;
+  background-color: transparent;
 }
 .interactions > .number  span,
 .interactions > .number > input {
   font-size: 18px;
+  background:transparent;
 }
 .interactions > .number > input {
   width: 40%;
   height: 75%;
   border: none;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.6);
   outline: none;
   text-align: center;
 }
@@ -257,13 +264,15 @@
     outline: none;
     border: none;
     transition: .3s all;
-    background-color: white;
+    //background-color: rgba(255,255,255,0.5);
     margin-top: 0;
+    background: transparent;
+
 }
 .interactions > .minus {
   color: $color-danger-main;
   border-bottom-left-radius: 4px;
-  border-right: 1px solid #D9D9D9;
+  border-right: 1px solid  rgba($main-text, 0.25);
 }
 .interactions > .minus:hover {
   background-color: rgba($color-danger-dark,0.6);
@@ -276,7 +285,7 @@
 .interactions > .plus {
   color: $color-success-main;
   border-bottom-right-radius: 4px;
-  border-left: 1px solid #D9D9D9;
+  border-left: 1px solid  rgba($main-text, 0.25);
 }
 .interactions > .plus:hover {
   background-color: rgba($color-success-dark,0.6);
@@ -305,10 +314,10 @@
   .characters-images div {
     padding: 4px;
     background-color: white;
-  max-height: 275px;
-  max-width: 166px;
-  min-height: 166px;
-  min-width: 100px;
+    max-height: 275px;
+    max-width: 166px;
+    min-height: 166px;
+    min-width: 100px;
 }
 
 /*fab*/
