@@ -47,7 +47,7 @@ Inject_css___compiled_and_depedent___files_into_html = () ->
     debug = require 'gulp-debug-streams'
 
 
-    themeToBuild = 'Dark'
+    themeToBuild = 'Light'
     files = mainBowerFiles('**/*.css').concat([serveDir + '/styles/**/*.css'])
 
     options =
@@ -209,15 +209,15 @@ Package_for_each_platforms = () ->
       platform: platform
       out: releaseDir + '/' + platform + '-' + arch
       version: '1.3.1'
-      asar: true
+      asar: false
       icon: './resources/windows/icon.ico'
     options['version-string'] = {
       'CompanyName': 'arkenthera',
       'LegalCopyright': 'Whatever',
       'FileDescription' : 'Chiika',
       'OriginalFilename' : 'Chiika.exe',
-      'FileVersion' : '0.0.1',
-      'ProductVersion' : '0.0.1',
+      'FileVersion' : '0.0.2',
+      'ProductVersion' : '0.0.2',
       'ProductName' : 'Chiika',
       'InternalName' : 'Chiika.exe'
     }
@@ -237,6 +237,7 @@ gulp.task 'ci:win32', () ->
     iconUrl: "#{process.cwd()}/resources/windows/icon.ico",
     noMsi: true,
     loadingGif: './src/assets/installer.gif',
+    remoteReleases: 'https://chiika.herokuapp.com/update/win32/0.0.1'
     setupExe: 'Chiika-Windows-Installer.exe' })
 
   success = () =>

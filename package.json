@@ -1,6 +1,6 @@
 {
   "name": "chiika",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "The ultimate Anime and Manga scrobbler.",
   "main": "./.serve/main_process/chiika.js",
   "productName": "chiika",

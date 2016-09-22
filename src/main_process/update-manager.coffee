@@ -26,46 +26,29 @@ string                  = require 'string'
 
 module.exports = class UpdateManager
   constructor: ->
-    @feed = "https://chiika.herokuapp.com/download/latest"
+    if process.platform == 'linux'
+      return
+    @feed = "https://chiika.herokuapp.com/update/#{process.platform}/#{chiika.chiikaVer}"
     autoUpdater.setFeedURL("#{@feed}")
 
     @handleEvents()
 
-    closeUpdateWindow = =>
-      @updaterWindow.close()
-      @updaterWindow = null
-
-    hideUpdateWindow = =>
-      @updaterWindow.hide()
-
-      setTimeout(closeUpdateWindow,10000)
-
-
-
-    chiika.emitter.on 'update-error', =>
-      hideUpdateWindow()
-      chiika.emitter.emit 'updater-ready'
-
-    chiika.emitter.on 'update-available', =>
-      @sendToUpdaterWindow 'update-available'
-
-    chiika.emitter.on 'update-downloaded', =>
-      @sendToUpdaterWindow 'update-downloaded'
-
-      autoUpdater.quitAndInstall()
-
-    chiika.emitter.on 'update-not-available', =>
-      hideUpdateWindow()
-
-      chiika.emitter.emit 'updater-ready'
-
 
   checkForUpdates: ->
+    if process.platform == 'linux'
+      return
     chiika.logger.info("Checking for updates...")
     try
       autoUpdater.checkForUpdates()
     catch error
       console.log error
+
+  installUpdates: ->
+    if process.platform == 'linux'
+      return
+
+    chiika.logger.info("Quitting and updating...")
+    autoUpdater.quitAndInstall()
 
 
   sendToUpdaterWindow: (message,params) ->
@@ -73,6 +56,41 @@ module.exports = class UpdateManager
       @updaterWindow.webContents.send message,{ message: message, params: params }
 
   check: ->
+    if process.platform == 'linux'
+      return
+    closeUpdateWindow = =>
+      if @updaterWindow
+        @updaterWindow.close()
+        @updaterWindow = null
+
+    hideUpdateWindow = =>
+      if @updaterWindow
+        @updaterWindow.hide()
+
+      setTimeout(closeUpdateWindow,10000)
+
+
+
+    updateError = chiika.emitter.on 'update-error', =>
+      hideUpdateWindow()
+      @sendToUpdaterWindow 'update-error'
+      chiika.emitter.emit 'updater-ready'
+      updateError.dispose()
+
+    updateAvailable = chiika.emitter.on 'update-available', =>
+      @sendToUpdaterWindow 'update-available'
+      updateAvailable.dispose()
+
+    updateDownloaded = chiika.emitter.on 'update-downloaded', =>
+      @sendToUpdaterWindow 'update-downloaded'
+      updateDownloaded.dispose()
+      @installUpdates()
+
+    updateNotAvailable = chiika.emitter.on 'update-not-available', =>
+      @sendToUpdaterWindow 'update-not-available'
+      hideUpdateWindow()
+      chiika.emitter.emit 'updater-ready'
+      updateNotAvailable.dispose()
     updateWindowReady = =>
       @checkForUpdates()
 

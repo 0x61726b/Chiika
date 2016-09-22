@@ -71,6 +71,9 @@ class ChiikaEnvironment
       if args == 'update-available'
         @emitter.emit 'update-available'
 
+      if args == 'update-error'
+        @emitter.emit 'update-not-available'
+
 
     ipcRenderer.on 'show-toast', (event,args) =>
       message = args.message

@@ -69,28 +69,34 @@ module.exports = class Media
     libraryDataByOwner
 
   scanFolder: (folder,title,callback) ->
-    libraryDataByOwner = @libraryDataByOwner()
+    detectCache = @chiika.viewManager.getViewByName('anime_detect_cache')
+    animeDbView = @chiika.viewManager.getViewByName('anime_db')
 
-    results = []
+    if animeDbView?
+      data = detectCache.getData()
+      animeDb = animeDbView.getData()
 
-    @recognition.getVideoFilesFromFolder folder, ['.mkv','.mp4'], (files) =>
-      error = false
-      errorMessage = "An error occured while recognizing entries for #{title}."
-      _forEach files, (videoFile) =>
-        seperate = videoFile.split(path.sep)
-        videoName = seperate[seperate.length - 1]
-        try
-          parse =  @anitomy.Parse videoName
-          parse.AnimeTitle = title
-          episode = parse.EpisodeNumber
-          if episode == ""
-            error = true
-            errorMessage = "Some of the video files are either badly named or Chiika could not identify them."
+      results = []
 
-          libRecognizeResults = @recognition.doRecognize(title,libraryDataByOwner)
-          results.push { parse: parse,results:libRecognizeResults,videoFile: videoFile }
+      @recognition.getVideoFilesFromFolder folder, ['.mkv','.mp4'], (files) =>
+        error = false
+        errorMessage = "An error occured while recognizing entries for #{title}."
+        _forEach files, (videoFile) =>
+          seperate = videoFile.split(path.sep)
+          videoName = seperate[seperate.length - 1]
+          try
+            parse =  @anitomy.Parse videoName
+            parse.AnimeTitle = title
+            episode = parse.EpisodeNumber
+            if episode == "" && parse.AnimeType == ''
+              error = true
+              errorMessage = "Some of the video files are either badly named or Chiika could not identify them."
 
-      callback?({ results: results, success: !error, errorMessage: errorMessage})
+
+            libRecognizeResults = @recognition.doRecognize(title,animeDb)
+            results.push { parse: parse,results:libRecognizeResults,videoFile: videoFile }
+
+        callback?({ results: results, success: !error, errorMessage: errorMessage})
 
 
 
@@ -136,7 +142,7 @@ module.exports = class Media
         detectCache = @chiika.viewManager.getViewByName('anime_detect_cache')
         animeDbView = @chiika.viewManager.getViewByName('anime_db')
 
-        if detectCache? && animeDbView
+        if detectCache? && animeDbView?
           data = detectCache.getData()
           animeDb = animeDbView.getData()
 
@@ -265,6 +271,14 @@ module.exports = class Media
           #
           @chiika.requestViewDataUpdate('media','chiika_library')
 
+          services = @chiika.getServices()
+
+          _forEach services, (service) =>
+            animeView = @chiika.viewManager.getViewByName(service.animeView)
+            if animeView?
+              @chiika.requestViewDataUpdate(service.name,service.animeView)
+
+
 
     @on 'system-event', (event) =>
       @chiika.logger.script("[yellow](#{@name}) system-event - #{event.name}")
@@ -291,70 +305,65 @@ module.exports = class Media
         episode = layout.episode
         title = layout.title
 
-        libraryData = @libraryDataByOwner()
+        animeDbView = @chiika.viewManager.getViewByName('anime_db')
+        animeDbData = animeDbView.getData()
 
-        _forEach libraryData,(lib) =>
-          library = lib.library
-          owner = lib.owner
-          viewName = lib.viewName
+        # entry = _find animeDbData, (o) -> o.animeTitle == title
+        #
+        # if entry?
+        #   listActionParams =
+        #     viewName: viewName
+        #     id: entry.id
+        #     item:
+        #       current: episode
+        #   @chiika.emit 'list-action', { calling: owner, action: 'progress-update', params: listActionParams }
 
-          # Find
-          entry = _find library, (o) -> o.animeTitle == title
-
-          if entry?
-            listActionParams =
-              viewName: viewName
-              id: entry.id
-              item:
-                current: episode
-            @chiika.emit 'list-action', { calling: owner, action: 'progress-update', params: listActionParams }
-
-      if event.name == 'md-pick'
-        entry = event.params.entry
-        layout = event.params.layout
-        parse = layout.parse
-        videoFile = layout.videoFile
-
-        findEntry = _find layout.suggestions, (o) -> o.entry.id == entry
-
-        if findEntry?
-          onValues = (args) =>
-            if args.list
-              homeFolder = path.join(videoFile,'..')
-              @scanFolderNot homeFolder, findEntry.entry,(result) =>
-                console.log "Scanazad #{homeFolder}"
-                @tryRecognize({ parse: parse, videoFile: videoFile, cache: result })
-
-            else
-              onAdded = =>
-                # Try to recognize again
-                animelistView   = @chiika.viewManager.getViewByName('myanimelist_animelist')
-                animeExtraView   = @chiika.viewManager.getViewByName('myanimelist_animeextra')
-                if animelistView?
-                  animelist = animelistView.getData()
-                  animelist.push findEntry.entry # Hackz
-                  animeextra = []
-                  if animeExtraView?
-                    animeextra = animeExtraView.getData()
-
-                  recognize = @recognition.recognize(findEntry.entry.animeTitle,animelist,animeextra)
-
-                  if recognize.recognized
-                    layout = { title: findEntry.entry.animeTitle, episode: layout.episode,image: findEntry.entry.animeImage, imageLink: "myanimelist.net/anime/#{findEntry.entry.id}" }
-                    @chiika.sendMessageToWindow 'notification','notf-bar-recognized', layout
-
-                    @chiika.emit 'create-card', { name: 'cards_currentlyWatching' }
-
-                    # Save this file to cache
-                    # detectCache = @chiika.viewManager.getViewByName('anime_detect_cache')
-                    #
-                    # @recognition.cache(detectCache,recognize,anitomy,videoFile)
-
-                    @chiika.requestViewUpdate 'cards_currentlyWatching','cards', null, { entry: recognize.entry,parse: parse }
-
-
-              @chiika.emit 'add-anime', { calling: 'myanimelist', entry:findEntry.entry, status:"1", return: onAdded }
-          @chiika.emit 'get-anime-values', { calling: 'myanimelist', entry:findEntry.entry, return: onValues }
+      # if event.name == 'md-pick'
+      #   entry = event.params.entry
+      #   layout = event.params.layout
+      #   parse = layout.parse
+      #   videoFile = layout.videoFile
+      #
+      #   findEntry = _find layout.suggestions, (o) -> o.entry.id == entry
+      #
+      #   if findEntry?
+      #     onValues = (args) =>
+      #       if args.list
+      #         homeFolder = path.join(videoFile,'..')
+      #         @scanFolderNot homeFolder, findEntry.entry,(result) =>
+      #           console.log "Scanazad #{homeFolder}"
+      #           @tryRecognize({ parse: parse, videoFile: videoFile, cache: result })
+      #
+      #       else
+      #         onAdded = =>
+      #           # Try to recognize again
+      #           animelistView   = @chiika.viewManager.getViewByName('myanimelist_animelist')
+      #           animeExtraView   = @chiika.viewManager.getViewByName('myanimelist_animeextra')
+      #           if animelistView?
+      #             animelist = animelistView.getData()
+      #             animelist.push findEntry.entry # Hackz
+      #             animeextra = []
+      #             if animeExtraView?
+      #               animeextra = animeExtraView.getData()
+      #
+      #             recognize = @recognition.recognize(findEntry.entry.animeTitle,animelist,animeextra)
+      #
+      #             if recognize.recognized
+      #               layout = { title: findEntry.entry.animeTitle, episode: layout.episode,image: findEntry.entry.animeImage, imageLink: "myanimelist.net/anime/#{findEntry.entry.id}" }
+      #               @chiika.sendMessageToWindow 'notification','notf-bar-recognized', layout
+      #
+      #               @chiika.emit 'create-card', { name: 'cards_currentlyWatching' }
+      #
+      #               # Save this file to cache
+      #               # detectCache = @chiika.viewManager.getViewByName('anime_detect_cache')
+      #               #
+      #               # @recognition.cache(detectCache,recognize,anitomy,videoFile)
+      #
+      #               @chiika.requestViewUpdate 'cards_currentlyWatching','cards', null, { entry: recognize.entry,parse: parse }
+      #
+      #
+      #         @chiika.emit 'add-anime', { calling: 'myanimelist', entry:findEntry.entry, status:"1", return: onAdded }
+      #     @chiika.emit 'get-anime-values', { calling: 'myanimelist', entry:findEntry.entry, return: onValues }
 
   #
   #
@@ -390,7 +399,7 @@ module.exports = class Media
             recognized = true
 
             title = c.title
-            recognize = @recognition.recognize(title,animelist)
+            recognize = @recognition.recognize(title,animeDbData)
             return false
 
 

@@ -69,6 +69,12 @@ module.exports = class IpcManager
       if mainWindow?
         @send mainWindow, 'squirrel',params
 
+  squirrel: ->
+    @receive 'squirrel', (event,args) =>
+      message = args
+
+      if message == 'start-update'
+        chiika.updateManager.installUpdates()
   #
   #
   #
@@ -581,3 +587,4 @@ module.exports = class IpcManager
     @listAction()
     @syncService()
     @checkForUpdates()
+    @squirrel()

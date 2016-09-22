@@ -30,7 +30,7 @@ module.exports = class NotificationManager
     chiika.notification({ type: 'prompt', message: message, action: action })
 
   updateDialog: (callback) ->
-    @dialog('Are you sure to start the software update for Chiika? The app will be unavailable for a short while.',callback)
+    @dialog('Update is downloaded!','Are you sure to start the software update for Chiika? The app will be unavailable for a short while.','Update!',callback)
 
   episodeNotFound: (title,episode,callback) ->
     @dialog('Episode not found!',"We couldnt find episode number #{episode} for #{title}", 'Set Folder',callback)

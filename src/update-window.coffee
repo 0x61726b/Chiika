@@ -19,12 +19,16 @@ ReactDOM                            = require("react-dom")
 {remote,ipcRenderer,shell}          = require 'electron'
 LoadingMini                         = require '../loading-mini'
 
-window.$ = window.jQuery = require('jQuery')
+window.$ = window.jQuery = require('jquery')
 
 UpdateWindow = React.createClass
   getInitialState: ->
     update: 'checking-for-update'
   componentDidMount: ->
+    downloadingUpdate = =>
+      @setState { update: 'update-available' }
+
+    setTimeout(downloadingUpdate,5000)
     ipcRenderer.on 'update-available', (event,args) =>
       @setState { update: args.message }
 

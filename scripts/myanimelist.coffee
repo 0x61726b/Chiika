@@ -206,9 +206,9 @@ module.exports = class MyAnimelist
           historyItem =
             history_id: historyData.length
             updated: moment().valueOf()
-            mal_id: anime.id
-            episode: anime.animeWatchedEpisodes
+            mal_id: anime.mal_id
             owner: 'myanimelist'
+            episode: anime.animeWatchedEpisodes
 
 
 
@@ -1023,7 +1023,7 @@ module.exports = class MyAnimelist
         historyItem =
           history_id: historyData.length
           updated: moment().valueOf()
-          mal_id: manga.id
+          mal_id: manga.mal_id
           owner: 'myanimelist'
           volumes: manga.mangaUserReadVolumes
 

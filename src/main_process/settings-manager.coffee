@@ -42,6 +42,14 @@ module.exports = class SettingsManager
     chiika.logger.info("Dev Mode: #{chiika.devMode}")
     chiika.logger.info("Running Tests: #{chiika.runningTests}")
 
+    packageJson = {}
+    if chiika.devMode
+      packageJson = require '../../package.json'
+    else
+      packageJson = require '../package.json'
+    chiika.chiikaVer             = packageJson.version
+    chiika.logger.info("App version #{chiika.chiikaVer}")
+
   initialize: ->
     defer = _when.defer()
 

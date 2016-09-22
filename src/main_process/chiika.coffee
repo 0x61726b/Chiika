@@ -22,7 +22,6 @@
 path                              = require 'path'
 
 
-
 {Emitter,Disposable}              = require 'event-kit'
 string                            = require 'string'
 
@@ -94,6 +93,7 @@ class Application
     global.__base          = process.cwd() + '/'
     global.mainProcessHome = __dirname
 
+
     process.env.CHIIKA_APPDATA = app.getPath('appData')
     process.env.CHIIKA_RESOURCES_SRC = path.join(__dirname,'..','assets')
 
@@ -156,6 +156,7 @@ class Application
           @handleEvents()
 
       @updateManager.check()
+
 
   run: ->
     #
@@ -255,10 +256,7 @@ class Application
       @ipcManager.systemEvent('squirrel','update-downloaded')
 
     @emitter.on 'update-error', (error) =>
-      @ipcManager.systemEvent('squirrel',error.toString())
-
-
-
+      @ipcManager.systemEvent('squirrel','update-error')
 
     #
     #
@@ -289,8 +287,6 @@ class Application
       skipTaskbar: true
     installerWindow = new BrowserWindow options
     installerWindow.loadURL("file://#{__dirname}/../static/update-window.html")
-
-
 
     # if @devMode
     #   installerWindow.openDevTools({ detach: true })
