@@ -47,6 +47,16 @@
   padding-left: 16px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.3);
 }
+.settings-service-info img {
+  margin-left: -16px;
+}
+.service-card {
+  display: flex;
+  align-items: center;
+}
+.password-input {
+  margin-bottom: 4px;
+}
 /* Fixed in yui*/
 ul {
   margin-top: 2px;

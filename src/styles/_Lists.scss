@@ -31,8 +31,9 @@ $row-border-color: $grey-2;
   display:flex;
 }
 .chiika-header{
+  padding-left: 4px;
+  border-bottom: 1px solid  $grey-2;
   .header-title {
-    border-bottom: 1px solid  $grey-2;
     border-right: $border-size solid $grey-2;
     padding: 8px 4px;
     flex-grow: 0;
@@ -48,13 +49,13 @@ $row-border-color: $grey-2;
       text-align: left;
     }
   }
-  &:before{
-    content: '';
-    width: 5px;
-    background: transparent;
-    height: inherit;
-    border-bottom: 1px solid $grey-2;
-  }
+  //&:before{
+  //  content: '';
+  //  width: 5px;
+  //  background: transparent;
+  //  height: inherit;
+  //  border-bottom: 1px solid $grey-2;
+  //}
   .header-title:last-child {
     padding-right: 8px;
   }
@@ -174,6 +175,7 @@ $row-border-color: $grey-2;
   align-items: center;
   color: $grey-3;
   margin-left: 2px;
+  transition: color .3s, background-color .3s;
   &:after  {
     content: "\F142";
   }
@@ -194,6 +196,7 @@ $row-border-color: $grey-2;
   align-items: center;
   color: $grey-3;
   margin-right: 2px;
+  transition: color .3s, background-color .3s;
   &:after {
     content: "\F141";
   }
@@ -226,7 +229,8 @@ $row-border-color: $grey-2;
   .col-animeSeasonText,
   .col-animeLastUpdatedText,
   .col-mangaSeasonText,
-  .col-mangaLastUpdatedText  {
+  .col-mangaLastUpdatedText,
+  .col-animeSeriesStatusText   {
     text-align: right;
     font-weight: 500;
     color: rgba($main-text,0.8);
@@ -350,9 +354,6 @@ $row-border-color: $grey-2;
 /*****************************************************/
 .react-tabs {
   background-color: inherit;
-}
-.react-tabs * {
-  border: none;
 }
 .react-tabs [role=tablist] {
   font-size: 16px;

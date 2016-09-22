@@ -53,7 +53,7 @@ module.exports = class Hummingbird
 
   # Logo which will be seen at the login screen
   #
-  logo: '../assets/images/hm.png'
+  logo: '../assets/images/login/hummingbird.png'
 
   # Chiika lets you define multiple users
   # In the methods below you can use whatever user you want

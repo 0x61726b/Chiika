@@ -16,9 +16,9 @@
   padding: 4px;
   border-bottom: 1px solid #666;
   margin-bottom: 0;
-  position: sticky;
   top: 0px;
   margin-top: 0;
+  color: $main-text;
 }
 
 .result-cover {
@@ -40,7 +40,7 @@
   border: 1px solid #ddd;
   margin: 4px;
   border-radius: 2px;
-  background: transparent;
+  background: $card-background;
 }
 
 .result-meta {

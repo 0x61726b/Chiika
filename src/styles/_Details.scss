@@ -199,6 +199,9 @@
 }
 .detailsPage-card-item {
   margin-bottom: 16px;
+  .card-content {
+    background: transparent;
+  }
 }
 
 
@@ -313,7 +316,6 @@
   }
   .characters-images div {
     padding: 4px;
-    background-color: white;
     max-height: 275px;
     max-width: 166px;
     min-height: 166px;

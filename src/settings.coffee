@@ -255,15 +255,19 @@ AccountSettings = React.createClass
     <p>Succesfully logging in to a service will RELOAD Chiika automatically. Please be aware.</p>
     {
       chiika.services.map (service,i) =>
-        <div className="card pink" key={i}>
-          <p>{ service.description } </p>
-          <p><img src={service.logo} style={{ width: 200,height: 200}}></img></p>
-          <label htmlFor="log-usr">Username</label>
-          <input type="text" className="text-input" id="userName-#{service.name}" defaultValue={@getUser(service).realUserName} required autofocus/>
-          <label htmlFor="log-psw">Password</label>
-          <input type="Password" className="text-input" id="password-#{service.name}" required />
-          <button type="button" className="button raised primary" id="log-btn" onClick={() => @login(service)}>Login</button>
-          <button type="button" className="button raised primary" onClick={() => @sync(service)}>Sync</button>
+        <div className="card service-card" key={i}>
+          <div className="settings-service-info">
+            <p>{ service.description } </p>
+            <img src={service.logo} style={{ width: 150,height: 150}}></img>
+          </div>
+          <div>
+            <label htmlFor="log-usr">Username</label>
+            <input type="text" className="text-input" id="userName-#{service.name}" defaultValue={@getUser(service).realUserName} required autofocus/>
+            <label htmlFor="log-psw">Password</label>
+            <input type="Password" className="text-input password-input" id="password-#{service.name}" required />
+            <button type="button" className="button raised primary" id="log-btn" onClick={() => @login(service)}>Login</button>
+            <button type="button" className="button raised primary" onClick={() => @sync(service)}>Sync</button>
+          </div>
         </div>
     }
     </div>

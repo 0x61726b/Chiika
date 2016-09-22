@@ -166,8 +166,13 @@ a {
   font-weight: bold !important;
 }
 
-.toast {
-
+.sticker {
+  background: rgba($color-secondary,0.4);
+  border-color: $color-secondary;
+  color: $main-text;
+}
+.sticked div {
+  color: $main-text;
 }
 
 // .toast {

@@ -72,7 +72,7 @@ module.exports = class CardViews
   # @option card {Object} value
   #
   miniCard: (card,i) ->
-    <div className="sticker purple" key={i}>
+    <div className="sticker" key={i}>
       <div className="title">
         { card.title }
       </div>
