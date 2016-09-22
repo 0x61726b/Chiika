@@ -131,13 +131,14 @@ module.exports = class Media
       if process.platform != 'win32'
         return
       @chiika.logger.script("[yellow](#{@name}) get-view-data #{args.view.name}")
-      return
+
       if args.view.name == 'chiika_library'
         detectCache = @chiika.viewManager.getViewByName('anime_detect_cache')
-        if detectCache?
-          data = detectCache.getData()
+        animeDbView = @chiika.viewManager.getViewByName('anime_db')
 
-          libraryDataByOwner = @libraryDataByOwner()
+        if detectCache? && animeDbView
+          data = detectCache.getData()
+          animeDb = animeDbView.getData()
 
           libraryView = []
           episodeCount = 0
@@ -152,19 +153,9 @@ module.exports = class Media
 
             # Find in service data
 
-            libraryDataByOwnerLength = libraryDataByOwner.length
-
-            _forEach libraryDataByOwner, (lib) =>
-              library = lib.library
-              owner = lib.owner
-
-              findInList = _find library, (o) => @recognition.clear(o.animeTitle) == title
-
-              if findInList?
-                viewByOwner.push { owner: owner, entry: findInList }
-
-                if libraryDataByOwnerLength <= viewByOwner.length
-                  return false
+            findInList = _find animeDb, (o) => @recognition.clear(o.animeTitle) == title
+            if findInList?
+              viewByOwner.push { owner: findInList.owner, entry: findInList }
 
             if viewByOwner.length > 0
               episodeCount += d.files.length
