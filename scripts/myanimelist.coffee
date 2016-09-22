@@ -44,7 +44,7 @@ getSearchExtendedUrl = (type,id) ->
 _assign       = scriptRequire 'lodash.assign'
 _find         = scriptRequire 'lodash/collection/find'
 _isArray      = scriptRequire 'lodash.isarray'
-_forEach      = scriptRequire 'lodash.foreach'
+_forEach      = scriptRequire 'lodash/collection/forEach'
 _cloneDeep    = scriptRequire 'lodash.clonedeep'
 _size         = scriptRequire 'lodash/collection/size'
 
@@ -206,8 +206,9 @@ module.exports = class MyAnimelist
           historyItem =
             history_id: historyData.length
             updated: moment().valueOf()
-            id: anime.id
+            mal_id: anime.id
             episode: anime.animeWatchedEpisodes
+            owner: 'myanimelist'
 
 
 
@@ -875,10 +876,13 @@ module.exports = class MyAnimelist
                 args.return( { success: true })
                 @initialize()
 
-            newUser = { userName: args.user + "_" + @name,owner: @name, password: args.pass, realUserName: args.user, isDefault: true }
+            newUser = { userName: args.user + "_" + @name,owner: @name, password: args.pass, realUserName: args.user }
 
             @chiika.parser.parseXml(body).then (xmlObject) =>
               assignNewUser = =>
+                users = @chiika.users.getUsers()
+                if users.length == 0
+                  _assign newUser, { isDefault: true }
                 _assign newUser, { malID: xmlObject.user.id }
                 if @malUser?
                   _assign @malUser,newUser
@@ -892,8 +896,6 @@ module.exports = class MyAnimelist
                 assignNewUser()
               else
                 onRemovePreviousUser = () =>
-                  console.log "Removed previous user"
-                  console.log @malUser
                   @malUser = null
                   assignNewUser()
                 @chiika.users.removeUser @malUser,onRemovePreviousUser
@@ -920,7 +922,9 @@ module.exports = class MyAnimelist
 
 
     @on 'get-anime-values', (args) =>
-      args.return @getAnimeValues(args.entry)
+      @chiika.logger.debug("[yellow](#{@name}) get-anime-values #{args.entry.mal_id}")
+      if args.entry.mal_id?
+        args.return @getAnimeValues(args.entry)
 
     @on 'make-search', (args) =>
       @chiika.logger.script("[yellow](#{@name}) make-search #{args.title}")
@@ -1011,14 +1015,16 @@ module.exports = class MyAnimelist
         historyItem =
           history_id: historyData.length
           updated: moment().valueOf()
-          id: manga.id
+          mal_id: manga.id
+          owner: 'myanimelist'
           chapters: manga.mangaUserReadChapters
 
       if type == 'volumes'
         historyItem =
           history_id: historyData.length
           updated: moment().valueOf()
-          id: manga.id
+          mal_id: manga.id
+          owner: 'myanimelist'
           volumes: manga.mangaUserReadVolumes
 
       historyView.setData( historyItem, 'updated').then (args) =>
@@ -2623,13 +2629,15 @@ module.exports = class MyAnimelist
               historyItem =
                 history_id: counter
                 updated: momentDate.valueOf()
-                id: history.id
+                mal_id: history.id
+                owner: 'myanimelist'
                 episode: history.ep
             else
               historyItem =
                 history_id: counter
                 updated: momentDate.valueOf()
-                id: history.id
+                mal_id: history.id
+                owner: 'myanimelist'
                 chapters: history.chapter
             historyData.push historyItem
             counter++
@@ -2673,6 +2681,7 @@ module.exports = class MyAnimelist
               historyItem =
                 history_id: historyData.length
                 updated: time
-                id: id
+                mal_id: id
+                owner: 'myanimelist'
                 episode: episode
               historyView.setData( historyItem, 'updated')

@@ -19,7 +19,7 @@ _when                   = require 'when'
 View                    = require './view'
 _find                   = require 'lodash/collection/find'
 _indexOf                = require 'lodash/array/indexOf'
-_forEach                = require 'lodash.foreach'
+_forEach                = require 'lodash/collection/forEach'
 _remove                 = require 'lodash/array/remove'
 
 {InvalidOperationException,InvalidParameterException} = require './exceptions'

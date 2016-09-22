@@ -179,10 +179,11 @@ module.exports = class WindowManager
       chiika.logger.info("[magenta](Window-Manager) Window has finished loading.")
 
   createLoginWindow: ->
+    windowSize = chiika.utility.calculateWindowSize()
     loginWindow = chiika.windowManager.createWindowAndOpen({
       name: 'login',
-      width: 1600,
-      height: 900,
+      width: windowSize.width,
+      height: windowSize.height,
       title: 'login',
       icon: "resources/icon.png",
       url: "file://#{__dirname}/../static/LoginWindow.html",
@@ -192,10 +193,11 @@ module.exports = class WindowManager
     @openDevTools(loginWindow)
 
   createMainWindow: ->
+    windowSize = chiika.utility.calculateWindowSize()
     mainWindow = chiika.windowManager.createWindowAndOpen({
       name: 'main',
-      width: 1400,
-      height: 900,
+      width: windowSize.width,
+      height: windowSize.height,
       title: 'main',
       icon: "resources/icon.png",
       url: "file://#{__dirname}/../static/index.html#Home"

@@ -15,8 +15,8 @@
 #----------------------------------------------------------------------------
 NoSQL     = require 'nosql'
 path      = require 'path'
-_forOwn   = require 'lodash.forown'
-_forEach  = require 'lodash.foreach'
+_forOwn   = require 'lodash/object/forOwn'
+_forEach  = require 'lodash/collection/forEach'
 _isArray  = require 'lodash.isarray'
 _assign   = require 'lodash.assign'
 _when     = require 'when'

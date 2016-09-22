@@ -1,0 +1,23 @@
+
+// Light theme
+
+$body-bg:#F9F9F9;
+$body-bg-2: #FAFAFA;
+$grey-0: #F5F5F5;
+$grey-1:#F2F2F4;
+$grey-2:#EEEEEE;
+$grey-3:#DCDCE2;
+
+$sidebar: #282B30;
+$sidebar-hover: darken($sidebar,4%);
+$sidebar-active: darken($sidebar,7%);
+
+$main-text: #111;
+$main-text-darker: #010101;
+$inverse-text: #F5F5F5;
+$link-text: #04003c;
+
+$accent:#B91896;
+$color-dark:#1D2326;
+
+@import "../_color-palette.scss";

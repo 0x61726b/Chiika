@@ -16,7 +16,7 @@
 
 React                               = require('react')
 Loading                             = require './loading'
-_forEach                            = require 'lodash.foreach'
+_forEach                            = require 'lodash/collection/forEach'
 _indexOf                            = require 'lodash/array/indexOf'
 _find                               = require 'lodash/collection/find'
 #Views
@@ -53,7 +53,7 @@ module.exports = React.createClass
       return
     #
     if @state.searchState == 'searching'
-      chiika.toastLoading("Searching #{@state.searchString}...",'infinite')
+      chiika.toastLoading("Searching #{@state.searchString}...",3000)
     #
       chiika.searchManager.search @state.searchString,searchType,@state.searchSource, (response) =>
         chiika.closeToast()

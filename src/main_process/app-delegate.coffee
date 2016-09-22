@@ -45,9 +45,11 @@ module.exports = class AppDelegate
 
     app.on 'ready', =>
       app.setAppUserModelId('com.arkenthera.chiika')
+
       chiika.settingsManager.initialize().then =>
         defer.resolve()
         chiika.logger.verbose("Electron app is ready")
+
     return defer.promise
 
 

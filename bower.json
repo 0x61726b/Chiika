@@ -15,7 +15,9 @@
   "dependencies": {
     "roboto-fontface": "~0.4.3",
     "components-font-awesome": "~4.5.0",
-    "yui-css": "0.0.17",
-    "mdi": "~1.7.22"
+    "yui-css": "0.0.20",
+    "mdi": "git+https://github.com/arkenthera/MaterialDesign-Webfont.git",
+    "toastr": "git+https://github.com/arkenthera/toastr-bower.git",
+    "sweetalert": "^1.1.3"
   }
 }

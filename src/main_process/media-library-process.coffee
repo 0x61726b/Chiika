@@ -14,7 +14,7 @@
 #Description:
 #----------------------------------------------------------------------------
 
-_forEach                = require 'lodash.foreach'
+_forEach                = require 'lodash/collection/forEach'
 _assign                 = require 'lodash.assign'
 _find                   = require 'lodash/collection/find'
 _filter                 = require 'lodash/collection/filter'
@@ -51,9 +51,9 @@ class LibraryScanner
 
     process.on 'message', (message) =>
       if message.message == 'set-anime-list'
-        @libraryOwnerMap = JSON.parse(message.animelist)
+        @animeDb = JSON.parse(message.animelist)
 
-        process.send "Media Process library length #{@libraryOwnerMap.length}"
+        process.send "Media Process library length #{@animeDb.length}"
         @start = process.hrtime()
         @init()
 
@@ -92,7 +92,7 @@ class LibraryScanner
 
         title = parse.AnimeTitle.toLowerCase()
 
-        libRecognizeResults = @recognition.doRecognize(title,@libraryOwnerMap)
+        libRecognizeResults = @recognition.doRecognize(title,@animeDb)
 
         recognized = false
         _forEach libRecognizeResults, (libRecognize) =>

@@ -18,7 +18,7 @@ path          = require 'path'
 fs            = require 'fs'
 
 
-_forEach      = scriptRequire 'lodash.foreach'
+_forEach      = scriptRequire 'lodash/collection/forEach'
 _pick         = scriptRequire 'lodash/object/pick'
 _find         = scriptRequire 'lodash/collection/find'
 _indexOf      = scriptRequire 'lodash/array/indexOf'
@@ -333,36 +333,40 @@ module.exports = class CardViews
 
       else if args.view.name == 'cards_continueWatching'
         historyAnime = @chiika.viewManager.getViewByName('myanimelist_animelist_history')
-        animeView = @chiika.viewManager.getViewByName('myanimelist_animelist')
-        animeExtraView = @chiika.viewManager.getViewByName('myanimelist_animeextra')
 
         if historyAnime?
           animeHistory = historyAnime.getData()
-          animelist    = animeView.getData()
 
 
           cntWatchingLayouts = []
           _forEach animeHistory, (history) =>
-            id = history.id
             ep     = history.episode
+            owner  = history.owner
 
-            animeEntry = _find animelist, (o) -> o.id == id
+            # Small hack, hope this doesnt fail xD
+            if Object.keys(history).length != 5
+              return
+            idKey = Object.keys(history)[2]
+            # Small hack end
+            id     = history[idKey]
 
-            if animeEntry?
-              onReturn = (anime) =>
-                exists = _find cntWatchingLayouts, (p) -> p.id == id
-                index  = _indexOf cntWatchingLayouts,exists
 
-                if parseInt(anime.watchedEpisodes) == parseInt(anime.totalEpisodes)
-                  return
-                if exists?
-                  if history.updated > exists.time
-                    exists = { id: id,time: history.updated,layout: anime }
-                    cntWatchingLayouts.splice(index,1,exists)
-                else
-                  cntWatchingLayouts.push { id: id,time: history.updated,layout: anime }
+            onReturn = (anime) =>
+              exists = _find cntWatchingLayouts, (p) -> p.id == id
+              index  = _indexOf cntWatchingLayouts,exists
 
-              @chiika.emit 'get-anime-values', { calling: 'myanimelist',entry: animeEntry,return: onReturn }
+              if parseInt(anime.watchedEpisodes) == parseInt(anime.totalEpisodes)
+                return
+              if exists?
+                if history.updated > exists.time
+                  exists = { id: id,time: history.updated,layout: anime }
+                  cntWatchingLayouts.splice(index,1,exists)
+              else
+                cntWatchingLayouts.push { id: id,time: history.updated,layout: anime }
+
+            animeEntry = {}
+            animeEntry[idKey] = history[idKey]
+            @chiika.emit 'get-anime-values', { calling: owner,entry: animeEntry,return: onReturn }
 
           cntWatchingLayouts.sort (a,b) =>
             if a.time > b.time
@@ -535,7 +539,23 @@ module.exports = class CardViews
           @chiika.requestViewDataUpdate('cards','cards_currentlyWatching')
           @chiika.requestUIDataUpdate('cards_currentlyWatching')
 
-        @chiika.emit 'details-layout', { viewName: 'myanimelist_animelist', id: update.params.entry.id, return: onAnimeDetailsLayout }
+        onAnimeValues = (response) =>
+          # Get details layout
+          owner = update.params.entry.owner
+          services = @chiika.getServices()
+
+          findInServices = _find services, (o) -> o.name == owner
+
+          if findInServices?
+            animeView = findInServices.animeView
+
+            @chiika.emit 'details-layout', { calling: update.params.entry.owner, id: response.id,viewName: animeView, return: onAnimeDetailsLayout }
+
+        idKey = Object.keys(update.params.entry)[1]
+        animeEntry = {}
+        animeEntry[idKey] = update.params.entry[idKey]
+
+        @chiika.emit 'get-anime-values', { calling: update.params.entry.owner, entry: animeEntry, return: onAnimeValues }
 
       else if update.view.name == 'cards_notRecognized'
         recognizeResult = update.params.result

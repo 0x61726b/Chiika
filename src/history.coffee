@@ -17,7 +17,7 @@
 React                               = require('react')
 
 Chart                               = require 'chart.js'
-_forEach                            = require 'lodash.foreach'
+_forEach                            = require 'lodash/collection/forEach'
 _filter                             = require 'lodash/collection/filter'
 #Views
 

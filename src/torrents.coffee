@@ -19,7 +19,7 @@ React                               = require('react')
 Chart                               = require 'chart.js'
 ReactList                           = require 'react-list'
 Loading                             = require './loading'
-_forEach                            = require 'lodash.foreach'
+_forEach                            = require 'lodash/collection/forEach'
 _filter                             = require 'lodash/collection/filter'
 _find                               = require 'lodash/collection/find'
 #Views

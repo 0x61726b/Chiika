@@ -16,35 +16,27 @@
 
 _find                               = require 'lodash/collection/find'
 _indexOf                            = require 'lodash/array/indexOf'
-_forEach                            = require 'lodash.foreach'
+_forEach                            = require 'lodash/collection/forEach'
 CardViews                           = require './cards'
 
 module.exports = class NotificationManager
-  episodeNotFound: (title,episode) ->
-    notification =
-      title: 'Episode not found!'
-      message:"We couldnt find episode number #{episode} for #{title}"
-      color: 'red'
-      actions: [
-      ]
-    chiika.notification(notification)
+  error: (message) ->
+    chiika.notification({ title: 'Error!', type: 'error', message: message })
+
+  dialog: (title,message,confirmText,confirm) ->
+    chiika.notification({ title:title, type: 'dialog', message: message, confirmText: confirmText,confirm: confirm })
+
+  prompt: (message,action) ->
+    chiika.notification({ type: 'prompt', message: message, action: action })
+
+  updateDialog: (callback) ->
+    @dialog('Are you sure to start the software update for Chiika? The app will be unavailable for a short while.',callback)
+
+  episodeNotFound: (title,episode,callback) ->
+    @dialog('Episode not found!',"We couldnt find episode number #{episode} for #{title}", 'Set Folder',callback)
 
   folderNotFound: (callback) ->
-    notification =
-      title: 'Folder not found!'
-      message: 'Please choose the folder manually.'
-      color: 'red'
-      actions: [
-        { name: 'Set Folder', clickAction: callback }
-      ]
-    chiika.notification(notification)
+    @dialog('Not found in the library!',"Choose the location.", 'Set Folder',callback)
 
-  deleteFromListConfirmation: (callback) ->
-    notification =
-      title: 'Are you sure?'
-      message: 'Delete this entry from your list?'
-      color: 'red'
-      actions: [
-        { name: 'Delete', clickAction: callback }
-      ]
-    chiika.notification(notification)
+  deleteFromListConfirmation: (title,callback) ->
+    @dialog('Are you sure?',"Delete #{title} from your library?", 'Delete',callback)

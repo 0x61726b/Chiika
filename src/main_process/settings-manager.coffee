@@ -16,7 +16,7 @@
 
 DefaultOptions      = require './options'
 mkdirp              = require 'mkdirp'
-_forEach            = require 'lodash.foreach'
+_forEach            = require 'lodash/collection/forEach'
 _when               = require 'when'
 path                = require 'path'
 

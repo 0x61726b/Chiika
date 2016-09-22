@@ -43,7 +43,8 @@ module.exports = class DatabaseManager
     @uiDb         = new DbUI { @promises }
 
   onLoad: (callback) ->
-    _when.all(@promises).then () => callback()
+    console.log @promises
+    _when.all(@promises)
 
   # @todo Make it so that this returns same instance with same view name
   createViewDb: (viewName) ->

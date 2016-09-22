@@ -24,7 +24,12 @@ module.exports = class ChiikaPublicApi
 
   constructor: (params={})->
     @emitter                                    = new Emitter
-    {@logger, @db,@parser,@ui,@viewManager}     = params
+    @logger                                     = chiika.logger
+    @db                                         = chiika.dbManager
+    @parser                                     = chiika.parser
+    @ui                                         = chiika.uiManager
+    @viewManager                                = chiika.viewManager
+    #{@logger, @db,@parser,@ui,@viewManager}     = params
     @settingsManager                            = chiika.settingsManager
     @users                                      = @db.usersDb
     @custom                                     = @db.customDb

@@ -16,7 +16,7 @@
 
 {BrowserWindow,ipcMain} = require 'electron'
 
-_forEach                = require 'lodash.foreach'
+_forEach                = require 'lodash/collection/forEach'
 _assign                 = require 'lodash.assign'
 _when                   = require 'when'
 _find                   = require 'lodash/collection/find'
@@ -65,7 +65,9 @@ module.exports = class IpcManager
 
     chiika.logger.verbose("System Event - #{event}")
     if event == 'squirrel'
-      @send chiika.windowManager.getWindowByName('main'), 'squirrel',params
+      mainWindow = chiika.windowManager.getWindowByName('main')
+      if mainWindow?
+        @send mainWindow, 'squirrel',params
 
   #
   #

@@ -22,56 +22,62 @@ _when                                     = require 'when'
 Logger                                    = require './main_process/logger'
 _find                                     = require 'lodash/collection/find'
 _indexOf                                  = require 'lodash/array/indexOf'
-_forEach                                  = require 'lodash.foreach'
+_forEach                                  = require 'lodash/collection/forEach'
 
 module.exports = class ListManager
   updateProgress: (type,id,owner,item,viewName,callback) ->
     onActionCompete = (params) =>
       if params.args.success
         callback?()
+        chiika.closeLastToast()
         chiika.toastSuccess('Updated!',2000)
 
 
-    chiika.toastLoading('Updating..','infinite')
+    chiika.toastLoading('Updating..',10000)
     @listAction 'progress-update',{ layoutType: type, id: id,owner:owner,item:item,viewName: viewName },onActionCompete
 
   updateStatus: (type,id,owner,item,viewName,callback) ->
     onActionCompete = (params) =>
       if params.args.success
         callback?()
+        chiika.closeLastToast()
         chiika.toastSuccess('Updated!',2000)
 
 
-    chiika.toastLoading('Updating..','infinite')
+    chiika.toastLoading('Updating..',3000)
     @listAction 'status-update',{ layoutType: type, id: id,owner:owner, item:item,viewName: viewName },onActionCompete
 
   updateScore: (type,id,owner,item,viewName,callback) ->
     onActionCompete = (params) =>
       if params.args.success
         callback?()
+        chiika.closeLastToast()
         chiika.toastSuccess('Updated!',2000)
 
 
-    chiika.toastLoading('Updating..','infinite')
+    chiika.toastLoading('Updating..',3000)
     @listAction 'score-update',{ layoutType: type, id: id,owner:owner, item:item,viewName: viewName },onActionCompete
 
   addToList: (type,id,owner,entry,callback) ->
     onActionCompete = (params) =>
       if params.args.success
         callback?()
+        chiika.closeLastToast()
         chiika.toastSuccess('Added!',2000)
 
 
-    chiika.toastLoading('Adding..','infinite')
+    chiika.toastLoading('Adding..',3000)
     @listAction 'add-entry',{ layoutType: type, id: id,owner:owner, rawEntry: entry },onActionCompete
 
   deleteFromList: (type,id,owner,callback) ->
-    chiika.notificationManager.deleteFromListConfirmation =>
-      chiika.toastLoading('Deleting..','infinite')
+    chiika.notificationManager.deleteFromListConfirmation id, =>
+      chiika.toastLoading('Deleting..',3000)
       onDeleteReturn = (params) =>
         if params.args.success
-          chiika.toastSuccess('Deleted!',2000)
           callback?(params.args)
+          chiika.toastSuccess('Deleted!',2000)
+          chiika.closeLastToast()
+
         else
           chiika.toastError("Could not delete. #{params.args.response}",2000)
       @listAction('delete-entry', { layoutType: type, id: id,owner:owner }, onDeleteReturn)

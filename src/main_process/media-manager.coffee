@@ -14,7 +14,7 @@
 #Description:
 #----------------------------------------------------------------------------
 
-_forEach                = require 'lodash.foreach'
+_forEach                = require 'lodash/collection/forEach'
 _assign                 = require 'lodash.assign'
 _when                   = require 'when'
 string                  = require 'string'

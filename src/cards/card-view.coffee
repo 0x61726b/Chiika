@@ -16,7 +16,7 @@
 
 _find                                     = require 'lodash/collection/find'
 _indexOf                                  = require 'lodash/array/indexOf'
-_forEach                                  = require 'lodash.foreach'
+_forEach                                  = require 'lodash/collection/forEach'
 
 module.exports =
   prepare: (props) ->

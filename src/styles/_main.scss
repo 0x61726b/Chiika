@@ -20,7 +20,6 @@
 .hidden {
   display: none;
 }
-
 .main {
   height: 100vh;
   float: right;
@@ -59,6 +58,23 @@ td {
   height: 100vh;
   -webkit-app-region: drag;
 }
+.update-window {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  height: 400px;
+}
+.updater-window-item {
+  align-items: center;
+}
+.updater-window-info {
+  color: white;
+  font-size: 16px;
+  font-weight: 400;
+  margin-top: 12px;
+}
+
 .loading-small {
   display: flex;
   flex-direction: row;
@@ -136,44 +152,61 @@ a {
   text-decoration: none;
   color: $link-text;
 }
+.toast-top-right {
+  margin-top: 40px;
+}
+
+// Toastr uses .toast class and yui.css defines .toast as well......
+.toast > *:last-child {
+  margin-left: 0px !important;
+  cursor: default !important;
+  padding: 0 !important;
+  border-radius: 4px !important;
+  font-size: 12px !important;
+  font-weight: bold !important;
+}
 
 .toast {
-  padding: 8px 8px 8px 0;
-  color: white!important;
-  top: 60px;
-  right: 15px;
+
 }
-.toast.timer {
-  color: #282C34;
-}
-.toast::before {
-  content: '';
-  margin: -8px 8px -8px 0;
-  padding: 0 4px;
-  font: normal normal normal 24px/1 "Material Design Icons";
-  background: rgba(0,0,0,0.2);
-  text-align: center;
-  width: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-}
-.toast.success::before{
-  content: '\F12C';
-}
-.toast.warning::before{
-  content: "\F205";
-}
-.toast.info::before{
-  content: "\F2FD";
-}
-.toast.timer::before{
-  content: "\F150";
-}
-.toast.danger::before{
-  content: "\F156";
-}
+
+// .toast {
+//   padding: 8px 8px 8px 0;
+//   color: white!important;
+//   top: 60px;
+//   right: 15px;
+// }
+// .toast.timer {
+//   color: #282C34;
+// }
+// .toast::before {
+//   content: '';
+//   margin: -8px 8px -8px 0;
+//   padding: 0 4px;
+//   font: normal normal normal 24px/1 "Material Design Icons";
+//   background: rgba(0,0,0,0.2);
+//   text-align: center;
+//   width: 30px;
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+//   color: white;
+// }
+// .toast.success::before{
+//   content: '\F12C';
+// }
+// .toast.warning::before{
+//   content: "\F205";
+// }
+// .toast.info::before{
+//   content: "\F2FD";
+// }
+// .toast.timer::before{
+//   content: "\F150";
+// }
+// .toast.danger::before{
+//   content: "\F156";
+// }
 /*
 .loading-screen > div {
   display: flex;

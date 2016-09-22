@@ -23,7 +23,7 @@ _when                                     = require 'when'
 Logger                                    = require './main_process/logger'
 _find                                     = require 'lodash/collection/find'
 _indexOf                                  = require 'lodash/array/indexOf'
-_forEach                                  = require 'lodash.foreach'
+_forEach                                  = require 'lodash/collection/forEach'
 
 ChiikaIPC                                 = require './chiika-ipc'
 ViewManager                               = require './view-manager'
@@ -32,6 +32,8 @@ NotificationManager                       = require './notification-manager'
 SearchManager                             = require './search-manager'
 ListManager                               = require './list-manager'
 
+Toastr                                    = require 'toastr'
+
 class ChiikaEnvironment
   emitter: null
 
@@ -39,6 +41,12 @@ class ChiikaEnvironment
     {@applicationDelegate, @window,@chiikaHome} = params
 
     window.chiika = this
+
+    isDevMode = process.env.DEV_MODE
+    if !isDevMode?
+      isDevMode = false
+    @devMode = JSON.parse(isDevMode)
+
 
     @emitter          = new Emitter
     @logger           = remote.getGlobal('logger')
@@ -84,13 +92,23 @@ class ChiikaEnvironment
         window.location = url
 
 
+
+  setTheme: (theme) ->
+    if !@devMode
+      if theme == 'Dark'
+        $("link[rel='stylesheet']").attr('href','../styles/app_dark.css')
+      else
+        $("link[rel='stylesheet']").attr('href','../styles/app_light.css')
+    else
+      @notificationManager.error("Due to (arguably) technical limitations, we can't (allegedly) change theme when in DEV_MODE. Try this option on prod environment.")
+
   scanLibrary: () ->
+    chiika.toastLoading('Scanning library...',10000)
     chiika.ipc.sendMessage 'start-library-scan'
     chiika.ipc.receive 'scan-library-response', (event,result) =>
-      console.log result
-
       @ipc.disposeListeners('scan-library-response')
 
+      @closeLastToast()
       chiika.toastSuccess("#{result.recognizedFiles} video files has been successfuly recognized!",4000)
 
   openFolderByEntry: (title) ->
@@ -160,21 +178,61 @@ class ChiikaEnvironment
     menu.popup(remote.getCurrentWindow())
 
   notification: (notf) ->
-    window.yuiNotification(notf)
+    title = notf.title
+    message = notf.message
+    type = notf.type
+    confirmText = notf.confirmText
+
+    swalOptions =
+      title: title
+      text: message
+      type: type
+
+    if type == 'dialog'
+      type = 'info'
+
+      swalOptions.type = type
+      swalOptions.showCancelButton = true
+      swalOptions.confirmButtonColor = "#48c85e"
+      swalOptions.confirmButtonText = confirmText
+      swalOptions.closeOnConfirm = true
+      window.swal(swalOptions,notf.confirm)
+    else
+      window.swal(swalOptions)
 
   toast: (toast) ->
-    $(".toast").remove()
-    window.yuiToast(toast)
+    options =
+      closeButton: false
+      debug:false
+      "newestOnTop": false
+      "progressBar": if toast.progressBar? then true else false
+      "positionClass": toast.position
+      "preventDuplicates": false
+      "onclick": null
+      "showDuration": 300
+      "hideDuration": 1000
+      "timeOut": toast.duration
+      "extendedTimeOut": 1000
+      "showEasing": "swing"
+      "hideEasing": "linear"
+      "showMethod": "fadeIn"
+      "hideMethod": "fadeOut"
+    console.log "Toastr : Duration - #{toast.duration} - Position - #{toast.position}"
+    @lastToast = Toastr[toast.theme](toast.message,'Chiika',options)
 
   closeToast: () ->
-    $(".toast").remove()
+    Toastr.clear()
+
+  closeLastToast: ->
+    if @lastToast
+      Toastr.clear(@lastToast)
 
   toastSuccess: (message,duration) ->
     @toast({
       message: message,
       duration: duration,
       theme: 'success',
-      position: 'hue'
+      position: 'toast-bottom-right'
       })
 
   toastInfo: (message,duration) ->
@@ -182,23 +240,24 @@ class ChiikaEnvironment
       message: message,
       duration: duration,
       theme: 'info',
-      position: 'hue'
+      position: 'toast-bottom-right'
       })
 
   toastError: (message,duration) ->
     @toast({
       message: message,
       duration: duration,
-      theme: 'danger',
-      position: 'hue'
+      theme: 'error',
+      position: 'toast-bottom-right'
       })
 
   toastLoading: (message,duration) ->
     @toast({
       message: message,
       duration: duration,
-      theme: 'timer',
-      position: 'hue'
+      theme: 'info',
+      position: 'toast-bottom-right',
+      progressBar: true
       })
 
   getOption: (option) ->

@@ -17,7 +17,7 @@
 IDb           = require './db-interface'
 _find                   = require 'lodash/collection/find'
 _indexOf                = require 'lodash/array/indexOf'
-_forEach                = require 'lodash.foreach'
+_forEach                = require 'lodash/collection/forEach'
 _when         = require('when')
 
 {InvalidParameterException} = require './exceptions'

@@ -44,7 +44,12 @@ Inject_css___compiled_and_depedent___files_into_html = () ->
     concat = require "gulp-concat"
     gulpif = require "gulp-if"
     gulpIgnore = require 'gulp-ignore'
+    debug = require 'gulp-debug-streams'
+
+
+    themeToBuild = 'Dark'
     files = mainBowerFiles('**/*.css').concat([serveDir + '/styles/**/*.css'])
+
     options =
       relative: true
       ignorePath: ['../../.serve', '..']
@@ -56,9 +61,15 @@ Inject_css___compiled_and_depedent___files_into_html = () ->
 
     files = files.concat([serveDir + '/bundleJs.js' ])
 
+    ignoreThemeFile = 'Light'
+    if themeToBuild == 'Light'
+      ignoreThemeFile = 'Dark'
+
+    condition = "#{ignoreThemeFile}Theme.css"
+
     stream.on 'end', =>
       str = gulp.src(srcDir + '/**/*.html')
-          .pipe(inject(gulp.src(files),options))
+          .pipe(inject(gulp.src(files).pipe(gulpIgnore.exclude(condition)),options))
           .pipe(gulp.dest(serveDir))
       str.on 'end', done
     dummy = 42
@@ -182,39 +193,36 @@ Write_a_package_json_for_distribution = () ->
     fs.writeFile(distDir + '/package.json', JSON.stringify(json), () -> done())
 
 Package_for_each_platforms = () ->
+  success = =>
+    console.log "Packaging success"
+  error = (error) =>
+    console.log error
 
-  gulp.task 'package', ['win32'].map (platform) ->
 
-    taskName = 'package:' + platform
+  gulp.task 'package:win32', ['build'], (done) ->
+    arch = 'x64'
+    platform = 'win32'
+    options =
+      dir: distDir
+      name: 'Chiika'
+      arch: arch
+      platform: platform
+      out: releaseDir + '/' + platform + '-' + arch
+      version: '1.3.1'
+      asar: true
+      icon: './resources/windows/icon.ico'
+    options['version-string'] = {
+      'CompanyName': 'arkenthera',
+      'LegalCopyright': 'Whatever',
+      'FileDescription' : 'Chiika',
+      'OriginalFilename' : 'Chiika.exe',
+      'FileVersion' : '0.0.1',
+      'ProductVersion' : '0.0.1',
+      'ProductName' : 'Chiika',
+      'InternalName' : 'Chiika.exe'
+    }
 
-    gulp.task taskName, ['build'], (done) ->
-      arch = 'x64'
-      options =
-        dir: distDir
-        name: 'Chiika'
-        arch: arch
-        platform: platform
-        out: releaseDir + '/' + platform + '-' + arch
-        version: '1.3.1'
-        asar: false
-      if platform == 'win32'
-        options.icon = './resources/windows/icon.ico'
-        options['version-string'] = {
-          'CompanyName': 'arkenthera',
-          'LegalCopyright': 'Whatever',
-          'FileDescription' : 'Chiika',
-          'OriginalFilename' : 'Chiika.exe',
-          'FileVersion' : '0.0.1',
-          'ProductVersion' : '0.0.1',
-          'ProductName' : 'Chiika',
-          'InternalName' : 'Chiika.exe'
-        }
-      else if platform == 'darwin'
-        icon = './resources/osx/icon.ico'
-
-      packager options, (err) -> console.log err
-
-    return taskName
+    packager options,error
 
 
 gulp.task 'ci:win32', () ->

@@ -31,7 +31,7 @@ urls = [
 _assign       = scriptRequire 'lodash.assign'
 _find         = scriptRequire 'lodash/collection/find'
 _isArray      = scriptRequire 'lodash.isarray'
-_forEach      = scriptRequire 'lodash.foreach'
+_forEach      = scriptRequire 'lodash/collection/forEach'
 _cloneDeep    = scriptRequire 'lodash.clonedeep'
 _size         = scriptRequire 'lodash/collection/size'
 
@@ -181,6 +181,7 @@ module.exports = class Hummingbird
   toAnimeDbFormat: (v) ->
     anime = {}
     anime = @animeToCommonFormat(v.anime)
+    anime.owner = 'hummingbird'
     anime
 
   animeToCommonFormat: (v) ->
@@ -480,6 +481,10 @@ module.exports = class Hummingbird
       if type == 'anime'
         args.return(entry.animeType)
 
+    @on 'get-anime-values', (args) =>
+      @chiika.logger.script("[yellow](#{@name}) get-anime-values #{args.entry.hmb_id}")
+      args.return @getAnimeValues(args.entry)
+
     @on 'set-user-login', (args,callback) =>
       @chiika.logger.script("[yellow](#{@name}) Auth in process " + args.user)
       onAuthComplete = (error,response,body) =>
@@ -497,11 +502,15 @@ module.exports = class Hummingbird
             # /users/{userName}
             @retrieveUserInfo args.user, (info) =>
               if info.response.statusCode == 200
-                newUser = { userName: args.user + "_" + @name,owner: @name, password: args.pass, realUserName: args.user, isDefault: true }
+                newUser = { userName: args.user + "_" + @name,owner: @name, password: args.pass, realUserName: args.user }
                 _assign newUser, info.userInfo
 
 
                 @hummingbirdUser = @chiika.users.getUser(args.user + "_" + @name)
+
+                users = @chiika.users.getUsers()
+                if users.length == 0
+                  _assign newUser, { isDefault: true }
 
                 updateAnimelist = (resolve) =>
                   @chiika.requestViewUpdate 'hummingbird_animelist',@name, () =>

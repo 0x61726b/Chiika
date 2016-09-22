@@ -15,7 +15,7 @@
 #----------------------------------------------------------------------------
 {Emitter}                   = require 'event-kit'
 _when                       = require 'when'
-_forEach                    = require 'lodash.foreach'
+_forEach                    = require 'lodash/collection/forEach'
 
 module.exports = class SearchManager
   emitter: null

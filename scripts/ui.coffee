@@ -18,7 +18,7 @@ path          = require 'path'
 fs            = require 'fs'
 
 
-_forEach      = scriptRequire 'lodash.foreach'
+_forEach      = scriptRequire 'lodash/collection/forEach'
 moment        = scriptRequire 'moment'
 string        = scriptRequire 'string'
 momentTz      = scriptRequire 'moment-timezone'

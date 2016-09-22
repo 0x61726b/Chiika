@@ -17,7 +17,7 @@
 React                               = require('react')
 {Link}                              = require('react-router')
 {dialog}                            = require('electron').remote
-_forEach                            = require 'lodash.foreach'
+_forEach                            = require 'lodash/collection/forEach'
 _find                               = require 'lodash/collection/find'
 
 
@@ -41,6 +41,43 @@ CheckboxOption = React.createClass
       <label className="checkbox danger">
         <input type="checkbox" id="#{@state.label}" onChange={@onChange} checked={@state.checked} />
         { @state.label }
+      </label>
+    </div>
+
+RadioOption = React.createClass
+  getInitialState: ->
+    label: ''
+    id:''
+    checked: false
+    option: ''
+  # componentWillReceiveProps: (props) ->
+  #   checked = @isChecked(props)
+  #   @setState { label: props.label, checked: checked == props.id,id : props.id }
+
+  componentDidMount: ->
+    checked = @isChecked(@props)
+
+    @setState { label: @props.label, checked: checked,id : @props.id }
+
+  componentDidUpdate: ->
+    console.log "#{@props.id} - #{@state.checked}"
+    $("##{@state.id}_radio").prop('checked',@state.checked)
+
+  isChecked: (props) ->
+    checked = false
+    if chiika.getOption(props.option) == props.id
+      checked = true
+
+    checked
+  onChange: (e) ->
+    chiika.setOption(@props.option,@props.id)
+    this.props.onChange(@state)
+
+
+  render: ->
+    <div>
+      <label className="radio">
+        <input type="radio" name="radio" id="#{@state.id}_radio" onChange={@onChange} /> {@state.label}
       </label>
     </div>
 
@@ -74,15 +111,34 @@ DropdownOption = React.createClass
     </div>
 
 AppSettings = React.createClass
+  getCurrentTheme: ->
+    chiika.appSettings['Theme']
+
+  onThemeChange: (state) ->
+    theme = state.id
+    chiika.setTheme(theme)
+
   render: ->
-    <div className="card">
-      <CheckboxOption label="Disable Anime Recognition" id="DisableAnimeRecognition" />
-      <CheckboxOption label="Remember Window Position & Size" id="RememberWindowSizeAndPosition" />
-      <CheckboxOption label="Close to tray" id="CloseToTray" />
-      <CheckboxOption label="Minimize to tray" id="MinimizeToTray" />
-      <CheckboxOption label="Launch minimized on startup" id="LaunchMinimized" />
-      <CheckboxOption label="Check for Updates" id="CheckForUpdates" />
-      <CheckboxOption label="Disable transparency (Transparency might not work on some OSes)" id="NoTransparentWindows" />
+    <div>
+      <div className="card">
+        <CheckboxOption label="Disable Anime Recognition" id="DisableAnimeRecognition" />
+        <CheckboxOption label="Remember Window Position & Size" id="RememberWindowSizeAndPosition" />
+        <CheckboxOption label="Close to tray" id="CloseToTray" />
+        <CheckboxOption label="Minimize to tray" id="MinimizeToTray" />
+        <CheckboxOption label="Launch minimized on startup" id="LaunchMinimized" />
+        <CheckboxOption label="Check for Updates" id="CheckForUpdates" />
+        <CheckboxOption label="Disable transparency (Transparency might not work on some OSes)" id="NoTransparentWindows" />
+      </div>
+      <div className="card">
+        <div className="title">
+          <h4>Styling</h4>
+        </div>
+        App theme
+        <form>
+          <RadioOption label="Dark" option="Theme" id="Dark" onChange={@onThemeChange} />
+          <RadioOption label="Light" option="Theme" id="Light" onChange={@onThemeChange} />
+        </form>
+      </div>
     </div>
 
 Cards = React.createClass
@@ -109,7 +165,6 @@ Recognition = React.createClass
       @setState { libraryPaths: folderText }
       chiika.setOption('LibraryPaths',folders)
   scanLibrary: ->
-    chiika.toastLoading('Scanning library...','infinite')
     chiika.scanLibrary()
 
   render: ->
@@ -150,7 +205,7 @@ RSSSettings = React.createClass
 
 AccountSettings = React.createClass
   sync: (service) ->
-    chiika.toastLoading("Syncing #{service.description}...",'infinite')
+    chiika.toastLoading("Syncing #{service.description}...",3000)
 
     chiika.ipc.sendMessage 'sync-service', { owner: service.name }
     chiika.ipc.receive 'sync-response', (params) =>
@@ -163,7 +218,7 @@ AccountSettings = React.createClass
     pass = $("#password-#{service.name}")
 
     if userName.val().length > 0 && pass.val().length > 0
-      chiika.toastLoading("Logging in #{service.description}...",'infinite')
+      chiika.toastLoading("Logging in #{service.description}...",3000)
 
       loginData = { user: userName.val(), pass: pass.val() }
       $("#log-btn").prop("disabled",true)

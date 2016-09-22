@@ -22,6 +22,8 @@ module.exports =
   RememberWindowSizeAndPosition: true
   DisableBubbleNotifications: false
 
+  Theme: 'Dark'
+
   # Tray
   MinimizeToTray: true
   CloseToTray: false

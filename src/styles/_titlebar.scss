@@ -43,6 +43,21 @@
     color: white;
   }
 }
+.titlebar-update:after
+{
+    content:'';
+    position: relative;
+    background: rgba(255,0,0,1);
+    height:0.4rem;
+    width:0.4rem;
+    text-align: center;
+    line-height: 2rem;
+    font-size: 1rem;
+    border-radius: 50%;
+    color:white;
+    right: 4px;
+    bottom: 8px;
+}
 .titlebar-stoplight {
   float: right;
   text-align: right;
@@ -50,6 +65,7 @@
 .titlebar.webkit-draggable .titlebar-settings,
 .titlebar.webkit-draggable .titlebar-close,
 .titlebar.webkit-draggable .titlebar-devtools,
+.titlebar.webkit-draggable .titlebar-update,
 .titlebar.webkit-draggable .titlebar-fullscreen,
 .titlebar.webkit-draggable .titlebar-minimize {
   -webkit-app-region: no-drag;
@@ -58,6 +74,7 @@
 .titlebar-settings,
 .titlebar-devtools,
 .titlebar-close,
+.titlebar-update,
 .titlebar-fullscreen,
 .titlebar-minimize {
   float: left;
@@ -80,6 +97,7 @@
 .titlebar-devtools:hover,
 .titlebar-close:hover,
 .titlebar-fullscreen:hover,
+.titlebar-update:hover,
 .titlebar-minimize:hover {
   background-color: rgba(255,255,255,0.15);
 }
@@ -87,6 +105,7 @@
 .titlebar-devtools:active,
 .titlebar-close:active,
 .titlebar-fullscreen:active,
+.titlebar-update:active,
 .titlebar-minimize:active {
   background-color: rgba(255,255,255,0.3);
 }
@@ -94,7 +113,7 @@
 .titlebar-settings:after {
   content: "\F493";
 }
-.titlebar-update:after {
+.titlebar-update:before {
   content: "\F6AF";
 }
 .titlebar-devtools:after {

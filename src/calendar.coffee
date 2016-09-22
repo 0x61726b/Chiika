@@ -16,7 +16,7 @@
 
 React                               = require('react')
 Loading                             = require './loading'
-_forEach                            = require 'lodash.foreach'
+_forEach                            = require 'lodash/collection/forEach'
 _indexOf                            = require 'lodash/array/indexOf'
 _find                               = require 'lodash/collection/find'
 

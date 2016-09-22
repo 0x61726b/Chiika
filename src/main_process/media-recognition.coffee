@@ -17,7 +17,7 @@
 path                    = require 'path'
 fs                      = require 'fs'
 
-_forEach                = require 'lodash.foreach'
+_forEach                = require 'lodash/collection/forEach'
 _assign                 = require 'lodash.assign'
 _find                   = require 'lodash/collection/find'
 _filter                 = require 'lodash/collection/filter'
@@ -79,11 +79,6 @@ module.exports = class MyAnimelistRecognition
     parseResult = entry.parse
     results = entry.results
 
-    # if recognized
-    #   recognizedAnimeEntry = recognize.entry
-    # else
-    #   suggestions = recognize.suggestions
-
     videoFile = entry.videoFile
 
     title = @clear(parseResult.AnimeTitle)
@@ -129,10 +124,6 @@ module.exports = class MyAnimelistRecognition
   #
   #
   cacheInBulk: (detectCache,list) ->
-    # cacheEntries = detectCache.getData()
-    # _forEach list,(entry) =>
-    #   cacheEntries.push @doCache(cacheEntries,entry.recognize,entry.parse,entry.videoFile,entry.owner)
-
     cached = detectCache.getData()
     _forEach list,(entry) =>
       @doCache(cached,entry)
@@ -153,11 +144,15 @@ module.exports = class MyAnimelistRecognition
 
   doRecognize: (title,library) ->
     results = []
-    _forEach library, (lib) =>
-      owner = lib.owner
-      list = lib.library
+    tryRecognize = @recognize(title,library)
 
-      results.push { owner: owner, recognize: @recognize(title,list) }
+    owner = ""
+    if tryRecognize.recognized
+      # get entry
+      entries = tryRecognize.entries
+      _forEach entries, (entry) =>
+        owner = entry.owner
+        results.push { owner: owner, recognize: tryRecognize }
     results
 
   #
@@ -169,13 +164,14 @@ module.exports = class MyAnimelistRecognition
     if chiika? && chiika.logger?
       chiika.logger.debug("Trying to recognize title #{title}")
     # Find the title in anime list
-    findInAnimelist = _find animelist, (o) => (@clear(o.animeTitle) == title)
+    findInAnimelist = _filter animelist, (o) => (@clear(o.animeTitle) == title)
 
-    result = {  }
+
+    result = { entries: [] }
     suggestions = []
 
-    if findInAnimelist?
-      result = { recognized: true, entry: findInAnimelist,suggestions: suggestions }
+    if findInAnimelist.length > 0
+      result = { recognized: true, entries: findInAnimelist,suggestions: suggestions }
     else
       recognized = false
       result.recognized = recognized
@@ -192,7 +188,7 @@ module.exports = class MyAnimelistRecognition
             if syn == title
               recognized = true
               result.recognized = recognized
-              result.entry = anime
+              result.entries.push anime
               return false
 
         if recognized

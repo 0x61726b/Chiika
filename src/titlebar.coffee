@@ -48,6 +48,12 @@ module.exports = React.createClass
     remote.getCurrentWindow().close()
 
   update: ->
+    onUpdateConfirm = ->
+      chiika.ipc.sendMessage 'squirrel', 'start-update'
+
+      chiika.toastLoading('Updating Chiika...',10000)
+
+    chiika.notificationManager.updateDialog(onUpdateConfirm)
 
   render: ->
     <div className="titlebar">

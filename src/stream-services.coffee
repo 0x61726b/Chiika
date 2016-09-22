@@ -14,7 +14,7 @@
 #//Description:
 #//----------------------------------------------------------------------------
 
-_forEach                = require 'lodash.foreach'
+_forEach                = require 'lodash/collection/forEach'
 stringjs                = require 'string'
 
 module.exports = class StreamServices

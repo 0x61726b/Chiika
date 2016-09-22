@@ -18,7 +18,7 @@ electron                            = require 'electron'
 {BrowserWindow,ipcMain,Tray,Menu}   = require 'electron'
 path = require 'path'
 
-_forEach                = require 'lodash.foreach'
+_forEach                = require 'lodash/collection/forEach'
 _assign                 = require 'lodash.assign'
 _when                   = require 'when'
 string                  = require 'string'

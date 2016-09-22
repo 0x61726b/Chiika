@@ -17,7 +17,7 @@
 
 path                    = require 'path'
 fs                      = require 'fs'
-_forEach                = require 'lodash.foreach'
+_forEach                = require 'lodash/collection/forEach'
 _when                   = require 'when'
 coffee                  = require 'coffee-script'
 string                  = require 'string'
@@ -149,6 +149,7 @@ module.exports = class APIManager
       @activeScripts = []
       processedFiles = 0
 
+
       for scriptDir in @scriptsDirs
         fs.readdir scriptDir,(err,files) =>
           fileCount = files.length
@@ -252,6 +253,7 @@ module.exports = class APIManager
           callback(null,path.join(chiika.getScriptCachePath(),stripExtension + '_cache.js'))
     else
       @scriptsConfig = { scripts: [] }
+      console.log @scriptsConfig
 
       @internalCompile js,file, (error,scriptPath) =>
         @scriptsConfig.scripts.push { name: file, timestamp: moment().add(10,'seconds').valueOf()}

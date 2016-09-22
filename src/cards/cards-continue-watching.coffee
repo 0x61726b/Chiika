@@ -18,7 +18,7 @@ React                                     = require('react')
 CardMixin                                 = require './card-view'
 _find                                     = require 'lodash/collection/find'
 _indexOf                                  = require 'lodash/array/indexOf'
-_forEach                                  = require 'lodash.foreach'
+_forEach                                  = require 'lodash/collection/forEach'
 
 module.exports = React.createClass
   mixins: [CardMixin]

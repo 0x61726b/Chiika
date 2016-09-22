@@ -15,8 +15,9 @@
 #----------------------------------------------------------------------------
 
 {autoUpdater}           = require 'electron'
+{Emitter,Disposable}    = require 'event-kit'
 
-_forEach                = require 'lodash.foreach'
+_forEach                = require 'lodash/collection/forEach'
 _assign                 = require 'lodash.assign'
 _when                   = require 'when'
 _find                   = require 'lodash/collection/find'
@@ -25,30 +26,75 @@ string                  = require 'string'
 
 module.exports = class UpdateManager
   constructor: ->
-    autoUpdater.setFeedURL("https://chiika.herokuapp.com/download/latest")
+    @feed = "https://chiika.herokuapp.com/download/latest"
+    autoUpdater.setFeedURL("#{@feed}")
 
     @handleEvents()
 
+    closeUpdateWindow = =>
+      @updaterWindow.close()
+      @updaterWindow = null
+
+    hideUpdateWindow = =>
+      @updaterWindow.hide()
+
+      setTimeout(closeUpdateWindow,10000)
+
+
+
+    chiika.emitter.on 'update-error', =>
+      hideUpdateWindow()
+      chiika.emitter.emit 'updater-ready'
+
+    chiika.emitter.on 'update-available', =>
+      @sendToUpdaterWindow 'update-available'
+
+    chiika.emitter.on 'update-downloaded', =>
+      @sendToUpdaterWindow 'update-downloaded'
+
+      autoUpdater.quitAndInstall()
+
+    chiika.emitter.on 'update-not-available', =>
+      hideUpdateWindow()
+
+      chiika.emitter.emit 'updater-ready'
+
+
   checkForUpdates: ->
-    autoUpdater.checkForUpdates()
+    chiika.logger.info("Checking for updates...")
+    try
+      autoUpdater.checkForUpdates()
+    catch error
+      console.log error
+
+
+  sendToUpdaterWindow: (message,params) ->
+    if @updaterWindow?
+      @updaterWindow.webContents.send message,{ message: message, params: params }
+
+  check: ->
+    updateWindowReady = =>
+      @checkForUpdates()
+
+    @updaterWindow = chiika.updaterWindow(updateWindowReady)
 
   handleEvents: ->
     autoUpdater.on 'update-available', () =>
-      console.log "Update available"
+      chiika.logger.info("New update available!")
       chiika.emitter.emit 'update-available'
 
     autoUpdater.on 'update-downloaded', () =>
-      console.log "Update downloaded"
+      chiika.logger.info("New update is downloaded!")
       chiika.emitter.emit 'update-downloaded'
 
     autoUpdater.on 'error', (e) =>
-      console.log "errror #{e}"
+      chiika.logger.info("Update error!")
       chiika.emitter.emit 'update-error',e
 
     autoUpdater.on 'checking-for-update', () =>
-      console.log "Checking for update"
+      chiika.logger.info("Checking for updates on #{@feed}!")
       chiika.emitter.emit 'checking-for-update'
 
     autoUpdater.on 'update-not-available', () =>
-      console.log "Update not available"
+      chiika.logger.info("No new update is available.")
       chiika.emitter.emit 'update-not-available'

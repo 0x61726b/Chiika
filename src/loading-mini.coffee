@@ -30,19 +30,11 @@ module.exports = React.createClass
         duration: 1500,
         easing: 'easeInOutQuad'
       },
-      scale: {
-        value: 2,
-        delay: 150,
-        duration: 850,
-        easing: 'easeInOutExpo',
-      },
       direction: 'alternate',
       loop: true
     })
 
   render: () ->
-    (<div style={{width: 'inherit',height:'inherit',align:'center'}}>
-      <div>
-        <img src="#{__dirname}/assets/images/logo.svg" style={{width: 72,height:72}} className="anime" alt="" />
-      </div>
+    (<div>
+      <img src="#{__dirname}/assets/images/logo.svg" style={{width: 72,height:72}} className="anime" alt="" />
     </div>)

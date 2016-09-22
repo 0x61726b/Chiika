@@ -21,7 +21,7 @@ React = require('react')
 
 _find                   = require 'lodash/collection/find'
 _indexOf                = require 'lodash/array/indexOf'
-_forEach                = require 'lodash.foreach'
+_forEach                = require 'lodash/collection/forEach'
 _filter                 = require 'lodash/collection/filter'
 
 path                    = require 'path'
@@ -111,6 +111,18 @@ SideMenu = React.createClass
       menuItemsOfThisCategory.map (menuItem,j) =>
         @renderMenuItem(menuItem,j + 1)
 
+  userAvatarContextMenu: ->
+    console.log "test"
+
+    menuItems = []
+    menuItems.push ( { type: 'separator'})
+    _forEach chiika.users, (user) =>
+      isDefault = user.isDefault
+
+      menuItems.push ( { type: 'checkbox', label: "#{user.realUserName} - #{user.owner}", checked: isDefault})
+
+    chiika.popupContextMenu(menuItems)
+
   getCoverImage: ->
     defaultUser = _find chiika.users, (o) -> o.isDefault == true
     if defaultUser?
@@ -132,7 +144,7 @@ SideMenu = React.createClass
           <img className="chiikaLogo" src="../assets/images/topLeftLogo.png"/>
         </div>
         <Link to="User" className="userArea noDecoration">
-          <div className="imageContainer">
+          <div className="imageContainer" title="Right click to swap primary user" onContextMenu={@userAvatarContextMenu}>
             <img id="userAvatar" className="img-circle avatar" src="#{@getCoverImage()}"/>
           </div>
           <div className="userInfo">

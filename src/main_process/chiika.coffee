@@ -21,11 +21,9 @@
 {app,BrowserWindow}               = require 'electron'
 path                              = require 'path'
 
-
 {Emitter,Disposable}              = require 'event-kit'
 string                            = require 'string'
 
-menubar                           = require './menubar'
 Logger                            = require './logger'
 #
 
@@ -48,6 +46,8 @@ NotificationBar                   = require './notification-bar'
 UpdateManager                     = require './update-manager'
 
 
+process.on 'exit', (code) ->
+  console.log "Exiting.. #{code}"
 
 process.on 'uncaughtException',(err) ->
   # chiika.logger.log 'error', 'Fatal uncaught exception crashed cluster', err, (err, level, msg, meta) =>
@@ -126,7 +126,7 @@ class Application
     @viewManager        = new ViewManager()
     @uiManager          = new UIManager()
     @mediaManager       = new MediaManager()
-    @chiikaApi          = new ChiikaPublicApi( { logger: @logger, db: @dbManager, parser: @parser, ui: @uiManager, viewManager: @viewManager })
+    @chiikaApi          = new ChiikaPublicApi()
     @windowManager      = new WindowManager()
     @appDelegate        = new AppDelegate()
     @ipcManager         = new IpcManager()
@@ -136,8 +136,6 @@ class Application
 
     @ipcManager.handleEvents()
 
-
-
     app.commandLine.appendSwitch('--disable-2d-canvas-image-chromium');
     app.commandLine.appendSwitch('--disable-accelerated-2d-canvas');
     app.commandLine.appendSwitch('--disable-gpu');
@@ -146,15 +144,16 @@ class Application
 
     @appDelegate.run()
 
-
     @appDelegate.ready =>
       @mediaManager.initialize()
       @notificationBar.create()
 
-      @dbManager.onLoad =>
-        @run()
-        @handleEvents()
+      @emitter.on 'updater-ready', =>
+        @dbManager.onLoad().then =>
+          @run()
+          @handleEvents()
 
+      @updateManager.check()
 
   run: ->
     #
@@ -187,11 +186,6 @@ class Application
                     chiika.windowManager.createLoginWindow()
 
 
-
-
-    # If there are no users but there are view data
-    # preload view data first, this way scripts can instantly access view data without waiting
-    #
     if userCount == 0 && viewCount > 0
       @apiManager.preCompile().then =>
         @apiManager.postCompile()
@@ -220,8 +214,6 @@ class Application
           @apiManager.postInit()
 
           chiika.windowManager.createMainWindow()
-
-
 
 
 
@@ -283,17 +275,30 @@ class Application
   getScriptCachePath: ->
     path.join(@chiikaHome,'cache','scripts')
 
-  installerWindow: ->
+  updaterWindow: (callback) ->
     options =
-      width: 600
-      height: 600
+      width: 400
+      height: 400
       backgroundColor: '#2e2c29'
       frame: false
+      show: false
       icon: "resources/icon.png"
       title: 'Chiika'
+      skipTaskbar: true
     installerWindow = new BrowserWindow options
     installerWindow.loadURL("file://#{__dirname}/../static/update-window.html")
-    installerWindow.openDevTools({ detach: true })
+
+
+
+    # if @devMode
+    #   installerWindow.openDevTools({ detach: true })
+
+    installerWindow.once 'ready-to-show',() =>
+      installerWindow.show()
+      callback?()
+
+    return installerWindow
+
 
 
 

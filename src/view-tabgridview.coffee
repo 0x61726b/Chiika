@@ -18,7 +18,7 @@ React                                   = require('react')
 remote                                  = require('electron').remote
 {MenuItem}                              = require('electron').remote
 _find                                   = require 'lodash/collection/find'
-_forEach                                = require 'lodash.foreach'
+_forEach                                = require 'lodash/collection/forEach'
 _indexOf                                = require 'lodash/array/indexOf'
 _remove                                 = require 'lodash/array/remove'
 _assign                                 = require 'lodash.assign'
@@ -26,7 +26,6 @@ _cloneDeep                              = require 'lodash.clonedeep'
 {ReactTabs,Tab,Tabs,TabList,TabPanel}   = require 'react-tabs'
 Loading                                 = require './loading'
 ReactList                               = require 'react-list'
-Sortable                                = require 'react-sortablejs'
 moment                                  = require 'moment'
 
 module.exports = React.createClass

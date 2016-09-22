@@ -17,7 +17,7 @@
 React                               = require('react')
 ReactDOM                            = require("react-dom")
 Chart                               = require 'chart.js'
-_forEach                            = require 'lodash.foreach'
+_forEach                            = require 'lodash/collection/forEach'
 {remote,ipcRenderer,shell}          = require 'electron'
 
 window.$ = window.jQuery = require('jQuery')

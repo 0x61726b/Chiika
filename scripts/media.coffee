@@ -19,7 +19,7 @@ fs            = require 'fs'
 
 
 
-_forEach      = scriptRequire 'lodash.foreach'
+_forEach      = scriptRequire 'lodash/collection/forEach'
 _pick         = scriptRequire 'lodash/object/pick'
 _find         = scriptRequire 'lodash/collection/find'
 _indexOf      = scriptRequire 'lodash/array/indexOf'
@@ -259,29 +259,29 @@ module.exports = class Media
     @on 'scan-library', (args) =>
       libraryPaths = @chiika.settingsManager.getOption('LibraryPaths')
 
-      libraryDataByOwner = @libraryDataByOwner()
+      animeDbView = @chiika.viewManager.getViewByName('anime_db')
+      animeDbData = animeDbView.getData()
 
-      if libraryDataByOwner.length > 0
-        @chiika.media.runLibraryProcess libraryPaths,libraryDataByOwner, (results) =>
+      if animeDbData.length > 0
+        @chiika.media.runLibraryProcess libraryPaths,animeDbData, (results) =>
           detectCache = @chiika.viewManager.getViewByName('anime_detect_cache')
 
 
           @recognition.cacheInBulk(detectCache,results)
-
-
+          #
+          #
           args.return({ recognizedFiles: results.length })
-
+          #
           @chiika.requestViewDataUpdate('media','chiika_library')
 
 
     @on 'system-event', (event) =>
       @chiika.logger.script("[yellow](#{@name}) system-event - #{event.name}")
 
-      if event.name == 'md-detect' or (event.name == 'shortcut-pressed' and event.params.action == 'test')
+      if event.name == 'md-detect'
         @tryRecognize(event.params)
 
-            #@chiika.sendMessageToWindow('main','get-ui-data-by-name-response',{ name: 'cards_currentlyWatching', item: @chiika.ui.getUIItem('cards_currentlyWatching') } )
-      if event.name == 'md-close' or (event.name == 'shortcut-pressed' and event.params.action == 'test2')
+      if event.name == 'md-close'
         view = @chiika.viewManager.getViewByName('cards_currentlyWatching')
 
         @chiika.closeNotificationWindow()
@@ -371,24 +371,18 @@ module.exports = class Media
   tryRecognize: (params) ->
     anitomy = params.parse
     videoFile = params.videoFile
-    cacheList = params.cace
 
     title = anitomy.AnimeTitle
     group = anitomy.ReleaseGroup
 
     # Search title in local list
-    animelistView   = @chiika.viewManager.getViewByName('myanimelist_animelist')
-    animeExtraView   = @chiika.viewManager.getViewByName('myanimelist_animeextra')
-    if animelistView?
-      animelist = animelistView.getData()
-      animeextra = []
-      if animeExtraView?
-        animeextra = animeExtraView.getData()
+    animeDbView   = @chiika.viewManager.getViewByName('anime_db')
 
-      recognize = @recognition.recognize(title,animelist,animeextra)
+    if animeDbView?
+      animeDbData = animeDbView.getData()
+
+      recognize = @recognition.recognize(title,animeDbData)
       recognized = recognize.recognized
-
-
 
       if !recognized
         # Check cache
@@ -405,18 +399,18 @@ module.exports = class Media
             recognized = true
 
             title = c.title
-            recognize = @recognition.recognize(title,animelist,animeextra)
+            recognize = @recognition.recognize(title,animelist)
             return false
 
 
       if recognized
         @chiika.createNotificationWindow 200,() =>
-          layout = { title: anitomy.AnimeTitle, episode: anitomy.EpisodeNumber,image: recognize.entry.animeImage, imageLink: "myanimelist.net/anime/#{recognize.entry.id}" }
+          layout = { title: anitomy.AnimeTitle, episode: anitomy.EpisodeNumber,image: recognize.entries[0].animeImage }
           @chiika.sendMessageToWindow 'notification','notf-bar-recognized', layout
 
         @chiika.emit 'create-card', { name: 'cards_currentlyWatching' }
 
-        @chiika.requestViewUpdate 'cards_currentlyWatching','cards', null, { entry: recognize.entry,parse: anitomy }
+        @chiika.requestViewUpdate 'cards_currentlyWatching','cards', null, { entry: recognize.entries[0],parse: anitomy }
 
       else
         @chiika.createNotificationWindow 250, =>

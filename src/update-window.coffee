@@ -17,15 +17,55 @@
 React                               = require('react')
 ReactDOM                            = require("react-dom")
 {remote,ipcRenderer,shell}          = require 'electron'
+LoadingMini                         = require '../loading-mini'
 
 window.$ = window.jQuery = require('jQuery')
 
 UpdateWindow = React.createClass
+  getInitialState: ->
+    update: 'checking-for-update'
+  componentDidMount: ->
+    ipcRenderer.on 'update-available', (event,args) =>
+      @setState { update: args.message }
+
+    ipcRenderer.on 'update-error', (event,args) =>
+      @setState { update: args.message }
+
+    ipcRenderer.on 'update-available', (event,args) =>
+      @setState { update: args.message }
+
+    ipcRenderer.on 'update-not-available', (event,args) =>
+      @setState { update: args.message }
+
+    ipcRenderer.on 'update-downloaded', (event,args) =>
+      @setState { update: args.message }
+
+  componentDidUpdate: ->
+    console.log @state
   render: ->
-    <div>
-      <div style={{marginLeft: 250,marginTop: 250, color: 'white'}}>
-        Installing Chiika...
+    <div className="update-window">
+      <div className="update-window-row">
+        <div className="updater-window-item">
+          <div className="updater-loading-logo">
+            <LoadingMini />
+          </div>
+        </div>
+      </div>
+      <div className="updater-window-item">
+        {
+          if @state.update == 'checking-for-update'
+            <div className="updater-window-info">Checking for updates..</div>
+          else if @state.update == 'update-error'
+            <div className="updater-window-info">Error when updating!</div>
+          else if @state.update == 'update-available'
+            <div className="updater-window-info">Downloading new update..</div>
+          else if @state.update == 'update-downloaded'
+            <div className="updater-window-info">Downloaded!</div>
+          else if @state.update == 'update-not-available'
+            <div className="updater-window-info">Chiika is up-to-date!</div>
+        }
       </div>
     </div>
+
 
 ReactDOM.render(React.createElement(UpdateWindow), document.getElementById('app'))

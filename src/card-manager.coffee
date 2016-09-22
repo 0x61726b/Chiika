@@ -18,7 +18,7 @@ React                               = require('react')
 
 _find                               = require 'lodash/collection/find'
 _indexOf                            = require 'lodash/array/indexOf'
-_forEach                            = require 'lodash.foreach'
+_forEach                            = require 'lodash/collection/forEach'
 CardViews                           = require './cards'
 
 module.exports = class CardManager
