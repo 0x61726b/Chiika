@@ -329,6 +329,7 @@ do Your_Application_will_ = () ->
     gulp.watch([serveDir + '/main_process/notification-bar.js'], electron.restart)
     gulp.watch([serveDir + '/main_process/media-recognition.js'], electron.restart)
     gulp.watch([serveDir + '/main_process/media-library-process.js'], electron.restart)
+    gulp.watch([serveDir + '/main_process/browser-extension-manager.js'], electron.restart)
 
   gulp.task 'clean', (done) ->
     del [serveDir, distDir, releaseDir], () -> done()

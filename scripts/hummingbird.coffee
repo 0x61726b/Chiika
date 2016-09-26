@@ -482,8 +482,11 @@ module.exports = class Hummingbird
         args.return(entry.animeType)
 
     @on 'get-anime-values', (args) =>
-      @chiika.logger.script("[yellow](#{@name}) get-anime-values #{args.entry.hmb_id}")
-      args.return @getAnimeValues(args.entry)
+      if args.entry.hmb_id?
+        @chiika.logger.script("[yellow](#{@name}) get-anime-values #{args.entry.hmb_id}")
+        args.return @getAnimeValues(args.entry)
+      else
+        chiika.logger.error("[yellow](#{@name}) get-anime-values without hmb_id")
 
     @on 'set-user-login', (args,callback) =>
       @chiika.logger.script("[yellow](#{@name}) Auth in process " + args.user)

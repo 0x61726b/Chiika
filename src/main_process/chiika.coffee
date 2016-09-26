@@ -18,16 +18,16 @@
 #--------------------
 #
 #--------------------
+
+
 {app,BrowserWindow}               = require 'electron'
 path                              = require 'path'
-
 
 {Emitter,Disposable}              = require 'event-kit'
 string                            = require 'string'
 
 Logger                            = require './logger'
 #
-
 APIManager                        = require './api-manager'
 DbManager                         = require './database-manager'
 RequestManager                    = require './request-manager'
@@ -45,6 +45,7 @@ AppOptions                        = require './options'
 AppDelegate                       = require './app-delegate'
 NotificationBar                   = require './notification-bar'
 UpdateManager                     = require './update-manager'
+BrowserExtensionManager           = require './browser-extension-manager'
 
 
 process.on 'exit', (code) ->
@@ -135,6 +136,7 @@ class Application
     @shortcutManager    = new ShortcutManager()
     @notificationBar    = new NotificationBar()
     @updateManager      = new UpdateManager()
+    @browserManager     = new BrowserExtensionManager()
 
     @ipcManager.handleEvents()
 

@@ -30,11 +30,16 @@ anitomyPath = '../vendor/anitomy-node/AnitomyNode'
 
 class Win32MediaDetect
   md: null
+  browserTitleLinkMap: {}
   detectedPlayers: []
   constructor: ->
     @mediaPlayers = JSON.parse((process.argv[2]))
 
-    @disableBrowserDetection = true
+    @enableMediaPlayerDetection = JSON.parse((process.argv[3]))
+    @enableBrowserDetection = JSON.parse((process.argv[4]))
+
+    process.send "Browser: #{@enableBrowserDetection}"
+    process.send "Mp: #{@enableMediaPlayerDetection}"
 
     try
       @md = require(mdPath)
@@ -67,10 +72,15 @@ class Win32MediaDetect
       process.send(obj.stack)
       process.send(error.message)
 
+  removeBrowserTitle: (title,browser) ->
+    string(title).chompRight(" - " + browser.name).s
+
 
   lookForMediaPlayers: ->
     currentWindows = @md.GetCurrentWindows() # Native method
     _forEach @mediaPlayers, (mediaPlayer) =>
+      if !mediaPlayer.enabled
+        return
       findMp = _filter currentWindows.PlayerArray, (o) -> o.windowClass == mediaPlayer.class
 
       if findMp.length > 0
@@ -96,7 +106,10 @@ class Win32MediaDetect
             if !checkIfMpWasRunningLastTick?
               skip = false
 
-              if mediaPlayer.browser? && @disableBrowserDetection
+              if mediaPlayer.browser? && !@enableBrowserDetection
+                skip = true
+
+              if !mediaPlayer.browser? && !@enableMediaPlayerDetection
                 skip = true
 
               if !skip
@@ -125,10 +138,19 @@ class Win32MediaDetect
 
           AnitomyParse = @anitomy.Parse(videoFileName) # Native
 
-          state = { status: 'md-running-video', player: mostRecent, videoFile: videoFile, parse: AnitomyParse }
+          state = { status: 'md-running-video', player: mostRecent, videoFile: videoFile, parse: AnitomyParse,detectionSource: 'player' }
           process.send(state)
         else
           process.send({ status: 'md-video-not-video-file'})
+
+      else
+        windowTitle = @removeBrowserTitle(mostRecent.windowTitle,mostRecent.browser)
+
+        if @md.CheckIfTabIsOpen({ Handle: mostRecent.Handle, Browser:mostRecent.browser.browser, Title: windowTitle })
+          url = @md.GetActiveTabLink({ Handle:mostRecent.Handle, Browser:mostRecent.browser.browser })
+
+          process.send({ status: 'md-browser', browser: mostRecent, url: url, title: windowTitle, detectionSource: 'browser' })
+
     else
       process.send({ status: 'md-no-video'})
 

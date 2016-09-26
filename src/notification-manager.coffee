@@ -17,6 +17,7 @@
 _find                               = require 'lodash/collection/find'
 _indexOf                            = require 'lodash/array/indexOf'
 _forEach                            = require 'lodash/collection/forEach'
+_assign                             = require 'lodash.assign'
 CardViews                           = require './cards'
 
 module.exports = class NotificationManager
@@ -25,6 +26,11 @@ module.exports = class NotificationManager
 
   dialog: (title,message,confirmText,confirm) ->
     chiika.notification({ title:title, type: 'dialog', message: message, confirmText: confirmText,confirm: confirm })
+
+  info: (title,message,params) ->
+    swal = { title:title, type: 'info', message: message }
+    _assign swal,params
+    chiika.notification(swal)
 
   prompt: (message,action) ->
     chiika.notification({ type: 'prompt', message: message, action: action })
@@ -40,3 +46,28 @@ module.exports = class NotificationManager
 
   deleteFromListConfirmation: (title,callback) ->
     @dialog('Are you sure?',"Delete #{title} from your library?", 'Delete',callback)
+
+  browserExtensionWarning: ->
+    @info("Streaming","In order to make everything smooth,
+    <ul>
+      <li>If chrome is open right now, restart it or reload chiika-chrome extension.</li>
+      <li>we should advise that you turn off 'Stream Detection' when using this option.
+      See <a id='streaming-warning-docs' href='#'>here</a> for more info!</li>
+    </ul>", { html: true })
+    $("#streaming-warning-docs").click (e) =>
+      e.preventDefault()
+      chiika.openShellUrl('https://github.com/arkenthera/Chiika/docs/streaming.md')
+
+
+  linuxOsxStreamingWarning: ->
+    @info("Streaming on Linux/OSX", "In order for detection to work, we advise you to download our
+    <a id='streaming-warning-firefox' href='#'>firefox</a> or
+    <a id='streaming-warning-chrome' href='#'>chrome</a> extensions.", { html: true })
+
+    $("#streaming-warning-chrome").click (e) =>
+      e.preventDefault()
+      chiika.openShellUrl('https://github.com/arkenthera/Chiika/docs/streaming.md')
+
+    $("#streaming-warning-firefox").click (e) =>
+      e.preventDefault()
+      chiika.openShellUrl('https://github.com/arkenthera/Chiika/docs/streaming.md')

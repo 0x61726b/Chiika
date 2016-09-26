@@ -31,11 +31,54 @@ module.exports =
   NoTransparentWindows: false
 
   #Detection
-  DisableAnimeRecognition: false
+  EnableMediaPlayerDetection: false
   EnableBrowserDetection: false
+  EnableNotificationsForBrowserDetection: true
+  EnableBrowserExtensionDetection: false
+  UpdateDelayAfterDetection: 120
 
   LibraryPaths: [
     'E:/Anime'
+  ]
+
+  # Taken from Taiga
+  # github.com/erengy/taiga
+  MediaPlayerConfig: [
+    { name: "MPC" , class: "MediaPlayerClassicW", executables: ['mpc-hc', 'mpc-hc64'], enabled: true },
+    { name: "BSPlayer" , class: "BSPlayer", executables: ['bsplayer'], enabled: false },
+    { name: "Google Chrome" , class: "Chrome_WidgetWin_1", browser:0, executables: ['chrome'], enabled: true },
+    { name: "Mozilla Firefox" , class: "MozillaWindowClass", browser: 1, executables: ['firefox'], enabled: true },
+    { name: "ACE Player HD (VLC)" , class: "QWidget", executables: ['ace_player'], enabled: false },
+    { name: "ALLPlayer" , class: "TApplication", executables: ['ALLPlayer'], enabled: false },
+    { name: "Baka MPlayer" , class: "Qt5QWindowIcon", executables: ['Baka MPlayer'], enabled: false },
+    { name: "BESTplayer" , class: "TBESTplayerApp.UnicodeClass", executables: ['BESTplayer'], enabled: false },
+    { name: "Bomi Player" , class: "Qt5QWindowGLOwnDCIcon", executables: ['bomi'], enabled: false },
+    { name: "DivX Player" , class: "QWidget", executables: ['DivX Player.exe','DivX Plus Player'], enabled: false },
+    { name: "GOM Player" , class: "GomPlayer1.x", executables: ['GOM'], enabled: false },
+    { name: "Kantaris Media Player" , class: "WindowsForms10.Window.20008.app.0.378734a", executables: ['Kantaris'], enabled: false },
+    { name: "Kodi" , class: "Kodi", executables: ['Kodi'], enabled: false },
+    { name: "Kodi XBMC" , class: "XBMC", executables: ['XBMC'], enabled: false },
+    { name: "Light Alloy" , class: "LightAlloyFront", executables: ['LA'], enabled: false },
+    { name: "Miro" , class: "gdkWindowToplevel", executables: ['Miro'], enabled: false },
+    { name: "MPCSTAR" , class: "wxWindowClassNR", executables: ['mpcstar'], enabled: false },
+    { name: "MPDN" , class: "FilterGraphWindow", executables: ['MediaPlayerDotNet'], enabled: false },
+    { name: "MPDN" , class: "VsyncWindowClass", executables: ['MediaPlayerDotNet'], enabled: false },
+    { name: "mpv" , class: "mpv", executables: ['mpv'], enabled: false },
+    { name: "MV2Player" , class: "TApplication", executables: ['Mv2Player'], enabled: false },
+    { name: "PotPlayer" , class: "PotPlayer", executables: ['Miro'], enabled: false },
+    { name: "PotPlayer64" , class: "PotPlayer64", executables: ['PotPlayer','PotPlayer64','PotPlayerMini','PotPlayerMini64'], enabled: false },
+    { name: "SMPlayer" , class: "QWidget", executables: ['smplayer','smplayer2'], enabled: false },
+    { name: "Splash Lite" , class: "DX_DISPLAY0", executables: ['SplashLite'], enabled: false },
+    { name: "SPlayer" , class: "MediaPlayerClassicW", executables: ['splayer'], enabled: false },
+    { name: "UMPlayer" , class: "QWidget", executables: ['umplayer'], enabled: false },
+    { name: "VLC Media Player" , class: "QWidget", executables: ['vlc'], enabled: false },
+    { name: "VLC Media Player" , class: "Qt5QWindowIcon", executables: ['vlc'], enabled: false },
+    { name: "VLC Media Player" , class: "VLC DirectX", executables: ['vlc'], enabled: false },
+    { name: "Winamp" , class: "Winamp v1.x", executables: ['winamp'], enabled: false },
+    { name: "Windows Media Center" , class: "eHome Render Window", executables: ['ehshell'], enabled: false },
+    { name: "Windows Media Player" , class: "WMPlayerApp", executables: ['wmplayer'], enabled: false },
+    { name: "Windows Media Player" , class: "WMP Skin Host", executables: ['wmplayer'], enabled: false },
+    { name: "Zoom Player" , class: "TApplication", executables: ['zplayer'], enabled: true }
   ]
   #Grid
   FilterGridImmediately: true

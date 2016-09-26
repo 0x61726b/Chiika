@@ -15,8 +15,13 @@
 #//----------------------------------------------------------------------------
 
 
-stringjs = require 'string'
+stringjs                = require 'string'
+_forEach                = require 'lodash/collection/forEach'
 
+#
+# Adapted from erengy/Taiga https://github.com/erengy/taiga
+# Huge thanks to him for his wonderful work.
+#
 module.exports = class StreamServices
   streamServices:[
     { name: 'AnimeLab', identifiers: ['animelab.com/player/'] },
@@ -31,8 +36,8 @@ module.exports = class StreamServices
   ]
   getStreamServiceFromUrl: (url) ->
     streamService = undefined
-    _.forEach @streamServices, (v,k) =>
-      _.forEach v.identifiers, (vi,ki) =>
+    _forEach @streamServices, (v,k) =>
+      _forEach v.identifiers, (vi,ki) =>
         match = url.match vi
         if match?
           streamService = v

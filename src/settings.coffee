@@ -36,6 +36,9 @@ CheckboxOption = React.createClass
     @setState { checked: $(e.target).prop('checked')}
 
     chiika.setOption(@state.id,$(e.target).prop('checked'))
+
+    if @props.onChange?
+      @props.onChange($(e.target).prop('checked'))
   render: ->
     <div>
       <label className="checkbox danger">
@@ -110,6 +113,25 @@ DropdownOption = React.createClass
       </span>
     </div>
 
+
+TextInputOption = React.createClass
+  getInitialState: ->
+    label: ''
+
+
+  componentDidMount: () ->
+    optionValue = chiika.getOption(@props.id)
+    @setState { label: @props.label, option: optionValue }
+
+  onChange: (e) ->
+    value = $(e.target).val()
+    @props.onChange(value)
+  render: ->
+    <div>
+      { @state.label } <input type="number" placeholder="#{@state.option}" onChange={@onChange} className="form-control" id="input-option" />
+    </div>
+
+
 AppSettings = React.createClass
   getCurrentTheme: ->
     chiika.appSettings['Theme']
@@ -121,7 +143,6 @@ AppSettings = React.createClass
   render: ->
     <div>
       <div className="card">
-        <CheckboxOption label="Disable Anime Recognition" id="DisableAnimeRecognition" />
         <CheckboxOption label="Remember Window Position & Size" id="RememberWindowSizeAndPosition" />
         <CheckboxOption label="Close to tray" id="CloseToTray" />
         <CheckboxOption label="Minimize to tray" id="MinimizeToTray" />
@@ -166,12 +187,33 @@ Recognition = React.createClass
       chiika.setOption('LibraryPaths',folders)
   scanLibrary: ->
     chiika.scanLibrary()
+  onUpdateDelayChange: (value) ->
+    toInt = 120
+    try
+      toInt = parseInt(value,10)
+    catch error
+      chiika.logger.error("Parsing error at onUpdateDelayChange")
+
+    chiika.setOption('UpdateDelayAfterDetection',toInt)
+
+  onBrowserExtensionChange: (v) ->
+    if v
+      chiika.notificationManager.browserExtensionWarning()
 
   render: ->
-    <div className="card">
-      <textarea className="text-input" name="description" disabled value={@state.libraryPaths} onChange={@onChange} />
-      <button type="button" className="button raised primary" onClick={@openDialog}>Browse..</button>
-      <button type="button" className="button raised primary" onClick={@scanLibrary}>Scan library</button>
+    <div>
+      <div className="card">
+        <textarea className="text-input" name="description" disabled value={@state.libraryPaths} onChange={@onChange} />
+        <button type="button" className="button raised primary" onClick={@openDialog}>Browse..</button>
+        <button type="button" className="button raised primary" onClick={@scanLibrary}>Scan library</button>
+      </div>
+      <div className="card">
+        <CheckboxOption label="Enable Media Player Detection" id="EnableMediaPlayerDetection" />
+        <CheckboxOption label="Enable Stream Detection" id="EnableBrowserDetection" />
+        <CheckboxOption label="Enable Notifications for Stream Detection" id="EnableNotificationsForBrowserDetection" />
+        <CheckboxOption label="Enable Browser Extension Detection" id="EnableBrowserExtensionDetection" onChange={@onBrowserExtensionChange} />
+        <TextInputOption label="Auto Update Delay After Detection" id="UpdateDelayAfterDetection" onChange={@onUpdateDelayChange} />
+      </div>
     </div>
 
 ListGeneral = React.createClass

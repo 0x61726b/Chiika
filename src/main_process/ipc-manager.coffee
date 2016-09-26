@@ -57,6 +57,7 @@ module.exports = class IpcManager
       chiika.logger.info("[yellow](IPC-Manager) Received message #{message}")
       callback(event,args)
 
+
   #
   #
   #

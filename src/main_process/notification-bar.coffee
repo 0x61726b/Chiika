@@ -29,8 +29,9 @@ module.exports = class NotificationBar
   clickCount: 0
 
   hide: ->
-    chiika.logger.info("Hide notification bar")
-    @notfWindow.hide()
+    if @notfWindow?
+      chiika.logger.info("Hide notification bar")
+      @notfWindow.hide()
 
   show: ->
     chiika.logger.info("Show notification bar")
@@ -86,6 +87,15 @@ module.exports = class NotificationBar
   sendMessage: (message,args) =>
     @notfWindow.webContents.send message,args
 
+  clearFade: ->
+    if @blurTimeout?
+      clearTimeout(@blurTimeout)
+      @blurTimeout = null
+
+    if @afterFadeTimeout?
+      clearTimeout(@afterFadeTimeout)
+      @afterFadeTimeout = null
+
 
   #
   #
@@ -96,6 +106,7 @@ module.exports = class NotificationBar
     width = 400
     height = size
 
+    chiika.logger.info("Creating Notification Window")
 
     notificationWindow = new BrowserWindow {
       width: width,
@@ -123,29 +134,43 @@ module.exports = class NotificationBar
     defaultPosition = { x: display.width - width, y: (display.height - height) }
     position = defaultPosition
 
-    if process.platform != 'linux'
-      trayBounds = @tray.getBounds()
-
-
-      position.x = defaultPosition.x - trayBounds.width
-      position.y = trayBounds.y - height
-
-    console.log position
     @notfWindow.setPosition(position.x,position.y)
     @notfWindow.on 'ready-to-show', =>
       @notfWindow.setPosition(position.x,position.y)
       @notfWindow.show()
+      @notfWindow.openDevTools({ detach: true })
 
       callback?()
+
+      # Fake real notification by fading in/out
+      @notfWindow.on 'focus', =>
+        @notfWindow.webContents.send 'fade', 'stop-fading'
+
+        @clearFade()
+
+      @notfWindow.on 'blur', =>
+        startFading = =>
+          if @notfWindow?
+            @notfWindow.webContents.send 'fade', 'start-fading'
+
+            afterFade = =>
+              @hide()
+
+            @afterFadeTimeout = setTimeout(afterFade,2000)
+        @blurTimeout = setTimeout(startFading,2000)
 
     @notfWindow.on 'close', (event) =>
       if @enableNotfBar
         event.preventDefault()
 
+      @clearFade()
+
       # hideAfterSomeTime = =>
       #   @hide()
       # setTimeout(hideAfterSomeTime,5000)
 
-    @notfWindow.on 'closed', ->
+    @notfWindow.on 'closed', =>
       @notfWindow = null
       @enableNotfBar = false
+
+      @clearFade()

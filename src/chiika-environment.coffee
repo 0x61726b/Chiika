@@ -190,6 +190,7 @@ class ChiikaEnvironment
       title: title
       text: message
       type: type
+      html: if notf.html? then true else false
 
     if type == 'dialog'
       type = 'info'

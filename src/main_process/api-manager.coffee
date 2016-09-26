@@ -202,7 +202,6 @@ module.exports = class APIManager
 
 
                   if processedFiles == fileCount
-                    console.log @scriptsConfig
                     chiika.logger.info("Saving config file scripts")
                     chiika.settingsManager.saveConfigFile('scripts',@scriptsConfig)
                     resolve()
@@ -253,7 +252,6 @@ module.exports = class APIManager
           callback(null,path.join(chiika.getScriptCachePath(),stripExtension + '_cache.js'))
     else
       @scriptsConfig = { scripts: [] }
-      console.log @scriptsConfig
 
       @internalCompile js,file, (error,scriptPath) =>
         @scriptsConfig.scripts.push { name: file, timestamp: moment().add(10,'seconds').valueOf()}

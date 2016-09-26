@@ -25,6 +25,7 @@ window.$ = window.jQuery = require('jQuery')
 NotificationBar = React.createClass
   getInitialState: ->
     recognized: false
+    updateDelay: 120 # Default
     layout:
       title: ''
       suggestions: []
@@ -79,15 +80,38 @@ NotificationBar = React.createClass
       console.log "notf-bar-recognized"
       console.log args
       layout = { title: args.title, episode: args.episode,image: args.image,imageLink: args.imageLink }
-      @setState { recognized: true, layout: layout }
+      @setState { recognized: true, layout: layout, updateDelay: args.updateDelay }
+
+
+    ipcRenderer.on 'fade', (event,args) =>
+      console.log args
+      if args == 'stop-fading' # Focus
+        if @afterFadeTimeout?
+          clearTimeout(@afterFadeTimeout)
+          @afterFadeTimeout = null
+
+        if $(".desktop-notification").hasClass 'dn-fade-out'
+          $(".desktop-notification").toggleClass 'dn-fade-out'
+      if args == 'start-fading' # Blur
+        if !$(".desktop-notification").hasClass 'dn-fade-out'
+          $(".desktop-notification").toggleClass 'dn-fade-out'
+
+          afterFade = =>
+            $(".desktop-notification").toggleClass 'dn-fade-out'
+
+          @afterFadeTimeout = setTimeout(afterFade,2500)
 
   componentDidUpdate: ->
     if @state.recognized
       if @updateInterval?
-        @updateInterval.clear()
+        clearInterval(@updateInterval)
         @updateInterval = null
+        console.log "Cleared previous interval"
 
-      time = 120
+      time = @state.updateDelay
+
+      if !time?
+        time = 120
       updateTimer = =>
         time = time - 1
         $("#updateButton").html("Update in #{time}")

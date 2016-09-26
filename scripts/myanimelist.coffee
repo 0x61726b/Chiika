@@ -101,6 +101,11 @@ module.exports = class MyAnimelist
 
   useInSearch: true
 
+  #
+  moveToWatchingOnDetection: true
+  alwaysUpdateOnDetection: true
+  moveToCompletedWhenFinished: true
+
   # Will be called by Chiika with the API object
   # you can do whatever you want with this object
   # See the documentation for this object's methods,properties etc.
@@ -372,6 +377,17 @@ module.exports = class MyAnimelist
     @on 'post-init',(init) =>
       init.defer.resolve()
 
+      malConfig = @chiika.settingsManager.readConfigFile('myanimelist')
+
+      if !malConfig?
+        #Create config file
+        config =
+          moveToWatchingOnDetection: @moveToWatchingOnDetection
+          alwaysUpdateOnDetection: @alwaysUpdateOnDetection
+          moveToCompletedWhenFinished: @moveToCompletedWhenFinished
+
+        @chiika.settingsManager.saveConfigFile('myanimelist',config)
+
     # This method will be called if there are no UI elements in the database
     # or the user wants to refresh the views
     @on 'reconstruct-ui', (update) =>
@@ -386,6 +402,50 @@ module.exports = class MyAnimelist
       if @malUser?
         @malUser.profileImage = "https://myanimelist.cdn-dena.com/images/userimages/#{@malUser.malID}.jpg"
         args.return(@malUser)
+
+
+    @on 'get-config', () =>
+      malConfig = @chiika.settingsManager.readConfigFile('myanimelist')
+      if malConfig?
+        args.return(malConfig)
+
+    @on 'get-option', (args) =>
+      option = args.option
+
+      malConfig = @chiika.settingsManager.readConfigFile('myanimelist')
+
+      if malConfig?
+        if option == 'move-to-watching-on-detection'
+          args.return(malConfig.moveToWatchingOnDetection)
+
+        if option == 'always-update-on-detection'
+          args.return(malConfig.alwaysUpdateOnDetection)
+
+        if option == 'move-to-completed-when-finished'
+          args.return(malConfig.moveToCompletedWhenFinished)
+
+
+    @on 'set-option', (args) =>
+      option = args.option
+      value = args.value
+
+      malConfig = @chiika.settingsManager.readConfigFile('myanimelist')
+
+      if !malConfig?
+        chiika.logger.error("Could not read config file for #{@name}. Something is seriosly wrong. Contact developer.")
+        return
+
+      if option == 'move-to-watching-on-detection'
+        malConfig.moveToWatchingOnDetection = value
+
+      if option == 'always-update-on-detection'
+        malConfig.alwaysUpdateOnDetection = value
+
+      if option == 'move-to-completed-when-finished'
+        malConfig.moveToCompletedWhenFinished = value
+
+
+
 
 
     @on 'sync', (args) =>
@@ -495,8 +555,17 @@ module.exports = class MyAnimelist
           item = params.item
 
           if params.viewName == 'myanimelist_animelist'
-            @updateProgress params.id,'anime',item.current, (result) =>
-              args.return(result)
+            id = params.id
+            if !id? # If coming from media, there wont be an id, but title
+              title = params.title
+              @chiika.logger.script("Id not found for #{title}. Using title instead.")
+
+              findInList = _find @animedb, (o) -> o.animeTitle == title
+              if findInList?
+                id = findInList.mal_id
+            if id?
+              @updateProgress id,'anime',item.current, (result) =>
+                args.return(result)
 
           if params.viewName == 'myanimelist_mangalist'
             mangaEntry = _find @mangalist, (o) -> o.mal_id == params.id
@@ -511,7 +580,6 @@ module.exports = class MyAnimelist
 
         when 'score-update'
           item = params.item
-          console.log params
           if params.viewName == 'myanimelist_animelist'
             @updateScore params.id,'anime',item.current, (result) =>
               args.return(result)
@@ -522,10 +590,22 @@ module.exports = class MyAnimelist
 
         when 'status-update'
           item = params.item
+          id = params.id
+
+          if item.identifier == 'watching'
+            item.identifier = "1"
 
           if params.viewName == 'myanimelist_animelist'
-            @updateStatus params.id,'anime',item.identifier, (result) =>
-              args.return(result)
+            if !id? # If coming from media, there wont be an id, but title
+              title = params.title
+              @chiika.logger.script("Id not found for #{title}. Using title instead.")
+
+              findInList = _find @animedb, (o) -> o.animeTitle == title
+              if findInList?
+                id = findInList.mal_id
+            if id?
+              @updateStatus id,'anime',item.identifier, (result) =>
+                args.return(result)
 
           if params.viewName == 'myanimelist_mangalist'
             @updateStatus params.id,'manga',item.identifier, (result) =>
@@ -648,12 +728,15 @@ module.exports = class MyAnimelist
           newAnime.animeScoreAverage             = animeValues.averageScore
           newAnime.animeTypeText                 = animeValues.typeText
           newAnime.animeSeason                   = animeValues.season
+          newAnime.animeScore                    = animeValues.score
+          newAnime.animeScoreText                = animeValues.score
           newAnime.animeSeasonText               = animeValues.seasonText
           newAnime.animeLastUpdatedText          = animeValues.lastUpdatedText
           newAnime.animeSeriesStatusText         = @getAnimeStatus('text',animeValues.seriesStatus)
 
           if parseInt(newAnime.animeScore) == 0
-            newAnime.animeScore = "-"
+            newAnime.animeScoreText = "-"
+
 
           green = "grid-airing-color-green" #success-main
           red   = "grid-airing-color-red" #danger-main
@@ -1822,6 +1905,11 @@ module.exports = class MyAnimelist
               @updateViewAndRefresh 'myanimelist_animelist',animeEntry,'mal_id', (result) =>
                 if result.updated > 0
                   callback({ success: true, updated: result.updated })
+
+                  malConfig = @chiika.settingsManager.readConfigFile('myanimelist')
+
+                  if malConfig.moveToCompletedWhenFinished
+                    @updateStatus(id,type,"2", ->)
                 else
                   callback({ success: false, updated: result.updated, error:"Update request has failed.", response: result.response, errorDetailed: "Something went wrong when saving to database." })
             else
@@ -2485,7 +2573,7 @@ module.exports = class MyAnimelist
           { name: 'animeTypeText',display: 'Type', sort: 'int', css: 'grid-40'},
           { name: 'animeTitle',display: 'Title', sort: 'str',css: 'grid-title'},
           { name: 'animeProgress',display: 'Progress', sort: 'float', css: 'grid-progress'},
-          { name: 'animeScore',display: 'Score', sort: 'int', css: 'grid-80'},
+          { name: 'animeScoreText',display: 'Score', sort: 'int', css: 'grid-80'},
           { name: 'animeScoreAverage',display: 'Avg Score', sort: 'float',css: 'grid-80'},
           { name: 'animeSeasonText',display: 'Season', sort: 'date', css: 'grid-160'},
           { name: 'animeSeriesStatusText',display: 'Airing Status', sort: 'int', css: 'grid-160'},
