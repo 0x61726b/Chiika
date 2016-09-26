@@ -1,8 +1,9 @@
 // Soon™
-$sidebar: #2E3136;
-$sidebar-hover: #282B30;
-$sidebar-active: #23252a;
-$sidebar-text: #F5F5F5;
+$sidebar: #353a3c;
+$sidebar-hover: darken($sidebar,5);
+$sidebar-active: darken($sidebar,10);
+$sidebar-text: #dedede;
+$sidebar-text-hover: #efefef;
 $sidebar-text-active: #FFF;
 $sidebar-title: #f2f2f4;
 $titlebar-icons: #DCDCE2;
@@ -54,7 +55,7 @@ $color-primary: #CC3C75;
 $color-secondary: #DD7596;
 $color-inverse: #B7C3F3;
 $color-emphasis: #4F6272;
-$color-accent: #5C92C6;
+$color-accent: #25A9DF;
 
 /*
 $color-primary: #CC3C75;

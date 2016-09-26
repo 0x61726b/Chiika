@@ -102,7 +102,12 @@ SideMenu = React.createClass
     else if currentPath.indexOf(path) != -1
       'active'
   renderMenuItem: (item,i) ->
-    <Link className="side-menu-link #{@isMenuItemActive(item.name)}" to="#{item.name}" key={i}><li className="side-menu-li" key={i}>{item.display}</li></Link>
+    <Link className="side-menu-link #{@isMenuItemActive(item.name)}" to="#{item.name}" key={i}>
+      <li className="side-menu-li" key={i}>
+        <i className="fa fa-list"></i>
+        {item.display}
+      </li>
+    </Link>
 
   renderMenuItems: (category) ->
     menuItemsOfThisCategory = _filter(@state.uiItems, (o) ->
@@ -154,7 +159,7 @@ SideMenu = React.createClass
       </div>
       <div className="navigation">
         <ul>
-          <Link className="side-menu-link #{@isMenuItemActive('Home')}" to="Home"><li className="side-menu-li">Home</li></Link>
+          <Link className="side-menu-link #{@isMenuItemActive('Home')}" to="Home"><li className="side-menu-li"><i className="fa fa-home"></i>Home</li></Link>
           {
             @state.categories.map (category,i) =>
               <div key={i}>
@@ -167,10 +172,10 @@ SideMenu = React.createClass
               </div>
           }
           <p className="list-title">Something</p>
-          <Link className="side-menu-link #{@isMenuItemActive('Search')}" to="Search/:"><li className="side-menu-li">Search</li></Link>
-          <Link className="side-menu-link #{@isMenuItemActive('Calendar')}" to="Calendar"><li className="side-menu-li">Calendar</li></Link>
-          <Link className="side-menu-link #{@isMenuItemActive('Library')}" to="Library"><li className="side-menu-li">Library</li></Link>
-          <Link className="side-menu-link #{@isMenuItemActive('Torrents')}" to="Torrents"><li className="side-menu-li">Torrents</li></Link>
+          <Link className="side-menu-link #{@isMenuItemActive('Search')}" to="Search/:"><li className="side-menu-li"><i className="fa fa-search"></i>Search</li></Link>
+          <Link className="side-menu-link #{@isMenuItemActive('Calendar')}" to="Calendar"><li className="side-menu-li"><i className="fa fa-calendar"></i>Calendar</li></Link>
+          <Link className="side-menu-link #{@isMenuItemActive('Library')}" to="Library"><li className="side-menu-li"><i className="fa fa-archive"></i>Library</li></Link>
+          <Link className="side-menu-link #{@isMenuItemActive('Torrents')}" to="Torrents"><li className="side-menu-li"><i className="fa fa-cloud-download"></i>Torrents</li></Link>
         </ul>
       </div>
     </div>)

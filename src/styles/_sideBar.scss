@@ -78,11 +78,16 @@ img.chiikaLogo {
   text-decoration: none;
   color: $sidebar-text;
   display: block;
-  padding: 6px 0 6px 12px;
+  padding: 6px 0 5px 12px;
   position: relative;
+  border-bottom: 1px solid #484D50;
+}
+.side-menu-link i {
+  margin-right: 8px;
 }
 .side-menu-link:hover {
   background-color: $sidebar-hover;
+  color: $sidebar-text-hover;
 }
 .side-menu-link.active {
   padding-left: 7px;
@@ -94,14 +99,24 @@ img.chiikaLogo {
 }
 .navigation .list-title {
   font-family: Montserrat, 'monospace';
-  color: $sidebar-title;
-  font-weight: normal;
-  opacity: 1;
-  padding-left: 8px;
-  font-size: 12px;
-  margin: 8px 0 2px;
+  color: $sidebar-text-active;
+  font-weight: bold;
+  //padding-left: 12px;
+  padding: 4px 0px 4px 12px;
+  font-size: 11px;
+  margin: 8px 0 0 0;
   text-transform: uppercase;
-  border-bottom: 1px dashed rgba($sidebar-title,0.2);
+  // --- Option 1 --- //
+  //border-top: 1px solid #676B6C;
+  border-bottom: 1px solid #53585D;
+  //background: #35393A;
+
+  // --- Option 2 --- //
+  /*
+  border-top: 1px solid #676B6C;
+  border-bottom: 1px solid #35393A;
+  background: #53585D;
+  /**/
 }
 .sidebar-image {
   position: absolute;

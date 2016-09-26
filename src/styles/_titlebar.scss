@@ -32,6 +32,7 @@
     margin: 0;
     font-size: 16px;
     color: #A9A9A4;
+    transition: .3s background, .3s color;
   }
   #gridSearch:hover {
   background-color: rgba(0,0,0,0.75);
@@ -61,6 +62,7 @@
 .titlebar-stoplight {
   float: right;
   text-align: right;
+  padding: 5px 0 4px;
 }
 .titlebar.webkit-draggable .titlebar-settings,
 .titlebar.webkit-draggable .titlebar-close,
@@ -88,6 +90,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  transition: .3s background, .3s color;
 }
 .titlebar-divider {
   width: 1px;
