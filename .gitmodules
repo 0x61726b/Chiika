@@ -2,3 +2,7 @@
 	path = vendor/media-detect
 	url = https://github.com/arkenthera/media-detect
 	branch = master
+[submodule "vendor/anitomy-node"]
+	path = vendor/anitomy-node
+	url = https://github.com/arkenthera/anitomy-node
+	branch = master

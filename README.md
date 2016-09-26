@@ -9,9 +9,10 @@
 
 #Running
 
-Use NPM to build and run Chiika.You will be greeted with login screen,there you can login with your account.Your user info and lists will be retrieved upon login. Media detection only works on Windows *for now*.
+Use NPM to build and run Chiika.You will be greeted with login screen,there you can login with your account.Your user info and lists will be retrieved upon login.
 
 ```
+git submodule update --init --recursive
 npm install -g gulp bower
 npm install
 bower install

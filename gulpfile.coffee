@@ -277,7 +277,7 @@ do Your_Application_will_ = () ->
 
   gulp.task('build', ['html', 'compile:scripts', 'packageJson', 'copy:fonts', 'misc','copy:vendor'])
   gulp.task('test', ['inject:css', 'compile:scripts:not:watch', 'compile:styles', 'misc','copy:vendor'])
-  gulp.task 'serve', ['inject:css', 'compile:scripts:watch', 'compile:styles', 'misc','copy:vendor'], () ->
+  gulp.task 'serve', ['inject:css', 'compile:scripts:watch', 'compile:styles', 'misc'], () ->
     development = null
     development = Object.create( process.env );
     development.CHIIKA_ENV = 'debug';

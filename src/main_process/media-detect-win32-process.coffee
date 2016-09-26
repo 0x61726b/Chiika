@@ -24,7 +24,6 @@ moment                  = require 'moment'
 string                  = require 'string'
 
 mdPath = __dirname + '/../vendor/media-detect'
-anitomyPath = '../vendor/anitomy-node/AnitomyNode'
 
 
 class Win32MediaDetect
@@ -42,7 +41,12 @@ class Win32MediaDetect
 
     try
       @md = require(mdPath)
-      @anitomy = require(anitomyPath)
+      if process.env.DEV_MODE
+        AnitomyNode             = require '../../vendor/anitomy-node'
+        @anitomy = AnitomyNode
+      else
+        AnitomyNode             = require '../vendor/anitomy-node'
+        @anitomy = AnitomyNode
     catch error
       obj = {}
       Error.captureStackTrace(obj)
@@ -50,7 +54,8 @@ class Win32MediaDetect
       throw "Media Detect Win32 child process has crashed."
 
     @md = @md.MediaDetect()
-    @anitomy = new @anitomy.Root()
+
+    @anitomy = new AnitomyNode.Root()
 
     try
       crazyLoop = =>

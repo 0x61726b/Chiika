@@ -19,14 +19,20 @@ _assign                 = require 'lodash.assign'
 _find                   = require 'lodash/collection/find'
 _remove                 = require 'lodash/array/remove'
 StreamServices          = require './stream-services'
-AnitomyNode             = require '../vendor/anitomy-node/AnitomyNode'
 
 
 module.exports = class BrowserExtensionManager
   tabs: []
   constructor: ->
     @streamServices = new StreamServices()
+
+    if chiika.devMode
+      AnitomyNode             = require '../../vendor/anitomy-node'
+    else
+      AnitomyNode             = require '../vendor/anitomy-node'
+
     @anitomy = new AnitomyNode.Root()
+
 
   #
   #

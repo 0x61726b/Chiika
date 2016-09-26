@@ -26,8 +26,6 @@ path                    = require 'path'
 fs                      = require 'fs'
 MediaRecognition        = require './media-recognition'
 
-AnitomyNode             = require '../vendor/anitomy-node/AnitomyNode'
-
 process.on 'exit', ->
   process.send "Exit"
 
@@ -45,6 +43,11 @@ class LibraryScanner
     @libraryPaths = JSON.parse(process.argv[2])
     @fileTypes = ['.mkv','.mp4']
     @videoFiles = []
+
+    if process.env.DEV_MODE
+      AnitomyNode             = require '../../vendor/anitomy-node'
+    else
+      AnitomyNode             = require '../vendor/anitomy-node'
     @anitomy = new AnitomyNode.Root()
 
     @recognition = new MediaRecognition()

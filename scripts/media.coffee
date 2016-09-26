@@ -43,7 +43,7 @@ module.exports = class Media
     @chiika = chiika
 
     if process.platform == 'win32'
-      AnitomyNode   = require "#{mainProcessHome}/../vendor/anitomy-node/AnitomyNode"
+      AnitomyNode   = require "#{mainProcessHome}/../vendor/anitomy-node"
       Recognition   = require "#{mainProcessHome}/media-recognition"
 
       @recognition = new Recognition()

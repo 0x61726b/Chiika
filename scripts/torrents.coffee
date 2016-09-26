@@ -26,7 +26,7 @@ moment        = scriptRequire 'moment'
 _when         = scriptRequire 'when'
 string        = scriptRequire 'string'
 Recognition   = require "#{mainProcessHome}/media-recognition"
-AnitomyNode   = require "#{mainProcessHome}/../vendor/anitomy-node/AnitomyNode"
+AnitomyNode   = require "#{mainProcessHome}/../vendor/anitomy-node"
 
 NyaaSource = "http://www.nyaa.se/?page=rss&cats=1_37&filter=2"
 
