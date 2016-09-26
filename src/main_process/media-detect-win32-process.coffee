@@ -23,8 +23,7 @@ _when                   = require 'when'
 moment                  = require 'moment'
 string                  = require 'string'
 
-
-mdPath = __dirname + '/../vendor/media-detect-helpers/MediaDetect'
+mdPath = __dirname + '/../vendor/media-detect'
 anitomyPath = '../vendor/anitomy-node/AnitomyNode'
 
 

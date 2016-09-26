@@ -7,7 +7,8 @@
   "scripts": {
     "start": "electron .serve/main_process/chiika.js",
     "test": "exit 0",
-    "preparetesting": "./node_modules/.bin/gulp test"
+    "preparetesting": "./node_modules/.bin/gulp test",
+    "postinstall": "cd vendor/media-detect && npm install && npm run conf && npm run rebuild"
   },
   "keywords": [
     "electron",

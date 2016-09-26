@@ -1,0 +1,4 @@
+[submodule "vendor/media-detect"]
+	path = vendor/media-detect
+	url = https://github.com/arkenthera/media-detect
+	branch = master
