@@ -59,6 +59,7 @@ module.exports = class SubView extends View
 
   clear: ->
     new Promise (resolve) =>
+      @dataSource = []
       @db.clear(resolve)
 
   setDataArray: (data) ->
@@ -94,7 +95,7 @@ module.exports = class SubView extends View
         syncArray.push syncSave
 
       _when.all(syncArray).then =>
-        resolve()
+        resolve(@dataSource)
 
 
   #

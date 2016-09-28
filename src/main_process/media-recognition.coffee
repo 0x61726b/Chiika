@@ -155,6 +155,39 @@ module.exports = class MyAnimelistRecognition
         results.push { owner: owner, recognize: tryRecognize }
     results
 
+  doRecognizeLib: (title,library) ->
+    results = []
+    tryRecognize = @recognizeLib(title,library)
+
+    owner = ""
+    if tryRecognize.recognized
+      # get entry
+      entries = tryRecognize.entries
+      _forEach entries, (entry) =>
+        owner = entry.owner
+        results.push { owner: owner, recognize: tryRecognize }
+    results
+
+  recognizeLib: (title,animelist) ->
+    title = @clear(title)
+
+    if chiika? && chiika.logger?
+      chiika.logger.debug("Trying to recognize title #{title}")
+    # Find the title in anime list
+    findInAnimelist = _filter animelist, (o) => (@clear(o.animeTitle) == title)
+
+
+    result = { entries: [] }
+    suggestions = []
+
+    if findInAnimelist.length > 0
+      result = { recognized: true, entries: findInAnimelist,suggestions: suggestions }
+    else
+      recognized = false
+      result.recognized = recognized
+      result.suggestions = suggestions
+
+    return result
   #
   #
   #

@@ -185,8 +185,12 @@ Recognition = React.createClass
         folderText += folder + "\n"
       @setState { libraryPaths: folderText }
       chiika.setOption('LibraryPaths',folders)
-  scanLibrary: ->
-    chiika.scanLibrary()
+  scanLibrary: (e) ->
+    onScan = =>
+      $(e.target).prop('disabled',false)  
+    chiika.scanLibrary(onScan)
+
+    $(e.target).prop('disabled',true)
   onUpdateDelayChange: (value) ->
     toInt = 120
     try

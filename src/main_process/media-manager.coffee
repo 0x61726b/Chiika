@@ -204,13 +204,13 @@ module.exports = class MediaManager
         throw "Error on child process wtf? - #{code} - #{signal}"
 
     @libraryProcess.on 'message', (message) =>
-      if message.message == 'media-recognized'
+      if message.message == 'lib-stats'
         list = message.list
-        chiika.logger.info "#{list.length} entries have been recognized."
-        callback?(list)
-      if message.message == 'media-not-recognized'
-        list = message.list
-        chiika.logger.info "#{list.length} entries have not been recognized."
+        time = message.time
+        recognizedLen = list.length
+        unRecognizedLen = message.notRecognized.length
+        chiika.logger.info "#{list.length} entries have been recognized. #{unRecognizedLen} isnt recognized. Took: #{time}"
+        callback?(message)
         @libraryProcess.kill('SIGTERM')
         @libraryProcess = null
 

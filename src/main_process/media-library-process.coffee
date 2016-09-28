@@ -35,8 +35,7 @@ process.on 'uncaughtException', (error) ->
 elapsedTime = (start,text) ->
   precision = 3
   elapsed = process.hrtime(start)[1] / 1000000
-  process.send(process.hrtime(start)[0] + " s, " + elapsed.toFixed(precision) + " ms - " + text)
-  start = process.hrtime()
+  return process.hrtime(start)[0] + " s, " + elapsed.toFixed(precision) + " ms - "
 
 class LibraryScanner
   constructor: ->
@@ -95,7 +94,7 @@ class LibraryScanner
 
         title = parse.AnimeTitle.toLowerCase()
 
-        libRecognizeResults = @recognition.doRecognize(title,@animeDb)
+        libRecognizeResults = @recognition.doRecognizeLib(title,@animeDb)
 
         recognized = false
         _forEach libRecognizeResults, (libRecognize) =>
@@ -114,13 +113,7 @@ class LibraryScanner
       progress = (counter / @videoFiles.length) * 100
       @updateProgress(progress)
 
-    elapsedTime(@start,'recognition')
-    process.send "Recognized: #{recognizedList.length}"
-    process.send "Not Recognized: #{unRecognizedList.length}"
-
-    process.send { message: 'media-recognized', list: recognizedList }
-    process.send { message: 'media-not-recognized', list: unRecognizedList }
-
+    process.send { message: 'lib-stats', recognized: recognizedList.length, notRecognized: unRecognizedList.length, time: elapsedTime(@start,'recognition'), list: recognizedList }
 
   #
   #

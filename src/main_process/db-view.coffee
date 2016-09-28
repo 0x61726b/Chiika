@@ -67,6 +67,7 @@ module.exports = class DbView extends IDb
           loadDatabase()
 
   clear: (callback) ->
+    @viewData = []
     @clearDb(callback)
 
 

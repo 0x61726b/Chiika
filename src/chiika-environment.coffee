@@ -105,14 +105,15 @@ class ChiikaEnvironment
     else
       @notificationManager.error("Due to (arguably) technical limitations, we can't (allegedly) change theme when in DEV_MODE. Try this option on prod environment.")
 
-  scanLibrary: () ->
-    chiika.toastLoading('Scanning library...',10000)
+  scanLibrary: (callback) ->
+    chiika.toastLoading('Scanning library...',50000)
     chiika.ipc.sendMessage 'start-library-scan'
     chiika.ipc.receive 'scan-library-response', (event,result) =>
       @ipc.disposeListeners('scan-library-response')
 
       @closeLastToast()
-      chiika.toastSuccess("#{result.recognizedFiles} video files has been successfuly recognized!",4000)
+      @notificationManager.scanResultsInfo(result.recognizedFiles,result.unRecognizedFiles,result.time)
+      callback?()
 
   openFolderByEntry: (title) ->
     @scriptAction 'media','open-folder', { title: title }, (args) =>
@@ -136,7 +137,8 @@ class ChiikaEnvironment
   playEpisodeByNumber: (title,episode) ->
     chiika.scriptAction 'media','play-episode', { title: title,episode: episode }, (args) =>
       if args.state == 'episode-not-found'
-        @notificationManager.episodeNotFound(title,episode)
+        @notificationManager.episodeNotFound title,episode, () =>
+          @setFolderByEntry(title)
 
 
 
@@ -155,10 +157,12 @@ class ChiikaEnvironment
     if view?
       ui = _find @uiData, (o) -> o.name == view.name
       ui.state = 0
-      console.log ui
       @emitter.emit 'ui-data-refresh', { item: ui }
 
     @ipc.refreshViewByName(view.name,owner)
+
+  requestViewDataUpdate: (owner,view) ->
+    @ipc.sendMessage 'request-view-data-update', { owner: owner, viewName: view }
 
   openShellUrl: (url) ->
     shell.openExternal(url)
@@ -336,14 +340,11 @@ class ChiikaEnvironment
         if args.view?
           @viewData.splice(index,1,args.view)
           @logger.renderer("ViewData - Replacing #{name}")
-          console.log args.view
         else
           @viewData.splice(index,1)
           @logger.renderer("ViewData - Removing #{name}")
       else
         @logger.renderer("Could not find view in renderer #{name}. Current views: ")
-        console.log "WTF ?"
-        console.log args.view
         @viewData.push args.view
 
 
@@ -375,7 +376,6 @@ class ChiikaEnvironment
         if args.item?
           @uiData.splice(index,1,args.item)
           @logger.renderer("UIDATA - Replacing #{name}")
-          console.log args.item
         else
           @uiData.splice(index,1)
           @logger.renderer("UIDATA - Removing #{name}")
@@ -426,13 +426,9 @@ class ChiikaEnvironment
       chiika.logger.renderer("Current UI items are #{infoStr}")
       waitForUI.resolve()
 
-      console.log @uiData
-
     @ipc.sendMessage 'get-view-data'
     @ipc.getViewData (args) =>
       @viewData = args
-
-      console.log @viewData
 
       waitForViewData.resolve()
 
@@ -445,8 +441,6 @@ class ChiikaEnvironment
     @ipc.sendMessage 'get-user-data'
     @ipc.receive 'get-user-data-response', (event,args) =>
       @users = args
-
-      console.log @users
 
     @ipc.sendMessage 'get-services'
     @ipc.receive 'get-services-response', (event,args) =>
@@ -464,6 +458,5 @@ class ChiikaEnvironment
       @ipc.disposeListeners('get-ui-data-response')
 
       @preload().then =>
-        console.log "All promises have returned"
         setTimeout(main,args.delay)
 module.exports = ChiikaEnvironment

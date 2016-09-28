@@ -81,7 +81,6 @@ Copy_assets = () ->
 
     gulp.src(srcDir + '/assets/**/*')
       .pipe(gulp.dest(serveDir + '/assets'))
-      .pipe(gulp.dest(distDir + '/assets'))
 
 
 Copy_scripts = () ->
@@ -303,7 +302,6 @@ do Your_Application_will_ = () ->
     electron.start([], () => {})
     gulp.watch(['bower.json', srcDir + '/index.html',srcDir + '/MyAnimeListLogin.html'], ['inject:css'])
     gulp.watch([srcDir + '/styles/*.scss'],['inject:css'])
-    gulp.watch([srcDir + '/../scripts/*.coffee'],['misc'])
     gulp.watch([serveDir + '/styles/**/*.css', serveDir + '/**/*.html', serveDir + '/**/*.js'], electron.reload)
     gulp.watch([serveDir + '/main_process/chiika.js'], electron.restart)
     gulp.watch([serveDir + '/main_process/api-manager.js'], electron.restart)

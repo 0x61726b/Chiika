@@ -500,6 +500,8 @@ module.exports = class MyAnimelist
 
               # Save the date of this process
               @chiika.custom.addKey { name: "#{update.view.name}_updated", value:moment() }
+
+            update.return({ success: result.success })
           else
             @chiika.logger.warn("[yellow](#{@name}) view-update has failed.")
             update.return({ success: result.success })
@@ -765,7 +767,7 @@ module.exports = class MyAnimelist
               _forEach newAnime.animeEpisodes, (episodes) =>
                 episode = parseInt(episodes.episode,10)
 
-                if episode > parseInt(anime.animeWatchedEpisodes,10) && episode <= parseInt(anime.animeTotalEpisodes,10)
+                if episode > parseInt(animeValues.watchedEpisodes,10) && episode <= parseInt(animeValues.totalEpisodes,10)
                   airingColor = green
 
 
@@ -940,20 +942,13 @@ module.exports = class MyAnimelist
 
               deferUpdate1 = _when.defer()
               deferUpdate2 = _when.defer()
-              deferUpdate3 = _when.defer()
-              deferUpdate4 = _when.defer()
               async.push deferUpdate1.promise
               async.push deferUpdate2.promise
-              async.push deferUpdate3.promise
-              async.push deferUpdate4.promise
 
 
 
               @chiika.requestViewUpdate 'myanimelist_animelist',@name,() => deferUpdate1.resolve()
               @chiika.requestViewUpdate('myanimelist_mangalist',@name,() => deferUpdate2.resolve())
-
-              @importHistoryFromMAL('anime', () => deferUpdate3.resolve() )
-              @importHistoryFromMAL('manga', () => deferUpdate4.resolve() )
 
               _when.all(async).then =>
                 args.return( { success: true })
@@ -1141,12 +1136,12 @@ module.exports = class MyAnimelist
           entry = _find @animelist, (o) -> o.mal_id == id
           callback({ updated: true, layout: @getAnimeDetailsLayout(entry)})
 
-          @chiika.requestViewDataUpdate('myanimelist','myanimelist_animelist')
+          #@chiika.requestViewDataUpdate('myanimelist','myanimelist_animelist')
 
         if response.success && !response.list
           callback({ updated: false, layout: @getAnimeDetailsLayout(response.entry)})
 
-          @chiika.requestViewDataUpdate('myanimelist','myanimelist_animelist')
+          #@chiika.requestViewDataUpdate('myanimelist','myanimelist_animelist')
 
     if animeEntry?
       callback({ updated: false, layout: @getAnimeDetailsLayout(animeEntry)})
@@ -1797,6 +1792,8 @@ module.exports = class MyAnimelist
     catch error
       console.log error
 
+    @animedb = animeDbArray
+    @animelist = commonFormatList
 
     animeDb.setDataArray(animeDbArray)
     view.setDataArray(commonFormatList)
@@ -1908,7 +1905,7 @@ module.exports = class MyAnimelist
 
                   malConfig = @chiika.settingsManager.readConfigFile('myanimelist')
 
-                  if malConfig.moveToCompletedWhenFinished
+                  if malConfig.moveToCompletedWhenFinished && parseInt(animeEntry.animeWatchedEpisodes,10) == parseInt(animeEntry.animeTotalEpisodes,10)
                     @updateStatus(id,type,"2", ->)
                 else
                   callback({ success: false, updated: result.updated, error:"Update request has failed.", response: result.response, errorDetailed: "Something went wrong when saving to database." })
@@ -2362,10 +2359,17 @@ module.exports = class MyAnimelist
     ]
     if type == 'text'
       find = _find statusMap, (o) -> o.api == status
-      return find.text
+      if find?
+        return find.text
+      else
+        return 'Unknown'
+
     if type == 'number'
       find = _find statusMap, (o) -> o.text == status
-      return find.api
+      if find?
+        return find.api
+      else
+        return '0'
 
   #
   # Type is what you want in return.
@@ -2399,13 +2403,20 @@ module.exports = class MyAnimelist
 
     if r == 'text'
       find = _find typeMap, (o) -> o.api == type
-      return find.text
+      if find?
+        return find.text
+      else
+        return 'Unknown'
     if r == 'number'
       find = _find typeMap, (o) -> o.text == type
-      return find.api
+      if find?
+        return find.api
+      else
+        return '0'
 
   getMangaType: (r,type) ->
     typeMap = [
+      { api: '0', text: 'Unknown' },
       { api: '1', text: 'Manga' },
       { api: '2', text: 'Novel' },
       { api: '3', text: 'One-shot' },
@@ -2415,10 +2426,16 @@ module.exports = class MyAnimelist
     ]
     if r == 'text'
       find = _find typeMap, (o) -> o.api == type
-      return find.text
+      if find?
+        return find.text
+      else
+        return 'Unknown'
     if r == 'number'
       find = _find typeMap, (o) -> o.text == type
-      return find.api
+      if find?
+        return find.api
+      else
+        return '0'
 
   getMangaStatus: (type,status) ->
     statusMap = [
@@ -2427,10 +2444,17 @@ module.exports = class MyAnimelist
     ]
     if type == 'text'
       find = _find statusMap, (o) -> o.api == status
-      return find.text
+      if find?
+        return find.text
+      else
+        return 'Unknown'
+
     if type == 'number'
       find = _find statusMap, (o) -> o.text == status
-      return find.api
+      if find?
+        return find.api
+      else
+        return '0'
 
   #
   # Type is what you want in return.

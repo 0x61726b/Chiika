@@ -170,6 +170,9 @@ module.exports = class IpcManager
         chiika.logger.error("#{args.viewName} couldnt be found.")
 
 
+    @receive 'request-view-data-update', (event,args) =>
+      chiika.chiikaApi.requestViewDataUpdate(args.owner,args.viewName)
+
   #
   #
   #

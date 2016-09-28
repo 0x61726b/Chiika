@@ -71,3 +71,11 @@ module.exports = class NotificationManager
     $("#streaming-warning-firefox").click (e) =>
       e.preventDefault()
       chiika.openShellUrl('https://github.com/arkenthera/Chiika/docs/streaming.md')
+
+  scanResultsInfo: (recognized,notRecognized,time) ->
+    @info("Library Scan Result","
+    Recognized Video File Count: <b>#{recognized}</b> <br />
+    Not Recognized Video File Count: <b>#{notRecognized}</b> <br />
+    Time Elapsed: <b>#{time}</b> <br />
+    <a href='#Library'>Go to Library</a>
+    ", { html: true })

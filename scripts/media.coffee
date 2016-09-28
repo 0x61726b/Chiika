@@ -104,6 +104,15 @@ module.exports = class Media
 
         callback?({ results: results, success: !error, errorMessage: errorMessage})
 
+        @chiika.requestViewDataUpdate('media','chiika_library')
+
+        services = @chiika.getServices()
+
+        _forEach services, (service) =>
+          animeView = @chiika.viewManager.getViewByName(service.animeView)
+          if animeView?
+            @chiika.requestViewDataUpdate(service.name,service.animeView)
+
 
 
 
@@ -207,7 +216,31 @@ module.exports = class Media
         if fileToPlay.length > 0
           @chiika.openExternal(fileToPlay)
         else
-          args.return({state: 'episode-not-found'})
+          folder = findEntry.folder
+          @scanFolder folder,title, (results) =>
+            if !results.success
+              @chiika.showToast results.errorMessage, 8000, 'error'
+
+              detectCache.setData(findEntry,'title')
+            else
+              @recognition.cacheInBulk(detectCache,results.results).then (data) =>
+                findEntry = _find data, (o) -> o.title == title
+
+                console.log "?"
+
+                fileToPlay = ""
+                if findEntry?
+                  _forEach findEntry.files, (f) =>
+                    if parseInt(f.episode) == parseInt(episode)
+                      fileToPlay = f.file
+                      return false
+
+                  if fileToPlay.length > 0
+                    @chiika.openExternal(fileToPlay)
+                  else
+                    args.return({state: 'episode-not-found'})
+                else
+                  args.return({state: 'episode-not-found'})
 
     @on 'set-folders-for-entry', (args) =>
       title = args.params.title
@@ -266,23 +299,29 @@ module.exports = class Media
       animeDbData = animeDbView.getData()
 
       if animeDbData.length > 0
+
         @chiika.media.runLibraryProcess libraryPaths,animeDbData, (results) =>
+          list = results.list
+          time = results.time
+          recognizedLen = list.length
+          unRecognizedLen = results.notRecognized
+          args.return({ recognizedFiles: recognizedLen, unRecognizedFiles: unRecognizedLen, time: time })
+
           detectCache = @chiika.viewManager.getViewByName('anime_detect_cache')
 
+          detectCache.clear().then =>
+            @recognition.cacheInBulk(detectCache,list)
+            #
+            #
+            #
+            @chiika.requestViewDataUpdate('media','chiika_library')
 
-          @recognition.cacheInBulk(detectCache,results)
-          #
-          #
-          args.return({ recognizedFiles: results.length })
-          #
-          @chiika.requestViewDataUpdate('media','chiika_library')
+            services = @chiika.getServices()
 
-          services = @chiika.getServices()
-
-          _forEach services, (service) =>
-            animeView = @chiika.viewManager.getViewByName(service.animeView)
-            if animeView?
-              @chiika.requestViewDataUpdate(service.name,service.animeView)
+            _forEach services, (service) =>
+              animeView = @chiika.viewManager.getViewByName(service.animeView)
+              if animeView?
+                @chiika.requestViewDataUpdate(service.name,service.animeView)
 
 
     @on 'system-event', (event) =>
