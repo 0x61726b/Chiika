@@ -233,7 +233,7 @@ MalLogin = React.createClass
           <span className="divider left"></span>
           <span className="divider right"></span>
           <h1>Welcome To Chiika</h1>
-          <span className="nextPage" onClick={@goDown}></span>
+          <span className="mdi mdi-chevron-down nextPage" onClick={@goDown}></span>
         </div>
         <div className="section">
         <h1>Please Select a Service Provider</h1>

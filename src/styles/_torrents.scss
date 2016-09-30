@@ -1,0 +1,38 @@
+.fab-refresh {
+  background: $color-info-main;
+  transition: background .3s;
+}
+.fab-refresh:active {
+  background: $color-info-dark;
+}
+.fab-discard {
+  background: $color-danger-main;
+  transition: background .3s;
+}
+.fab-discard i {
+  color: white;
+}
+.fab-discard:active {
+  background: $color-danger-dark;
+}
+.fab-download {
+  background: $color-success-main;
+  transition: background .3s;
+}
+.fab-download:active {
+  background: $color-success-dark;
+}
+.fab-refresh:hover:after,
+.fab-download:hover:after {
+  content: attr(title);
+  position: absolute;
+  background: black;
+  color: white;
+  padding: 4px 6px;
+  font-size: 14px;
+  right: 64px;
+  border-radius: 4px;
+  width: auto;
+  white-space: nowrap;
+  font-weight: 400;
+}

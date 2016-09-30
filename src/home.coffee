@@ -50,6 +50,17 @@ module.exports = React.createClass
 
   render: ->
     <div className="home-grid">
+      <div className="whats-next">
+      <h5>Whats Next // Optional</h5>
+        <div className="whats-next-list">
+          <div className="whats-next-item">
+            <div className="whats-next-cover" data-episodeno="13">
+              <img></img>
+            </div>
+            <span>Anime Title</span>
+          </div>
+        </div>
+      </div>
     {
       @state.cards.map (card,i) =>
         if card.name == 'cards_continueWatching' && !chiika.getOption('DisableCardContinueWatching')

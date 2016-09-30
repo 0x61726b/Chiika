@@ -457,7 +457,7 @@ module.exports = React.createClass
             </div>
           </div>
         </div>
-        <div className="fab-container">
+        <div className="fab-container fab-left">
           <div className="fab fab-main raised accent">
             <i className="mdi mdi-menu"></i>
           </div>

@@ -122,4 +122,19 @@ module.exports = React.createClass
             }
           </div>
       }
+      <div className="fab-container active fab-right">
+        <div className="fab fab-main fab-refresh" title="Refresh">
+          <i className="mdi mdi-refresh"></i>
+        </div>
+        <div className="fab fab-main fab-download" title="Download">
+          <i className="mdi mdi-download"></i>
+        </div>
+        <div className="fab fab-little fab-discard" title="Discard">
+          <i className="mdi mdi-close"></i>
+        </div>
+        <p>
+        If nothing is selected, only first fab will be visible,<br/>
+        after selecting torrents, first fab will be download and second discard will be visible
+        </p>
+      </div>
     </div>

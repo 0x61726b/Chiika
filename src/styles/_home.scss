@@ -17,6 +17,66 @@
 #card-news {
   flex-basis: 50%;
 }
+.whats-next {
+  background: $card-background;
+  flex-basis: 100%;
+  width: 100%;
+}
+.whats-next h5 {
+  padding-left: 16px;
+}
+.whats-next-list {
+  white-space: nowrap;
+  overflow-x: scroll;
+}
+.whats-next-item {
+  margin: 8px;
+  width: 96px;
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.whats-next-item  span {
+  width: 96px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.whats-next-cover {
+  display: inline-flex;
+  align-items: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 4px;
+}
+.whats-next-cover:after {
+  content: '';
+}
+.whats-next-cover img {
+  background: #ddd;
+  width: 72px;
+  height: 108px;
+  transition: opacity .3s;
+}
+.whats-next-cover:hover:after {
+  content: attr(data-episodeno);
+  color: white;
+  background: rgba(0,0,0,0.6);
+  opacity: 1;
+  position: absolute;
+  text-align: center;
+  padding: 22px 0;
+  left: 0;
+  right: 0;
+  font-size: 24px;
+  transition: background .3s;
+}
 /**Card Title**/
 
 .home-inline {

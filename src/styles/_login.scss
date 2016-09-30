@@ -21,15 +21,17 @@
   right: 0;
 }
 #fullpage .nextPage {
-  width: 50px;
-  height: 50px;
-  border-right: 1px solid white;
-  border-bottom: 1px solid white;
+  //width: 50px;
+  //height: 50px;
+  //border-right: 1px solid white;
+  //border-bottom: 1px solid white;
   position: absolute;
+  color: white;
+  font-size: 72px;
   left: 50%;
   transform: translate(-50%);
-  transform: rotate(45deg);
-  bottom: 5%;
+  //transform: rotate(45deg);
+  bottom: 0;
 }
 .serviceProviders {
   margin: 0 auto;
