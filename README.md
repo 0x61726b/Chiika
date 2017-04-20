@@ -4,8 +4,9 @@
 [![Build Status](https://travis-ci.org/arkenthera/Chiika.svg?branch=master)](https://travis-ci.org/arkenthera/Chiika)
 [![Build status](https://ci.appveyor.com/api/projects/status/y28jtt8iic29kbon?svg=true)](https://ci.appveyor.com/project/arkenthera/chiika)
 
+[Chiika](http://chiika.moe/) is an upcoming cross platform desktop application which helps you manage anything related to your anime/manga.Chiika is written with [Electron](https://github.com/atom/electron).
 
-[Chiika](http://chiika.moe/) is an upcoming cross platform desktop application which helps you manage anything related to your anime/manga.Chiika is written with [Electron](https://github.com/atom/electron)
+Due to losing motivation and real life duties, Chiika development has stopped and is unlikely to continue in the future.
 
 #Running
 
